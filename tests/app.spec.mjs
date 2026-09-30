@@ -172,7 +172,7 @@ test("plans for a game played here are asked for by line, and say what opening t
   await open(page, {}, {}, link(EXCHANGE, 17));
   await expect(moves(page).first()).toBeVisible();
   await page.click("#plansBtn");
-  const plans = rowsOf(key("PlansInLine", { moves: EXCHANGE }));
+  const plans = rowsOf(key("PlansInLine", { moves: EXCHANGE, level: "intermediate" }));
   await expect(page.locator(".plans .plan")).toHaveCount(plans.length);
   await expect(page.locator("#plans > .meta").first()).toContainText(plans[0].opening.slice(0, 30));
 });
@@ -227,7 +227,7 @@ test("the plans render for both sides, with the summary and no citation numbers"
   await load(page, RUY);
   await expect(moves(page).first()).toBeVisible();
   await page.click("#plansBtn");
-  const plans = rowsOf(key("PlansInPosition", { fen: RUY }));
+  const plans = rowsOf(key("PlansInPosition", { fen: RUY, level: "intermediate" }));
   for (const side of ["white", "black"]) {
     await expect(page.locator(`.side[data-side=${side}] .plan`)).toHaveCount(plans.filter((p) => p.side === side).length);
   }
@@ -271,7 +271,7 @@ test("an empty answer with warnings says what the warning was", async ({ page })
 });
 
 test("failed plans say so, and leave the rest of the page alone", async ({ page }) => {
-  const k = key("PlansInPosition", { fen: RUY });
+  const k = key("PlansInPosition", { fen: RUY, level: "intermediate" });
   await open(page, { [k]: { status: "FAILED", error: { message: "no skill named 'chess-plans'" } } });
   await load(page, RUY);
   await expect(moves(page).first()).toBeVisible();
@@ -290,7 +290,7 @@ test("an answer for a position the board has left is dropped, not shown", async 
 });
 
 test("the board takes a move at once while the plans are still loading, and the old plans never appear", async ({ page }) => {
-  await open(page, {}, { [key("PlansInPosition", { fen: RUY })]: 800 });
+  await open(page, {}, { [key("PlansInPosition", { fen: RUY, level: "intermediate" })]: 800 });
   await load(page, RUY);
   await expect(moves(page).first()).toBeVisible();
   await page.click("#plansBtn");
@@ -319,4 +319,16 @@ test("stepping quickly through a game asks only about the position you stop on",
   // One search for the ten positions stepped through: the last. (Its fixture is not captured, so
   // the page shows an error for it — what is asserted is that nothing else was asked.)
   expect(asked.length - before).toBe(1);
+});
+
+test("the plans are asked for at the reader's level, and the level is remembered", async ({ page }) => {
+  await open(page, {}, {}, link(EXCHANGE, 17));
+  await expect(moves(page).first()).toBeVisible();
+  await page.selectOption("#level", "beginner");
+  await page.click("#plansBtn");
+  const plans = rowsOf(key("PlansInLine", { moves: EXCHANGE, level: "beginner" }));
+  await expect(page.locator(".plans .plan")).toHaveCount(plans.length);
+  expect(await page.evaluate(() => window.__calls.at(-1))).toContain('"level":"beginner"');
+  await page.reload();
+  await expect(page.locator("#level")).toHaveValue("beginner");
 });

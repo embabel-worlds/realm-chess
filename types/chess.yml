@@ -163,6 +163,7 @@
     structure: "The row of the chess-plans skill's structure table the model judged this to be, or `none`."
     opening: "The book name of the position, if it has one."
     model: "The model role that judged it."
+    level: "Who the plans were written for: `beginner`, `intermediate` or `expert`. Filter on it — `WHERE pl.level = 'beginner'` — to ask for that level; it is passed to the model, and each level is judged and cached separately."
     line: "For plans reached from a GameLine: the line's moves."
 
 - name: OpeningTheory

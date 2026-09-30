@@ -283,6 +283,8 @@ export interface PlanRecord {
   summary: string;
   /** The row of the skill's structure table the model matched, or "none". Same on every row for a position. */
   structure: string;
+  /** Who the plans were written for: beginner, intermediate or expert. */
+  level: string;
   opening: string;
   model: string;
 }
@@ -293,7 +295,8 @@ interface ModelPlan {
 }
 
 function promptFor(fen: string, x: Imbalances, opening: string | null, structure: string | null,
-                   candidates: CandidateLineRecord[], withinCp: number, theory: TheoryRecord | null = null): string {
+                   candidates: CandidateLineRecord[], withinCp: number, theory: TheoryRecord | null = null,
+                   level: Level = "intermediate"): string {
   const lines = candidates
     .filter((c) => c.rank === 1 || (c.lossCp !== null && c.lossCp <= withinCp))
     .map((c) => {
@@ -328,7 +331,8 @@ ${lines}
 First decide which row of the skill's structure table (section 4) this position is, from the
 pawn structure and imbalances above — or "none" — and let that row's plans lead unless the
 engine's moves show they do not work here.
-Name the plans for BOTH sides — up to three each, most important first — as the skill describes.
+${LEVEL_BRIEF[level]} (Section 8 of the skill says more.)
+Name the plans for BOTH sides — up to ${MAX_PLANS[level]} each, most important first — as the skill describes.
 Ground every plan in the numbered imbalances and, for the side to move, in the candidate moves.
 Cite imbalances by number, in the "imbalances" field ONLY — never write the numbers in the
 summary or the ideas; a reader does not see the list. Do not state any imbalance that is not in
@@ -374,7 +378,32 @@ const asList = (v: string[] | string | undefined) => (Array.isArray(v) ? v : v ?
 const uncite = (text: string | undefined) =>
   (text ?? "").replace(/\s*\((?:#?\d+(?:\s*[,&]\s*#?\d+)*)\)/g, "").replace(/\s+([.,;:])/g, "$1");
 
-interface PlanArgs { withinCp?: number; multiPv?: number; depth?: number; role?: string }
+interface PlanArgs { withinCp?: number; multiPv?: number; depth?: number; role?: string; level?: string }
+
+export const LEVELS = ["beginner", "intermediate", "expert"] as const;
+export type Level = (typeof LEVELS)[number];
+
+/*
+ * The audience. It arrives through the producer's pushdown — `WHERE pl.level = 'beginner'`
+ * rendered into the `{filters}` slot — so an unrendered placeholder, or nothing, means no level
+ * was asked for, and that is intermediate.
+ */
+/*
+ * The level's rules, stated in the prompt as well as in the skill's section 8. Left to the skill
+ * alone, the model wrote nearly the same plans for a beginner as for an expert — and for the
+ * beginner skipped the attacked pawn on e4 that the expert version mentioned.
+ */
+const LEVEL_BRIEF: Record<Level, string> = {
+  beginner: `Write for a BEGINNER. Your first plan for the side to move MUST deal with the Tactics lines above, if there are any — what is attacked, what is loose, what is threatened — said square by square in plain words. Then the basic principles that apply: develop, castle, fight for the centre. At most TWO plans per side, one or two short sentences each, one or two moves each. No jargon unless you say what it means; no structure names; no numbers.`,
+  intermediate: `Write for an INTERMEDIATE player: plans from the imbalances, the structure named and its known plans, the engine's moves tied to the plans, what each plan concedes. Tactics that are there come first. Explain an uncommon term once, briefly.`,
+  expert: `Write for an EXPERT: full depth, no hand-holding — structure and variation names, the plans theory gives both sides, move-order finesse and why this move first, the pawn breaks and their timing, what the engine's second and third choices say. Tactics that are there are stated, briefly. Never explain basic terms.`,
+};
+const MAX_PLANS: Record<Level, number> = { beginner: 2, intermediate: 3, expert: 3 };
+
+function levelOf(v: string | undefined): Level {
+  const t = (v ?? "").trim().toLowerCase();
+  return (LEVELS as readonly string[]).includes(t) ? (t as Level) : "intermediate";
+}
 
 /*
  * One position's plans. `opening` is what is known of its name — from the book by position, or
@@ -396,7 +425,8 @@ async function plansFor(ctx: GenericGatewayContext, fen: string, opening: string
     skills: ["chess-plans"],
     ...(args.role ? { role: args.role } : {}),
   }).then((r) => (typeof r === "string" ? r : JSON.stringify(r)));
-  const prompt = promptFor(fen, x, opening, structure, candidates, withinCp, theory);
+  const level = levelOf(args.level);
+  const prompt = promptFor(fen, x, opening, structure, candidates, withinCp, theory, level);
   let text = await ask(prompt);
   let parsed: ReturnType<typeof parseModelJson>;
   try {
@@ -405,14 +435,17 @@ async function plansFor(ctx: GenericGatewayContext, fen: string, opening: string
     text = await ask(`${prompt}\n\nYour previous answer was not valid JSON (${(e as Error).message}). Reply again with ONLY the JSON object.`);
     parsed = parseModelJson(text);
   }
-  const plans = (parsed.plans ?? []).filter((p) => p.side === "white" || p.side === "black");
+  const perSide: Record<string, number> = { white: 0, black: 0 };
+  const plans = (parsed.plans ?? []).filter((p) => p.side === "white" || p.side === "black")
+    .sort((a, b) => (a.priority ?? 9) - (b.priority ?? 9))
+    .filter((p) => ++perSide[p.side as string] <= MAX_PLANS[level]);
   if (plans.length === 0) throw new Error(`The model named no plans for ${fen}: ${text.slice(0, 200)}`);
   const count: Record<string, number> = { white: 0, black: 0 };
   return plans.map((p) => {
     const side = p.side as "white" | "black";
     const priority = typeof p.priority === "number" ? p.priority : ++count[side];
     return {
-      planId: `${fen}#${side}#${priority}#${(p.name ?? "").slice(0, 40)}`,
+      planId: `${fen}#${level}#${side}#${priority}#${(p.name ?? "").slice(0, 40)}`,
       fen,
       side,
       priority,
@@ -424,6 +457,7 @@ async function plansFor(ctx: GenericGatewayContext, fen: string, opening: string
       summary: uncite(parsed.summary),
       structure: parsed.structure ?? "",
       opening: opening ?? "",
+      level,
       model: args.role ?? "default",
     };
   });
@@ -473,7 +507,7 @@ export async function explainLinePlans(
     // Theory is evidence, not a requirement: a line the wikibook cannot be reached for still gets plans.
     const theory = await theoryFor(ctx, moves).catch(() => null);
     for (const p of await plansFor(ctx, fen, opening, args, theory)) {
-      out.push({ ...p, planId: `${line}#${p.side}#${p.priority}#${p.name.slice(0, 40)}`, line });
+      out.push({ ...p, planId: `${line}#${p.level}#${p.side}#${p.priority}#${p.name.slice(0, 40)}`, line });
     }
   }
   return out;

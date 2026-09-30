@@ -35,7 +35,8 @@ for (const line of LINES) {
 }
 calls.push(["BestMoves", { fen: RUY, withinCp: 50, maxLines: 5 }], ["ImbalancesOf", { fen: RUY }], ["OpeningOf", { fen: RUY }]);
 for (const fen of [fenAfter(""), RUY]) for (const withinCp of [20, 100]) calls.push(["BestMoves", { fen, withinCp, maxLines: 5 }]);
-calls.push(["PlansInPosition", { fen: RUY }], ["PlansInLine", { moves: EXCHANGE }]);
+calls.push(["PlansInPosition", { fen: RUY, level: "intermediate" }], ["PlansInLine", { moves: EXCHANGE, level: "intermediate" }],
+  ["PlansInLine", { moves: EXCHANGE, level: "beginner" }]);
 
 const key = (name, args) => `view:${name}:${JSON.stringify(Object.fromEntries(Object.entries(args).sort()))}`;
 const out = {};

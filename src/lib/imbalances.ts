@@ -258,6 +258,75 @@ function chainsOf(all: Placed[]): Imbalances["chains"] {
   return out;
 }
 
+
+/*
+ * Material as a player counts it: straight after 4.Bxc6 nobody calls White three points up,
+ * because ...dxc6 is coming. So when the side to move is behind, the exchange on ONE square is
+ * played out — least valuable attacker first, each side free to stop — and the balance is read
+ * after it. Deliberately no wider search: a capture-only search over the whole board "wins" the
+ * e5 pawn after 4...dxc6 with Nxe5, which ...Qd4 refutes; it cannot see a fork, so it must not
+ * be asked what a side can win. That is the engine's question.
+ */
+function exchangeOn(c: Chess, square: string): number {
+  const caps = c.moves({ verbose: true }).filter((m) => m.to === square && m.captured)
+    .sort((a, b) => VALUE[a.piece] - VALUE[b.piece]);
+  if (caps.length === 0) return 0;
+  const m = caps[0];
+  c.move(m);
+  // Taking is optional for each side: never worse than not taking.
+  const value = Math.max(0, VALUE[m.captured!] - exchangeOn(c, square));
+  c.undo();
+  return value;
+}
+
+/* The best single-square exchange for the side to move, and where. */
+export function recapture(fen: string): { gain: number; square: string | null; san: string | null } {
+  const c = new Chess(fen);
+  let best = { gain: 0, square: null as string | null, san: null as string | null };
+  for (const m of c.moves({ verbose: true }).filter((x) => x.captured)) {
+    c.move(m);
+    const gain = VALUE[m.captured!] - exchangeOn(c, m.to);
+    c.undo();
+    if (gain > best.gain) best = { gain, square: m.to, san: m.san };
+  }
+  return best;
+}
+
+/* Mates in one: exact, cheap, and the first thing a beginner must see. `threat` asks it of the side
+ * NOT to move, with the move handed over — not asked when the side to move is in check. */
+function mateInOne(fen: string, threat: boolean): string[] {
+  let c = new Chess(fen);
+  if (threat) {
+    if (c.inCheck()) return [];
+    const parts = fen.split(" ");
+    parts[1] = parts[1] === "w" ? "b" : "w";
+    parts[3] = "-";
+    try { c = new Chess(parts.join(" ")); } catch { return []; }
+  }
+  return c.moves({ verbose: true }).filter((m) => m.san.endsWith("#")).map((m) => m.san);
+}
+
+/* A piece attacked and not defended, or attacked by something cheaper: facts a beginner must see
+ * first. Whether taking it actually works is left to the engine. Kings are excluded — check is
+ * reported on its own. */
+function exposedPieces(c: Chess, colour: Color): string[] {
+  const out: string[] = [];
+  const enemy: Color = colour === "w" ? "b" : "w";
+  for (const row of c.board()) for (const p of row) {
+    if (!p || p.color !== colour || p.type === "k") continue;
+    const attackers = c.attackers(p.square, enemy);
+    if (attackers.length === 0) continue;
+    const defenders = c.attackers(p.square, colour);
+    const cheapest = Math.min(...attackers.map((a) => VALUE[c.get(a)!.type] || 100));
+    if (defenders.length === 0) out.push(`${PIECE_NAME[p.type]} on ${p.square} is attacked and not defended`);
+    else if (p.type !== "p" && cheapest < VALUE[p.type]) {
+      const by = attackers.map((a) => c.get(a)!).sort((x, y) => VALUE[x.type] - VALUE[y.type])[0];
+      out.push(`${PIECE_NAME[p.type]} on ${p.square} is attacked by a ${PIECE_NAME[by.type]}`);
+    }
+  }
+  return out;
+}
+
 export function imbalancesOf(fen: string): Imbalances {
   const c = new Chess(fen);
   const all = pieces(c);
@@ -288,7 +357,7 @@ const Cap = (s: Side) => (s === "white" ? "White" : "Black");
 /* Silman's imbalances, by the names a player uses for them — plus where the kings stand in an
  * endgame, which is not an imbalance but is what an endgame is about. */
 export const CATEGORIES = [
-  "Material", "Minor pieces", "Pawn structure", "Space", "Files", "Key squares",
+  "Tactics", "Material", "Minor pieces", "Pawn structure", "Space", "Files", "Key squares",
   "Development", "King safety", "King position", "Piece activity",
 ] as const;
 export type Category = (typeof CATEGORIES)[number];
@@ -319,7 +388,27 @@ function factsOf(x: Imbalances): string[] {
   // Every imbalance is filed under Silman's name for it, so a reader sees WHICH imbalance a
   // sentence is about — king safety, pawn structure — before what it says.
   const add = (category: Category, sentence: string) => out.push(`${category}: ${sentence}`);
-  add("Material", materialFact(x.white, x.black));
+  const mover = x.sideToMove, other_ = mover === "white" ? "black" : "white";
+  const c = new Chess(x.fen);
+  if (c.inCheck()) add("Tactics", `${Cap(mover)} is in check.`);
+  const mates = mateInOne(x.fen, false);
+  if (mates.length) add("Tactics", `${Cap(mover)} can mate at once with ${list(mates.slice(0, 3))}.`);
+  const threats = mateInOne(x.fen, true);
+  if (threats.length) add("Tactics", `${Cap(other_)} threatens mate with ${list(threats.slice(0, 3))}.`);
+  for (const s of SIDES) {
+    for (const e of exposedPieces(c, colourOf(s))) add("Tactics", `${Cap(s)}'s ${e}.`);
+  }
+  const moverStatic = x[mover].material.points - x[other_].material.points;
+  const r = moverStatic < 0 ? recapture(x.fen) : { gain: 0, square: null, san: null };
+  if (r.gain > 0) {
+    // An exchange under way: the side to move is behind only until it takes back.
+    const after = moverStatic + r.gain;
+    const who = after === 0 ? "the sides are level" : after < 0 ? `${Cap(other_)} is ${after === -1 ? "a pawn" : `${-after} points`} up`
+      : `${Cap(mover)} is ${after === 1 ? "a pawn" : `${after} points`} up`;
+    add("Material", `${who} once ${Cap(mover)} recaptures on ${r.square} — an exchange is under way.`);
+  } else {
+    add("Material", materialFact(x.white, x.black));
+  }
   const w = x.white, b = x.black;
   if (w.bishopPair !== b.bishopPair) add("Minor pieces", `${w.bishopPair ? "White" : "Black"} has the bishop pair.`);
   if (x.oppositeColouredBishops) add("Minor pieces", "Bishops of opposite colours: drawish in an endgame, but the attacker is effectively a piece up in a middlegame.");

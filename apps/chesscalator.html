@@ -195,6 +195,13 @@
           </select>
         </label>
         <span class="spacer"></span>
+        <label class="inline">Explain for
+          <select id="level">
+            <option value="beginner">a beginner</option>
+            <option value="intermediate" selected>an intermediate player</option>
+            <option value="expert">an expert</option>
+          </select>
+        </label>
         <button class="btn primary" id="plansBtn" disabled>Show the plans</button>
       </div>
       <details class="theory" id="theoryBox" open hidden>
@@ -237,6 +244,10 @@
       <code>chess.theoryOfGameLine</code>: the deepest page of the Chess Opening Theory wikibook the game's moves
       reach, read through the Wikibooks API, shown as an excerpt with its authors and licence (CC BY-SA 4.0).
       Cached for a week.</li>
+    <li><b>Tactics</b> — also computed from the board and listed first: check, mate in one, a mate threat, a piece
+      attacked and not defended, a piece attacked by a cheaper one. These are facts, not verdicts: whether taking a
+      loose piece works is the engine's call. Material is counted once an exchange under way is finished, so straight
+      after 4.Bxc6 the sides are level, not "White three points up".</li>
     <li><b>Plans</b> — <code>HAS_PLAN</code> → <code>Plan</code>, from <code>chess.explainPlans</code>, only when you
       press <i>Show the plans</i>: the three above go to <code>gateway.ai.complete</code> with the
       <code>chess-plans</code> skill attached — with the opening theory too, for a game played here — and the model
@@ -269,9 +280,11 @@ RETURN t.title AS page, t.url AS url, t.theory AS theory, toInteger(t.pliesCover
   <p><b>OpeningOf</b> — <code>fen</code>, for a position loaded from a FEN.</p>
 <pre>MATCH (p:Position {fen: $fen})-[:IN_OPENING]->(o:Opening)
 RETURN o.eco AS eco, o.name AS name, o.pgn AS moves</pre>
-  <p><b>PlansInLine</b> — <code>moves</code> — for a game played from the start, so the model is told the line's
+  <p><b>PlansInLine</b> — <code>moves</code>, <code>level</code> — for a game played from the start, so the model is told the line's
     opening name; <b>PlansInPosition</b> — <code>fen</code> — otherwise. The same query shape from a
-    <code>GameLine</code> or a <code>Position</code>. One engine search and one model call per new position.</p>
+    <code>GameLine</code> or a <code>Position</code>, filtered <code>WHERE pl.level = $level</code>: the level is pushed
+    down to the verb, so a beginner, an intermediate player and an expert each get plans written for them, each
+    judged and cached separately. One engine search and one model call per new position and level.</p>
 <pre>MATCH (p:Position {fen: $fen})-[:HAS_PLAN]->(pl:Plan)
 RETURN pl.side AS side, toInteger(pl.priority) AS priority, pl.name AS plan, pl.idea AS idea,
        pl.moves AS moves, pl.imbalances AS imbalances, pl.engineEvidence AS engineEvidence,
@@ -351,6 +364,14 @@ let inFlight = null;   // AbortController for the current position's requests
  * through a game — a held arrow key, a run of Back — then costs one search, for the position
  * you stop on, instead of a queue of searches for positions already gone. */
 const SETTLE_MS = 300;
+
+/* The reader's level is a per-viewer preference, so it lives in this browser only; storage may be
+ * unavailable (a private window), and then the page simply starts at intermediate. */
+try { const saved = localStorage.getItem("chesscalator.level"); if (saved) $("level").value = saved; } catch { /* no storage */ }
+$("level").addEventListener("change", () => {
+  try { localStorage.setItem("chesscalator.level", $("level").value); } catch { /* no storage */ }
+  $("plans").replaceChildren();
+});
 
 /* Sprites are served beside this page: the board's own asset folders are subdirectories, which
  * an app cannot serve, and a cross-origin sprite is refused by the browser. */
@@ -740,9 +761,10 @@ $("plansBtn").addEventListener("click", async () => {
   state("plans", "Reading the plans — an engine search and a model call, up to half a minute the first time.", "note");
   try {
     const opts = inFlight ? { signal: inFlight.signal } : {};
+    const level = $("level").value;
     const env = fromStart() && cursor > 0
-      ? await embabel.views.invoke("PlansInLine", { moves: playedLine() }, opts)
-      : await embabel.views.invoke("PlansInPosition", { fen: game.fen() }, opts);
+      ? await embabel.views.invoke("PlansInLine", { moves: playedLine(), level }, opts)
+      : await embabel.views.invoke("PlansInPosition", { fen: game.fen(), level }, opts);
     if (seq !== analysisSeq) return;
     renderPlans(rowsOf(env));
   } catch (e) {

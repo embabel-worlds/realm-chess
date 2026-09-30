@@ -1,3 +1,4 @@
+import { Chess } from "chess.js";
 import { describe, expect, it } from "vitest";
 import { imbalancesOf } from "../src/lib/imbalances";
 import { battery } from "./battery/battery";
@@ -69,5 +70,33 @@ describe("imbalance names", () => {
         expect(CATEGORIES.some((c) => f.startsWith(`${c}: `)), f).toBe(true);
       }
     }
+  });
+});
+
+describe("material mid-exchange, and tactics", () => {
+  const at = (moves: string) => { const c = new Chess(); for (const m of moves.split(" ")) c.move(m); return c.fen(); };
+  const facts = (moves: string) => imbalancesOf(at(moves)).facts.join("\n");
+
+  it("straight after 4.Bxc6 the material is level once Black recaptures, not 'White is 3 up'", () => {
+    const f = facts("e4 e5 Nf3 Nc6 Bb5 a6 Bxc6");
+    expect(f).toContain("Material: the sides are level once Black recaptures on c6");
+    expect(f).not.toMatch(/White is 3 points up/);
+  });
+
+  it("an undefended pawn is reported as a fact, never as a win (Nxe5 loses to ...Qd4)", () => {
+    const f = facts("e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6");
+    expect(f).toContain("Tactics: Black's pawn on e5 is attacked and not defended.");
+    expect(f).not.toMatch(/can win/);
+  });
+
+  it("a fork shows as two loose pieces", () => {
+    const f = facts("e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 Nxe5 Qd4");
+    expect(f).toContain("White's knight on e5 is attacked and not defended");
+    expect(f).toContain("White's pawn on e4 is attacked and not defended");
+  });
+
+  it("mate in one, and a mate threat", () => {
+    expect(facts("e4 e5 Qh5 Nc6 Bc4 Nf6")).toContain("Tactics: White can mate at once with Qxf7#.");
+    expect(facts("e4 e5 Qh5 Nc6 Bc4")).toContain("Tactics: White threatens mate with Qxf7#.");
   });
 });

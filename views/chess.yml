@@ -65,11 +65,16 @@
       type: string
       default: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
       description: "The position, as a complete FEN."
+    level:
+      type: string
+      default: "intermediate"
+      description: "Who the plans are for: `beginner` (tactics first — threats, loose pieces, checks — and the basic principles, in plain words), `intermediate` (plans from the imbalances, structures by name), or `expert` (full strategic depth, move-order nuance, no hand-holding)."
   cypher: |
     MATCH (p:Position {fen: $fen})-[:HAS_PLAN]->(pl:Plan)
+    WHERE pl.level = $level
     RETURN pl.side AS side, toInteger(pl.priority) AS priority, pl.name AS plan, pl.idea AS idea,
            pl.moves AS moves, pl.imbalances AS imbalances, pl.engineEvidence AS engineEvidence,
-           pl.summary AS summary, pl.structure AS structure, pl.opening AS opening
+           pl.summary AS summary, pl.structure AS structure, pl.opening AS opening, pl.level AS level
     ORDER BY side DESC, priority
 
 - name: OpeningOfLine
@@ -91,11 +96,16 @@
       type: string
       default: "e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1"
       description: "The game's moves from the start in SAN, space-separated."
+    level:
+      type: string
+      default: "intermediate"
+      description: "Who the plans are for: `beginner` (tactics first — threats, loose pieces, checks — and the basic principles, in plain words), `intermediate` (plans from the imbalances, structures by name), or `expert` (full strategic depth, move-order nuance, no hand-holding)."
   cypher: |
     MATCH (g:GameLine {moves: $moves})-[:HAS_PLAN]->(pl:Plan)
+    WHERE pl.level = $level
     RETURN pl.side AS side, toInteger(pl.priority) AS priority, pl.name AS plan, pl.idea AS idea,
            pl.moves AS moves, pl.imbalances AS imbalances, pl.engineEvidence AS engineEvidence,
-           pl.summary AS summary, pl.structure AS structure, pl.opening AS opening
+           pl.summary AS summary, pl.structure AS structure, pl.opening AS opening, pl.level AS level
     ORDER BY side DESC, priority
 
 - name: TheoryOfLine

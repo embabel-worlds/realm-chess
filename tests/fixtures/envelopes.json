@@ -1,6 +1,6 @@
 {
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\",\"maxLines\":5,\"withinCp\":50}": {
-  "executionId": "exec_2135bb5c-980d-4a6a-a1eb-cc4a740a0baa",
+  "executionId": "exec_44cedb8e-f657-4baa-8c1b-002c61716b8e",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -86,13 +86,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 2940,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 46,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:ImbalancesOf:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\"}": {
-  "executionId": "exec_0c21d525-b722-40b1-b785-348109fd91d8",
+  "executionId": "exec_a5a50ad4-d494-4e91-8be7-0d58a401c938",
   "operationId": "ImbalancesOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -118,13 +118,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1155,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 20,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1\",\"maxLines\":5,\"withinCp\":50}": {
-  "executionId": "exec_f3992b91-f407-4dfa-aa6c-13e3412dab57",
+  "executionId": "exec_3ad321f1-7588-4976-a5c5-aedb58854847",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -210,13 +210,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 2834,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 23,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:ImbalancesOf:{\"fen\":\"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1\"}": {
-  "executionId": "exec_0f61793b-81c8-4d87-80f0-5e5c0d195451",
+  "executionId": "exec_5accb9e3-df87-4c73-830d-1a756e38e078",
   "operationId": "ImbalancesOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -242,13 +242,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1115,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 19,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:OpeningOfLine:{\"moves\":\"e4\"}": {
-  "executionId": "exec_94d31e3b-0fc7-42f8-a082-31943bb48659",
+  "executionId": "exec_74242df7-d184-47f5-8257-ef041db31fef",
   "operationId": "OpeningOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -266,13 +266,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1199,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 11,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:TheoryOfLine:{\"moves\":\"e4\"}": {
-  "executionId": "exec_0195565c-a3cc-469c-95b5-a8434fb180a1",
+  "executionId": "exec_e87c62db-88d3-43a2-990b-eb2e9c52b4a2",
   "operationId": "TheoryOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -291,13 +291,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1587,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 17,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\",\"maxLines\":5,\"withinCp\":50}": {
-  "executionId": "exec_b85d891e-bbd2-4af3-a283-c9c0e15cc76c",
+  "executionId": "exec_25163cb1-1d45-44b5-a313-843be12aec1a",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -383,13 +383,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 3347,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 17,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:ImbalancesOf:{\"fen\":\"rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\"}": {
-  "executionId": "exec_b184db8f-8752-4ef6-8697-67a1e026f110",
+  "executionId": "exec_9535fc45-b76f-409a-a135-086b7f2164f0",
   "operationId": "ImbalancesOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -415,13 +415,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1083,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 14,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:OpeningOfLine:{\"moves\":\"e4 e5\"}": {
-  "executionId": "exec_948b5a6b-c3d1-4436-beda-a401d3c3f57f",
+  "executionId": "exec_bae8e11a-df85-4b81-94b7-32d47c48636d",
   "operationId": "OpeningOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -439,13 +439,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1185,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 18,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:TheoryOfLine:{\"moves\":\"e4 e5\"}": {
-  "executionId": "exec_dfc5c147-1229-4b73-954b-d19e45039c34",
+  "executionId": "exec_58019488-a054-47a6-9218-58d5c01132f9",
   "operationId": "TheoryOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -464,13 +464,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1365,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 16,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\",\"maxLines\":5,\"withinCp\":50}": {
-  "executionId": "exec_2181ea49-1743-44f4-9e0c-e6fb2a00567f",
+  "executionId": "exec_cdc3ce65-4f2c-4ea0-bfbd-631dbebb04e9",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -556,13 +556,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 2936,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 30,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:ImbalancesOf:{\"fen\":\"rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\"}": {
-  "executionId": "exec_c2514407-5330-496d-98a2-00488c5dc7f9",
+  "executionId": "exec_ccb0f457-a8e6-4e12-b256-0fe8ebf95f9e",
   "operationId": "ImbalancesOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -588,13 +588,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1061,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 23,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:OpeningOfLine:{\"moves\":\"e4 c5\"}": {
-  "executionId": "exec_67b66c94-9a33-4db7-bfff-b6b37cbf65d2",
+  "executionId": "exec_04181f78-d248-45a0-b71c-7ca150f03b3f",
   "operationId": "OpeningOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -612,13 +612,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1124,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 23,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:TheoryOfLine:{\"moves\":\"e4 c5\"}": {
-  "executionId": "exec_68bdd1b1-1655-433d-bc8f-3c312ae13d49",
+  "executionId": "exec_1a40c01b-70b0-4f59-a479-51a945f33341",
   "operationId": "TheoryOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -637,13 +637,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1355,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 29,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"maxLines\":5,\"withinCp\":50}": {
-  "executionId": "exec_6ee830b5-26d6-4cf0-9707-17430af3b11f",
+  "executionId": "exec_015f0001-e00f-49da-8b47-f1c4a578eed4",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -729,13 +729,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 20,
+   "durationMs": 17,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:ImbalancesOf:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\"}": {
-  "executionId": "exec_cc530db4-7987-4350-8181-32d1da2c5f9d",
+  "executionId": "exec_a239cf9a-6055-41ae-a903-67276072be24",
   "operationId": "ImbalancesOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -767,7 +767,7 @@
   }
  },
  "view:OpeningOfLine:{\"moves\":\"e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1\"}": {
-  "executionId": "exec_063e7a94-ca94-4118-9537-cc14d09bc278",
+  "executionId": "exec_25e02b5d-5299-4100-b516-2c66e7a5c216",
   "operationId": "OpeningOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -785,13 +785,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1114,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 19,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:TheoryOfLine:{\"moves\":\"e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1\"}": {
-  "executionId": "exec_fd9c3a67-14b4-4008-87be-86f557702581",
+  "executionId": "exec_57bdc4a7-7f40-42c2-8988-3a178a6fbaaf",
   "operationId": "TheoryOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -810,13 +810,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1282,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 13,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:OpeningOf:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\"}": {
-  "executionId": "exec_20c6f963-9beb-43ed-ad05-3f76da7645ab",
+  "executionId": "exec_b28c69d2-92aa-4221-aeb6-2404dea1aa3f",
   "operationId": "OpeningOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -826,13 +826,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1101,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 23,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\",\"maxLines\":5,\"withinCp\":20}": {
-  "executionId": "exec_c1b5b8e8-493b-4447-8549-96bf51d6dc48",
+  "executionId": "exec_e67c94a1-4c29-4403-b933-365dac3d60a7",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -918,13 +918,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 28,
+   "durationMs": 17,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\",\"maxLines\":5,\"withinCp\":100}": {
-  "executionId": "exec_c7e5fcf1-99c9-418f-8888-dbb37eab4d03",
+  "executionId": "exec_3bb27aa2-f8b6-41de-910e-e826fbefae34",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1010,13 +1010,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 22,
+   "durationMs": 21,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"maxLines\":5,\"withinCp\":20}": {
-  "executionId": "exec_64b17ae8-4350-41ce-aa24-c19ceb0e9846",
+  "executionId": "exec_b9b24dec-2094-4c81-9fb5-5249deac3a61",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1072,13 +1072,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 22,
+   "durationMs": 19,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"maxLines\":5,\"withinCp\":100}": {
-  "executionId": "exec_0954d61b-6488-4d1a-972d-9ba08238de55",
+  "executionId": "exec_6fc88bd8-7098-464e-b816-3120fff371d3",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1164,13 +1164,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 23,
+   "durationMs": 14,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
- "view:PlansInPosition:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\"}": {
-  "executionId": "exec_cd360c8c-3ea4-4f85-9546-54da4a5c73a4",
+ "view:PlansInPosition:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"level\":\"intermediate\"}": {
+  "executionId": "exec_3d5face7-c7a3-401d-9645-637ff1ff3344",
   "operationId": "PlansInPosition",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1180,86 +1180,92 @@
    {
     "side": "white",
     "priority": 1,
-    "plan": "Exploit open d-file and superior piece activity",
-    "idea": "White should use the open d-file and their more active rook to pressure Black's centralized king or contest open files after Black castles. Fast development of queenside pieces can increase initiative and support pressure on the queenside, especially against Black's c5/c7 weaknesses or backward d7 pawn.",
-    "moves": "Nc3 Bf4 Na4 Be3",
-    "imbalances": "Files: the d-file is open.\nFiles: White holds an open file with the rook d1.\nDevelopment: White still has Nb1 and Bc1 undeveloped.\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
-    "engineEvidence": "Nc3 and Na4 appear in multiple engine lines, consistently prioritizing activity and d-file pressure.",
-    "summary": "The position is equal with imbalances in minor pieces: Black keeps the bishop pair, but has less active pieces and doubled c-pawns. White's freer position and rook on the open d-file give a slight initiative, but also a development lag. Black is aiming to complete development and may castle queenside, using the bishop pair and pressure on the center and queenside to compensate for structural weakness. White will try to leverage piece activity, pressure the c5/c7 pawns or d-file, and provoke weaknesses while finishing development. The mutual majorities (Black queenside, White kingside) offer long-term play, but immediate plans focus on piece activity and king safety.",
-    "structure": "none",
-    "opening": ""
+    "plan": "Maximize piece activity and attack weaknesses",
+    "idea": "White's more active pieces should pile up on weak pawns (especially doubled c-pawns) and on the queenside. Increasing pressure here may provoke further weaknesses and create tactical chances, especially if the open d-file can be used.",
+    "moves": "Nc3 Na4 Bf4 Be3 Rxd8+",
+    "imbalances": "Piece activity: White has the freer pieces: 34 legal moves against 23.\nPawn structure: Black has doubled pawns on the c-file.\nFiles: White holds an open file with the rook d1.\nPawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).",
+    "engineEvidence": "All the engine's candidate lines feature Nc3 and Na4, targeting the queenside and open d-file.",
+    "summary": "The position is roughly even, but slightly favors White thanks to more piece activity and a freer position. Black has the bishop pair but suffers from doubled c-pawns, and must solve the problem of safe castling and slow development. Both sides are likely to castle on opposite wings, leading to sharp play where pawn storms can be decisive—the engine's main lines support this. White aims to increase piece activity and target Black's pawns, especially on the queenside. Black's main plans are to finish development efficiently, castle queenside, and unleash the bishops in an open game, hoping the bishop pair compensates for structural issues.",
+    "structure": "Ruy Lopez Exchange-like (symmetrical, with doubled c-pawns)",
+    "opening": "",
+    "level": "intermediate"
    },
    {
     "side": "white",
     "priority": 2,
-    "plan": "Target doubled c-pawns and queenside weaknesses",
-    "idea": "White can try to provoke or exploit Black's doubled c-pawns and generally weaker queenside, either by offering exchanges or opening up the position as Black castles long. Pressure along the b-file or through piece exchanges that highlight Black's pawn weaknesses is key.",
-    "moves": "Na4 Bf4 Nc3",
-    "imbalances": "Pawn structure: Black has doubled pawns on the c-file.\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
-    "engineEvidence": "Na4 and Bf4 in main lines play towards these weaknesses.",
-    "summary": "The position is equal with imbalances in minor pieces: Black keeps the bishop pair, but has less active pieces and doubled c-pawns. White's freer position and rook on the open d-file give a slight initiative, but also a development lag. Black is aiming to complete development and may castle queenside, using the bishop pair and pressure on the center and queenside to compensate for structural weakness. White will try to leverage piece activity, pressure the c5/c7 pawns or d-file, and provoke weaknesses while finishing development. The mutual majorities (Black queenside, White kingside) offer long-term play, but immediate plans focus on piece activity and king safety.",
-    "structure": "none",
-    "opening": ""
+    "plan": "Queenside minority attack",
+    "idea": "With a kingside majority and Black's doubled c-pawns, White can initiate a pawn storm on the queenside once Black castles long, trying to open files against Black's king and convert structural weaknesses to targets.",
+    "moves": "a4 Nb5 b4",
+    "imbalances": "Pawn structure: Black has doubled pawns on the c-file.\nPawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).\nFiles: White holds an open file with the rook d1.",
+    "engineEvidence": "Seen in sample lines after Black castles long and White follows up with Nb5/a4.",
+    "summary": "The position is roughly even, but slightly favors White thanks to more piece activity and a freer position. Black has the bishop pair but suffers from doubled c-pawns, and must solve the problem of safe castling and slow development. Both sides are likely to castle on opposite wings, leading to sharp play where pawn storms can be decisive—the engine's main lines support this. White aims to increase piece activity and target Black's pawns, especially on the queenside. Black's main plans are to finish development efficiently, castle queenside, and unleash the bishops in an open game, hoping the bishop pair compensates for structural issues.",
+    "structure": "Ruy Lopez Exchange-like (symmetrical, with doubled c-pawns)",
+    "opening": "",
+    "level": "intermediate"
    },
    {
     "side": "white",
     "priority": 3,
-    "plan": "Leverage kingside majority if queenside closes",
-    "idea": "If the queenside becomes blocked or less relevant, White may look to advance the kingside majority in the endgame, creating a passed pawn or opening lines against Black's king.",
-    "moves": "f4 h3",
-    "imbalances": "Pawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).",
-    "engineEvidence": "f4 and h3 are present in some secondary lines, supporting this plan.",
-    "summary": "The position is equal with imbalances in minor pieces: Black keeps the bishop pair, but has less active pieces and doubled c-pawns. White's freer position and rook on the open d-file give a slight initiative, but also a development lag. Black is aiming to complete development and may castle queenside, using the bishop pair and pressure on the center and queenside to compensate for structural weakness. White will try to leverage piece activity, pressure the c5/c7 pawns or d-file, and provoke weaknesses while finishing development. The mutual majorities (Black queenside, White kingside) offer long-term play, but immediate plans focus on piece activity and king safety.",
-    "structure": "none",
-    "opening": ""
+    "plan": "Pressure open d-file",
+    "idea": "White's control of the open d-file with a rook can be decisive, especially targeting d8 or d6 if Black is uncoordinated, sometimes exchanging off key defenders.",
+    "moves": "Rxd8+ Rd1",
+    "imbalances": "Files: White holds an open file with the rook d1.\nFiles: the d-file is open.",
+    "engineEvidence": "Lines with Rxd8+ or buildup on d-file after Nc3, Bd6, Rxd8+.",
+    "summary": "The position is roughly even, but slightly favors White thanks to more piece activity and a freer position. Black has the bishop pair but suffers from doubled c-pawns, and must solve the problem of safe castling and slow development. Both sides are likely to castle on opposite wings, leading to sharp play where pawn storms can be decisive—the engine's main lines support this. White aims to increase piece activity and target Black's pawns, especially on the queenside. Black's main plans are to finish development efficiently, castle queenside, and unleash the bishops in an open game, hoping the bishop pair compensates for structural issues.",
+    "structure": "Ruy Lopez Exchange-like (symmetrical, with doubled c-pawns)",
+    "opening": "",
+    "level": "intermediate"
    },
    {
     "side": "black",
     "priority": 1,
-    "plan": "Complete development and secure the king via queenside castling",
-    "idea": "Black should prioritize completing development while keeping the bishop pair; castling queenside brings the king to relative safety and activates the rook on the d-file. This plan is especially pressing due to central king vulnerability and the open d-file.",
-    "moves": "Be6 Bg4 Bd7 O-O-O",
-    "imbalances": "Minor pieces: Black has the bishop pair.\nPawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).\nDevelopment: Black still has Ng8, Bc8 and Bf8 undeveloped.\nKing safety: Black's king is still in the centre, on e8.",
-    "engineEvidence": "Be6, Bg4, Bd7, O-O-O in engine main lines show Black aiming to finish development and bring the king to safety.",
-    "summary": "The position is equal with imbalances in minor pieces: Black keeps the bishop pair, but has less active pieces and doubled c-pawns. White's freer position and rook on the open d-file give a slight initiative, but also a development lag. Black is aiming to complete development and may castle queenside, using the bishop pair and pressure on the center and queenside to compensate for structural weakness. White will try to leverage piece activity, pressure the c5/c7 pawns or d-file, and provoke weaknesses while finishing development. The mutual majorities (Black queenside, White kingside) offer long-term play, but immediate plans focus on piece activity and king safety.",
-    "structure": "none",
-    "opening": ""
+    "plan": "Complete development and castle queenside",
+    "idea": "Black urgently needs to complete development, mainly to connect the rooks and bring the king to safety on the queenside. This enables the bishops to become effective, and brings the a8-rook into play against White's likely kingside castled king.",
+    "moves": "Be6 Bd6 Bd7 O-O-O",
+    "imbalances": "King safety: Black's king is still in the centre, on e8.\nMinor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nDevelopment: Black still has Ng8, Bc8 and Bf8 undeveloped.",
+    "engineEvidence": "All the top engine moves are aimed at freeing c8-bishop and castling long.",
+    "summary": "The position is roughly even, but slightly favors White thanks to more piece activity and a freer position. Black has the bishop pair but suffers from doubled c-pawns, and must solve the problem of safe castling and slow development. Both sides are likely to castle on opposite wings, leading to sharp play where pawn storms can be decisive—the engine's main lines support this. White aims to increase piece activity and target Black's pawns, especially on the queenside. Black's main plans are to finish development efficiently, castle queenside, and unleash the bishops in an open game, hoping the bishop pair compensates for structural issues.",
+    "structure": "Ruy Lopez Exchange-like (symmetrical, with doubled c-pawns)",
+    "opening": "",
+    "level": "intermediate"
    },
    {
     "side": "black",
     "priority": 2,
-    "plan": "Use bishop pair and majority for long-term queenside play",
-    "idea": "Black should utilize the bishop pair on an open board, and if queenside play opens up, seek to use the queenside pawn majority. This might involve advancing b5/b6 or playing for activity on the c-file as White develops.",
-    "moves": "Be6 Bd6 b6",
-    "imbalances": "Minor pieces: Black has the bishop pair.\nPawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).",
-    "engineEvidence": "Be6 and Bd6 lines preserve the bishop pair; b6 is cited in main lines as Black starts to support queenside play.",
-    "summary": "The position is equal with imbalances in minor pieces: Black keeps the bishop pair, but has less active pieces and doubled c-pawns. White's freer position and rook on the open d-file give a slight initiative, but also a development lag. Black is aiming to complete development and may castle queenside, using the bishop pair and pressure on the center and queenside to compensate for structural weakness. White will try to leverage piece activity, pressure the c5/c7 pawns or d-file, and provoke weaknesses while finishing development. The mutual majorities (Black queenside, White kingside) offer long-term play, but immediate plans focus on piece activity and king safety.",
-    "structure": "none",
-    "opening": ""
+    "plan": "Active use of bishop pair",
+    "idea": "The bishop pair gives long-term dynamic potential if the position opens. Black must use them actively to compensate for pawn weaknesses, especially aiming down long diagonals once central tension eases.",
+    "moves": "Be6 Bd6 Bxb3",
+    "imbalances": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nPawn structure: Black has doubled pawns on the c-file.",
+    "engineEvidence": "Be6 followed by Bxb3 in engine lines, activating both bishops.",
+    "summary": "The position is roughly even, but slightly favors White thanks to more piece activity and a freer position. Black has the bishop pair but suffers from doubled c-pawns, and must solve the problem of safe castling and slow development. Both sides are likely to castle on opposite wings, leading to sharp play where pawn storms can be decisive—the engine's main lines support this. White aims to increase piece activity and target Black's pawns, especially on the queenside. Black's main plans are to finish development efficiently, castle queenside, and unleash the bishops in an open game, hoping the bishop pair compensates for structural issues.",
+    "structure": "Ruy Lopez Exchange-like (symmetrical, with doubled c-pawns)",
+    "opening": "",
+    "level": "intermediate"
    },
    {
     "side": "black",
     "priority": 3,
-    "plan": "Challenge White's central and kingside activity",
-    "idea": "Black can look for tactical responses or pawn breaks (like...g5 in some lines) to question White's control in the center and restrict their freer pieces. Countering White's threats promptly is critical given the development lag.",
-    "moves": "Bg4 g5",
-    "imbalances": "King safety: Black's king is still in the centre, on e8.\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
-    "engineEvidence": "Bg4 and g5 appear as second and fourth-best engine moves, showing attempts to challenge White's space and development lead.",
-    "summary": "The position is equal with imbalances in minor pieces: Black keeps the bishop pair, but has less active pieces and doubled c-pawns. White's freer position and rook on the open d-file give a slight initiative, but also a development lag. Black is aiming to complete development and may castle queenside, using the bishop pair and pressure on the center and queenside to compensate for structural weakness. White will try to leverage piece activity, pressure the c5/c7 pawns or d-file, and provoke weaknesses while finishing development. The mutual majorities (Black queenside, White kingside) offer long-term play, but immediate plans focus on piece activity and king safety.",
-    "structure": "none",
-    "opening": ""
+    "plan": "Counterattack on the kingside if White castles short",
+    "idea": "In opposite-side castling, Black should push kingside pawns to open lines toward White's king—moves like g5 or Bg4 are supported, even at some cost to pawn structure. This gives practical counterplay and may distract White from his pressure on the queenside.",
+    "moves": "g5 Bg4",
+    "imbalances": "Files: the e-file is half-open for Black.\nKing safety: Black's king is still in the centre, on e8.\nPawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).",
+    "engineEvidence": "g5 and Bg4 are among the engine's choices, initiating kingside play.",
+    "summary": "The position is roughly even, but slightly favors White thanks to more piece activity and a freer position. Black has the bishop pair but suffers from doubled c-pawns, and must solve the problem of safe castling and slow development. Both sides are likely to castle on opposite wings, leading to sharp play where pawn storms can be decisive—the engine's main lines support this. White aims to increase piece activity and target Black's pawns, especially on the queenside. Black's main plans are to finish development efficiently, castle queenside, and unleash the bishops in an open game, hoping the bishop pair compensates for structural issues.",
+    "structure": "Ruy Lopez Exchange-like (symmetrical, with doubled c-pawns)",
+    "opening": "",
+    "level": "intermediate"
    }
   ],
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 10851,
+   "durationMs": 14664,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
- "view:PlansInLine:{\"moves\":\"e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1\"}": {
-  "executionId": "exec_f343d905-857f-41aa-952a-3cdac51aab29",
+ "view:PlansInLine:{\"level\":\"intermediate\",\"moves\":\"e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1\"}": {
+  "executionId": "exec_39edf7d5-c0cc-404a-b6e1-c4ca82a27f73",
   "operationId": "PlansInLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1269,80 +1275,155 @@
    {
     "side": "white",
     "priority": 1,
-    "plan": "Exploit open files and piece activity",
-    "idea": "With more active minor and major pieces and the open d-file, White should seize the initiative on open lines. This includes contesting the open file with rooks and using freer mobility to pressure Black's slightly undeveloped queenside.",
-    "moves": "Rd1 Nc3 Bf4",
-    "imbalances": "Files: the d-file is open.\nFiles: White holds an open file with the rook d1.\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
-    "engineEvidence": "All main engine lines for Black respond to White's expected rook or knight development, showing active piece play is essential.",
-    "summary": "The game is balanced, but both sides have dynamic possibilities. Black's doubled c-pawns and slightly lagging development are offset by the bishop pair. The open d- and half-open e-files offer active play for both sides, with White having freer pieces and a slight lead in development, while Black may seek queenside play or simplification. Key plans revolve around exploiting open lines, activating pieces, and possible pawn structure transformations (doubling on the b-file, creating outposts). Black's candidate moves all gravitate towards development and castling long, so both sides are preparing for middlegame activity.",
-    "structure": "none",
-    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago"
+    "plan": "Simplify and aim for kingside majority in the endgame",
+    "idea": "Look for piece exchanges that lead toward an endgame where the kingside pawn majority is stronger than Black's crippled queenside pawns. Trading off Black's bishops or reaching an endgame with a knight vs. bad bishop is particularly good.",
+    "moves": "Nc3 Na4 Rxd8+",
+    "imbalances": "Pawn structure: Black has doubled pawns on the c-file.\nPawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).\nFiles: White holds an open file with the rook d1.\nDevelopment: White still has Nb1 and Bc1 undeveloped.",
+    "engineEvidence": "Moves like Nc3, Na4, and Rxd8+ in the engine's best lines facilitate exchanges and steer toward favorable endgames for White.",
+    "summary": "This position fits the Ruy Lopez: Exchange structure, where Black has the bishop pair and doubled c-pawns, and White has a compact kingside pawn majority. Play centers on whether Black can use the bishops actively before the pawn weaknesses become targets. The engine's moves show the struggle between developing the bishops, exchanging off White's best minor piece, and safely castling. White's aims are to simplify toward the endgame and use the healthier kingside pawns, while Black looks to use the bishops for dynamic play on both wings before simplifying. Most lines lead to opposite-side castling, suggesting a race of attacks. The position is balanced but demands accurate play from both sides.",
+    "structure": "Ruy Lopez, Exchange",
+    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago",
+    "level": "intermediate"
    },
    {
     "side": "white",
     "priority": 2,
-    "plan": "Play against Black’s pawn structure",
-    "idea": "Black's doubled c-pawns can become a target, especially using knights and the bishop to create threats on the queenside, either via direct pressure or inducing further weaknesses.",
-    "moves": "Na5 Nc3 Bf4",
-    "imbalances": "Pawn structure: Black has doubled pawns on the c-file.",
-    "engineEvidence": "Nc3/Na4 in the engine lines and subsequent play targeting c5/c6 demonstrate these ideas.",
-    "summary": "The game is balanced, but both sides have dynamic possibilities. Black's doubled c-pawns and slightly lagging development are offset by the bishop pair. The open d- and half-open e-files offer active play for both sides, with White having freer pieces and a slight lead in development, while Black may seek queenside play or simplification. Key plans revolve around exploiting open lines, activating pieces, and possible pawn structure transformations (doubling on the b-file, creating outposts). Black's candidate moves all gravitate towards development and castling long, so both sides are preparing for middlegame activity.",
-    "structure": "none",
-    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago"
+    "plan": "Challenge Black's center and files",
+    "idea": "Pressure Black's central pawns and occupy open and half-open files (the d-file and potentially the a- or b-files after exchanges) to restrict Black's piece mobility. Develop actively (Nc3, Na4), double rooks, and use White's more flexible position to force concessions.",
+    "moves": "Nc3 d4-d5 in future Rook to d1",
+    "imbalances": "Files: the d-file is open.\nFiles: White holds an open file with the rook d1.\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
+    "engineEvidence": "Nc3 and rook moves up the d-file form the backbone of the engine's lines.",
+    "summary": "This position fits the Ruy Lopez: Exchange structure, where Black has the bishop pair and doubled c-pawns, and White has a compact kingside pawn majority. Play centers on whether Black can use the bishops actively before the pawn weaknesses become targets. The engine's moves show the struggle between developing the bishops, exchanging off White's best minor piece, and safely castling. White's aims are to simplify toward the endgame and use the healthier kingside pawns, while Black looks to use the bishops for dynamic play on both wings before simplifying. Most lines lead to opposite-side castling, suggesting a race of attacks. The position is balanced but demands accurate play from both sides.",
+    "structure": "Ruy Lopez, Exchange",
+    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago",
+    "level": "intermediate"
    },
    {
     "side": "white",
     "priority": 3,
-    "plan": "Leverage kingside pawn majority",
-    "idea": "Expanding or trading with f2-f4 or g2-g4 may become attractive if Black castles queenside, giving White chances for kingside space and play.",
-    "moves": "f4 g4",
-    "imbalances": "Pawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).",
-    "engineEvidence": "f3/f4 appears in secondary engine lines, especially if Black delays kingside development.",
-    "summary": "The game is balanced, but both sides have dynamic possibilities. Black's doubled c-pawns and slightly lagging development are offset by the bishop pair. The open d- and half-open e-files offer active play for both sides, with White having freer pieces and a slight lead in development, while Black may seek queenside play or simplification. Key plans revolve around exploiting open lines, activating pieces, and possible pawn structure transformations (doubling on the b-file, creating outposts). Black's candidate moves all gravitate towards development and castling long, so both sides are preparing for middlegame activity.",
-    "structure": "none",
-    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago"
+    "plan": "Create knight outpost and attack weak pawns",
+    "idea": "Use the c5 or d5 squares (if they open) as potential outposts for knights, especially after Black commits to a pawn structure. With Na4 or Nc3, prepare to occupy weak squares and pressure Black's doubled c-pawns.",
+    "moves": "Na4 Nc3 Bf4 after exchanges",
+    "imbalances": "Pawn structure: Black has doubled pawns on the c-file.\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
+    "engineEvidence": "Candidate lines show Na4 and Nc3 targeting weak c-pawns and looking for outposts.",
+    "summary": "This position fits the Ruy Lopez: Exchange structure, where Black has the bishop pair and doubled c-pawns, and White has a compact kingside pawn majority. Play centers on whether Black can use the bishops actively before the pawn weaknesses become targets. The engine's moves show the struggle between developing the bishops, exchanging off White's best minor piece, and safely castling. White's aims are to simplify toward the endgame and use the healthier kingside pawns, while Black looks to use the bishops for dynamic play on both wings before simplifying. Most lines lead to opposite-side castling, suggesting a race of attacks. The position is balanced but demands accurate play from both sides.",
+    "structure": "Ruy Lopez, Exchange",
+    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago",
+    "level": "intermediate"
    },
    {
     "side": "black",
     "priority": 1,
-    "plan": "Develop and prepare queenside castling",
-    "idea": "Black’s pieces (bishops and queen) must be quickly developed to connect rooks and safeguard the king, ideally with queenside castling which also activates the rook on the open d-file.",
-    "moves": "Be6 Bd7 O-O-O",
-    "imbalances": "Minor pieces: Black has the bishop pair.\nDevelopment: Black still has Ng8, Bc8 and Bf8 undeveloped.\nKing safety: Black's king is still in the centre, on e8.\nFiles: the d-file is open.\nFiles: the e-file is half-open for Black.",
-    "engineEvidence": "Every top engine line includes rapid bishop development and queenside castling.",
-    "summary": "The game is balanced, but both sides have dynamic possibilities. Black's doubled c-pawns and slightly lagging development are offset by the bishop pair. The open d- and half-open e-files offer active play for both sides, with White having freer pieces and a slight lead in development, while Black may seek queenside play or simplification. Key plans revolve around exploiting open lines, activating pieces, and possible pawn structure transformations (doubling on the b-file, creating outposts). Black's candidate moves all gravitate towards development and castling long, so both sides are preparing for middlegame activity.",
-    "structure": "none",
-    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago"
+    "plan": "Develop the bishop pair and castle queenside",
+    "idea": "Use the bishop pair actively, ideally keeping both on to pressure both wings before the endgame, where the c-pawn weaknesses might tell. Develop the bishops to e6 and d6, preparing to castle long where the king is safer. Aim for dynamic play instead of early simplification.",
+    "moves": "Be6 Bd6 O-O-O",
+    "imbalances": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nPawn structure: Black has doubled pawns on the c-file.\nPawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).\nFiles: the e-file is half-open for Black.\nKing safety: Black's king is still in the centre, on e8.",
+    "engineEvidence": "Be6 is the engine's first choice, and Bd6/O-O-O feature in the top lines.",
+    "summary": "This position fits the Ruy Lopez: Exchange structure, where Black has the bishop pair and doubled c-pawns, and White has a compact kingside pawn majority. Play centers on whether Black can use the bishops actively before the pawn weaknesses become targets. The engine's moves show the struggle between developing the bishops, exchanging off White's best minor piece, and safely castling. White's aims are to simplify toward the endgame and use the healthier kingside pawns, while Black looks to use the bishops for dynamic play on both wings before simplifying. Most lines lead to opposite-side castling, suggesting a race of attacks. The position is balanced but demands accurate play from both sides.",
+    "structure": "Ruy Lopez, Exchange",
+    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago",
+    "level": "intermediate"
    },
    {
     "side": "black",
     "priority": 2,
-    "plan": "Exchange to reduce White’s piece activity",
-    "idea": "By trading minor pieces (e.g., Bxb3 or Bg4 followed by Be6), Black can remove White's active pieces and lessen White's lead in mobility, especially if this leads to imbalanced pawn structures that favor the bishop pair.",
-    "moves": "Be6 Bg4 Bxb3",
-    "imbalances": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
-    "engineEvidence": "Be6, Bxb3, and Bg4 are all top engine suggestions aiming to exchange minor pieces.",
-    "summary": "The game is balanced, but both sides have dynamic possibilities. Black's doubled c-pawns and slightly lagging development are offset by the bishop pair. The open d- and half-open e-files offer active play for both sides, with White having freer pieces and a slight lead in development, while Black may seek queenside play or simplification. Key plans revolve around exploiting open lines, activating pieces, and possible pawn structure transformations (doubling on the b-file, creating outposts). Black's candidate moves all gravitate towards development and castling long, so both sides are preparing for middlegame activity.",
-    "structure": "none",
-    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago"
+    "plan": "Hold the center, avoid pure endgames",
+    "idea": "Keep central control with pawns on c5 and f6, and seek to avoid exchanges that reach a simple pawn ending, where White's healthy kingside majority can be decisive. Instead, maintain piece tension and use the bishop pair before White can simplify.",
+    "moves": "Be6 Bg4 Bd7",
+    "imbalances": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nPawn structure: Black has doubled pawns on the c-file.\nFiles: the e-file is half-open for Black.\nKing safety: Black's king is still in the centre, on e8.",
+    "engineEvidence": "All of Be6, Bg4, Bd7 aim for development and maintaining piece tension.",
+    "summary": "This position fits the Ruy Lopez: Exchange structure, where Black has the bishop pair and doubled c-pawns, and White has a compact kingside pawn majority. Play centers on whether Black can use the bishops actively before the pawn weaknesses become targets. The engine's moves show the struggle between developing the bishops, exchanging off White's best minor piece, and safely castling. White's aims are to simplify toward the endgame and use the healthier kingside pawns, while Black looks to use the bishops for dynamic play on both wings before simplifying. Most lines lead to opposite-side castling, suggesting a race of attacks. The position is balanced but demands accurate play from both sides.",
+    "structure": "Ruy Lopez, Exchange",
+    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago",
+    "level": "intermediate"
    },
    {
     "side": "black",
     "priority": 3,
-    "plan": "Play for central control and kingside counterplay",
-    "idea": "Moves like g5 or pushing pawns central/kingside can help Black contest space and look for play against White’s king, especially if White overextends or weakens squares (as in the engine's g5 line).",
-    "moves": "g5 Be6 Bg4",
-    "imbalances": "Pawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).\nFiles: the e-file is half-open for Black.",
-    "engineEvidence": "g5 is a top-5 engine candidate, marking this as a concrete, if sharp, alternative plan.",
-    "summary": "The game is balanced, but both sides have dynamic possibilities. Black's doubled c-pawns and slightly lagging development are offset by the bishop pair. The open d- and half-open e-files offer active play for both sides, with White having freer pieces and a slight lead in development, while Black may seek queenside play or simplification. Key plans revolve around exploiting open lines, activating pieces, and possible pawn structure transformations (doubling on the b-file, creating outposts). Black's candidate moves all gravitate towards development and castling long, so both sides are preparing for middlegame activity.",
-    "structure": "none",
-    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago"
+    "plan": "Create tactical chances with piece activity",
+    "idea": "Use piece activity to create threats, especially exploiting open files and the central tension. Moves like Bg4 try to pin or destabilize White's minor pieces. If White mishandles development, Black's better bishops and active rook(s) can become dangerous.",
+    "moves": "Bg4 g5",
+    "imbalances": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nFiles: White holds an open file with the rook d1.\nFiles: the e-file is half-open for Black.\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
+    "engineEvidence": "Bg4, and even g5, are among engine candidates aiming for tactical play rather than immediate simplification.",
+    "summary": "This position fits the Ruy Lopez: Exchange structure, where Black has the bishop pair and doubled c-pawns, and White has a compact kingside pawn majority. Play centers on whether Black can use the bishops actively before the pawn weaknesses become targets. The engine's moves show the struggle between developing the bishops, exchanging off White's best minor piece, and safely castling. White's aims are to simplify toward the endgame and use the healthier kingside pawns, while Black looks to use the bishops for dynamic play on both wings before simplifying. Most lines lead to opposite-side castling, suggesting a race of attacks. The position is balanced but demands accurate play from both sides.",
+    "structure": "Ruy Lopez, Exchange",
+    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago",
+    "level": "intermediate"
    }
   ],
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 11010,
+   "durationMs": 16354,
+   "externalCalls": 1,
+   "cacheHit": null
+  }
+ },
+ "view:PlansInLine:{\"level\":\"beginner\",\"moves\":\"e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1\"}": {
+  "executionId": "exec_dc01c269-c78d-4ea5-826c-6459a1376d52",
+  "operationId": "PlansInLine",
+  "contractVersion": "1",
+  "status": "SUCCEEDED",
+  "outcome": "OK",
+  "outputType": "rows",
+  "data": [
+   {
+    "side": "white",
+    "priority": 1,
+    "plan": "Develop and attack loose pawns",
+    "idea": "Develop the knight and bishop quickly. If Black's bishop leaves a6 undefended, attack it. Also, use the open d-file with your rook to pressure Black's uncastled king and d8 square.",
+    "moves": "Nc3 Na4 Bf4 Rxd8+",
+    "imbalances": "Files: White holds an open file with the rook d1.\nDevelopment: White still has Nb1 and Bc1 undeveloped.\nDevelopment: Black still has Ng8, Bc8 and Bf8 undeveloped.\nKing safety: Black's king is still in the centre, on e8.\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
+    "engineEvidence": "Nc3, Na4",
+    "summary": "The position is even, but Black has the bishop pair and a central pawn mass, while White's pieces are a bit more active. Both sides want to finish developing and get their kings to safety. Black is choosing how to finish development — either by trading pieces or pinning knights — and needs to watch the a6-pawn, which is attacked if Black's bishop leaves. White should try to get pieces out quickly and put pressure on Black's less safe king. If Black castles queenside, both sides might push pawns on opposite wings.",
+    "structure": "none",
+    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago",
+    "level": "beginner"
+   },
+   {
+    "side": "white",
+    "priority": 2,
+    "plan": "Prepare for pawn play on the kingside",
+    "idea": "Since you have more pawns on the kingside, consider pushing them to attack if Black castles long. Wait until your pieces are out, and then consider moves like f4 or h4.",
+    "moves": "f4 h4",
+    "imbalances": "Pawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
+    "engineEvidence": "none of the engine's top moves",
+    "summary": "The position is even, but Black has the bishop pair and a central pawn mass, while White's pieces are a bit more active. Both sides want to finish developing and get their kings to safety. Black is choosing how to finish development — either by trading pieces or pinning knights — and needs to watch the a6-pawn, which is attacked if Black's bishop leaves. White should try to get pieces out quickly and put pressure on Black's less safe king. If Black castles queenside, both sides might push pawns on opposite wings.",
+    "structure": "none",
+    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago",
+    "level": "beginner"
+   },
+   {
+    "side": "black",
+    "priority": 1,
+    "plan": "Defend and finish development",
+    "idea": "First, protect any loose pawns or pieces, especially the a6 pawn if the bishop moves. Then, get the bishops and remaining knight out, and prepare to castle (queenside is common here since the centre is open).",
+    "moves": "Be6 Bd6 Bg4",
+    "imbalances": "Minor pieces: Black has the bishop pair.\nDevelopment: White still has Nb1 and Bc1 undeveloped.\nDevelopment: Black still has Ng8, Bc8 and Bf8 undeveloped.\nKing safety: Black's king is still in the centre, on e8.\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
+    "engineEvidence": "Be6, Bg4, Bd7, Bd6",
+    "summary": "The position is even, but Black has the bishop pair and a central pawn mass, while White's pieces are a bit more active. Both sides want to finish developing and get their kings to safety. Black is choosing how to finish development — either by trading pieces or pinning knights — and needs to watch the a6-pawn, which is attacked if Black's bishop leaves. White should try to get pieces out quickly and put pressure on Black's less safe king. If Black castles queenside, both sides might push pawns on opposite wings.",
+    "structure": "none",
+    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago",
+    "level": "beginner"
+   },
+   {
+    "side": "black",
+    "priority": 2,
+    "plan": "Trade to ease pressure",
+    "idea": "Consider exchanging a bishop for the knight on b3, which makes White double b-pawns and can help Black activate the rook along the a-file after castling.",
+    "moves": "Be6 Bxb3",
+    "imbalances": "Minor pieces: Black has the bishop pair.\nPawn structure: Black has doubled pawns on the c-file.\nFiles: the d-file is open.\nFiles: White holds an open file with the rook d1.",
+    "engineEvidence": "Be6",
+    "summary": "The position is even, but Black has the bishop pair and a central pawn mass, while White's pieces are a bit more active. Both sides want to finish developing and get their kings to safety. Black is choosing how to finish development — either by trading pieces or pinning knights — and needs to watch the a6-pawn, which is attacked if Black's bishop leaves. White should try to get pieces out quickly and put pressure on Black's less safe king. If Black castles queenside, both sides might push pawns on opposite wings.",
+    "structure": "none",
+    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago",
+    "level": "beginner"
+   }
+  ],
+  "warnings": [],
+  "error": null,
+  "metrics": {
+   "durationMs": 8762,
    "externalCalls": 1,
    "cacheHit": null
   }

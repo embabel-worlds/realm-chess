@@ -3575,6 +3575,7 @@ var require_chess = __commonJS({
 // src/api/chess.ts
 var chess_exports = {};
 __export(chess_exports, {
+  LEVELS: () => LEVELS,
   analysePosition: () => analysePosition,
   explainLinePlans: () => explainLinePlans,
   explainPlans: () => explainPlans,
@@ -3829,6 +3830,58 @@ function chainsOf(all) {
   }
   return out;
 }
+function exchangeOn(c, square) {
+  const caps = c.moves({ verbose: true }).filter((m2) => m2.to === square && m2.captured).sort((a, b) => VALUE[a.piece] - VALUE[b.piece]);
+  if (caps.length === 0) return 0;
+  const m = caps[0];
+  c.move(m);
+  const value = Math.max(0, VALUE[m.captured] - exchangeOn(c, square));
+  c.undo();
+  return value;
+}
+function recapture(fen) {
+  const c = new import_chess.Chess(fen);
+  let best = { gain: 0, square: null, san: null };
+  for (const m of c.moves({ verbose: true }).filter((x) => x.captured)) {
+    c.move(m);
+    const gain = VALUE[m.captured] - exchangeOn(c, m.to);
+    c.undo();
+    if (gain > best.gain) best = { gain, square: m.to, san: m.san };
+  }
+  return best;
+}
+function mateInOne(fen, threat) {
+  let c = new import_chess.Chess(fen);
+  if (threat) {
+    if (c.inCheck()) return [];
+    const parts = fen.split(" ");
+    parts[1] = parts[1] === "w" ? "b" : "w";
+    parts[3] = "-";
+    try {
+      c = new import_chess.Chess(parts.join(" "));
+    } catch {
+      return [];
+    }
+  }
+  return c.moves({ verbose: true }).filter((m) => m.san.endsWith("#")).map((m) => m.san);
+}
+function exposedPieces(c, colour) {
+  const out = [];
+  const enemy = colour === "w" ? "b" : "w";
+  for (const row of c.board()) for (const p of row) {
+    if (!p || p.color !== colour || p.type === "k") continue;
+    const attackers = c.attackers(p.square, enemy);
+    if (attackers.length === 0) continue;
+    const defenders = c.attackers(p.square, colour);
+    const cheapest = Math.min(...attackers.map((a) => VALUE[c.get(a).type] || 100));
+    if (defenders.length === 0) out.push(`${PIECE_NAME[p.type]} on ${p.square} is attacked and not defended`);
+    else if (p.type !== "p" && cheapest < VALUE[p.type]) {
+      const by = attackers.map((a) => c.get(a)).sort((x, y) => VALUE[x.type] - VALUE[y.type])[0];
+      out.push(`${PIECE_NAME[p.type]} on ${p.square} is attacked by a ${PIECE_NAME[by.type]}`);
+    }
+  }
+  return out;
+}
 function imbalancesOf(fen) {
   const c = new import_chess.Chess(fen);
   const all = pieces(c);
@@ -3881,7 +3934,25 @@ function materialFact(w, b) {
 function factsOf(x) {
   const out = [`Phase: ${x.phase}. ${Cap(x.sideToMove)} to move.`];
   const add = (category, sentence) => out.push(`${category}: ${sentence}`);
-  add("Material", materialFact(x.white, x.black));
+  const mover = x.sideToMove, other_ = mover === "white" ? "black" : "white";
+  const c = new import_chess.Chess(x.fen);
+  if (c.inCheck()) add("Tactics", `${Cap(mover)} is in check.`);
+  const mates = mateInOne(x.fen, false);
+  if (mates.length) add("Tactics", `${Cap(mover)} can mate at once with ${list(mates.slice(0, 3))}.`);
+  const threats = mateInOne(x.fen, true);
+  if (threats.length) add("Tactics", `${Cap(other_)} threatens mate with ${list(threats.slice(0, 3))}.`);
+  for (const s of SIDES) {
+    for (const e of exposedPieces(c, colourOf(s))) add("Tactics", `${Cap(s)}'s ${e}.`);
+  }
+  const moverStatic = x[mover].material.points - x[other_].material.points;
+  const r = moverStatic < 0 ? recapture(x.fen) : { gain: 0, square: null, san: null };
+  if (r.gain > 0) {
+    const after = moverStatic + r.gain;
+    const who = after === 0 ? "the sides are level" : after < 0 ? `${Cap(other_)} is ${after === -1 ? "a pawn" : `${-after} points`} up` : `${Cap(mover)} is ${after === 1 ? "a pawn" : `${after} points`} up`;
+    add("Material", `${who} once ${Cap(mover)} recaptures on ${r.square} \u2014 an exchange is under way.`);
+  } else {
+    add("Material", materialFact(x.white, x.black));
+  }
   const w = x.white, b = x.black;
   if (w.bishopPair !== b.bishopPair) add("Minor pieces", `${w.bishopPair ? "White" : "Black"} has the bishop pair.`);
   if (x.oppositeColouredBishops) add("Minor pieces", "Bishops of opposite colours: drawish in an endgame, but the attacker is effectively a piece up in a middlegame.");
@@ -4237,7 +4308,7 @@ async function openingLookup(_ctx, args) {
   }
   return out;
 }
-function promptFor(fen, x, opening, structure, candidates, withinCp, theory = null) {
+function promptFor(fen, x, opening, structure, candidates, withinCp, theory = null, level = "intermediate") {
   const lines = candidates.filter((c) => c.rank === 1 || c.lossCp !== null && c.lossCp <= withinCp).map((c) => {
     const score = c.mate !== null ? `mate in ${Math.abs(c.mate)}${c.mate < 0 ? " against the side to move" : ""}` : `${(c.whiteCp / 100).toFixed(2)} from White's side`;
     const loss = c.rank === 1 ? "the engine's best" : c.lossCp === null ? "not comparable with the mate" : `${c.lossCp} centipawns worse than best`;
@@ -4269,7 +4340,8 @@ ${lines}
 First decide which row of the skill's structure table (section 4) this position is, from the
 pawn structure and imbalances above \u2014 or "none" \u2014 and let that row's plans lead unless the
 engine's moves show they do not work here.
-Name the plans for BOTH sides \u2014 up to three each, most important first \u2014 as the skill describes.
+${LEVEL_BRIEF[level]} (Section 8 of the skill says more.)
+Name the plans for BOTH sides \u2014 up to ${MAX_PLANS[level]} each, most important first \u2014 as the skill describes.
 Ground every plan in the numbered imbalances and, for the side to move, in the candidate moves.
 Cite imbalances by number, in the "imbalances" field ONLY \u2014 never write the numbers in the
 summary or the ideas; a reader does not see the list. Do not state any imbalance that is not in
@@ -4300,6 +4372,17 @@ function parseModelJson(text) {
 }
 var asList = (v) => Array.isArray(v) ? v : v ? [v] : [];
 var uncite = (text) => (text ?? "").replace(/\s*\((?:#?\d+(?:\s*[,&]\s*#?\d+)*)\)/g, "").replace(/\s+([.,;:])/g, "$1");
+var LEVELS = ["beginner", "intermediate", "expert"];
+var LEVEL_BRIEF = {
+  beginner: `Write for a BEGINNER. Your first plan for the side to move MUST deal with the Tactics lines above, if there are any \u2014 what is attacked, what is loose, what is threatened \u2014 said square by square in plain words. Then the basic principles that apply: develop, castle, fight for the centre. At most TWO plans per side, one or two short sentences each, one or two moves each. No jargon unless you say what it means; no structure names; no numbers.`,
+  intermediate: `Write for an INTERMEDIATE player: plans from the imbalances, the structure named and its known plans, the engine's moves tied to the plans, what each plan concedes. Tactics that are there come first. Explain an uncommon term once, briefly.`,
+  expert: `Write for an EXPERT: full depth, no hand-holding \u2014 structure and variation names, the plans theory gives both sides, move-order finesse and why this move first, the pawn breaks and their timing, what the engine's second and third choices say. Tactics that are there are stated, briefly. Never explain basic terms.`
+};
+var MAX_PLANS = { beginner: 2, intermediate: 3, expert: 3 };
+function levelOf(v) {
+  const t = (v ?? "").trim().toLowerCase();
+  return LEVELS.includes(t) ? t : "intermediate";
+}
 async function plansFor(ctx, fen, opening, args, theory = null) {
   const withinCp = clamp(args.withinCp, 50, 0, 300);
   const multiPv = clamp(args.multiPv, 5, 1, 8);
@@ -4315,7 +4398,8 @@ async function plansFor(ctx, fen, opening, args, theory = null) {
     skills: ["chess-plans"],
     ...args.role ? { role: args.role } : {}
   }).then((r) => typeof r === "string" ? r : JSON.stringify(r));
-  const prompt = promptFor(fen, x, opening, structure, candidates, withinCp, theory);
+  const level = levelOf(args.level);
+  const prompt = promptFor(fen, x, opening, structure, candidates, withinCp, theory, level);
   let text = await ask(prompt);
   let parsed;
   try {
@@ -4326,14 +4410,15 @@ async function plansFor(ctx, fen, opening, args, theory = null) {
 Your previous answer was not valid JSON (${e.message}). Reply again with ONLY the JSON object.`);
     parsed = parseModelJson(text);
   }
-  const plans = (parsed.plans ?? []).filter((p) => p.side === "white" || p.side === "black");
+  const perSide = { white: 0, black: 0 };
+  const plans = (parsed.plans ?? []).filter((p) => p.side === "white" || p.side === "black").sort((a, b) => (a.priority ?? 9) - (b.priority ?? 9)).filter((p) => ++perSide[p.side] <= MAX_PLANS[level]);
   if (plans.length === 0) throw new Error(`The model named no plans for ${fen}: ${text.slice(0, 200)}`);
   const count = { white: 0, black: 0 };
   return plans.map((p) => {
     const side = p.side;
     const priority = typeof p.priority === "number" ? p.priority : ++count[side];
     return {
-      planId: `${fen}#${side}#${priority}#${(p.name ?? "").slice(0, 40)}`,
+      planId: `${fen}#${level}#${side}#${priority}#${(p.name ?? "").slice(0, 40)}`,
       fen,
       side,
       priority,
@@ -4345,6 +4430,7 @@ Your previous answer was not valid JSON (${e.message}). Reply again with ONLY th
       summary: uncite(parsed.summary),
       structure: parsed.structure ?? "",
       opening: opening ?? "",
+      level,
       model: args.role ?? "default"
     };
   });
@@ -4369,13 +4455,14 @@ async function explainLinePlans(ctx, args) {
     const opening = hit ? `${hit.eco} ${hit.name} (${hit.pgn})${hit.pliesPast ? `, left the book ${hit.pliesPast} ${hit.pliesPast === 1 ? "ply" : "plies"} ago` : ""}` : null;
     const theory = await theoryFor(ctx, moves).catch(() => null);
     for (const p of await plansFor(ctx, fen, opening, args, theory)) {
-      out.push({ ...p, planId: `${line}#${p.side}#${p.priority}#${p.name.slice(0, 40)}`, line });
+      out.push({ ...p, planId: `${line}#${p.level}#${p.side}#${p.priority}#${p.name.slice(0, 40)}`, line });
     }
   }
   return out;
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  LEVELS,
   analysePosition,
   explainLinePlans,
   explainPlans,

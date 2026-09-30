@@ -1,9 +1,10 @@
 # Every producer is a verb in src/api/chess.ts, keyed by FEN. A FEN carries "/" and spaces,
 # which `keyArgs` refuses, so `keyArg` hands the keys over as a plain list.
 #
-# None declares `pushdown:`. Nothing here takes a filter: "within 50 centipawns" and the like
-# are decided over what comes back, graph-side, and declaring a filter a source does not apply
-# would make the engine count rows it never produced.
+# Only the plan producers declare `pushdown:`, for the reader's level, which the verb really does
+# take. Everything else — "within 50 centipawns" and the like — is decided over what comes back,
+# graph-side; declaring a filter a source does not apply would make the engine count rows it
+# never produced.
 #
 # Caches are long because positions do not change. For the engine and the plans the cache also
 # keeps an explanation consistent with the numbers beside it: a search is not repeatable, and
@@ -61,6 +62,14 @@
     multiPv: 5
     depth: 18
     role: best
+    # The audience, from the query: `WHERE pl.level = 'beginner'` is pushed down into this slot.
+    level: "{filters}"
+  pushdown:
+    # Verified live: the level changes what comes back, and each level is its own cache entry.
+    - property: level
+      op: EQUALS
+      qualifier: "{value}"
+      valuePattern: "^(beginner|intermediate|expert)$"
   cache: { kind: ttl, seconds: 604800 }
 
 # The same, for the position a game line reaches: keyed by the line, so the model is told the
@@ -75,4 +84,12 @@
     multiPv: 5
     depth: 18
     role: best
+    # The audience, from the query: `WHERE pl.level = 'beginner'` is pushed down into this slot.
+    level: "{filters}"
+  pushdown:
+    # Verified live: the level changes what comes back, and each level is its own cache entry.
+    - property: level
+      op: EQUALS
+      qualifier: "{value}"
+      valuePattern: "^(beginner|intermediate|expert)$"
   cache: { kind: ttl, seconds: 604800 }

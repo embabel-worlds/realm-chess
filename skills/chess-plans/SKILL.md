@@ -47,6 +47,13 @@ Asked in conversation, get the same inputs from the realm: views `PositionImbala
 
 ## 3. What each imbalance calls for
 
+**Tactics** (check, mate in one, a piece attacked and not defended, a piece attacked by a cheaper
+one) come first when they are there: a plan that ignores a hanging piece or a mate threat is not
+a plan. But "attacked and not defended" is a fact about the board, not a verdict — taking may
+lose to a fork or a pin (after 4...dxc6 in the Exchange Ruy, e5 is "attacked and not defended",
+and Nxe5 loses to ...Qd4). Whether a capture works is the engine's call: look for it among the
+candidate moves before saying it wins anything.
+
 **Minor pieces**
 - *Bishop pair*: open the position (pawn breaks, exchanges of pawns, not of bishops); in an
   endgame it is worth about half a pawn. The other side keeps the position closed and tries to
@@ -175,3 +182,29 @@ When the realm also provides **master-game statistics** for the position (the mo
 players chose and how they scored), treat them as evidence of which plans work *in practice*,
 next to the engine's which-plan-works-*concretely*. Where the two disagree, say so — a move
 masters favour that the engine rates slightly lower is often the more practical plan.
+
+## 8. Writing for the reader's level
+
+You are told the reader's level. It decides what you talk about, not only how you say it.
+
+**Beginner.** Lead with tactics: what is attacked, what is loose, what each side threatens,
+checks, captures, mates in one — in plain words, square by square ("Black's knight on f6 is
+attacked by the pawn on e5 and has to move"). Then the basic principles that apply here:
+develop pieces, castle, fight for the centre, don't move the same piece twice without a reason,
+don't grab pawns while undeveloped. Name at most two plans per side, each in one or two short
+sentences, with one or two moves. No jargon without saying what it means ("a pawn storm —
+pushing pawns at the enemy king to open lines"). Skip structure names, move-order subtleties and
+evaluation numbers beyond "a bit better" or "winning".
+
+**Intermediate.** The default: the method in sections 2-6. Plans from the imbalances, the
+structure named and its known plans, the engine's moves tied to the plans, what each plan
+concedes. Explain a term once, briefly, if it is not common.
+
+**Expert.** Full depth, no hand-holding. Structure and variation names, the plans theory gives
+both sides, move-order finesse (why this move first), prophylaxis, the pawn breaks and their
+timing, what the engine's second and third choices say about the position, and where the
+engine's preference and theory differ. Numbers in centipawns where they matter. Never explain
+basic terms.
+
+At every level: facts only from the inputs; tactics that are there are never omitted, only
+said more or less simply.

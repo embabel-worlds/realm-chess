@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-30T17:55:50.028Z",
+  "generatedAt": "2026-09-30T20:08:16.652Z",
   "entries": [
     {
       "namespace": "chess",
@@ -147,6 +147,9 @@
             "structure": {
               "type": "string"
             },
+            "level": {
+              "type": "string"
+            },
             "opening": {
               "type": "string"
             },
@@ -167,6 +170,7 @@
             "engineEvidence",
             "summary",
             "structure",
+            "level",
             "opening",
             "model"
           ]
@@ -216,6 +220,9 @@
             "structure": {
               "type": "string"
             },
+            "level": {
+              "type": "string"
+            },
             "opening": {
               "type": "string"
             },
@@ -235,6 +242,7 @@
             "engineEvidence",
             "summary",
             "structure",
+            "level",
             "opening",
             "model"
           ]
