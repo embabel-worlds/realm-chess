@@ -18,6 +18,8 @@ const fixtures = JSON.parse(readFileSync(join(here, "fixtures/envelopes.json"), 
 const START = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const E4 = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
 const RUY = "r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9";
+const EXCHANGE = "e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1";
+const link = (moves, at) => `#${new URLSearchParams({ line: moves, at: String(at) })}`;
 const MATED = "3R2k1/5ppp/8/8/8/8/5PPP/6K1 b - - 1 1";
 const key = (name, args) => `view:${name}:${JSON.stringify(Object.fromEntries(Object.entries(args).sort()))}`;
 const rowsOf = (k) => fixtures[k].data;
@@ -46,7 +48,7 @@ function stub(overrides = {}, delays = {}) {
   })();`;
 }
 
-async function open(page, overrides, delays) {
+async function open(page, overrides, delays, hash = "") {
   const errors = [];
   page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
   page.on("pageerror", (e) => errors.push(String(e)));
@@ -65,7 +67,7 @@ async function open(page, overrides, delays) {
     }
     return route.abort();
   });
-  await page.goto("http://chess.test/apps/chess/chesscalator.html");
+  await page.goto(`http://chess.test/apps/chess/chesscalator.html${hash}`);
   return errors;
 }
 
@@ -82,7 +84,7 @@ test("the start position renders every candidate and every imbalance the views r
   await expect(page.locator("#imbalances li")).toHaveText(factsOf(START));
   await expect(page.locator("#who")).toHaveText("White to move");
   await expect(page.locator("#evalText")).toContainText(`+${(best(START)[0].whiteCp / 100).toFixed(2)}`);
-  await expect(page.locator("#opening")).toHaveText("Not a book position.");
+  await expect(page.locator("#opening")).toHaveText("The starting position.");
   expect(errors).toEqual([]);
 });
 
@@ -94,13 +96,71 @@ test("the Embabel badge is visible, attributed and linked", async ({ page }) => 
   await expect(badge.locator("a")).toHaveAttribute("href", /embabel\.com/);
 });
 
-test("a book position shows its name; a deeper one the structure it resembles", async ({ page }) => {
+test("a game played here is named from its line; a loaded FEN by the structure it resembles", async ({ page }) => {
   await open(page);
   await page.getByRole("button", { name: "e4", exact: true }).click();
-  const o = rowsOf(key("OpeningOf", { fen: E4 }))[0];
-  await expect(page.locator("#opening")).toHaveText(`${o.eco} ${o.name}`);
+  const o = rowsOf(key("OpeningOfLine", { moves: "e4" }))[0];
+  await expect(page.locator("#opening b")).toHaveText(`${o.eco} ${o.name}`);
   await load(page, RUY);
   await expect(page.locator("#opening")).toContainText("Ruy Lopez: Exchange");
+});
+
+test("a line keeps its book name long after it leaves the book, and shows its theory with attribution", async ({ page }) => {
+  const errors = await open(page, {}, {}, link(EXCHANGE, 17));
+  const o = rowsOf(key("OpeningOfLine", { moves: EXCHANGE }))[0];
+  await expect(page.locator("#opening")).toContainText(`${o.eco} ${o.name}`);
+  await expect(page.locator("#opening")).toContainText(`left the book ${o.pliesPast} plies ago`);
+  await expect(page.locator("#theoryBox")).toBeVisible();
+  await expect(page.locator("#theory p").first()).toBeVisible();
+  await expect(page.locator("#theoryCredit a").first()).toHaveAttribute("href", /en\.wikibooks\.org\/wiki\/Chess_Opening_Theory/);
+  await expect(page.locator("#theoryCredit")).toContainText("CC BY-SA 4.0");
+  await expect(page.locator("#theoryCredit")).toContainText("Excerpt");
+  expect(errors).toEqual([]);
+});
+
+test("the step buttons, the arrow keys and the browser's Back all move through the game", async ({ page }) => {
+  await open(page, {}, {}, link("e4 e5", 2));
+  await expect(page.locator("#ply")).toHaveText("2 / 2");
+  await page.click("#back");
+  await expect(page.locator("#ply")).toHaveText("1 / 2");
+  await expect(moves(page)).toHaveText(best(E4).map((r) => r.move));
+  await page.keyboard.press("ArrowLeft");
+  await expect(page.locator("#ply")).toHaveText("0 / 2");
+  await page.goBack();
+  await expect(page.locator("#ply")).toHaveText("1 / 2");
+  await page.click("#last");
+  await expect(page.locator("#ply")).toHaveText("2 / 2");
+  await page.click('#moves span.mv[data-ply="1"]');
+  await expect(page.locator("#ply")).toHaveText("1 / 2");
+});
+
+test("a different move from an earlier position starts a new line there", async ({ page }) => {
+  await open(page, {}, {}, link("e4 e5", 1));
+  await expect(page.locator("#ply")).toHaveText("1 / 2");
+  await page.getByRole("button", { name: "c5", exact: true }).click();
+  await expect(page.locator("#ply")).toHaveText("2 / 2");
+  await expect(page.locator("#moves")).toContainText("1. e4 c5");
+  await expect(page.locator("#moves")).not.toContainText("e5");
+  const o = rowsOf(key("OpeningOfLine", { moves: "e4 c5" }))[0];
+  await expect(page.locator("#opening b")).toHaveText(`${o.eco} ${o.name}`);
+});
+
+test("stepping back to the engine's side does not make it move", async ({ page }) => {
+  await open(page, {}, {}, link("e4 e5", 2));
+  await page.selectOption("#engineSide", "b");
+  await page.click("#back");
+  await expect(page.locator("#ply")).toHaveText("1 / 2");
+  await page.waitForTimeout(1000);
+  await expect(page.locator("#ply")).toHaveText("1 / 2");
+});
+
+test("plans for a game played here are asked for by line, and say what opening they were told", async ({ page }) => {
+  await open(page, {}, {}, link(EXCHANGE, 17));
+  await expect(moves(page).first()).toBeVisible();
+  await page.click("#plansBtn");
+  const plans = rowsOf(key("PlansInLine", { moves: EXCHANGE }));
+  await expect(page.locator(".plans .plan")).toHaveCount(plans.length);
+  await expect(page.locator("#plans > .meta").first()).toContainText(plans[0].opening.slice(0, 30));
 });
 
 test("each move shows the imbalances its line creates and removes", async ({ page }) => {

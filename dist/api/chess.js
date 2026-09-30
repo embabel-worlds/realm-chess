@@ -2255,7 +2255,7 @@ var require_chess = __commonJS({
     function strippedSan(move) {
       return move.replace(/=/, "").replace(/[+#]?[?!]*$/, "");
     }
-    var Chess5 = class {
+    var Chess6 = class {
       _board = new Array(128);
       _turn = WHITE;
       _header = {};
@@ -3556,7 +3556,7 @@ var require_chess = __commonJS({
     };
     exports2.BISHOP = BISHOP;
     exports2.BLACK = BLACK;
-    exports2.Chess = Chess5;
+    exports2.Chess = Chess6;
     exports2.DEFAULT_POSITION = DEFAULT_POSITION;
     exports2.KING = KING;
     exports2.KNIGHT = KNIGHT;
@@ -3576,12 +3576,15 @@ var require_chess = __commonJS({
 var chess_exports = {};
 __export(chess_exports, {
   analysePosition: () => analysePosition,
+  explainLinePlans: () => explainLinePlans,
   explainPlans: () => explainPlans,
   openingLookup: () => openingLookup,
-  positionImbalances: () => positionImbalances
+  openingOfGameLine: () => openingOfGameLine,
+  positionImbalances: () => positionImbalances,
+  theoryOfGameLine: () => theoryOfGameLine
 });
 module.exports = __toCommonJS(chess_exports);
-var import_chess4 = __toESM(require_chess());
+var import_chess5 = __toESM(require_chess());
 
 // src/lib/engine.ts
 var path = __toESM(require("path"));
@@ -3991,13 +3994,51 @@ function positionKey(fen) {
   return `${board} ${turn} ${castling} ${epLegal ? ep : "-"}`;
 }
 var book = null;
+function readData(file2) {
+  for (const dir of [path2.join(__dirname, "..", "data"), path2.join(__dirname, "..", "..", "dist", "data")]) {
+    try {
+      return JSON.parse((0, import_node_fs.readFileSync)(path2.join(dir, file2), "utf8"));
+    } catch {
+    }
+  }
+  throw new Error(`${file2} not found: run npm run build`);
+}
 function load() {
-  if (!book) book = JSON.parse((0, import_node_fs.readFileSync)(path2.join(__dirname, "..", "data", "openings.json"), "utf8"));
+  if (!book) book = readData("openings.json");
   return book;
 }
 function openingOf(fen) {
   return load()[positionKey(fen)] ?? null;
 }
+function openingOfLine(moves) {
+  const c = new import_chess3.Chess();
+  let best = null;
+  let ply = 0;
+  for (const m of moves) {
+    try {
+      c.move(m);
+    } catch {
+      break;
+    }
+    ply++;
+    const hit = load()[positionKey(c.fen())];
+    if (hit) best = { ...hit, fen: c.fen(), namedAtPly: ply, pliesPast: 0 };
+  }
+  if (best) best.pliesPast = ply - best.namedAtPly;
+  return best;
+}
+function positionAfter(moves) {
+  const c = new import_chess3.Chess();
+  moves.forEach((m, i) => {
+    try {
+      c.move(m);
+    } catch {
+      throw new Error(`Move ${i + 1} (${m}) is not legal in that line`);
+    }
+  });
+  return c.fen();
+}
+var splitLine = (line) => line.trim().split(/\s+/).filter(Boolean);
 var skeletons = null;
 var MAX_FAMILIES = 2;
 function pawnSet(fen) {
@@ -4007,7 +4048,7 @@ function pawnSet(fen) {
   return out;
 }
 function structureOf(fen, maxDifferent = 2) {
-  if (!skeletons) skeletons = JSON.parse((0, import_node_fs.readFileSync)(path2.join(__dirname, "..", "data", "skeletons.json"), "utf8"));
+  if (!skeletons) skeletons = readData("skeletons.json");
   const mine = pawnSet(fen);
   const exact = skeletons[[...mine].sort().join(" ")];
   if (exact) return exact.families <= MAX_FAMILIES ? { openings: exact.openings, pawnsDifferent: 0 } : null;
@@ -4029,11 +4070,41 @@ function structureSentence(m) {
   return m.pawnsDifferent === 0 ? `The pawn structure is the one reached in: ${names}.` : `The pawn structure is close to the one reached in: ${names} \u2014 ${m.pawnsDifferent} pawn${m.pawnsDifferent > 1 ? "s" : ""} different.`;
 }
 
+// src/lib/theory.ts
+var import_chess4 = __toESM(require_chess());
+var ROOT = "Chess Opening Theory";
+function theoryTitles(moves) {
+  const c = new import_chess4.Chess();
+  const parts = [];
+  const titles = [];
+  for (const m of moves) {
+    const n = c.moveNumber();
+    const white = c.turn() === "w";
+    let san;
+    try {
+      san = c.move(m).san;
+    } catch {
+      break;
+    }
+    parts.push(white ? `${n}. ${san}` : `${n}...${san}`);
+    titles.push(`${ROOT}/${parts.join("/")}`);
+  }
+  return titles;
+}
+var pageUrl = (title) => `https://en.wikibooks.org/wiki/${encodeURIComponent(title.replace(/ /g, "_")).replace(/%2F/g, "/")}`;
+function theoryText(extract, maxChars = 3e3) {
+  const cut = extract.search(/\n==\s*(Theory table|References|See also|Statistics)\s*==/i);
+  const body = (cut >= 0 ? extract.slice(0, cut) : extract).replace(/\n{3,}/g, "\n\n").trim();
+  if (body.length <= maxChars) return body;
+  const clipped = body.slice(0, maxChars);
+  return clipped.slice(0, Math.max(clipped.lastIndexOf("\n"), clipped.lastIndexOf(". ") + 1)).trim() + " \u2026";
+}
+
 // src/api/chess.ts
 var ENGINE = "Stockfish 19 lite (single-threaded WebAssembly)";
 function legal(fen) {
   try {
-    return new import_chess4.Chess(fen.trim());
+    return new import_chess5.Chess(fen.trim());
   } catch (e) {
     throw new Error(`Not a legal position: ${fen} (${e.message})`);
   }
@@ -4110,6 +4181,50 @@ async function positionImbalances(_ctx, args) {
     };
   });
 }
+async function theoryFor(ctx, moves) {
+  const wb = ctx.wikibooks;
+  const titles = theoryTitles(moves);
+  if (titles.length === 0) return null;
+  const candidates = titles.slice(-50);
+  const info = await wb.wikibooksQuery({ action: "query", format: "json", prop: "info", titles: candidates.join("|") });
+  const present = new Set(Object.values(info.query?.pages ?? {}).filter((p) => p.missing === void 0).map((p) => p.title));
+  const deepest = [...candidates].reverse().find((t) => present.has(t));
+  if (!deepest) return null;
+  const page = await wb.wikibooksQuery({ action: "query", format: "json", prop: "extracts", explaintext: "1", redirects: "1", titles: deepest });
+  const extract = Object.values(page.query?.pages ?? {})[0]?.extract ?? "";
+  const text = theoryText(extract);
+  if (!text) return null;
+  const covered = titles.indexOf(deepest) + 1;
+  return {
+    line: moves.join(" "),
+    title: deepest,
+    url: pageUrl(deepest),
+    pliesCovered: covered,
+    pliesPast: moves.length - covered,
+    theory: text,
+    licence: "Excerpt from the Chess Opening Theory wikibook, by Wikibooks contributors, CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/); references and tables omitted."
+  };
+}
+async function theoryOfGameLine(ctx, args) {
+  const out = [];
+  for (const raw of args.lines ?? []) {
+    const moves = splitLine(raw);
+    positionAfter(moves);
+    const t = await theoryFor(ctx, moves);
+    if (t) out.push(t);
+  }
+  return out;
+}
+async function openingOfGameLine(_ctx, args) {
+  const out = [];
+  for (const raw of args.lines ?? []) {
+    const line = splitLine(raw).join(" ");
+    positionAfter(splitLine(line));
+    const hit = openingOfLine(splitLine(line));
+    if (hit) out.push({ line, fen: hit.fen, eco: hit.eco, name: hit.name, pgn: hit.pgn, namedAtPly: hit.namedAtPly, pliesPast: hit.pliesPast });
+  }
+  return out;
+}
 async function openingLookup(_ctx, args) {
   const out = [];
   for (const raw of args.fens ?? []) {
@@ -4120,7 +4235,7 @@ async function openingLookup(_ctx, args) {
   }
   return out;
 }
-function promptFor(fen, x, opening, structure, candidates, withinCp) {
+function promptFor(fen, x, opening, structure, candidates, withinCp, theory = null) {
   const lines = candidates.filter((c) => c.rank === 1 || c.lossCp !== null && c.lossCp <= withinCp).map((c) => {
     const score = c.mate !== null ? `mate in ${Math.abs(c.mate)}${c.mate < 0 ? " against the side to move" : ""}` : `${(c.whiteCp / 100).toFixed(2)} from White's side`;
     const loss = c.rank === 1 ? "the engine's best" : c.lossCp === null ? "not comparable with the mate" : `${c.lossCp} centipawns worse than best`;
@@ -4135,9 +4250,14 @@ function promptFor(fen, x, opening, structure, candidates, withinCp) {
 
 Position (FEN): ${fen}
 ${x.sideToMove === "white" ? "White" : "Black"} to move.
-Opening book: ${opening ? `${opening.eco} ${opening.name} (${opening.pgn})` : "not a named book position"}
+Opening: ${opening ?? "not a named book position"}
 Pawn structure: ${structure ?? "matches no book line's pawns within two pawns"}
-
+${theory ? `
+Opening theory \u2014 "${theory.title}" in the Chess Opening Theory wikibook${theory.pliesPast ? `, ${theory.pliesPast} ${theory.pliesPast === 1 ? "ply" : "plies"} before this position` : ", for this position"}:
+"""
+${theory.theory}
+"""
+` : ""}
 Imbalances (computed from the board, numbered):
 ${citable(x).map((f, i) => `[${i + 1}] ${f}`).join("\n")}
 
@@ -4178,58 +4298,76 @@ function parseModelJson(text) {
 }
 var asList = (v) => Array.isArray(v) ? v : v ? [v] : [];
 var uncite = (text) => (text ?? "").replace(/\s*\((?:#?\d+(?:\s*[,&]\s*#?\d+)*)\)/g, "").replace(/\s+([.,;:])/g, "$1");
-async function explainPlans(ctx, args) {
+async function plansFor(ctx, fen, opening, args, theory = null) {
   const withinCp = clamp(args.withinCp, 50, 0, 300);
   const multiPv = clamp(args.multiPv, 5, 1, 8);
   const depth = clamp(args.depth, 18, 6, 22);
   const gateway = ctx;
+  if (legal(fen).moves().length === 0) return [];
+  const x = imbalancesOf(fen);
+  const structure = structureSentence(structureOf(fen));
+  const { lines, elapsedMs } = await linesFor(fen, multiPv, depth);
+  const candidates = candidateRecords(fen, lines, x, elapsedMs);
+  const ask = (prompt2) => gateway.ai.complete({
+    prompt: prompt2,
+    skills: ["chess-plans"],
+    ...args.role ? { role: args.role } : {}
+  }).then((r) => typeof r === "string" ? r : JSON.stringify(r));
+  const prompt = promptFor(fen, x, opening, structure, candidates, withinCp, theory);
+  let text = await ask(prompt);
+  let parsed;
+  try {
+    parsed = parseModelJson(text);
+  } catch (e) {
+    text = await ask(`${prompt}
+
+Your previous answer was not valid JSON (${e.message}). Reply again with ONLY the JSON object.`);
+    parsed = parseModelJson(text);
+  }
+  const plans = (parsed.plans ?? []).filter((p) => p.side === "white" || p.side === "black");
+  if (plans.length === 0) throw new Error(`The model named no plans for ${fen}: ${text.slice(0, 200)}`);
+  const count = { white: 0, black: 0 };
+  return plans.map((p) => {
+    const side = p.side;
+    const priority = typeof p.priority === "number" ? p.priority : ++count[side];
+    return {
+      planId: `${fen}#${side}#${priority}#${(p.name ?? "").slice(0, 40)}`,
+      fen,
+      side,
+      priority,
+      name: p.name ?? "",
+      idea: uncite(p.idea),
+      moves: asList(p.moves).join(" "),
+      imbalances: citedImbalances(x, p.imbalances).join("\n"),
+      engineEvidence: uncite(p.engineEvidence),
+      summary: uncite(parsed.summary),
+      structure: parsed.structure ?? "",
+      opening: opening ?? "",
+      model: args.role ?? "default"
+    };
+  });
+}
+async function explainPlans(ctx, args) {
   const out = [];
   for (const raw of args.fens ?? []) {
     const fen = raw.trim();
-    if (legal(fen).moves().length === 0) continue;
-    const x = imbalancesOf(fen);
+    legal(fen);
     const hit = openingOf(fen);
-    const opening = hit ? { fen, ...hit } : null;
-    const structure = structureSentence(structureOf(fen));
-    const { lines, elapsedMs } = await linesFor(fen, multiPv, depth);
-    const candidates = candidateRecords(fen, lines, x, elapsedMs);
-    const ask = (prompt2) => gateway.ai.complete({
-      prompt: prompt2,
-      skills: ["chess-plans"],
-      ...args.role ? { role: args.role } : {}
-    }).then((r) => typeof r === "string" ? r : JSON.stringify(r));
-    const prompt = promptFor(fen, x, opening, structure, candidates, withinCp);
-    let text = await ask(prompt);
-    let parsed;
-    try {
-      parsed = parseModelJson(text);
-    } catch (e) {
-      text = await ask(`${prompt}
-
-Your previous answer was not valid JSON (${e.message}). Reply again with ONLY the JSON object.`);
-      parsed = parseModelJson(text);
-    }
-    const plans = (parsed.plans ?? []).filter((p) => p.side === "white" || p.side === "black");
-    if (plans.length === 0) throw new Error(`The model named no plans for ${fen}: ${text.slice(0, 200)}`);
-    const count = { white: 0, black: 0 };
-    for (const p of plans) {
-      const side = p.side;
-      const priority = typeof p.priority === "number" ? p.priority : ++count[side];
-      out.push({
-        planId: `${fen}#${side}#${priority}#${(p.name ?? "").slice(0, 40)}`,
-        fen,
-        side,
-        priority,
-        name: p.name ?? "",
-        idea: uncite(p.idea),
-        moves: asList(p.moves).join(" "),
-        imbalances: citedImbalances(x, p.imbalances).join("\n"),
-        engineEvidence: uncite(p.engineEvidence),
-        summary: uncite(parsed.summary),
-        structure: parsed.structure ?? "",
-        opening: opening ? `${opening.eco} ${opening.name}` : "",
-        model: args.role ?? "default"
-      });
+    out.push(...await plansFor(ctx, fen, hit ? `${hit.eco} ${hit.name} (${hit.pgn})` : null, args));
+  }
+  return out;
+}
+async function explainLinePlans(ctx, args) {
+  const out = [];
+  for (const raw of args.lines ?? []) {
+    const moves = splitLine(raw);
+    const line = moves.join(" ");
+    const fen = positionAfter(moves);
+    const hit = openingOfLine(moves);
+    const opening = hit ? `${hit.eco} ${hit.name} (${hit.pgn})${hit.pliesPast ? `, left the book ${hit.pliesPast} ${hit.pliesPast === 1 ? "ply" : "plies"} ago` : ""}` : null;
+    const theory = await theoryFor(ctx, moves).catch(() => null);
+    for (const p of await plansFor(ctx, fen, opening, args, theory)) {
+      out.push({ ...p, planId: `${line}#${p.side}#${p.priority}#${p.name.slice(0, 40)}`, line });
     }
   }
   return out;
@@ -4237,9 +4375,12 @@ Your previous answer was not valid JSON (${e.message}). Reply again with ONLY th
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   analysePosition,
+  explainLinePlans,
   explainPlans,
   openingLookup,
-  positionImbalances
+  openingOfGameLine,
+  positionImbalances,
+  theoryOfGameLine
 });
 /*! Bundled license information:
 

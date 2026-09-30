@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/assets/extensions/markers/markers.css">
 <script src="/api/v1/apps-runtime/v1/embabel.js"></script>
 <script type="application/embabel-app+json">
-{"version":1,"name":"chesscalator","requires":{"lenses":[],"views":["BestMoves","ImbalancesOf","OpeningOf","PlansInPosition"],"realms":["chess"],"namespaces":[]}}
+{"version":1,"name":"chesscalator","requires":{"lenses":[],"views":["BestMoves","ImbalancesOf","OpeningOf","OpeningOfLine","TheoryOfLine","PlansInPosition","PlansInLine"],"realms":["chess"],"namespaces":[]}}
 </script>
 <style>
   :root{--bg:#0a0a0f;--surface:#13131a;--surface2:#191922;--border:#1e1e2e;--cyan:#63c0f5;--purple:#9f77cd;
@@ -74,6 +74,22 @@
   .explain{margin-top:14px;}
   .explain p{margin:0 0 10px;font-size:.92rem;}
   .legend{margin-top:12px;font-size:.78rem;color:var(--dim);}
+  /* The board column stays in view while the analysis scrolls: the imbalances sit above the board
+   * so the position and what is unbalanced about it are always read together. */
+  @media (min-width:881px){.board-col{position:sticky;top:12px;max-height:calc(100vh - 70px);overflow:auto;}}
+  .imbalances-box{margin-bottom:10px;}
+  .imbalances-box h2.sec{margin-top:0;}
+  .imbalances-box ul.facts{font-size:.78rem;columns:2 240px;column-gap:18px;margin:0;}
+  .imbalances-box ul.facts li{break-inside:avoid;}
+  .nav{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;}
+  .nav .ply{min-width:9ch;text-align:center;color:var(--dim);font-size:.8rem;font-variant-numeric:tabular-nums;}
+  .moves span.mv{cursor:pointer;padding:0 2px;border-radius:3px;}
+  .moves span.mv:hover{color:var(--cyan);}
+  .moves span.mv.at{background:var(--cyan);color:#06121c;}
+  .moves span.mv.after{opacity:.55;}
+  details.about{margin-top:4px;color:var(--dim);font-size:.86rem;max-width:80ch;}
+  details.about summary{cursor:pointer;font-size:.82rem;}
+  details.about p{margin:6px 0;}
   .opening{color:var(--dim);font-size:.84rem;margin:2px 0 6px;min-height:1.2em;}
   .opening b{color:var(--text);font-weight:500;}
   h2.sec{font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin:16px 0 4px;}
@@ -92,6 +108,14 @@
   .plan p{margin:4px 0;font-size:.84rem;}
   .plan .meta{font-size:.76rem;color:var(--dim);}
   .summary{font-size:.9rem;margin:8px 0 4px;}
+  #plans > .meta{font-size:.8rem;color:var(--dim);}
+  details.theory{margin:8px 0 4px;border:1px solid var(--border);border-radius:8px;padding:8px 12px;background:var(--surface2);}
+  details.theory summary{cursor:pointer;font-size:.86rem;font-weight:500;}
+  details.theory summary .meta{font-weight:400;color:var(--dim);font-size:.78rem;}
+  #theory p{font-size:.84rem;margin:6px 0;}
+  #theory h5{font-size:.84rem;margin:8px 0 2px;font-weight:600;}
+  .attribution{font-size:.72rem;color:var(--dim);margin-top:6px;}
+  .attribution a{color:var(--dim);}
 
   footer.how{max-width:1180px;margin:18px auto 0;padding:0 16px;font-size:.75rem;}
   footer.how a{color:var(--dim);text-decoration:none;} footer.how a:hover{color:var(--cyan);}
@@ -109,17 +133,35 @@
 <div class="wrap">
   <header>
     <h1>Chesscalator</h1>
-    <p>Play moves for either side. After each move you get the engine's best lines, the position's imbalances —
-      computed from the board, in Jeremy Silman's sense — and its opening. Ask for the plans and a model with the
-      chess-plans skill says what each side should be trying to do.</p>
+    <details class="about">
+      <summary>What this is, and how to read it</summary>
+      <p>Play moves for either side. After each move you get the engine's best lines, the position's imbalances —
+        computed from the board, in Jeremy Silman's sense — and its opening. Ask for the plans and a model with the
+        chess-plans skill says what each side should be trying to do.</p>
+      <p>Scores are in pawns from White's side: +0.80 means White is better by most of a pawn. "0.34 worse" is how
+        much a move gives up against the engine's best; within 0.20 the choice is style, not strength. Green and red
+        tags are the imbalances a move's line creates and removes. Hover a move to see it on the board; click to play
+        it. Step through the game with the arrows under the board, the arrow keys, the browser's Back and Forward,
+        or by clicking a move; playing a different move from an earlier position starts a new line from there.</p>
+    </details>
   </header>
 
   <div class="layout">
-    <section class="panel" aria-label="Board">
+    <section class="panel board-col" aria-label="Board">
+      <div class="imbalances-box">
+        <h2 class="sec">Imbalances</h2>
+        <div id="imbalances"></div>
+      </div>
       <div id="board"></div>
+      <div class="nav" aria-label="Step through the game">
+        <button class="btn" id="first" title="Start of the game">&#x23EE;</button>
+        <button class="btn" id="back" title="Back one move (left arrow)">&#x25C0;</button>
+        <span class="ply" id="ply"></span>
+        <button class="btn" id="fwd" title="Forward one move (right arrow)">&#x25B6;</button>
+        <button class="btn" id="last" title="Latest position">&#x23ED;</button>
+      </div>
       <div class="controls">
         <button class="btn" id="new">New game</button>
-        <button class="btn" id="undo">Take back</button>
         <button class="btn" id="flip">Flip board</button>
         <label class="inline">Engine plays
           <select id="engineSide">
@@ -151,15 +193,14 @@
         <span class="spacer"></span>
         <button class="btn primary" id="plansBtn" disabled>Show the plans</button>
       </div>
+      <details class="theory" id="theoryBox" open hidden>
+        <summary>Opening theory <span class="meta" id="theoryWhere"></span></summary>
+        <div id="theory"></div>
+        <div class="attribution" id="theoryCredit"></div>
+      </details>
       <div id="plans"></div>
       <h2 class="sec">The engine's moves</h2>
       <div id="analysis"><div class="state">Make a move, or load a position.</div></div>
-      <h2 class="sec">Imbalances</h2>
-      <div id="imbalances"></div>
-      <div class="legend">Scores are in pawns from White's side: +0.80 means White is better by most of a pawn.
-        "0.34 worse" is how much a move gives up against the engine's best; within 0.20 the choice is style, not
-        strength. Green and red tags are the imbalances a move's line creates and removes. Hover a move to see it on
-        the board; click to play it.</div>
     </section>
   </div>
 </div>
@@ -183,11 +224,19 @@
       good/bad bishops, doubled, isolated, backward, passed and hanging pawns, majorities, locked chains and the wing
       they point to, space, files, outposts, development, king safety. Also which named opening's pawn structure this
       is, matched on the pawns alone against the opening book.</li>
-    <li><b>Opening</b> — <code>IN_OPENING</code> → <code>Opening</code>, from <code>chess.openingLookup</code>: the
-      Lichess opening book (3,815 named lines, CC0). Only book positions have a name.</li>
+    <li><b>Opening</b> — <code>IN_OPENING</code> → <code>Opening</code>: the Lichess opening book (3,815 named lines,
+      CC0). A game played from the start is looked up as a <code>GameLine</code> — its moves — and keeps the deepest
+      name it passed through (<code>chess.openingOfGameLine</code>), so twenty moves into the Exchange Ruy Lopez it is
+      still called that. A position loaded from a FEN has no moves behind it and is looked up by position
+      (<code>chess.openingLookup</code>).</li>
+    <li><b>Opening theory</b> — <code>GameLine</code> <code>HAS_THEORY</code> → <code>OpeningTheory</code>, from
+      <code>chess.theoryOfGameLine</code>: the deepest page of the Chess Opening Theory wikibook the game's moves
+      reach, read through the Wikibooks API, shown as an excerpt with its authors and licence (CC BY-SA 4.0).
+      Cached for a week.</li>
     <li><b>Plans</b> — <code>HAS_PLAN</code> → <code>Plan</code>, from <code>chess.explainPlans</code>, only when you
       press <i>Show the plans</i>: the three above go to <code>gateway.ai.complete</code> with the
-      <code>chess-plans</code> skill attached, and the model names up to three plans for each side, citing the
+      <code>chess-plans</code> skill attached — with the opening theory too, for a game played here — and the model
+      names up to three plans for each side, citing the
       imbalances it uses by number. The facts are computed; the plans are its judgement. Cached for seven days.</li>
   </ul>
 
@@ -205,10 +254,20 @@ LIMIT $maxLines</pre>
   <p><b>ImbalancesOf</b> — <code>fen</code>.</p>
 <pre>MATCH (p:Position {fen: $fen})-[:HAS_IMBALANCES]->(i:PositionImbalances)
 RETURN i.sideToMove AS sideToMove, i.phase AS phase, i.facts AS facts, i.structure AS structure, ...</pre>
-  <p><b>OpeningOf</b> — <code>fen</code>.</p>
+  <p><b>OpeningOfLine</b> — <code>moves</code> (SAN from the start), for a game played on this board.</p>
+<pre>MATCH (g:GameLine {moves: $moves})-[:IN_OPENING]->(o:Opening)
+RETURN o.eco AS eco, o.name AS name, o.pgn AS bookMoves,
+       toInteger(o.namedAtPly) AS namedAtPly, toInteger(o.pliesPast) AS pliesPast</pre>
+  <p><b>TheoryOfLine</b> — <code>moves</code>.</p>
+<pre>MATCH (g:GameLine {moves: $moves})-[:HAS_THEORY]->(t:OpeningTheory)
+RETURN t.title AS page, t.url AS url, t.theory AS theory, toInteger(t.pliesCovered) AS pliesCovered,
+       toInteger(t.pliesPast) AS pliesPast, t.licence AS licence</pre>
+  <p><b>OpeningOf</b> — <code>fen</code>, for a position loaded from a FEN.</p>
 <pre>MATCH (p:Position {fen: $fen})-[:IN_OPENING]->(o:Opening)
 RETURN o.eco AS eco, o.name AS name, o.pgn AS moves</pre>
-  <p><b>PlansInPosition</b> — <code>fen</code>. One engine search and one model call per new position.</p>
+  <p><b>PlansInLine</b> — <code>moves</code> — for a game played from the start, so the model is told the line's
+    opening name; <b>PlansInPosition</b> — <code>fen</code> — otherwise. The same query shape from a
+    <code>GameLine</code> or a <code>Position</code>. One engine search and one model call per new position.</p>
 <pre>MATCH (p:Position {fen: $fen})-[:HAS_PLAN]->(pl:Plan)
 RETURN pl.side AS side, toInteger(pl.priority) AS priority, pl.name AS plan, pl.idea AS idea,
        pl.moves AS moves, pl.imbalances AS imbalances, pl.engineEvidence AS engineEvidence,
@@ -222,11 +281,16 @@ ORDER BY side DESC, priority</pre>
     <li><b>"The engine is thinking" for several seconds</b> — a new position is searched from scratch, one to four
       seconds; longer the first time after the appliance restarts.</li>
     <li><b>The plans take half a minute</b> — an engine search and a model call. The second time is instant.</li>
-    <li><b>No opening name</b> — the position is deeper than the book. The imbalances still say which book line's
-      pawn structure it has, when one is within two pawns.</li>
+    <li><b>No opening name</b> — for a game played here, the book never named any position along it; for a loaded
+      FEN, the position itself is deeper than the book. Either way the imbalances say which book line's pawn
+      structure it has, when one is close.</li>
+    <li><b>Back and Forward</b> step through the game, as do the arrows under the board and the arrow keys; the
+      address carries the game, so a reload or a shared link opens the same position.</li>
     <li><b>A plan that seems wrong</b> — plans are a model's judgement, and the battery of test positions shipped with
       the realm shows how often it matches theory. The imbalances and the engine's numbers are computed and
       authoritative; a plan that contradicts them is the plan's fault. Report it with the FEN.</li>
+    <li><b>No opening theory</b> — the wikibook has no page along this line, or the position was loaded from a FEN
+      and has no moves behind it.</li>
     <li><b>An imbalance that is wrong</b> — that is a bug in the realm's computation; report it with the FEN.</li>
     <li><b>The plans fail to load</b> — they need an appliance whose <code>gateway.ai.complete</code> accepts
       skills; the rest of the page works without it.</li>
@@ -253,14 +317,26 @@ import { Markers, MARKER_TYPE } from "https://cdn.jsdelivr.net/npm/cm-chessboard
 import { Chess } from "https://cdn.jsdelivr.net/npm/chess.js@1.4.0/dist/esm/chess.js";
 
 /*
- * The page holds the game; the world holds everything else. For each position the page asks
- * three views at once — BestMoves, ImbalancesOf, OpeningOf — and PlansInPosition only when
- * asked, because that one costs a model call. An answer for a position the board has already
- * left is dropped, not shown.
+ * The page holds the game; the world holds everything else.
+ *
+ * The game is a LINE — moves from a base position — and a cursor into it, so any earlier position
+ * can be revisited, and a different move played there starts a new line from that point. Each
+ * position change is a browser history entry, so Back and Forward step through the game too.
+ *
+ * For each position the page asks three views at once: BestMoves and ImbalancesOf by FEN, and
+ * the opening. When the game began from the starting position the opening comes from the LINE
+ * (OpeningOfLine), which keeps a name long after the position leaves the book; a game loaded
+ * from a FEN has no line, so it is looked up by position (OpeningOf). Plans follow the same rule
+ * (PlansInLine / PlansInPosition) and are asked for only on request. An answer for a position
+ * the board has already left is dropped.
  */
 
 const $ = (id) => document.getElementById(id);
-const game = new Chess();
+const START = new Chess().fen();
+let baseFen = START;
+let line = [];        // SAN moves from baseFen
+let cursor = 0;       // how many of them are played
+let game = new Chess();
 let orientation = COLOR.white;
 let currentRows = [];
 let analysisSeq = 0;
@@ -283,26 +359,51 @@ const rowsOf = (env) =>
   !env ? [] : Array.isArray(env.data) ? env.data : env.data && Array.isArray(env.data.rows) ? env.data.rows
   : Array.isArray(env.rows) ? env.rows : [];
 
-const fmt = (cp) => (cp > 0 ? "+" : cp < 0 ? "\u2212" : "") + (Math.abs(cp) / 100).toFixed(2);
+const fmt = (cp) => (cp > 0 ? "+" : cp < 0 ? "−" : "") + (Math.abs(cp) / 100).toFixed(2);
 const sideName = (c) => (c === "w" ? "White" : "Black");
 const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
 const lines = (s) => String(s || "").split("\n").map((x) => x.trim()).filter(Boolean);
+const failure = (e) => (e && e.message ? e.message : String(e));
+const fromStart = () => baseFen === START;
+const playedLine = () => line.slice(0, cursor).join(" ");
+
+/* Rebuild the game at the cursor: the base position, then the line's first `cursor` moves. */
+function rebuild() {
+  game = new Chess(baseFen);
+  for (const m of line.slice(0, cursor)) game.move(m);
+}
+
+/* Move numbers for a line that may start with Black to move. */
+function moveNumberAt(i) {
+  const base = new Chess(baseFen);
+  const startBlack = base.turn() === "b";
+  const full = Number(baseFen.split(" ")[5] || 1);
+  const ply = i + (startBlack ? 1 : 0);
+  return { number: full + Math.floor(ply / 2), white: ply % 2 === 0 };
+}
 
 function renderMoves() {
-  const hist = game.history();
   const m = $("moves");
   m.textContent = "";
-  for (let i = 0; i < hist.length; i += 2) {
-    m.append(el("b", null, `${i / 2 + 1}.`), ` ${hist[i]}${hist[i + 1] ? " " + hist[i + 1] : ""}  `);
-  }
-  m.scrollTop = m.scrollHeight;
+  line.forEach((san, i) => {
+    const { number, white } = moveNumberAt(i);
+    if (white) m.append(el("b", null, `${number}.`), " ");
+    else if (i === 0) m.append(el("b", null, `${number}...`), " ");
+    const span = el("span", "mv" + (i === cursor - 1 ? " at" : i >= cursor ? " after" : ""), san);
+    span.dataset.ply = String(i + 1);
+    span.addEventListener("click", () => go(i + 1));
+    m.append(span, " ");
+  });
+  $("ply").textContent = line.length ? `${cursor} / ${line.length}` : "";
+  $("back").disabled = $("first").disabled = cursor === 0;
+  $("fwd").disabled = $("last").disabled = cursor === line.length;
   $("fenInput").value = game.fen();
 }
 
 function statusLine() {
   const who = $("who");
-  if (game.isCheckmate()) return (who.textContent = `Checkmate \u2014 ${sideName(game.turn() === "w" ? "b" : "w")} wins`), true;
-  if (game.isStalemate()) return (who.textContent = "Stalemate \u2014 a draw"), true;
+  if (game.isCheckmate()) return (who.textContent = `Checkmate — ${sideName(game.turn() === "w" ? "b" : "w")} wins`), true;
+  if (game.isStalemate()) return (who.textContent = "Stalemate — a draw"), true;
   if (game.isDraw()) return (who.textContent = "Drawn position"), true;
   who.textContent = `${sideName(game.turn())} to move${game.inCheck() ? ", in check" : ""}`;
   return false;
@@ -312,32 +413,73 @@ function state(target, text, cls = "") {
   $(target).replaceChildren(el("div", "state " + cls, text));
 }
 
-const failure = (e) => (e && e.message ? e.message : String(e));
+/* The history entry for the current line and cursor. The hash carries the line, so a reload or a
+ * shared link lands on the same position. */
+function record(replace = false) {
+  const st = { baseFen, line, cursor };
+  const hash = "#" + new URLSearchParams(fromStart()
+    ? { line: line.join(" "), at: String(cursor) }
+    : { fen: baseFen, line: line.join(" "), at: String(cursor) }).toString();
+  if (replace) history.replaceState(st, "", hash);
+  else history.pushState(st, "", hash);
+}
 
-async function analyse() {
+/* Show the position at the cursor. `userMove` says whether a person just played, which is the
+ * only time the engine answers for its side — stepping back through a game must not trigger it. */
+function show({ userMove = false, push = true } = {}) {
+  rebuild();
+  board.setPosition(game.fen(), true);
+  renderMoves();
+  if (push) record();
+  analyse(userMove);
+}
+
+function go(ply) {
+  const to = Math.max(0, Math.min(line.length, ply));
+  if (to === cursor) return;
+  cursor = to;
+  show();
+}
+
+/* Play a move at the cursor. The same move as the line's next one just steps forward; a
+ * different one starts a new line from here. */
+function play(san, { userMove = true } = {}) {
+  if (line[cursor] === san) cursor++;
+  else { line = [...line.slice(0, cursor), san]; cursor = line.length; }
+  show({ userMove });
+}
+
+async function analyse(userMove) {
   const seq = ++analysisSeq;
   board.removeArrows();
   $("plans").replaceChildren();
   $("plansBtn").disabled = true;
   $("evalText").textContent = "";
   $("opening").textContent = "";
+  $("theoryBox").hidden = true;
   currentRows = [];
   if (statusLine()) {
     state("analysis", "No moves to analyse: the game is over.");
     $("imbalances").replaceChildren();
     return;
   }
-  state("analysis", "The engine is thinking \u2014 one to four seconds for a new position.");
-  state("imbalances", "Reading the position\u2026");
+  state("analysis", "The engine is thinking — one to four seconds for a new position.");
+  state("imbalances", "Reading the position…");
   const fen = game.fen();
   const within = Number($("within").value);
-  const [moves, imb, opening] = await Promise.allSettled([
+  const openingCall = fromStart()
+    ? (cursor === 0 ? Promise.resolve(null) : embabel.views.invoke("OpeningOfLine", { moves: playedLine() }))
+    : embabel.views.invoke("OpeningOf", { fen });
+  const theoryCall = fromStart() && cursor > 0 ? embabel.views.invoke("TheoryOfLine", { moves: playedLine() }) : Promise.resolve(null);
+  const [moves, imb, opening, theory] = await Promise.allSettled([
     embabel.views.invoke("BestMoves", { fen, withinCp: within, maxLines: 5 }),
     embabel.views.invoke("ImbalancesOf", { fen }),
-    embabel.views.invoke("OpeningOf", { fen }),
+    openingCall,
+    theoryCall,
   ]);
   if (seq !== analysisSeq) return;
   renderOpening(opening, imb);
+  renderTheory(theory);
   renderImbalances(imb);
   if (moves.status === "rejected") {
     state("analysis", `The engine did not answer: ${failure(moves.reason)}`, "error");
@@ -353,20 +495,49 @@ async function analyse() {
   const best = rows[0];
   $("evalText").textContent = best.mate != null
     ? `mate in ${Math.abs(best.mate)} for ${best.mate > 0 ? sideName(game.turn()) : sideName(game.turn() === "w" ? "b" : "w")}`
-    : `${fmt(best.whiteCp)} \u00b7 depth ${best.depth}`;
+    : `${fmt(best.whiteCp)} · depth ${best.depth}`;
   $("analysis").replaceChildren(...rows.map(candidate));
   $("plansBtn").disabled = false;
-  maybeEngineMove(seq);
+  if (userMove) maybeEngineMove(seq);
 }
 
 function renderOpening(opening, imb) {
-  const o = opening.status === "fulfilled" ? rowsOf(opening.value)[0] : null;
+  const o = opening.status === "fulfilled" && opening.value ? rowsOf(opening.value)[0] : null;
   const i = imb.status === "fulfilled" ? rowsOf(imb.value)[0] : null;
   const box = $("opening");
   box.replaceChildren();
-  if (o) box.append(el("b", null, `${o.eco} ${o.name}`));
-  else if (i && i.structure) box.append(i.structure);
-  else box.append("Not a book position.");
+  if (o) {
+    box.append(el("b", null, `${o.eco} ${o.name}`));
+    if (Number(o.pliesPast) > 0) box.append(` — left the book ${o.pliesPast} ${Number(o.pliesPast) === 1 ? "ply" : "plies"} ago`);
+  } else if (i && i.structure) box.append(i.structure);
+  else box.append(cursor === 0 && fromStart() ? "The starting position." : "Not a book position.");
+}
+
+/*
+ * The wikibook's text for the deepest page along the line, shown as the licence asks: as an
+ * excerpt, with the page, its authors and the licence named and linked. Headings in the text
+ * ("== 6. d4 · Gligoric variation ==") become headings; nothing in it is parsed as markup.
+ */
+function renderTheory(theory) {
+  const box = $("theoryBox");
+  const t = theory.status === "fulfilled" && theory.value ? rowsOf(theory.value)[0] : null;
+  if (!t) { box.hidden = true; return; }
+  const out = [];
+  for (const para of String(t.theory).split(/\n+/)) {
+    const h = para.match(/^=+\s*(.*?)\s*=+$/);
+    if (h) out.push(el("h5", null, h[1]));
+    else if (para.trim()) out.push(el("p", null, para.trim()));
+  }
+  $("theory").replaceChildren(...out);
+  const page = String(t.page).replace(/^Chess Opening Theory\//, "").split("/").join(" ");
+  $("theoryWhere").textContent = Number(t.pliesPast) > 0
+    ? `\u2014 after ${page}, ${t.pliesPast} ${Number(t.pliesPast) === 1 ? "ply" : "plies"} back`
+    : `\u2014 for this position`;
+  const credit = $("theoryCredit");
+  const link = (href, text) => { const a = el("a", null, text); a.href = href; a.target = "_blank"; a.rel = "noopener noreferrer"; return a; };
+  credit.replaceChildren("Excerpt from ", link(t.url, "Chess Opening Theory"), ", Wikibooks contributors, ",
+    link("https://creativecommons.org/licenses/by-sa/4.0/", "CC BY-SA 4.0"), "; references and tables omitted.");
+  box.hidden = false;
 }
 
 function renderImbalances(imb) {
@@ -392,12 +563,12 @@ function candidate(r) {
   const loss = el("span", "loss " + (Number(r.rank) === 1 ? "" : lc != null && lc <= 20 ? "style" : "cost"),
     Number(r.rank) === 1 ? "engine's best"
       : lc == null ? "not comparable with the mate"
-      : `${(lc / 100).toFixed(2)} worse${lc <= 20 ? " \u2014 style, not strength" : ""}`);
-  const line = el("div", "line", (r.line || "").split(" ").slice(0, 12).join(" "));
+      : `${(lc / 100).toFixed(2)} worse${lc <= 20 ? " — style, not strength" : ""}`);
+  const lineEl = el("div", "line", (r.line || "").split(" ").slice(0, 12).join(" "));
   const changes = el("div", "changes");
   for (const c of lines(r.creates)) changes.append(el("span", "chip plus", c));
   for (const c of lines(r.removes)) changes.append(el("span", "chip minus", c));
-  row.append(b, score, loss, line);
+  row.append(b, score, loss, lineEl);
   if (changes.childElementCount) row.append(changes);
   return row;
 }
@@ -407,31 +578,27 @@ function showArrow(uci) {
   if (uci) board.addArrow(ARROW_TYPE.info, uci.slice(0, 2), uci.slice(2, 4));
 }
 
-function after() {
-  board.setPosition(game.fen(), true);
-  renderMoves();
-  analyse();
-}
-
-function playUci(uci) {
+function playUci(uci, opts) {
+  let m;
   try {
-    game.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] || "q" });
+    m = new Chess(game.fen()).move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] || "q" });
   } catch { return; }
-  after();
+  play(m.san, opts);
 }
 
-/* The engine answers for its side with the first line it just computed \u2014 the same rows the
+/* The engine answers for its side with the first line it just computed — the same rows the
  * panel shows, so what it plays is always the move listed first. */
 function maybeEngineMove(seq) {
   const side = $("engineSide").value;
-  if (!side || side !== game.turn() || currentRows.length === 0) return;
-  setTimeout(() => { if (seq === analysisSeq) playUci(currentRows[0].uci); }, 600);
+  if (!side || side !== game.turn() || currentRows.length === 0 || cursor !== line.length) return;
+  setTimeout(() => { if (seq === analysisSeq) playUci(currentRows[0].uci, { userMove: false }); }, 600);
 }
 
 function renderPlans(rows) {
   const box = $("plans");
   if (rows.length === 0) return state("plans", "No plans came back for this position.", "error");
   const top = [];
+  if (rows[0].opening) top.push(el("div", "meta", `Opening: ${rows[0].opening}`));
   if (rows[0].structure) top.push(el("div", "meta", `Structure: ${rows[0].structure}`));
   if (rows[0].summary) top.push(el("p", "summary", rows[0].summary));
   const grid = el("div", "plans");
@@ -445,7 +612,7 @@ function renderPlans(rows) {
       card.append(el("h4", null, r.plan), el("p", null, r.idea));
       if (r.moves) card.append(el("div", "meta", `Moves: ${r.moves}`));
       const uses = lines(r.imbalances);
-      if (uses.length) card.append(el("div", "meta", `Uses: ${uses.join(" \u00b7 ")}`));
+      if (uses.length) card.append(el("div", "meta", `Uses: ${uses.join(" · ")}`));
       if (r.engineEvidence) card.append(el("div", "meta", `Engine: ${r.engineEvidence}`));
       col.append(card);
     });
@@ -459,14 +626,14 @@ board.enableMoveInput((event) => {
   switch (event.type) {
     case INPUT_EVENT_TYPE.moveInputStarted: {
       const side = $("engineSide").value;
-      if (side && side === game.turn()) return false;
+      if (side && side === game.turn() && cursor === line.length) return false;
       return game.moves({ square: event.squareFrom }).length > 0;
     }
     case INPUT_EVENT_TYPE.validateMoveInput: {
       let move = null;
       // Promotion goes to a queen: a promotion dialog is not worth its weight here.
-      try { move = game.move({ from: event.squareFrom, to: event.squareTo, promotion: "q" }); } catch { move = null; }
-      if (move) setTimeout(after);
+      try { move = new Chess(game.fen()).move({ from: event.squareFrom, to: event.squareTo, promotion: "q" }); } catch { move = null; }
+      if (move) setTimeout(() => play(move.san));
       return !!move;
     }
     default:
@@ -474,38 +641,52 @@ board.enableMoveInput((event) => {
   }
 });
 
-$("new").addEventListener("click", () => { game.reset(); $("fenError").textContent = ""; after(); });
-$("undo").addEventListener("click", () => {
-  game.undo();
-  // Against the engine, take back a whole turn so it is your move again.
-  const side = $("engineSide").value;
-  if (side && side === game.turn()) game.undo();
-  after();
+$("new").addEventListener("click", () => { baseFen = START; line = []; cursor = 0; $("fenError").textContent = ""; show(); });
+$("first").addEventListener("click", () => go(0));
+$("back").addEventListener("click", () => go(cursor - 1));
+$("fwd").addEventListener("click", () => go(cursor + 1));
+$("last").addEventListener("click", () => go(line.length));
+document.addEventListener("keydown", (e) => {
+  if (e.target instanceof HTMLInputElement || e.target instanceof HTMLSelectElement) return;
+  if (e.key === "ArrowLeft") { e.preventDefault(); go(cursor - 1); }
+  else if (e.key === "ArrowRight") { e.preventDefault(); go(cursor + 1); }
+  else if (e.key === "Home") { e.preventDefault(); go(0); }
+  else if (e.key === "End") { e.preventDefault(); go(line.length); }
+});
+window.addEventListener("popstate", (e) => {
+  const st = e.state || fromHash();
+  if (!st) return;
+  baseFen = st.baseFen; line = st.line; cursor = st.cursor;
+  show({ push: false });
 });
 $("flip").addEventListener("click", () => {
   orientation = orientation === COLOR.white ? COLOR.black : COLOR.white;
   board.setOrientation(orientation);
 });
 $("engineSide").addEventListener("change", () => maybeEngineMove(analysisSeq));
-$("within").addEventListener("change", analyse);
+$("within").addEventListener("change", () => analyse(false));
 $("loadFen").addEventListener("click", () => {
   const fen = $("fenInput").value.trim();
   try {
-    game.load(fen);
+    new Chess(fen);
     $("fenError").textContent = "";
   } catch (e) {
     $("fenError").textContent = `Not a legal position: ${e.message}`;
     return;
   }
-  after();
+  baseFen = new Chess(fen).fen() === START ? START : fen;
+  line = []; cursor = 0;
+  show();
 });
 
 $("plansBtn").addEventListener("click", async () => {
   const seq = analysisSeq;
   $("plansBtn").disabled = true;
-  state("plans", "Reading the plans \u2014 an engine search and a model call, up to half a minute the first time.", "note");
+  state("plans", "Reading the plans — an engine search and a model call, up to half a minute the first time.", "note");
   try {
-    const env = await embabel.views.invoke("PlansInPosition", { fen: game.fen() });
+    const env = fromStart() && cursor > 0
+      ? await embabel.views.invoke("PlansInLine", { moves: playedLine() })
+      : await embabel.views.invoke("PlansInPosition", { fen: game.fen() });
     if (seq !== analysisSeq) return;
     renderPlans(rowsOf(env));
   } catch (e) {
@@ -516,8 +697,29 @@ $("plansBtn").addEventListener("click", async () => {
   }
 });
 
+/* A link or a reload carries the game in its hash. An unreadable hash is ignored, not trusted. */
+function fromHash() {
+  const q = new URLSearchParams(location.hash.slice(1));
+  if (!q.has("line") && !q.has("fen")) return null;
+  try {
+    const base = q.get("fen") ? new Chess(q.get("fen")).fen() : START;
+    const moves = (q.get("line") || "").split(" ").filter(Boolean);
+    const c = new Chess(base);
+    for (const m of moves) c.move(m);
+    const at = Math.max(0, Math.min(moves.length, Number(q.get("at") ?? moves.length)));
+    return { baseFen: base, line: moves, cursor: at };
+  } catch {
+    return null;
+  }
+}
+
+const initial = fromHash();
+if (initial) { baseFen = initial.baseFen; line = initial.line; cursor = initial.cursor; }
+rebuild();
+board.setPosition(game.fen(), false);
 renderMoves();
-analyse();
+record(true);
+analyse(false);
 </script>
 </body>
 </html>

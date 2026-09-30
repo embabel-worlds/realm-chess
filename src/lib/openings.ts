@@ -23,15 +23,75 @@ export function positionKey(fen: string): string {
 
 let book: Record<string, BookEntry> | null = null;
 
-/* The bundled table, built by scripts/build.mjs into dist/data/openings.json beside the handler. */
+/* The bundled tables, built by scripts/build.mjs into dist/data/ beside the handler — found there
+ * from the bundle, and from the source tree (tests) via dist/. */
+function readData(file: string): any {
+  for (const dir of [path.join(__dirname, "..", "data"), path.join(__dirname, "..", "..", "dist", "data")]) {
+    try {
+      return JSON.parse(readFileSync(path.join(dir, file), "utf8"));
+    } catch {
+      /* try the next */
+    }
+  }
+  throw new Error(`${file} not found: run npm run build`);
+}
+
 function load(): Record<string, BookEntry> {
-  if (!book) book = JSON.parse(readFileSync(path.join(__dirname, "..", "data", "openings.json"), "utf8"));
+  if (!book) book = readData("openings.json");
   return book!;
 }
 
 export function openingOf(fen: string): BookEntry | null {
   return load()[positionKey(fen)] ?? null;
 }
+
+export interface LineOpening extends BookEntry {
+  /** The position the book names — the deepest named one along the line. */
+  fen: string;
+  /** How many plies into the line that name was reached. */
+  namedAtPly: number;
+  /** How many plies the line has gone past it. */
+  pliesPast: number;
+}
+
+/**
+ * The deepest named opening along a game's moves: the name a game keeps after it leaves the
+ * book, as a player (and Lichess) would call it — Bxc6 is still the Exchange Variation twenty
+ * moves later. Each position along the line is looked up, so a transposition into a named line
+ * is found too. `moves` is SAN from the starting position; an illegal move ends the line there.
+ */
+export function openingOfLine(moves: string[]): LineOpening | null {
+  const c = new Chess();
+  let best: LineOpening | null = null;
+  let ply = 0;
+  for (const m of moves) {
+    try {
+      c.move(m);
+    } catch {
+      break;
+    }
+    ply++;
+    const hit = load()[positionKey(c.fen())];
+    if (hit) best = { ...hit, fen: c.fen(), namedAtPly: ply, pliesPast: 0 };
+  }
+  if (best) best.pliesPast = ply - best.namedAtPly;
+  return best;
+}
+
+/** The position a line of SAN moves from the start reaches, or an error naming the bad move. */
+export function positionAfter(moves: string[]): string {
+  const c = new Chess();
+  moves.forEach((m, i) => {
+    try {
+      c.move(m);
+    } catch {
+      throw new Error(`Move ${i + 1} (${m}) is not legal in that line`);
+    }
+  });
+  return c.fen();
+}
+
+export const splitLine = (line: string) => line.trim().split(/\s+/).filter(Boolean);
 
 export interface StructureMatch {
   /** Book lines whose pawn skeleton this position has, or is closest to. */
@@ -61,7 +121,7 @@ function pawnSet(fen: string): Set<string> {
  * structure that far off is a different structure.
  */
 export function structureOf(fen: string, maxDifferent = 2): StructureMatch | null {
-  if (!skeletons) skeletons = JSON.parse(readFileSync(path.join(__dirname, "..", "data", "skeletons.json"), "utf8"));
+  if (!skeletons) skeletons = readData("skeletons.json");
   const mine = pawnSet(fen);
   const exact = skeletons![[...mine].sort().join(" ")];
   if (exact) return exact.families <= MAX_FAMILIES ? { openings: exact.openings, pawnsDifferent: 0 } : null;

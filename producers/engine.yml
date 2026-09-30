@@ -34,12 +34,41 @@
   records: "$[*]"
   cache: { kind: ttl, seconds: 2592000, negativeTtlSeconds: 2592000 }
 
+- name: openingOfGameLine
+  kind: remote
+  operation: openingOfGameLine
+  keyArg: lines
+  records: "$[*]"
+  cache: { kind: ttl, seconds: 2592000, negativeTtlSeconds: 2592000 }
+
+# The wikibook changes slowly; a week is fresh enough, and a line with no page stays that way.
+- name: theoryOfGameLine
+  kind: remote
+  operation: theoryOfGameLine
+  keyArg: lines
+  records: "$[*]"
+  cache: { kind: ttl, seconds: 604800, negativeTtlSeconds: 604800 }
+
 # One engine search and one model call per position; `role` picks the model tier the skill is
 # applied with.
 - name: positionPlans
   kind: remote
   operation: explainPlans
   keyArg: fens
+  records: "$[*]"
+  args:
+    withinCp: 50
+    multiPv: 5
+    depth: 18
+    role: best
+  cache: { kind: ttl, seconds: 604800 }
+
+# The same, for the position a game line reaches: keyed by the line, so the model is told the
+# line's opening name even after the position has left the book.
+- name: linePlans
+  kind: remote
+  operation: explainLinePlans
+  keyArg: lines
   records: "$[*]"
   args:
     withinCp: 50

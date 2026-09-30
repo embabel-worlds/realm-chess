@@ -35,22 +35,34 @@ await page.waitForFunction(() => document.querySelector("#moves").textContent.in
 await page.waitForFunction(() => /1\. e4 \S+/.test(document.querySelector("#moves").textContent.trim()), null, { timeout: 30000 });
 console.log("after 1.e4 and the engine's reply:", (await page.locator("#moves").textContent()).trim());
 
-// Load the Exchange Ruy, then ask for the plans.
+// A shared link deep into the Exchange Ruy: the line keeps its book name past the book.
+const EXCHANGE = "e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1";
 await page.selectOption("#engineSide", "");
-await page.fill("#fenInput", "r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9");
-await page.click("#loadFen");
+await page.goto(`${base}/apps/chess/chesscalator.html#line=${encodeURIComponent(EXCHANGE)}&at=17`);
 await page.waitForFunction(() => document.querySelectorAll(".cand button.mv").length > 0 && document.querySelectorAll("#imbalances li").length > 0, null, { timeout: 30000 });
-console.log("ruy exchange moves:", (await page.locator(".cand button.mv").allTextContents()).join(", "));
-console.log("opening line:", (await page.locator("#opening").textContent()).trim());
-console.log("imbalances:", (await page.locator("#imbalances li").allTextContents()).slice(0, 4).join(" | "));
-console.log("change chips on first move:", await page.locator(".cand").first().locator(".chip").count());
-await page.locator(".cand button.mv").first().hover();
-console.log("arrow on hover:", await page.locator("[class*=arrow]").count() > 0);
+console.log("opening at ply 17:", (await page.locator("#opening").textContent()).trim());
+console.log("imbalances above the board:", await page.locator(".board-col #imbalances li").count());
+await page.click("#back");
+await page.waitForFunction(() => document.querySelector("#ply").textContent.startsWith("16"));
+await page.keyboard.press("ArrowLeft");
+await page.waitForFunction(() => document.querySelector("#ply").textContent.startsWith("15"));
+await page.goBack();
+await page.waitForFunction(() => document.querySelector("#ply").textContent.startsWith("16"), null, { timeout: 10000 });
+console.log("button, arrow key and browser Back all step:", (await page.locator("#ply").textContent()).trim());
+// Back to move 4 and play Ba4 instead of Bxc6: a new line, and its own name.
+await page.click('#moves span.mv[data-ply="6"]');
+await page.waitForFunction(() => document.querySelector("#ply").textContent.startsWith("6"));
+await page.waitForSelector(".cand button.mv", { timeout: 30000 });
+const ba4 = page.getByRole("button", { name: "Ba4", exact: true });
+if (await ba4.count()) await ba4.click(); else { const a = await page.locator('rect[data-square="b5"]').boundingBox(), b = await page.locator('rect[data-square="a4"]').boundingBox(); await page.mouse.click(a.x + a.width / 2, a.y + a.height / 2); await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2); }
+await page.waitForFunction(() => document.querySelector("#ply").textContent.trim() === "7 / 7", null, { timeout: 10000 });
+await page.waitForFunction(() => document.querySelector("#opening").textContent.includes("Ruy Lopez"), null, { timeout: 30000 });
+console.log("after 4.Ba4:", (await page.locator("#opening").textContent()).trim(), "| moves:", (await page.locator("#moves").textContent()).trim());
 const t1 = Date.now();
 await page.click("#plansBtn");
 await page.waitForSelector(".plans .side .plan", { timeout: 120000 });
-console.log(`plans in ${Date.now() - t1} ms:`, (await page.locator(".side[data-side=white] .plan h4").allTextContents()).join(" | "), "//", (await page.locator(".side[data-side=black] .plan h4").allTextContents()).join(" | "));
-await page.screenshot({ path: "tests/live/last-run.png", fullPage: true });
+console.log(`plans in ${Date.now() - t1} ms, told:`, (await page.locator("#plans .meta").first().textContent()).trim());
+await page.screenshot({ path: "tests/live/last-run.png", fullPage: false });
 
 // Bad FEN is refused in place.
 await page.fill("#fenInput", "not a fen");

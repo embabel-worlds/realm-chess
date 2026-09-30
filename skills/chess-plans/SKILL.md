@@ -159,7 +159,14 @@ attention to the pairs.
   it is not there.
 - Never describe a line past what it shows, or call a preferred line forced.
 
-## 7. Opening book and master games
+## 7. Opening book, opening theory and master games
+
+When you are given **opening theory** — the Chess Opening Theory wikibook's page for this line
+or a few plies before it — it is the strongest evidence you have about the plans: it is what
+players who know the line say each side is playing for. Lead with the plans it names, in its
+terms, unless the imbalances or the engine show they no longer apply (the game may have left
+the page's line). Never quote it at length; say what it says. It is CC BY-SA: when you draw on
+it, say it is from the wikibook.
 
 The opening name is a strong prior: the structure's known plans (§4) are usually right, and a
 plan that contradicts the named structure needs strong evidence from the engine.

@@ -4,8 +4,9 @@ A chessboard, a strong engine, and the plans a position calls for.
 
 The plans in a chess position come from its **imbalances** — Jeremy Silman's word for the
 differences between the two sides: the bishop pair, a weak pawn, a pawn chain pointing at one
-wing, more space. This realm computes those from the board, gets the engine's best lines, looks
-the position up in the opening book, and then has a model with the **chess-plans** skill decide
+wing, more space. This realm computes those from the board, gets the engine's best lines, names
+the opening along the game's moves, reads what the Chess Opening Theory wikibook says along
+them, and then has a model with the **chess-plans** skill decide
 the plans for both sides from those facts. The facts are computed and checkable; the plans are
 judged, and the knowledge behind the judgement is a skill anyone can read and improve.
 
@@ -19,7 +20,9 @@ OPTIONAL MATCH (p)-[:HAS_CANDIDATE]->(c:CandidateMove) WHERE toInteger(c.lossCp)
 RETURN i.facts, o.name, collect(c.san)
 ```
 
-and `(p)-[:HAS_PLAN]->(:Plan)` for the plans. The same answers are REST calls and are what the
+and `(p)-[:HAS_PLAN]->(:Plan)` for the plans. A game played from the start is also a
+`GameLine` — its moves — with `IN_OPENING` (the deepest name along it, kept past the book),
+`HAS_THEORY` (the wikibook's page for it) and `HAS_PLAN` (plans told that name and theory). The same answers are REST calls and are what the
 **Chesscalator** app shows.
 
 ## How it is put together
@@ -29,13 +32,15 @@ and `(p)-[:HAS_PLAN]->(:Plan)` for the plans. The same answers are REST calls an
 | `src/lib/engine.ts` | Stockfish 19, lite single-threaded WebAssembly build, over UCI under Node. |
 | `src/lib/imbalances.ts` | Silman's imbalances from a FEN, as plain sentences; and what a line changes about them. |
 | `src/lib/lines.ts` | An engine line read for what it does — its moves, the imbalances it creates and removes — never for what it is for. |
-| `src/lib/openings.ts` | The Lichess opening book (CC0), by position and by pawn skeleton. |
+| `src/lib/openings.ts` | The Lichess opening book (CC0): by position, along a game line, and by pawn skeleton. |
+| `src/lib/theory.ts` | Chess Opening Theory wikibook page titles for a line, and the page text trimmed to theory. |
+| `apis/wikibooks.yml` | The Wikibooks MediaWiki API, declared — the only network the realm uses. |
 | `src/api/chess.ts` | The verbs: `analysePosition`, `positionImbalances`, `openingLookup`, `explainPlans`. |
 | `producers/engine.yml` | One producer per verb, keyed by FEN, cached per position. |
 | `types/chess.yml` | `Position` → `HAS_IMBALANCES` / `IN_OPENING` / `HAS_CANDIDATE` / `HAS_PLAN`. |
-| `views/chess.yml` | `BestMoves`, `ImbalancesOf`, `OpeningOf`, `PlansInPosition`. |
+| `views/chess.yml` | `BestMoves`, `ImbalancesOf`, `OpeningOf`, `PlansInPosition`; by line, `OpeningOfLine`, `TheoryOfLine`, `PlansInLine`. |
 | `skills/chess-plans/` | The plan knowledge: Silman's method, what each imbalance calls for, a table of pawn structures and their plans, how to use the engine. |
-| `apps/chesscalator.html` | The board. |
+| `apps/chesscalator.html` | The board: imbalances above it, the game stepped through with buttons, arrow keys or the browser's Back, and a link that reopens the same position. |
 | `tests/battery/positions.yml` | Fifteen common positions and the plans theory gives each side, including pairs from one opening family with opposite plans. |
 
 `explainPlans` sends the imbalances (numbered), the opening name or the book structure the pawns
@@ -89,4 +94,8 @@ Stockfish is GPL-3.0, and this realm, which ships it, is GPL-3.0 (`LICENSE`). Th
 [cm-chessboard](https://github.com/shaack/cm-chessboard) (MIT), loaded from jsdelivr; its three
 SVG sprites are copied into `apps/` because an app serves only flat same-origin files. Moves are
 validated with [chess.js](https://github.com/jhlywa/chess.js) (BSD-2-Clause). The opening book is
-the [Lichess opening list](https://github.com/lichess-org/chess-openings) (CC0).
+the [Lichess opening list](https://github.com/lichess-org/chess-openings) (CC0). Opening theory is
+read at query time from the [Chess Opening Theory](https://en.wikibooks.org/wiki/Chess_Opening_Theory)
+wikibook, by Wikibooks contributors, under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/);
+the realm shows it only as an attributed excerpt with a link to its page, and stores none of it.
+CC BY-SA 4.0 is one-way compatible with GPL-3.0.

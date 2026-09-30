@@ -1,6 +1,6 @@
 {
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\",\"maxLines\":5,\"withinCp\":50}": {
-  "executionId": "exec_fc69b1f5-6496-4357-bb2e-9aee8135a254",
+  "executionId": "exec_9c1d8c6f-53c0-4a6b-880f-b685d43f2844",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -86,13 +86,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 3986,
+   "durationMs": 4764,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:ImbalancesOf:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\"}": {
-  "executionId": "exec_3a26d932-9ff3-4fef-8290-b9e75636e851",
+  "executionId": "exec_08c09fe8-8a3d-4784-8d2b-4f4d7a3c5407",
   "operationId": "ImbalancesOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -118,29 +118,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1146,
-   "externalCalls": 1,
-   "cacheHit": null
-  }
- },
- "view:OpeningOf:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\"}": {
-  "executionId": "exec_965f441a-b1f5-486c-9f55-055ef641e44b",
-  "operationId": "OpeningOf",
-  "contractVersion": "1",
-  "status": "SUCCEEDED",
-  "outcome": "EMPTY",
-  "outputType": "rows",
-  "data": [],
-  "warnings": [],
-  "error": null,
-  "metrics": {
-   "durationMs": 1105,
+   "durationMs": 1827,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1\",\"maxLines\":5,\"withinCp\":50}": {
-  "executionId": "exec_60e7ac89-cb3f-48b6-9695-061dd977bd5c",
+  "executionId": "exec_d8604566-5ed1-4f4e-ad1a-798c03005a4c",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -226,13 +210,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 2859,
+   "durationMs": 3905,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:ImbalancesOf:{\"fen\":\"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1\"}": {
-  "executionId": "exec_5d7a37f3-9558-43e2-829a-23f0af9de0e5",
+  "executionId": "exec_d6e06675-273e-4c49-832c-cbae8528e945",
   "operationId": "ImbalancesOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -258,14 +242,14 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1072,
+   "durationMs": 1295,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
- "view:OpeningOf:{\"fen\":\"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1\"}": {
-  "executionId": "exec_eedf9fc6-1e88-469f-9aaa-027bfdf6e843",
-  "operationId": "OpeningOf",
+ "view:OpeningOfLine:{\"moves\":\"e4\"}": {
+  "executionId": "exec_373cd9c5-3d4b-4f70-b423-52be28070469",
+  "operationId": "OpeningOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
   "outcome": "OK",
@@ -274,19 +258,46 @@
    {
     "eco": "B00",
     "name": "King's Pawn Game",
-    "moves": "1. e4"
+    "bookMoves": "1. e4",
+    "namedAtPly": 1,
+    "pliesPast": 0
    }
   ],
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1091,
+   "durationMs": 1457,
+   "externalCalls": 1,
+   "cacheHit": null
+  }
+ },
+ "view:TheoryOfLine:{\"moves\":\"e4\"}": {
+  "executionId": "exec_16b82c39-6343-4407-a015-9d2aede9b0b0",
+  "operationId": "TheoryOfLine",
+  "contractVersion": "1",
+  "status": "SUCCEEDED",
+  "outcome": "OK",
+  "outputType": "rows",
+  "data": [
+   {
+    "page": "Chess Opening Theory/1. e4",
+    "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4",
+    "theory": "== 1. e4 · King's Pawn opening ==\nBest by test.\n— Bobby Fischer\n1. e4, the King's Pawn Opening, is the most popular first move at all levels of the game. 1. e4 opens lines to develop the queen and the king's bishop. It also fights for control of the centre. \n1. e4 directly controls d5 and f5, which may or may not be relevant later because Black, if they wanted to, could just take those squares away again by playing 1...e6. If White wants to develop some pieces, the most important square they control by playing 1. e4 is, in fact, the e4 square itself: as long as there's a white pawn on e4, there can't be a black pawn on e4, which means White's g1-knight can be developed to f3 without fear of getting kicked away by a pawn and losing a tempo. \nBlack has several ways to respond. The main idea is to find a way to prevent White from achieving or maintaining a two-pawn centre with both e4 and d4. They may try to:\n\nControl the d4 square.\nAttack White's e4 pawn directly.\nPrepare to establish their own pawn on d5.\nLet White build a centre but prepare to undermine it later.\n\n=== Control d4 ===\nIf Black can control d4 with a pawn, then it will be hard for White to establish pawns on both d4 and e4 and keep them there. \nBlack has two pawn pushes that control the d4 square: 1...e5 the Open game, and 1...c5 the Sicilian defence. It is no accident that these are the most popular continuations at all levels.\n1...e5 lets Black take space in the centre. It is the classical reply: traditionally 1. e4 openings are divided into 1...e5, the Open game, and the rest, the Semi-Open games. Now if 2. d4, Black can take it and prevent White from controlling all that central space. \nJust as 1. e4 helps White to indirectly control the e4 square, 1...e5 prevents White from playing 2. e5, and so ensures Black can develop their knight to f6.\nWhite's argument is that a symmetrical position is eventually going to favour the player moving first. White's usual continuation is 2. Nf3, a threat to eliminate the e5 pawn so that they may play d4 securely. \n1...c5 is the mainline in master-level games today. If White plays d4, Black can take it with the flank c pawn, keeping their two more important central pawns. An asymmetric opening, it is thought of as more combative than 1...e5. \n\n=== Attack e4 ===\nBlack can confront White's e-pawn immediately to open up the centre. \n1...d5 is the Scandinavian defence. Black intends to eliminate White's centre, even if they have to give up hopes of a big centre of their own. It is less popular in tournament play than as a club-level reply, where part of its appeal is that it is very forcing and confrontational. White's response is almost always 2. exd5, then Black can recover the pawn if they so choose.\n1...f5? is the risky Duras gambit. 2. exf5 and Black has succeeded in deflecting the e pawn away from the centre, but at the cost of a weakened kingside. \n1...Nf6, the Alekhine defence, also attacks e4, but White will rarely allow Black to take it. …",
+    "pliesCovered": 1,
+    "pliesPast": 0,
+    "licence": "Excerpt from the Chess Opening Theory wikibook, by Wikibooks contributors, CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/); references and tables omitted."
+   }
+  ],
+  "warnings": [],
+  "error": null,
+  "metrics": {
+   "durationMs": 2322,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\",\"maxLines\":5,\"withinCp\":50}": {
-  "executionId": "exec_5e80afb3-7025-4556-befe-3fac138ea79c",
+  "executionId": "exec_0e6007fc-28c5-4c11-8f27-71d64ac59e39",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -372,13 +383,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 3324,
+   "durationMs": 4248,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:ImbalancesOf:{\"fen\":\"rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\"}": {
-  "executionId": "exec_ba14af50-4b91-44d5-b7e1-a6fe5f50a8df",
+  "executionId": "exec_70e60932-9a76-4dee-85ed-ba1568916e6a",
   "operationId": "ImbalancesOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -404,14 +415,14 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1106,
+   "durationMs": 1338,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
- "view:OpeningOf:{\"fen\":\"rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\"}": {
-  "executionId": "exec_1e103450-65a0-4654-97c5-fcde319b97fb",
-  "operationId": "OpeningOf",
+ "view:OpeningOfLine:{\"moves\":\"e4 e5\"}": {
+  "executionId": "exec_df973a32-4a0b-452e-9ad9-a6823bfda2c0",
+  "operationId": "OpeningOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
   "outcome": "OK",
@@ -420,19 +431,219 @@
    {
     "eco": "C20",
     "name": "King's Pawn Game",
-    "moves": "1. e4 e5"
+    "bookMoves": "1. e4 e5",
+    "namedAtPly": 2,
+    "pliesPast": 0
    }
   ],
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1190,
+   "durationMs": 1433,
+   "externalCalls": 1,
+   "cacheHit": null
+  }
+ },
+ "view:TheoryOfLine:{\"moves\":\"e4 e5\"}": {
+  "executionId": "exec_d04990f5-91e7-4ef4-b1f6-b022d9835ba2",
+  "operationId": "TheoryOfLine",
+  "contractVersion": "1",
+  "status": "SUCCEEDED",
+  "outcome": "OK",
+  "outputType": "rows",
+  "data": [
+   {
+    "page": "Chess Opening Theory/1. e4/1...e5",
+    "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5",
+    "theory": "== 1...e5 · Open game ==\n1...e5 is the Open game (or the Double King's Pawn game). It is Black's classical response to 1. e4. By mirroring White's move, Black grabs an equal share of the centre and scope to develop some pieces. 1...e5 is also one of the few moves that directly interferes with White's ideal plan of playing d4.\nBut, the move's merit is also a drawback: the longer the position remains symmetrical, the longer White will have an advantage by moving first. Though the move is still common at every level, it saw a modest decline in popularity during the 20th century.\nBlack's pawn on e5 is undefended, so it is easy for White to develop in a way that restricts Black's possible responses by threatening to capture it. This is White's most common plan, but they may also chose to develop without attacking. \n\n=== Attack the pawn ===\nWhite may attack Black's undefended e5 pawn. By attacking, White keeps the initiative: Black is forced to react to White's plans or they could lose the pawn.\n2. Nf3 is the overwhelmingly popular move here, about ten times more common than everything else combined. This attacks the pawn while also developing a piece. Additionally, it controls the d4 square, ready to support a future d4 pawn push, and starts to make room for White to castle. By far Black's most common response is 2...Nc6, to defend the pawn while developing a piece. \nAlternatively, White can attack with a pawn. \n2. f4, the King's gambit, confronts the e5 pawn and tries to lever open the f-file for an attack on Black's weak f7 pawn. This is the quintessential Romantic chess opening, popular with the likes of Paul Morphy and a staple of chess repertoires in the time when it was considered bad manners to decline a gambit. Its popularity began to wane in the late 19th century, but received some revival in the 20th century thanks to players including David Bronstein. A prepared Black player should be able to grab the proffered pawn and keep it.\n2. d4, the centre game, smashes the centre open. White can then sacrifice a pawn or two to develop pieces with great speed (2...exd4 3. c3, the Danish gambit).\n\n=== Develop a piece ===\nSince White's pieces are not under threat, they have the opportunity to choose which piece to develop. The main alternatives are 2. Bc4, the Bishop's opening, and 2. Nc3, the Vienna game. These don't immediately challenge e5 so Black has a little more flexibility in how they respond, but they are still solid moves and they keep open the option of either d4 or f4.\nInstead of their kingside knight, White can prioritise their queenside knight with 2. Nc3. Depending on Black's response and their preference, they may following with 3. f4 (the Vienna gambit, a souped-up King's gambit).\nIf White would like to develop their bishop first, then its best move is 2. Bc4 (Be2 is very passive, Bd3 blocks in White's d pawn, Bb5 gets kicked by c6, and Ba6 bxa6, of course). The Bishop's opening is very transpositional depending on how Black responds. …",
+    "pliesCovered": 2,
+    "pliesPast": 0,
+    "licence": "Excerpt from the Chess Opening Theory wikibook, by Wikibooks contributors, CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/); references and tables omitted."
+   }
+  ],
+  "warnings": [],
+  "error": null,
+  "metrics": {
+   "durationMs": 1884,
+   "externalCalls": 1,
+   "cacheHit": null
+  }
+ },
+ "view:BestMoves:{\"fen\":\"rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\",\"maxLines\":5,\"withinCp\":50}": {
+  "executionId": "exec_7d910f7c-d1ca-4c4d-9b96-48fdc3cd070f",
+  "operationId": "BestMoves",
+  "contractVersion": "1",
+  "status": "SUCCEEDED",
+  "outcome": "OK",
+  "outputType": "rows",
+  "data": [
+   {
+    "rank": 1,
+    "move": "Nf3",
+    "uci": "g1f3",
+    "side": "white",
+    "scoreCp": 38,
+    "mate": null,
+    "whiteCp": 38,
+    "lossCp": 0,
+    "line": "Nf3 Nc6 d4 cxd4 Nxd4 g6 Nc3 Bg7 Be3 Nf6 Nxc6 bxc6 e5 Ng8 f4 Rb8 Bd3 Rxb2 Qd2",
+    "lineUci": "g1f3 b8c6 d2d4 c5d4 f3d4 g7g6 b1c3 f8g7 c1e3 g8f6 d4c6 b7c6 e4e5 f6g8 f2f4 a8b8 f1d3 b8b2 d1d2",
+    "depth": 18,
+    "creates": "Black's light-squared bishop on c8 is bad: 5 of 7 black pawns stand on its colour.\nBlack's dark-squared bishop on g7 is good: 2 of 7 black pawns stand on its colour.\nBlack has isolated pawn on a7.\nHalf-open for White: the d-file.\nHalf-open for Black: the b-file.",
+    "removes": ""
+   },
+   {
+    "rank": 2,
+    "move": "Nc3",
+    "uci": "b1c3",
+    "side": "white",
+    "scoreCp": 30,
+    "mate": null,
+    "whiteCp": 30,
+    "lossCp": 8,
+    "line": "Nc3 Nc6 Nf3 e5 Bc4 Be7 d3 d6 O-O a6 a4 Nf6 Ng5 O-O f4 exf4 Bxf4 h6",
+    "lineUci": "b1c3 b8c6 g1f3 e7e5 f1c4 f8e7 d2d3 d7d6 e1g1 a7a6 a2a4 g8f6 f3g5 e8g8 f2f4 e5f4 c1f4 h7h6",
+    "depth": 18,
+    "creates": "White's light-squared bishop on c4 is bad but active: 5 of 8 white pawns stand on its colour.\nBlack has a backward pawn on d6.\nWhite has outpost square on d5 (guarded by a pawn, beyond the reach of enemy pawns).",
+    "removes": "White's king is still in the centre, on e1."
+   },
+   {
+    "rank": 3,
+    "move": "Ne2",
+    "uci": "g1e2",
+    "side": "white",
+    "scoreCp": 28,
+    "mate": null,
+    "whiteCp": 28,
+    "lossCp": 10,
+    "line": "Ne2 Nf6 Nbc3 e5 Ng3 h5 Bc4 h4 Nf5 h3 g4 Nc6 d3 g6 Ne3 Bh6 Rg1",
+    "lineUci": "g1e2 g8f6 b1c3 e7e5 e2g3 h7h5 f1c4 h5h4 g3f5 h4h3 g2g4 b8c6 d2d3 g7g6 f5e3 f8h6 h1g1",
+    "depth": 18,
+    "creates": "Black has more space (5 against 2 by pawn control of the opponent's half).\nWhite has outpost square on d5 (guarded by a pawn, beyond the reach of enemy pawns).",
+    "removes": ""
+   },
+   {
+    "rank": 4,
+    "move": "c3",
+    "uci": "c2c3",
+    "side": "white",
+    "scoreCp": 17,
+    "mate": null,
+    "whiteCp": 17,
+    "lossCp": 21,
+    "line": "c3 Nf6 e5 Nd5 d4 cxd4 Nf3 e6 cxd4 d6 Nc3 Nc6 Bb5 dxe5 dxe5 Be7 O-O Nxc3",
+    "lineUci": "c2c3 g8f6 e4e5 f6d5 d2d4 c5d4 g1f3 e7e6 c3d4 d7d6 b1c3 b8c6 f1b5 d6e5 d4e5 f8e7 e1g1 d5c3",
+    "depth": 18,
+    "creates": "White's dark-squared bishop on c1 is bad: 5 of 7 white pawns stand on its colour.\nWhite's light-squared bishop on f1 is good: 2 of 7 white pawns stand on its colour.\nWhite has a backward pawn on d4.\nWhite has more space (5 against 0 by pawn control of the opponent's half).\nOpen file: c.\nBlack's knight on d5 stands on an outpost no pawn can challenge.",
+    "removes": ""
+   },
+   {
+    "rank": 5,
+    "move": "d4",
+    "uci": "d2d4",
+    "side": "white",
+    "scoreCp": 12,
+    "mate": null,
+    "whiteCp": 12,
+    "lossCp": 26,
+    "line": "d4 cxd4 Nf3 e5 c3 Nc6 cxd4 exd4 Nxd4 Nf6 Nc3 Bb4 Bc4 Nxe4 O-O Bxc3 bxc3 d5 Bb5 O-O Nxc6 bxc6 Bxc6 Ba6 Bxa8",
+    "lineUci": "d2d4 c5d4 g1f3 e7e5 c2c3 b8c6 c3d4 e5d4 f3d4 g8f6 b1c3 f8b4 f1c4 f6e4 e1g1 b4c3 b2c3 d7d5 c4b5 e8g8 d4c6 b7c6 b5c6 c8a6 c6a8",
+    "depth": 18,
+    "creates": "Black's light-squared bishop on c8 is bad: 4 of 6 black pawns stand on its colour.\nBlack's dark-squared bishop on f8 is good: 2 of 6 black pawns stand on its colour.\nBlack has an isolated queen's pawn (d7).\nPawn islands: White 2, Black 3.\nBlack has a queenside pawn majority (3 against 2, counting the a-d files).\nWhite has a kingside pawn majority (4 against 3, counting the e-h files).\nOpen file: c.\nHalf-open for White: the d-file.\nWhite has outpost square on d5 (guarded by a pawn, beyond the reach of enemy pawns).\nHalf-open for Black: the e-file.",
+    "removes": ""
+   }
+  ],
+  "warnings": [],
+  "error": null,
+  "metrics": {
+   "durationMs": 4436,
+   "externalCalls": 1,
+   "cacheHit": null
+  }
+ },
+ "view:ImbalancesOf:{\"fen\":\"rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\"}": {
+  "executionId": "exec_530014df-c74f-4dc1-8d8f-8df5ceffa224",
+  "operationId": "ImbalancesOf",
+  "contractVersion": "1",
+  "status": "SUCCEEDED",
+  "outcome": "OK",
+  "outputType": "rows",
+  "data": [
+   {
+    "sideToMove": "white",
+    "phase": "opening",
+    "facts": "Phase: opening. White to move.\nMaterial is level.\nWhite still has Nb1, Ng1, Bc1 and Bf1 undeveloped.\nWhite's king is still in the centre, on e1.\nBlack still has Nb8, Ng8, Bc8 and Bf8 undeveloped.\nBlack's king is still in the centre, on e8.\nWhite has the freer pieces: 30 legal moves against 22.",
+    "structure": "The pawn structure is the one reached in: Sicilian Defense (B20); Sicilian Defense: Closed (B23); Sicilian Defense: Old Sicilian (B30).",
+    "materialWhite": 39,
+    "materialBlack": 39,
+    "bishopPairWhite": true,
+    "bishopPairBlack": true,
+    "passedWhite": "",
+    "passedBlack": "",
+    "openFiles": "",
+    "oppositeSideCastling": false,
+    "oppositeColouredBishops": false
+   }
+  ],
+  "warnings": [],
+  "error": null,
+  "metrics": {
+   "durationMs": 1319,
+   "externalCalls": 1,
+   "cacheHit": null
+  }
+ },
+ "view:OpeningOfLine:{\"moves\":\"e4 c5\"}": {
+  "executionId": "exec_dbc7cbef-f1c1-43ee-9399-6324b713968a",
+  "operationId": "OpeningOfLine",
+  "contractVersion": "1",
+  "status": "SUCCEEDED",
+  "outcome": "OK",
+  "outputType": "rows",
+  "data": [
+   {
+    "eco": "B20",
+    "name": "Sicilian Defense",
+    "bookMoves": "1. e4 c5",
+    "namedAtPly": 2,
+    "pliesPast": 0
+   }
+  ],
+  "warnings": [],
+  "error": null,
+  "metrics": {
+   "durationMs": 1514,
+   "externalCalls": 1,
+   "cacheHit": null
+  }
+ },
+ "view:TheoryOfLine:{\"moves\":\"e4 c5\"}": {
+  "executionId": "exec_e980e80c-6278-4fdf-a272-a5bf58281b78",
+  "operationId": "TheoryOfLine",
+  "contractVersion": "1",
+  "status": "SUCCEEDED",
+  "outcome": "OK",
+  "outputType": "rows",
+  "data": [
+   {
+    "page": "Chess Opening Theory/1. e4/1...c5",
+    "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...c5",
+    "theory": "== 1...c5 · Sicilian defence ==\n1...c5 is the Sicilian defence, a counter-attacking, asymmetric opening. Black controls the d4 square with a flank pawn, asserting that trading their flank c-pawn for White's d-pawn will surely be to their advantage, as it will leave them with two central pawns to White's one. Black would love to one day achieve d5, and exploit the c-file should it open. \nThe main approach for White is the Open Sicilian: 2. Nf3 intending to bust open the position with 3. d4. This is the most testing approach, but as it is also normally what Black is most prepared for, a number of other approaches, the \"anti-Sicilians\", are also popular. \n\n=== Open the position ===\nThe drawback of 1...c5 is that it does not help Black to develop (compare 1...e5, which both controls d4 and opens a line for the king's bishop). After 1...c5, Black must eventually play another pawn move before a bishop can come out. Therefore White will be able to develop faster, and the most principled way to press this advantage is to open the position. \n2. Nf3 is the Open Sicilian. This prepares 3. d4 cxd4 and White can recapture with the knight. They will have a centralised knight, clear lines to develop both bishops and their queen, and an open, attacking position. Black has a centre pawn majority and a half-open c-file. After the moves 2...Nc6 or 2...d6, White has the alternative 3. Bb5, the Rossolimo or Moscow variations respectively.\nWhite can also play 2. d4 immediately, without preparing it with 2. Nf3. This was the approach in the 19th century but after 2...cxd4 3. Qxd4!? loses time to 3...Nc6, so today it is more usual to prepare d4 with 2. Nf3. Alternatively White may play 2. d4 cxd4 3. c3, the Smith-Morra gambit, to offer a pawn in exchange for faster development.\n\n=== Keep the position closed ===\n2. Nc3 is the chief alternative second move. White opts to avoid trading their d-pawn and keep the position closed. In the mainline Closed Sicilian, White fianchettos their kingside bishop and plays d3, Be3, Nge2, and Qd2. This typically leads to a more closed and slow-burning position.\nAnother approach for White is to take advantage of their space on the kingside and launch the violent Grand Prix attack, where White plays an early f4, places their knight on f3 behind the pawn, and brings their queen into the attack via a Qd1-Qe1-Qh4 manoeuvre. \n2. Nc3 is also a waiting move: after they get a bit more information about how Black wishes to play, White may still play Nf3 and d4 and transpose. \n\n=== Play d4 and keep it there ===\nWhite may wish to put a pawn on d4 and have some hope of keeping it there. \n2. c3, the Alapin, prepares to play 3. d4 and if the d-pawn is captured, to replace it with the c-pawn. This diffuses any advantage Black would hope to gain from trading a flank pawn for a centre pawn as White keeps two pawns in the centre. \nBlack can't prevent White from playing 3. …",
+    "pliesCovered": 2,
+    "pliesPast": 0,
+    "licence": "Excerpt from the Chess Opening Theory wikibook, by Wikibooks contributors, CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/); references and tables omitted."
+   }
+  ],
+  "warnings": [],
+  "error": null,
+  "metrics": {
+   "durationMs": 1758,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:BestMoves:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"maxLines\":5,\"withinCp\":50}": {
-  "executionId": "exec_b5f4e4e1-e519-4bb7-b0e7-46c5deb9c37a",
+  "executionId": "exec_c6353a97-954d-4e92-a6f0-6827783f8a51",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -518,13 +729,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 3574,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 38,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:ImbalancesOf:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\"}": {
-  "executionId": "exec_2d1a7ee1-adfe-4a75-8c0b-c9a73bfc9892",
+  "executionId": "exec_e32cde15-85fe-4a0d-9162-fb272a004769",
   "operationId": "ImbalancesOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -550,13 +761,62 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1098,
+   "durationMs": 29,
+   "externalCalls": 0,
+   "cacheHit": true
+  }
+ },
+ "view:OpeningOfLine:{\"moves\":\"e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1\"}": {
+  "executionId": "exec_1167caa8-f02b-4561-ac69-f94c47390ac0",
+  "operationId": "OpeningOfLine",
+  "contractVersion": "1",
+  "status": "SUCCEEDED",
+  "outcome": "OK",
+  "outputType": "rows",
+  "data": [
+   {
+    "eco": "C69",
+    "name": "Ruy Lopez: Exchange Variation, Gligoric Variation",
+    "bookMoves": "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6",
+    "namedAtPly": 10,
+    "pliesPast": 7
+   }
+  ],
+  "warnings": [],
+  "error": null,
+  "metrics": {
+   "durationMs": 1448,
+   "externalCalls": 1,
+   "cacheHit": null
+  }
+ },
+ "view:TheoryOfLine:{\"moves\":\"e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1\"}": {
+  "executionId": "exec_3f5ad2f3-701a-41be-92f7-97ac780d83dc",
+  "operationId": "TheoryOfLine",
+  "contractVersion": "1",
+  "status": "SUCCEEDED",
+  "outcome": "OK",
+  "outputType": "rows",
+  "data": [
+   {
+    "page": "Chess Opening Theory/1. e4/1...e5/2. Nf3/2...Nc6/3. Bb5/3...a6/4. Bxc6/4...dxc6/5. O-O/5...f6/6. d4",
+    "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6/4._Bxc6/4...dxc6/5._O-O/5...f6/6._d4",
+    "theory": "== 6. d4 · Gligorić variation ==\nWhite opens up the center with this move and attacks the e5-pawn. \nBlack has two main moves, he can either take the d4-pawn with 6...exd4, or pin the knight with 6...Bg4.",
+    "pliesCovered": 11,
+    "pliesPast": 6,
+    "licence": "Excerpt from the Chess Opening Theory wikibook, by Wikibooks contributors, CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/); references and tables omitted."
+   }
+  ],
+  "warnings": [],
+  "error": null,
+  "metrics": {
+   "durationMs": 1756,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:OpeningOf:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\"}": {
-  "executionId": "exec_f3e1459b-0bab-4911-9f67-91c364ba040f",
+  "executionId": "exec_a1eac498-bd2f-4d7c-9f44-8fdb8574c501",
   "operationId": "OpeningOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -566,13 +826,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1164,
+   "durationMs": 1647,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\",\"maxLines\":5,\"withinCp\":20}": {
-  "executionId": "exec_bc2b49cd-48cf-48f7-8448-13f474b207c1",
+  "executionId": "exec_90921e03-0dde-42c8-bb2b-58ab83f46a07",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -658,13 +918,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 28,
+   "durationMs": 44,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\",\"maxLines\":5,\"withinCp\":100}": {
-  "executionId": "exec_2fca8f50-b7d5-4a1b-8902-b209b40f7899",
+  "executionId": "exec_109a12ed-0141-430b-9bd1-f6aacc9fb1de",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -750,13 +1010,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 29,
+   "durationMs": 39,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"maxLines\":5,\"withinCp\":20}": {
-  "executionId": "exec_2c8d41f7-a92c-43d2-ae9a-1f6a27a5aa53",
+  "executionId": "exec_22ccf654-be87-4c34-8c92-6665309802ce",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -812,13 +1072,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 24,
+   "durationMs": 38,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"maxLines\":5,\"withinCp\":100}": {
-  "executionId": "exec_fe6e05d4-1418-482b-b1a0-fd5b1d52b513",
+  "executionId": "exec_19756ab2-acce-4c9c-92f6-797c43ff65bc",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -904,13 +1164,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 29,
+   "durationMs": 38,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:PlansInPosition:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\"}": {
-  "executionId": "exec_c03ad266-2f15-4b7b-ae9a-83dde0af5660",
+  "executionId": "exec_604aa15a-8372-4d74-af33-8d36abafc54a",
   "operationId": "PlansInPosition",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -920,80 +1180,169 @@
    {
     "side": "white",
     "priority": 1,
-    "plan": "Active development and piece pressure",
-    "idea": "White's slight lead in development and freer pieces make it important to bring out the queenside minor pieces quickly and seize open lines, especially the d-file. Controlling central and open files with the rooks and coordinating to invade or provoke pawn weaknesses is key.",
-    "moves": "Nc3 Bf4 Na4 Be3",
+    "plan": "Develop quickly and seize open d-file",
+    "idea": "White should aim to complete development—especially Nc3 and Bf4-e3—bringing rooks to the open d-file to pressure Black's position and discourage Black's king from castling queenside. White's faster development can restrict Black's maneuvering and create tactical threats on d7 or d8.",
+    "moves": "Nc3 Bf4 Be3 Rd1",
     "imbalances": "Open file: d.\nWhite holds an open file with the rook d1.\nWhite still has Nb1 and Bc1 undeveloped.\nWhite has the freer pieces: 34 legal moves against 23.",
-    "engineEvidence": "All Black candidate moves are met by Nc3, Na4, or Bf4 in engine lines.",
-    "summary": "The position is roughly balanced but with subtle imbalances: Black retains the bishop pair, but has doubled c-pawns and a somewhat awkward kingside development. White has more active pieces and controls the open d-file, while both sides have pawn majorities on opposite wings. The engine's top moves, especially Be6 and Bg4, are motivated by piece activity and getting the king to safety, as both sides may soon castle on opposite flanks and race for open lines. Black wants to simplify and activate the bishops but must solve development and avoid lingering with the king in the center. White should prioritize rapid development, occupying open space and files, and leveraging a freer position to press first.",
-    "structure": "none",
+    "engineEvidence": "All main engine lines show White playing Nc3, Bf4, Be3, and rook to d1.",
+    "summary": "The position is balanced, but White is somewhat more comfortable due to freer development and the initiative on the open d-file. Black holds the bishop pair as a resource, but suffers from queenside pawn weaknesses and cramped pieces, with the king still in the center. Both sides have pawn majorities on opposite flanks, but immediate pawn play is not favored by the engine; piece activity and king safety are more pressing. Black's plans revolve around exchanging a pair of minor pieces to ease development and preparing to castle queenside, as shown by the candidate moves. White's plans focus on rapid development, pressure on the d-file, and using the slight lead in activity to restrict Black.",
+    "structure": "Ruy Lopez Exchange",
     "opening": ""
    },
    {
     "side": "white",
     "priority": 2,
-    "plan": "Play for kingside majority",
-    "idea": "White can consider using the kingside pawn majority to initiate play, especially if Black castles queenside, by means of f4 or an eventual f3-g4 thrust to cramp Black's bishop and knight. If Black's king stays in the center too long, White can open lines rapidly.",
-    "moves": "f4 f3 g4",
-    "imbalances": "White has a kingside pawn majority (4 against 3, counting the e-h files).\nWhite has the freer pieces: 34 legal moves against 23.",
-    "engineEvidence": "Appears after Bg4 or g5 lines (f3).",
-    "summary": "The position is roughly balanced but with subtle imbalances: Black retains the bishop pair, but has doubled c-pawns and a somewhat awkward kingside development. White has more active pieces and controls the open d-file, while both sides have pawn majorities on opposite wings. The engine's top moves, especially Be6 and Bg4, are motivated by piece activity and getting the king to safety, as both sides may soon castle on opposite flanks and race for open lines. Black wants to simplify and activate the bishops but must solve development and avoid lingering with the king in the center. White should prioritize rapid development, occupying open space and files, and leveraging a freer position to press first.",
-    "structure": "none",
+    "plan": "Target queenside pawn weaknesses",
+    "idea": "After Black exchanges on b3 or develops the queenside, White can consider pressuring the c5 pawn or playing a4 to create further weaknesses. This leverages Black's doubled c-pawns and White's greater piece activity to open lines on the queenside.",
+    "moves": "a4 axb3 Nb5",
+    "imbalances": "Black has doubled pawns on the c-file.\nBlack has a queenside pawn majority (4 against 3, counting the a-d files).\nWhite has the freer pieces: 34 legal moves against 23.",
+    "engineEvidence": "The main line after Be6, Nc3, Bd6, Na4, Bxb3, axb3 shows White gaining a target on the c5 pawn.",
+    "summary": "The position is balanced, but White is somewhat more comfortable due to freer development and the initiative on the open d-file. Black holds the bishop pair as a resource, but suffers from queenside pawn weaknesses and cramped pieces, with the king still in the center. Both sides have pawn majorities on opposite flanks, but immediate pawn play is not favored by the engine; piece activity and king safety are more pressing. Black's plans revolve around exchanging a pair of minor pieces to ease development and preparing to castle queenside, as shown by the candidate moves. White's plans focus on rapid development, pressure on the d-file, and using the slight lead in activity to restrict Black.",
+    "structure": "Ruy Lopez Exchange",
     "opening": ""
    },
    {
     "side": "white",
     "priority": 3,
-    "plan": "Target Black's c-pawns",
-    "idea": "The doubled c-pawns are a long-term weakness; White can consider Nc3-Nd5 or Nc3-Na4-c4 ideas to fix or attack the c5 and c7 pawns, especially after opening the d-file further. If the position simplifies, this weakness could be decisive.",
-    "moves": "Nc3 Nd5 Na4",
-    "imbalances": "Black has doubled pawns on the c-file.\nOpen file: d.",
-    "engineEvidence": "Nc3/Na4 in best lines after Be6 and Bg4.",
-    "summary": "The position is roughly balanced but with subtle imbalances: Black retains the bishop pair, but has doubled c-pawns and a somewhat awkward kingside development. White has more active pieces and controls the open d-file, while both sides have pawn majorities on opposite wings. The engine's top moves, especially Be6 and Bg4, are motivated by piece activity and getting the king to safety, as both sides may soon castle on opposite flanks and race for open lines. Black wants to simplify and activate the bishops but must solve development and avoid lingering with the king in the center. White should prioritize rapid development, occupying open space and files, and leveraging a freer position to press first.",
-    "structure": "none",
+    "plan": "Prepare potential kingside expansion",
+    "idea": "If Black castles queenside, White has the option in some lines to expand on the kingside with moves like f4 or h4, supporting an attack where Black's king resides, especially since pawn storms cost little in king safety with opposite-side castling.",
+    "moves": "f4 h4",
+    "imbalances": "White has a kingside pawn majority (4 against 3, counting the e-h files).\nBlack's king is still in the centre, on e8.\nWhite has the freer pieces: 34 legal moves against 23.",
+    "engineEvidence": "The engine lines do not immediately pursue this, but it's shown in lines where the kings go to opposite wings.",
+    "summary": "The position is balanced, but White is somewhat more comfortable due to freer development and the initiative on the open d-file. Black holds the bishop pair as a resource, but suffers from queenside pawn weaknesses and cramped pieces, with the king still in the center. Both sides have pawn majorities on opposite flanks, but immediate pawn play is not favored by the engine; piece activity and king safety are more pressing. Black's plans revolve around exchanging a pair of minor pieces to ease development and preparing to castle queenside, as shown by the candidate moves. White's plans focus on rapid development, pressure on the d-file, and using the slight lead in activity to restrict Black.",
+    "structure": "Ruy Lopez Exchange",
     "opening": ""
    },
    {
     "side": "black",
     "priority": 1,
-    "plan": "Develop and castle (often queenside)",
-    "idea": "Black must complete development and decide on king safety, often castling long for safety and activity. Placing the king on c8/b7 helps coordinate rooks and makes use of queenside pawn majority. Development choices (Be6, Bd6, Bg4) all clear the way for castling and connect the rooks.",
-    "moves": "Be6 Bg4 Bd7 O-O-O",
-    "imbalances": "Black has the bishop pair.\nBlack still has Ng8, Bc8 and Bf8 undeveloped.\nBlack's king is still in the centre, on e8.",
-    "engineEvidence": "Be6, Bg4, Bd7 are all among the engine's top choices.",
-    "summary": "The position is roughly balanced but with subtle imbalances: Black retains the bishop pair, but has doubled c-pawns and a somewhat awkward kingside development. White has more active pieces and controls the open d-file, while both sides have pawn majorities on opposite wings. The engine's top moves, especially Be6 and Bg4, are motivated by piece activity and getting the king to safety, as both sides may soon castle on opposite flanks and race for open lines. Black wants to simplify and activate the bishops but must solve development and avoid lingering with the king in the center. White should prioritize rapid development, occupying open space and files, and leveraging a freer position to press first.",
-    "structure": "none",
+    "plan": "Exchange minor pieces to ease development",
+    "idea": "Black should aim to exchange a pair of minor pieces, especially the dark-squared bishops or one knight for White's bishop. This reduces White's activity and helps Black overcome development problems, as seen in the suggested Be6 or Bg4 lines.",
+    "moves": "Be6 Bg4 Bxb3",
+    "imbalances": "Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nBlack still has Ng8, Bc8 and Bf8 undeveloped.\nBlack's king is still in the centre, on e8.",
+    "engineEvidence": "Both Be6 and Bg4 directly pursue exchanges; lines show Bxb3 or trades on e6.",
+    "summary": "The position is balanced, but White is somewhat more comfortable due to freer development and the initiative on the open d-file. Black holds the bishop pair as a resource, but suffers from queenside pawn weaknesses and cramped pieces, with the king still in the center. Both sides have pawn majorities on opposite flanks, but immediate pawn play is not favored by the engine; piece activity and king safety are more pressing. Black's plans revolve around exchanging a pair of minor pieces to ease development and preparing to castle queenside, as shown by the candidate moves. White's plans focus on rapid development, pressure on the d-file, and using the slight lead in activity to restrict Black.",
+    "structure": "Ruy Lopez Exchange",
     "opening": ""
    },
    {
     "side": "black",
     "priority": 2,
-    "plan": "Mobilize bishop pair for activity",
-    "idea": "Black should use the bishop pair to exert pressure and fight for activity, especially before the position closes. Trading off a bishop for White's defending knight (Be6-Bxb3 or Bg4xN) is justified if it yields open files and targets. Good bishop placement (especially on open diagonals) is key for long-term chances.",
-    "moves": "Be6 Bg4 Bxb3 Bd6",
-    "imbalances": "Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.",
-    "engineEvidence": "Be6-Bxb3/ Bg4 lines trade a bishop for a knight to increase activity.",
-    "summary": "The position is roughly balanced but with subtle imbalances: Black retains the bishop pair, but has doubled c-pawns and a somewhat awkward kingside development. White has more active pieces and controls the open d-file, while both sides have pawn majorities on opposite wings. The engine's top moves, especially Be6 and Bg4, are motivated by piece activity and getting the king to safety, as both sides may soon castle on opposite flanks and race for open lines. Black wants to simplify and activate the bishops but must solve development and avoid lingering with the king in the center. White should prioritize rapid development, occupying open space and files, and leveraging a freer position to press first.",
-    "structure": "none",
+    "plan": "Castle queenside quickly for king safety",
+    "idea": "With the kingside unsafe for castling and the center open, Black should prepare castling long (O-O-O), moving the king off the e-file and linking the rooks for possible counterplay on the open d- and half-open e-file.",
+    "moves": "O-O-O Bd6 Bd7 Kb7",
+    "imbalances": "Black still has Ng8, Bc8 and Bf8 undeveloped.\nBlack's king is still in the centre, on e8.",
+    "engineEvidence": "In several main lines (Be6, Bg4), Black prepares or plays O-O-O quickly.",
+    "summary": "The position is balanced, but White is somewhat more comfortable due to freer development and the initiative on the open d-file. Black holds the bishop pair as a resource, but suffers from queenside pawn weaknesses and cramped pieces, with the king still in the center. Both sides have pawn majorities on opposite flanks, but immediate pawn play is not favored by the engine; piece activity and king safety are more pressing. Black's plans revolve around exchanging a pair of minor pieces to ease development and preparing to castle queenside, as shown by the candidate moves. White's plans focus on rapid development, pressure on the d-file, and using the slight lead in activity to restrict Black.",
+    "structure": "Ruy Lopez Exchange",
     "opening": ""
    },
    {
     "side": "black",
     "priority": 3,
-    "plan": "Queenside majority and central counterplay",
-    "idea": "After castling long, Black may prepare b5–b4 to use the queenside pawn majority in the endgame or open files for the rook. Central counterplay via c4 or e5 (if possible) should be timed to activate the bishops and force open lines for the more mobile pieces.",
-    "moves": "b5 b6 c4",
-    "imbalances": "Black has a queenside pawn majority (4 against 3, counting the a-d files).\nHalf-open for Black: the e-file.",
-    "engineEvidence": "b6, b5/c4 in Be6 and Bd6 engine lines.",
-    "summary": "The position is roughly balanced but with subtle imbalances: Black retains the bishop pair, but has doubled c-pawns and a somewhat awkward kingside development. White has more active pieces and controls the open d-file, while both sides have pawn majorities on opposite wings. The engine's top moves, especially Be6 and Bg4, are motivated by piece activity and getting the king to safety, as both sides may soon castle on opposite flanks and race for open lines. Black wants to simplify and activate the bishops but must solve development and avoid lingering with the king in the center. White should prioritize rapid development, occupying open space and files, and leveraging a freer position to press first.",
-    "structure": "none",
+    "plan": "Exploit the bishop pair in the middlegame",
+    "idea": "After easing development and ensuring king safety, Black can seek open lines or pawn breaks to utilize the bishop pair's long-term power, especially as the position becomes less blocked.",
+    "moves": "Bd6 b6 c4",
+    "imbalances": "Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nBlack has a queenside pawn majority (4 against 3, counting the a-d files).",
+    "engineEvidence": "The engine sometimes continues Bd6, b6, preparing further activity.",
+    "summary": "The position is balanced, but White is somewhat more comfortable due to freer development and the initiative on the open d-file. Black holds the bishop pair as a resource, but suffers from queenside pawn weaknesses and cramped pieces, with the king still in the center. Both sides have pawn majorities on opposite flanks, but immediate pawn play is not favored by the engine; piece activity and king safety are more pressing. Black's plans revolve around exchanging a pair of minor pieces to ease development and preparing to castle queenside, as shown by the candidate moves. White's plans focus on rapid development, pressure on the d-file, and using the slight lead in activity to restrict Black.",
+    "structure": "Ruy Lopez Exchange",
     "opening": ""
    }
   ],
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 12608,
+   "durationMs": 19835,
+   "externalCalls": 1,
+   "cacheHit": null
+  }
+ },
+ "view:PlansInLine:{\"moves\":\"e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1\"}": {
+  "executionId": "exec_401863f5-81f6-4417-b463-1b186992be50",
+  "operationId": "PlansInLine",
+  "contractVersion": "1",
+  "status": "SUCCEEDED",
+  "outcome": "OK",
+  "outputType": "rows",
+  "data": [
+   {
+    "side": "white",
+    "priority": 1,
+    "plan": "Activate on the open file",
+    "idea": "White should use their rook on the open d-file to put pressure on Black's queenside and hinder Black's castling or activity. This makes use of White's more developed rook and holds the initiative as long as Black's king is centered.",
+    "moves": "Rd1 Nc3 Bf4 Be3",
+    "imbalances": "Open file: d.\nWhite holds an open file with the rook d1.\nWhite has the freer pieces: 34 legal moves against 23.",
+    "engineEvidence": "Lines after Be6 (Nc3, Rd1, Be3, etc.)",
+    "summary": "The position is quite balanced, but Black has the bishop pair while White has a kingside pawn majority and some lead in development. The doubled c-pawns give Black a slight structural weakness, but Black's bishop pair and possible queenside majority could become effective in an endgame. White will aim to exploit their space, activity, and open file, while Black seeks to complete development, prepare queenside castling, and use their bishops and pawns on the queenside. The engine's top moves for Black (Be6, Bg4, Bd7) focus on speedy development and king safety, showing that Black's main plan is to castle and activate the bishops, while White will try to grab space and use the open d-file and their freer pieces.",
+    "structure": "Double pawn majority (Ruy Lopez Exchange, Carlsbad-like, or French…)",
+    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago"
+   },
+   {
+    "side": "white",
+    "priority": 2,
+    "plan": "Exploit development lead",
+    "idea": "White must keep developing quickly (Nc3, Bf4/Be3), threatening Black's still-centralized king and possibly opening play in the center or queenside before Black can coordinate. This temporary initiative is key before Black's bishops and king become active or safe.",
+    "moves": "Nc3 Bf4 Be3",
+    "imbalances": "White still has Nb1 and Bc1 undeveloped.\nBlack still has Ng8, Bc8 and Bf8 undeveloped.\nWhite has the freer pieces: 34 legal moves against 23.",
+    "engineEvidence": "Lines after Be6, Bg4, and Bd7 all show Nc3 and Bf4/Be3",
+    "summary": "The position is quite balanced, but Black has the bishop pair while White has a kingside pawn majority and some lead in development. The doubled c-pawns give Black a slight structural weakness, but Black's bishop pair and possible queenside majority could become effective in an endgame. White will aim to exploit their space, activity, and open file, while Black seeks to complete development, prepare queenside castling, and use their bishops and pawns on the queenside. The engine's top moves for Black (Be6, Bg4, Bd7) focus on speedy development and king safety, showing that Black's main plan is to castle and activate the bishops, while White will try to grab space and use the open d-file and their freer pieces.",
+    "structure": "Double pawn majority (Ruy Lopez Exchange, Carlsbad-like, or French…)",
+    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago"
+   },
+   {
+    "side": "white",
+    "priority": 3,
+    "plan": "Advance kingside pawns",
+    "idea": "With a pawn majority on the kingside, White may consider kingside pawn advances (f2-f3, sometimes g2-g4) to gain space, especially if Black castles queenside. This provides space and potential attacking chances if the Black king goes to c8.",
+    "moves": "f3 g4 h3",
+    "imbalances": "White has a kingside pawn majority (4 against 3, counting the e-h files).\nWhite has the freer pieces: 34 legal moves against 23.",
+    "engineEvidence": "Bg4 f3, g5 lines (though g4 less shown)",
+    "summary": "The position is quite balanced, but Black has the bishop pair while White has a kingside pawn majority and some lead in development. The doubled c-pawns give Black a slight structural weakness, but Black's bishop pair and possible queenside majority could become effective in an endgame. White will aim to exploit their space, activity, and open file, while Black seeks to complete development, prepare queenside castling, and use their bishops and pawns on the queenside. The engine's top moves for Black (Be6, Bg4, Bd7) focus on speedy development and king safety, showing that Black's main plan is to castle and activate the bishops, while White will try to grab space and use the open d-file and their freer pieces.",
+    "structure": "Double pawn majority (Ruy Lopez Exchange, Carlsbad-like, or French…)",
+    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago"
+   },
+   {
+    "side": "black",
+    "priority": 1,
+    "plan": "Develop and castle queenside",
+    "idea": "Black's priority is to finish developing the bishops (Be6/Bg4, Bd6/Bd7) and castle queenside, where the pawn structure gives more safety. This is seen in the engine lines and fixes the king-in-the-center issue, crucial for activating the bishop pair.",
+    "moves": "Be6 Bd7 Bg4 O-O-O",
+    "imbalances": "Black has the bishop pair.\nBlack still has Ng8, Bc8 and Bf8 undeveloped.\nBlack's king is still in the centre, on e8.",
+    "engineEvidence": "Be6, Bg4, Bd7 all aiming to let O-O-O happen",
+    "summary": "The position is quite balanced, but Black has the bishop pair while White has a kingside pawn majority and some lead in development. The doubled c-pawns give Black a slight structural weakness, but Black's bishop pair and possible queenside majority could become effective in an endgame. White will aim to exploit their space, activity, and open file, while Black seeks to complete development, prepare queenside castling, and use their bishops and pawns on the queenside. The engine's top moves for Black (Be6, Bg4, Bd7) focus on speedy development and king safety, showing that Black's main plan is to castle and activate the bishops, while White will try to grab space and use the open d-file and their freer pieces.",
+    "structure": "Double pawn majority (Ruy Lopez Exchange, Carlsbad-like, or French…)",
+    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago"
+   },
+   {
+    "side": "black",
+    "priority": 2,
+    "plan": "Use the bishop pair",
+    "idea": "After castling and completing development, Black should activate their bishops—often via Be6/Bd6 and possible exchanges—to maximize their power on the open board. Trading bishops only when favorable, especially if it damages White's structure (such as Bxb3), is optimal.",
+    "moves": "Be6 Bd6 Bxb3",
+    "imbalances": "Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nBlack still has Ng8, Bc8 and Bf8 undeveloped.",
+    "engineEvidence": "Be6, Bd6, critical bishop moves",
+    "summary": "The position is quite balanced, but Black has the bishop pair while White has a kingside pawn majority and some lead in development. The doubled c-pawns give Black a slight structural weakness, but Black's bishop pair and possible queenside majority could become effective in an endgame. White will aim to exploit their space, activity, and open file, while Black seeks to complete development, prepare queenside castling, and use their bishops and pawns on the queenside. The engine's top moves for Black (Be6, Bg4, Bd7) focus on speedy development and king safety, showing that Black's main plan is to castle and activate the bishops, while White will try to grab space and use the open d-file and their freer pieces.",
+    "structure": "Double pawn majority (Ruy Lopez Exchange, Carlsbad-like, or French…)",
+    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago"
+   },
+   {
+    "side": "black",
+    "priority": 3,
+    "plan": "Generate queenside play and pressure open/half-open files",
+    "idea": "In the long run, Black can aim to use their queenside majority and the semi-open d/e-files to create counterplay—sometimes pushing c4 to undouble c-pawns or using the d8-rook for file pressure. With careful play, Black can offset the doubled c-pawns by activity.",
+    "moves": "b6 c4 Rd8",
+    "imbalances": "Black has doubled pawns on the c-file.\nBlack has a queenside pawn majority (4 against 3, counting the a-d files).\nHalf-open for Black: the e-file.",
+    "engineEvidence": "Be6 line with b6, c4 in Bg4 line",
+    "summary": "The position is quite balanced, but Black has the bishop pair while White has a kingside pawn majority and some lead in development. The doubled c-pawns give Black a slight structural weakness, but Black's bishop pair and possible queenside majority could become effective in an endgame. White will aim to exploit their space, activity, and open file, while Black seeks to complete development, prepare queenside castling, and use their bishops and pawns on the queenside. The engine's top moves for Black (Be6, Bg4, Bd7) focus on speedy development and king safety, showing that Black's main plan is to castle and activate the bishops, while White will try to grab space and use the open d-file and their freer pieces.",
+    "structure": "Double pawn majority (Ruy Lopez Exchange, Carlsbad-like, or French…)",
+    "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago"
+   }
+  ],
+  "warnings": [],
+  "error": null,
+  "metrics": {
+   "durationMs": 23762,
    "externalCalls": 1,
    "cacheHit": null
   }

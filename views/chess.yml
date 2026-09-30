@@ -71,3 +71,41 @@
            pl.moves AS moves, pl.imbalances AS imbalances, pl.engineEvidence AS engineEvidence,
            pl.summary AS summary, pl.structure AS structure, pl.opening AS opening
     ORDER BY side DESC, priority
+
+- name: OpeningOfLine
+  description: "The opening a game became: the deepest named book position along its moves, and how far past it the game has gone. A game keeps its name after it leaves the book — twenty moves into the Exchange Ruy Lopez it is still the Exchange Ruy Lopez. Answers 'what opening is this game', 'what variation did we play'."
+  params:
+    moves:
+      type: string
+      default: "e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1"
+      description: "The game's moves from the start in SAN, space-separated."
+  cypher: |
+    MATCH (g:GameLine {moves: $moves})-[:IN_OPENING]->(o:Opening)
+    RETURN o.eco AS eco, o.name AS name, o.pgn AS bookMoves,
+           toInteger(o.namedAtPly) AS namedAtPly, toInteger(o.pliesPast) AS pliesPast
+
+- name: PlansInLine
+  description: "The plans for both sides in the position a game has reached, judged by a model with the chess-plans skill knowing the game's opening name — which the position alone loses once it leaves the book. Same shape as PlansInPosition. Costs an engine search and a model call per new line; cached for a week."
+  params:
+    moves:
+      type: string
+      default: "e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1"
+      description: "The game's moves from the start in SAN, space-separated."
+  cypher: |
+    MATCH (g:GameLine {moves: $moves})-[:HAS_PLAN]->(pl:Plan)
+    RETURN pl.side AS side, toInteger(pl.priority) AS priority, pl.name AS plan, pl.idea AS idea,
+           pl.moves AS moves, pl.imbalances AS imbalances, pl.engineEvidence AS engineEvidence,
+           pl.summary AS summary, pl.structure AS structure, pl.opening AS opening
+    ORDER BY side DESC, priority
+
+- name: TheoryOfLine
+  description: "What opening theory says about a game line: the deepest page of the Chess Opening Theory wikibook the line reaches, its text (CC BY-SA 4.0), and how far past it the game has gone. Answers 'what does theory say here', 'what is the idea behind this variation', 'why is this move played'."
+  params:
+    moves:
+      type: string
+      default: "e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O"
+      description: "The game's moves from the start in SAN, space-separated."
+  cypher: |
+    MATCH (g:GameLine {moves: $moves})-[:HAS_THEORY]->(t:OpeningTheory)
+    RETURN t.title AS page, t.url AS url, t.theory AS theory, toInteger(t.pliesCovered) AS pliesCovered,
+           toInteger(t.pliesPast) AS pliesPast, t.licence AS licence

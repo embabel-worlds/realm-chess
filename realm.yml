@@ -6,18 +6,20 @@ description: |
   sandbox — gives the best lines. The position's imbalances, in Jeremy
   Silman's sense, are computed from the board: material, the minor pieces,
   pawn structure, space, files, outposts, development, king safety. The
-  Lichess opening book names it when it is a book position. A model with the
+  Lichess opening book names it — along the game's moves, so a line keeps its
+  name long after it leaves the book — and the Chess Opening Theory wikibook
+  (CC BY-SA 4.0) says what theory holds along the line. A model with the
   chess-plans skill then decides the plans for both sides from those facts —
   the King's Indian Classical and Samisch, or the Exchange and closed Ruy
   Lopez, call for opposite plans, and the skill knows which.
 
-  Everything is a Virtual Cypher hop from a pinned Position —
-  HAS_IMBALANCES, IN_OPENING, HAS_CANDIDATE, HAS_PLAN — so the analysis is a
-  query and a REST call, not only a page.
+  Everything is a Virtual Cypher hop from a pinned Position (HAS_IMBALANCES,
+  IN_OPENING, HAS_CANDIDATE, HAS_PLAN) or GameLine (IN_OPENING, HAS_THEORY,
+  HAS_PLAN), so the analysis is a query and a REST call, not only a page.
 
-  No source system, no account, no key. The engine is GPL-3.0, and so is
+  No account, no key: the wikibook is read through its public API. The engine is GPL-3.0, and so is
   this realm.
-version: 0.2.0
+version: 0.3.0
 
 # Plans are a model's judgement with the chess-plans skill, and need an appliance whose
 # gateway.ai.complete accepts `skills`. On an older one PlansInPosition fails; the engine, the
@@ -35,15 +37,21 @@ tags:
   - skills
 exports:
   - chess
+  - wikibooks
   - Position
+  - GameLine
   - PositionImbalances
   - Opening
   - CandidateMove
   - Plan
+  - OpeningTheory
   - BestMoves
   - ImbalancesOf
   - OpeningOf
   - PlansInPosition
+  - OpeningOfLine
+  - PlansInLine
+  - TheoryOfLine
   # A realm with an exports list loads only the skills named in it; leave this out and the
   # skill is dropped at load with nothing but a debug line to say so.
   - chess-plans

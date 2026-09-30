@@ -4,9 +4,11 @@
  *
  *   APPLIANCE=http://127.0.0.1:11043 APPLIANCE_AUTH="Basic ..." node tests/battery/run.mjs [id ...]
  *
- * It calls the verb directly rather than the PlansInPosition view, because the view's producer
- * caches a position for a week: after a change to the skill, the view would still answer with
- * what the old skill said.
+ * A position given as moves goes through explainLinePlans — the path the app takes for a game
+ * played from the start, where the model is told the line's opening name and what the Chess
+ * Opening Theory wikibook says along it. A position given as a FEN goes through explainPlans.
+ * Both are called directly rather than through their views, because the views' producers cache
+ * for a week: after a change to the skill, a view would still answer with what the old skill said.
  *
  * A plan counts as found when one of the side's returned plans mentions any of its `anyOf`
  * words; a `not` word in any plan of that side fails it. The grading is deliberately crude —
@@ -35,12 +37,13 @@ const positions = parse(readFileSync(join(here, "positions.yml"), "utf8"))
     return { ...p, fen: c.fen() };
   });
 
-async function plansFor(fen) {
+async function plansFor(p) {
   const t = Date.now();
-  const res = await fetch(`${base}/api/v1/tools/explainPlans`, {
+  const [verb, args] = p.moves ? ["explainLinePlans", { lines: [p.moves], role }] : ["explainPlans", { fens: [p.fen], role }];
+  const res = await fetch(`${base}/api/v1/tools/${verb}`, {
     method: "POST",
     headers: { authorization: auth, "content-type": "application/json" },
-    body: JSON.stringify({ fens: [fen], role }),
+    body: JSON.stringify(args),
   });
   const body = await res.json();
   if (!res.ok || body.error) throw new Error(`HTTP ${res.status}: ${JSON.stringify(body.error ?? body).slice(0, 300)}`);
@@ -83,7 +86,7 @@ async function pool(items, n, fn) {
 
 const results = await pool(positions, 3, async (p) => {
   try {
-    const { rows, ms } = await plansFor(p.fen);
+    const { rows, ms } = await plansFor(p);
     const g = grade(p, rows);
     const lead = g.filter((x) => x.leads).length;
     console.log(`${g.every((x) => x.found) ? (lead === g.length ? "PASS" : "PART") : "MISS"}  ${p.id}  found ${g.filter((x) => x.found).length}/${g.length}, leads ${lead}/${g.length}  ${ms} ms`);
@@ -102,7 +105,7 @@ for (const r of results) {
   lines.push(`## ${r.p.id} — ${r.p.opening}`, "", `\`${r.p.fen}\``, "", `Theory: ${r.p.source}`, "");
   if (r.error) { lines.push(`**Failed:** ${r.error}`, ""); continue; }
   for (const g of r.grades) lines.push(`- ${g.leads ? "✓✓" : g.found ? "✓ " : "✗ "} ${g.side}: ${g.plan}${g.matched ? ` (matched "${g.matched}")` : ""}${g.forbidden ? ` — but mentions "${g.forbidden}"` : ""}`);
-  lines.push("", `Structure named: ${r.rows[0]?.structure ?? ""}`, "", `Summary: ${r.rows[0]?.summary ?? ""}`, "");
+  lines.push("", `Opening given: ${r.rows[0]?.opening || "none"}`, "", `Structure named: ${r.rows[0]?.structure ?? ""}`, "", `Summary: ${r.rows[0]?.summary ?? ""}`, "");
   for (const x of r.rows) lines.push(`- **${x.side} ${x.priority}. ${x.name}** — ${x.idea} *Moves:* ${x.moves}. *Uses:* ${(x.imbalances || "").split("\n").join(" / ")}. *Engine:* ${x.engineEvidence}`);
   lines.push("");
 }

@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-30T17:05:50.799Z",
+  "generatedAt": "2026-09-30T17:44:15.225Z",
   "entries": [
     {
       "namespace": "chess",
@@ -103,34 +103,81 @@
     },
     {
       "namespace": "chess",
-      "name": "explainPlans",
-      "description": "The plans for both sides in each position, decided by a model with the chess-plans skill from the position's imbalances, its opening-book name and the engine's candidate moves. The facts are computed; the judgement is the model's.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "fens": {
-            "type": "array",
-            "items": {
+      "name": "explainLinePlans",
+      "description": "The plans in the position a game line reaches, told the line's deepest opening name — which a position looked up alone has lost once it is past the book.",
+      "inputSchema": {},
+      "outputSchema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "line": {
+              "type": "string"
+            },
+            "planId": {
+              "type": "string"
+            },
+            "fen": {
+              "type": "string"
+            },
+            "side": {
+              "type": "string"
+            },
+            "priority": {
+              "type": "number"
+            },
+            "name": {
+              "type": "string"
+            },
+            "idea": {
+              "type": "string"
+            },
+            "moves": {
+              "type": "string"
+            },
+            "imbalances": {
+              "type": "string"
+            },
+            "engineEvidence": {
+              "type": "string"
+            },
+            "summary": {
+              "type": "string"
+            },
+            "structure": {
+              "type": "string"
+            },
+            "opening": {
+              "type": "string"
+            },
+            "model": {
               "type": "string"
             }
           },
-          "withinCp": {
-            "type": "number"
-          },
-          "multiPv": {
-            "type": "number"
-          },
-          "depth": {
-            "type": "number"
-          },
-          "role": {
-            "type": "string"
-          }
-        },
-        "required": [
-          "fens"
-        ]
-      },
+          "required": [
+            "line",
+            "planId",
+            "fen",
+            "side",
+            "priority",
+            "name",
+            "idea",
+            "moves",
+            "imbalances",
+            "engineEvidence",
+            "summary",
+            "structure",
+            "opening",
+            "model"
+          ]
+        }
+      }
+    },
+    {
+      "namespace": "chess",
+      "name": "explainPlans",
+      "description": "The plans for both sides in each position, decided by a model with the chess-plans skill from the position's imbalances, its opening-book name and the engine's candidate moves. The facts are computed; the judgement is the model's.",
+      "inputSchema": {},
       "outputSchema": {
         "type": "array",
         "items": {
@@ -241,6 +288,63 @@
     },
     {
       "namespace": "chess",
+      "name": "openingOfGameLine",
+      "description": "The deepest named opening along each game line (SAN from the start): the name a game keeps after it leaves the book. A line the book never names returns nothing.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "lines"
+        ]
+      },
+      "outputSchema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "line": {
+              "type": "string"
+            },
+            "namedAtPly": {
+              "type": "number"
+            },
+            "pliesPast": {
+              "type": "number"
+            },
+            "fen": {
+              "type": "string"
+            },
+            "eco": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "pgn": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "line",
+            "namedAtPly",
+            "pliesPast",
+            "fen",
+            "eco",
+            "name",
+            "pgn"
+          ]
+        }
+      }
+    },
+    {
+      "namespace": "chess",
       "name": "positionImbalances",
       "description": "Jeremy Silman's imbalances for each position: material, minor pieces, pawn structure, space, files, key squares, development and king safety.",
       "inputSchema": {
@@ -332,6 +436,63 @@
             "oppositeSideCastling",
             "oppositeColouredBishops",
             "detail"
+          ]
+        }
+      }
+    },
+    {
+      "namespace": "chess",
+      "name": "theoryOfGameLine",
+      "description": "What opening theory says along each game line: the deepest page of the Chess Opening Theory wikibook the line reaches.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "lines"
+        ]
+      },
+      "outputSchema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "line": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            },
+            "pliesCovered": {
+              "type": "number"
+            },
+            "pliesPast": {
+              "type": "number"
+            },
+            "theory": {
+              "type": "string"
+            },
+            "licence": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "line",
+            "title",
+            "url",
+            "pliesCovered",
+            "pliesPast",
+            "theory",
+            "licence"
           ]
         }
       }

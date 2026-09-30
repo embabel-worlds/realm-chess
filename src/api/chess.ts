@@ -3,7 +3,8 @@ import { Chess } from "chess.js";
 import { search, type RawLine } from "../lib/engine";
 import { imbalancesOf, type Imbalances } from "../lib/imbalances";
 import { readLine } from "../lib/lines";
-import { openingOf, structureOf, structureSentence } from "../lib/openings";
+import { openingOf, openingOfLine, positionAfter, splitLine, structureOf, structureSentence } from "../lib/openings";
+import { pageUrl, theoryText, theoryTitles } from "../lib/theory";
 
 /*
  * The realm's verbs. Three compute facts — the engine's lines, the position's imbalances, its
@@ -165,6 +166,90 @@ export async function positionImbalances(
 
 export interface OpeningRecord { fen: string; eco: string; name: string; pgn: string }
 
+export interface TheoryRecord {
+  /** The game line: SAN moves from the start, space-separated. */
+  line: string;
+  /** The deepest page along the line that exists. */
+  title: string;
+  url: string;
+  /** How many plies of the line the page covers, and how many the line has gone past it. */
+  pliesCovered: number;
+  pliesPast: number;
+  /** The page's theory, as plain text. Not called `text`: a gateway result whose record has a
+   *  `text` field is unwrapped to that string, and the producer then sees no records at all. */
+  theory: string;
+  licence: string;
+}
+
+type WikibooksPage = { title: string; missing?: string; extract?: string };
+type WikibooksGateway = { wikibooks: { wikibooksQuery(a: Record<string, string>): Promise<{ query?: { pages?: Record<string, WikibooksPage> } }> } };
+
+/*
+ * The deepest page of the Chess Opening Theory wikibook along a line: one request asks which of
+ * the line's prefix pages exist (the deepest 50), a second reads that one's text.
+ */
+async function theoryFor(ctx: GenericGatewayContext, moves: string[]): Promise<TheoryRecord | null> {
+  const wb = (ctx as unknown as WikibooksGateway).wikibooks;
+  const titles = theoryTitles(moves);
+  if (titles.length === 0) return null;
+  const candidates = titles.slice(-50);
+  const info = await wb.wikibooksQuery({ action: "query", format: "json", prop: "info", titles: candidates.join("|") });
+  const present = new Set(Object.values(info.query?.pages ?? {}).filter((p) => p.missing === undefined).map((p) => p.title));
+  const deepest = [...candidates].reverse().find((t) => present.has(t));
+  if (!deepest) return null;
+  const page = await wb.wikibooksQuery({ action: "query", format: "json", prop: "extracts", explaintext: "1", redirects: "1", titles: deepest });
+  const extract = Object.values(page.query?.pages ?? {})[0]?.extract ?? "";
+  const text = theoryText(extract);
+  if (!text) return null;
+  const covered = titles.indexOf(deepest) + 1;
+  return {
+    line: moves.join(" "), title: deepest, url: pageUrl(deepest), pliesCovered: covered, pliesPast: moves.length - covered,
+    theory: text, licence: "Excerpt from the Chess Opening Theory wikibook, by Wikibooks contributors, CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/); references and tables omitted.",
+  };
+}
+
+/** What opening theory says along each game line: the deepest page of the Chess Opening Theory wikibook the line reaches. */
+export async function theoryOfGameLine(
+  ctx: GenericGatewayContext,
+  args: { lines: string[] },
+): Promise<TheoryRecord[]> {
+  const out: TheoryRecord[] = [];
+  for (const raw of args.lines ?? []) {
+    const moves = splitLine(raw);
+    positionAfter(moves);
+    const t = await theoryFor(ctx, moves);
+    if (t) out.push(t);
+  }
+  return out;
+}
+
+export interface LineOpeningRecord extends OpeningRecord {
+  /** The game line looked up: SAN moves from the start, space-separated. */
+  line: string;
+  /** The ply at which the book last named the line. */
+  namedAtPly: number;
+  /** How far past that name the line has gone, in plies. */
+  pliesPast: number;
+}
+
+/**
+ * The deepest named opening along each game line (SAN from the start): the name a game keeps
+ * after it leaves the book. A line the book never names returns nothing.
+ */
+export async function openingOfGameLine(
+  _ctx: GenericGatewayContext,
+  args: { lines: string[] },
+): Promise<LineOpeningRecord[]> {
+  const out: LineOpeningRecord[] = [];
+  for (const raw of args.lines ?? []) {
+    const line = splitLine(raw).join(" ");
+    positionAfter(splitLine(line));
+    const hit = openingOfLine(splitLine(line));
+    if (hit) out.push({ line, fen: hit.fen, eco: hit.eco, name: hit.name, pgn: hit.pgn, namedAtPly: hit.namedAtPly, pliesPast: hit.pliesPast });
+  }
+  return out;
+}
+
 /** The named opening each position is, from the Lichess opening book. A position the book does not name returns nothing. */
 export async function openingLookup(
   _ctx: GenericGatewayContext,
@@ -207,8 +292,8 @@ interface ModelPlan {
   engineEvidence?: string; priority?: number;
 }
 
-function promptFor(fen: string, x: Imbalances, opening: OpeningRecord | null, structure: string | null,
-                   candidates: CandidateLineRecord[], withinCp: number): string {
+function promptFor(fen: string, x: Imbalances, opening: string | null, structure: string | null,
+                   candidates: CandidateLineRecord[], withinCp: number, theory: TheoryRecord | null = null): string {
   const lines = candidates
     .filter((c) => c.rank === 1 || (c.lossCp !== null && c.lossCp <= withinCp))
     .map((c) => {
@@ -226,9 +311,14 @@ function promptFor(fen: string, x: Imbalances, opening: OpeningRecord | null, st
 
 Position (FEN): ${fen}
 ${x.sideToMove === "white" ? "White" : "Black"} to move.
-Opening book: ${opening ? `${opening.eco} ${opening.name} (${opening.pgn})` : "not a named book position"}
+Opening: ${opening ?? "not a named book position"}
 Pawn structure: ${structure ?? "matches no book line's pawns within two pawns"}
-
+${theory ? `
+Opening theory — "${theory.title}" in the Chess Opening Theory wikibook${theory.pliesPast ? `, ${theory.pliesPast} ${theory.pliesPast === 1 ? "ply" : "plies"} before this position` : ", for this position"}:
+"""
+${theory.theory}
+"""
+` : ""}
 Imbalances (computed from the board, numbered):
 ${citable(x).map((f, i) => `[${i + 1}] ${f}`).join("\n")}
 
@@ -284,6 +374,61 @@ const asList = (v: string[] | string | undefined) => (Array.isArray(v) ? v : v ?
 const uncite = (text: string | undefined) =>
   (text ?? "").replace(/\s*\((?:#?\d+(?:\s*[,&]\s*#?\d+)*)\)/g, "").replace(/\s+([.,;:])/g, "$1");
 
+interface PlanArgs { withinCp?: number; multiPv?: number; depth?: number; role?: string }
+
+/*
+ * One position's plans. `opening` is what is known of its name — from the book by position, or
+ * from the game line that reached it, which keeps a name long after the position leaves the book.
+ */
+async function plansFor(ctx: GenericGatewayContext, fen: string, opening: string | null, args: PlanArgs,
+                        theory: TheoryRecord | null = null): Promise<PlanRecord[]> {
+  const withinCp = clamp(args.withinCp, 50, 0, 300);
+  const multiPv = clamp(args.multiPv, 5, 1, 8);
+  const depth = clamp(args.depth, 18, 6, 22);
+  const gateway = ctx as unknown as { ai: { complete(a: { prompt: string; role?: string; skills?: string[] }): Promise<unknown> } };
+  if (legal(fen).moves().length === 0) return [];
+  const x = imbalancesOf(fen);
+  const structure = structureSentence(structureOf(fen));
+  const { lines, elapsedMs } = await linesFor(fen, multiPv, depth);
+  const candidates = candidateRecords(fen, lines, x, elapsedMs);
+  const ask = (prompt: string) => gateway.ai.complete({
+    prompt,
+    skills: ["chess-plans"],
+    ...(args.role ? { role: args.role } : {}),
+  }).then((r) => (typeof r === "string" ? r : JSON.stringify(r)));
+  const prompt = promptFor(fen, x, opening, structure, candidates, withinCp, theory);
+  let text = await ask(prompt);
+  let parsed: ReturnType<typeof parseModelJson>;
+  try {
+    parsed = parseModelJson(text);
+  } catch (e) {
+    text = await ask(`${prompt}\n\nYour previous answer was not valid JSON (${(e as Error).message}). Reply again with ONLY the JSON object.`);
+    parsed = parseModelJson(text);
+  }
+  const plans = (parsed.plans ?? []).filter((p) => p.side === "white" || p.side === "black");
+  if (plans.length === 0) throw new Error(`The model named no plans for ${fen}: ${text.slice(0, 200)}`);
+  const count: Record<string, number> = { white: 0, black: 0 };
+  return plans.map((p) => {
+    const side = p.side as "white" | "black";
+    const priority = typeof p.priority === "number" ? p.priority : ++count[side];
+    return {
+      planId: `${fen}#${side}#${priority}#${(p.name ?? "").slice(0, 40)}`,
+      fen,
+      side,
+      priority,
+      name: p.name ?? "",
+      idea: uncite(p.idea),
+      moves: asList(p.moves).join(" "),
+      imbalances: citedImbalances(x, p.imbalances).join("\n"),
+      engineEvidence: uncite(p.engineEvidence),
+      summary: uncite(parsed.summary),
+      structure: parsed.structure ?? "",
+      opening: opening ?? "",
+      model: args.role ?? "default",
+    };
+  });
+}
+
 /**
  * The plans for both sides in each position, decided by a model with the chess-plans skill from
  * the position's imbalances, its opening-book name and the engine's candidate moves. The facts
@@ -291,57 +436,44 @@ const uncite = (text: string | undefined) =>
  */
 export async function explainPlans(
   ctx: GenericGatewayContext,
-  args: { fens: string[]; withinCp?: number; multiPv?: number; depth?: number; role?: string },
+  args: { fens: string[] } & PlanArgs,
 ): Promise<PlanRecord[]> {
-  const withinCp = clamp(args.withinCp, 50, 0, 300);
-  const multiPv = clamp(args.multiPv, 5, 1, 8);
-  const depth = clamp(args.depth, 18, 6, 22);
-  const gateway = ctx as unknown as { ai: { complete(a: { prompt: string; role?: string; skills?: string[] }): Promise<unknown> } };
   const out: PlanRecord[] = [];
   for (const raw of args.fens ?? []) {
     const fen = raw.trim();
-    if (legal(fen).moves().length === 0) continue;
-    const x = imbalancesOf(fen);
+    legal(fen);
     const hit = openingOf(fen);
-    const opening = hit ? { fen, ...hit } : null;
-    const structure = structureSentence(structureOf(fen));
-    const { lines, elapsedMs } = await linesFor(fen, multiPv, depth);
-    const candidates = candidateRecords(fen, lines, x, elapsedMs);
-    const ask = (prompt: string) => gateway.ai.complete({
-      prompt,
-      skills: ["chess-plans"],
-      ...(args.role ? { role: args.role } : {}),
-    }).then((r) => (typeof r === "string" ? r : JSON.stringify(r)));
-    const prompt = promptFor(fen, x, opening, structure, candidates, withinCp);
-    let text = await ask(prompt);
-    let parsed: ReturnType<typeof parseModelJson>;
-    try {
-      parsed = parseModelJson(text);
-    } catch (e) {
-      text = await ask(`${prompt}\n\nYour previous answer was not valid JSON (${(e as Error).message}). Reply again with ONLY the JSON object.`);
-      parsed = parseModelJson(text);
-    }
-    const plans = (parsed.plans ?? []).filter((p) => p.side === "white" || p.side === "black");
-    if (plans.length === 0) throw new Error(`The model named no plans for ${fen}: ${text.slice(0, 200)}`);
-    const count: Record<string, number> = { white: 0, black: 0 };
-    for (const p of plans) {
-      const side = p.side as "white" | "black";
-      const priority = typeof p.priority === "number" ? p.priority : ++count[side];
-      out.push({
-        planId: `${fen}#${side}#${priority}#${(p.name ?? "").slice(0, 40)}`,
-        fen,
-        side,
-        priority,
-        name: p.name ?? "",
-        idea: uncite(p.idea),
-        moves: asList(p.moves).join(" "),
-        imbalances: citedImbalances(x, p.imbalances).join("\n"),
-        engineEvidence: uncite(p.engineEvidence),
-        summary: uncite(parsed.summary),
-        structure: parsed.structure ?? "",
-        opening: opening ? `${opening.eco} ${opening.name}` : "",
-        model: args.role ?? "default",
-      });
+    out.push(...await plansFor(ctx, fen, hit ? `${hit.eco} ${hit.name} (${hit.pgn})` : null, args));
+  }
+  return out;
+}
+
+export interface LinePlanRecord extends PlanRecord {
+  /** The game line: SAN moves from the start, space-separated. */
+  line: string;
+}
+
+/**
+ * The plans in the position a game line reaches, told the line's deepest opening name — which a
+ * position looked up alone has lost once it is past the book.
+ */
+export async function explainLinePlans(
+  ctx: GenericGatewayContext,
+  args: { lines: string[] } & PlanArgs,
+): Promise<LinePlanRecord[]> {
+  const out: LinePlanRecord[] = [];
+  for (const raw of args.lines ?? []) {
+    const moves = splitLine(raw);
+    const line = moves.join(" ");
+    const fen = positionAfter(moves);
+    const hit = openingOfLine(moves);
+    const opening = hit
+      ? `${hit.eco} ${hit.name} (${hit.pgn})${hit.pliesPast ? `, left the book ${hit.pliesPast} ${hit.pliesPast === 1 ? "ply" : "plies"} ago` : ""}`
+      : null;
+    // Theory is evidence, not a requirement: a line the wikibook cannot be reached for still gets plans.
+    const theory = await theoryFor(ctx, moves).catch(() => null);
+    for (const p of await plansFor(ctx, fen, opening, args, theory)) {
+      out.push({ ...p, planId: `${line}#${p.side}#${p.priority}#${p.name.slice(0, 40)}`, line });
     }
   }
   return out;

@@ -1,0 +1,10 @@
+# One source: the Chess Opening Theory wikibook, read through the Wikibooks MediaWiki API. Open,
+# keyless. Its text is CC BY-SA 4.0 — every place the realm shows it names the page and licence.
+- url: wikibooks.yml
+  name: wikibooks
+  type: openapi
+  auth: none
+  headers:
+    User-Agent: "embabel-realm-chess/0.2 (https://github.com/embabel-worlds/realm-chess)"
+  operation-ids:
+    - wikibooksQuery
