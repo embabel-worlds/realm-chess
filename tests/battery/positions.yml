@@ -77,8 +77,8 @@
   source: "Standard theory: White's minority attack b4-b5; Black's kingside play and the e4 square."
   imbalances:
     - "Black has a queenside pawn majority"
-    - "Half-open for White: the c-file"
-    - "Half-open for Black: the e-file"
+    - "the c-file is half-open for White"
+    - "the e-file is half-open for Black"
   plans:
     white:
       - plan: "Minority attack: Rab1, b4-b5 to leave Black a weak c-pawn"
@@ -136,7 +136,7 @@
   moves: "e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 g6 Be3 Bg7 f3 O-O Qd2 Nc6"
   source: "Standard theory: White O-O-O and h4-h5 against the Dragon king; Black attacks down the c-file and with ...b5."
   imbalances:
-    - "Half-open for Black: the c-file"
+    - "the c-file is half-open for Black"
   plans:
     white:
       - plan: "O-O-O then h4-h5 to open the h-file; Bh6 to trade the dragon bishop"
@@ -195,7 +195,7 @@
   source: "Standard theory: White presses the long diagonal and the queenside (a4, Bf4, Rc1); Black frees himself with ...c5 and completes development."
   imbalances:
     - "White has outpost square on c5"
-    - "Half-open for White: the c-file"
+    - "the c-file is half-open for White"
   plans:
     white:
       - plan: "Pressure on the long diagonal and the queenside: a4, Bf4/Bg5, Rc1"

@@ -1,6 +1,6 @@
 {
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\",\"maxLines\":5,\"withinCp\":50}": {
-  "executionId": "exec_9c1d8c6f-53c0-4a6b-880f-b685d43f2844",
+  "executionId": "exec_2135bb5c-980d-4a6a-a1eb-cc4a740a0baa",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -19,7 +19,7 @@
     "line": "e4 e5 Nf3 Nc6 d4 exd4 Nxd4 Nf6 Nxc6 bxc6 Bd3 d5 e5 Nd7 O-O Nc5 f4 g6 Be3 Nxd3 cxd3 c5 Nc3",
     "lineUci": "e2e4 e7e5 g1f3 b8c6 d2d4 e5d4 f3d4 g8f6 d4c6 b7c6 f1d3 d7d5 e4e5 f6d7 e1g1 d7c5 f2f4 g7g6 c1e3 c5d3 c2d3 c6c5 b1c3",
     "depth": 18,
-    "creates": "Black has isolated pawn on a7.\nBlack has doubled pawns on the c-file.\nPawn islands: White 2, Black 3.\nBlack has a queenside pawn majority (4 against 3, counting the a-d files).\nWhite has a kingside pawn majority (4 against 3, counting the e-h files).\nHalf-open for White: the d-file.\nHalf-open for Black: the b and e-files.",
+    "creates": "Pawn structure: Black has isolated pawn on a7.\nPawn structure: Black has doubled pawns on the c-file.\nPawn structure: pawn islands, White 2, Black 3.\nPawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).\nPawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).\nFiles: the d-file is half-open for White.\nFiles: the b and e-files are half-open for Black.",
     "removes": ""
    },
    {
@@ -34,7 +34,7 @@
     "line": "d4 Nf6 c4 e6 Nf3 d5 Bg5 Be7 Nc3 h6 Bxf6 Bxf6 e3 c6 Bd3 dxc4 Bxc4",
     "lineUci": "d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 c1g5 f8e7 b1c3 h7h6 g5f6 e7f6 e2e3 c7c6 f1d3 d5c4 d3c4",
     "depth": 18,
-    "creates": "Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.",
+    "creates": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.",
     "removes": ""
    },
    {
@@ -49,7 +49,7 @@
     "line": "Nf3 Nf6 c4 e6 d4 d5 Bg5 Be7 Nc3 h6 Bxf6 Bxf6 e3 c6 Bd3 Nd7 O-O Be7",
     "lineUci": "g1f3 g8f6 c2c4 e7e6 d2d4 d7d5 c1g5 f8e7 b1c3 h7h6 g5f6 e7f6 e2e3 c7c6 f1d3 b8d7 e1g1 f6e7",
     "depth": 18,
-    "creates": "Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.",
+    "creates": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.",
     "removes": ""
    },
    {
@@ -64,7 +64,7 @@
     "line": "e3 Nf6 d4 e6 Nf3 Be7 c4 d5 b3 c5 Be2 cxd4 exd4 Bb4+ Nbd2",
     "lineUci": "e2e3 g8f6 d2d4 e7e6 g1f3 f8e7 c2c4 d7d5 b2b3 c7c5 f1e2 c5d4 e3d4 e7b4 b1d2",
     "depth": 18,
-    "creates": "Black's light-squared bishop on c8 is bad: 5 of 8 black pawns stand on its colour.",
+    "creates": "Minor pieces: Black's light-squared bishop on c8 is bad: 5 of 8 black pawns stand on its colour.",
     "removes": ""
    },
    {
@@ -79,20 +79,20 @@
     "line": "c4 e5 Nc3 Nf6 Nf3 Nc6 g3 d5 cxd5 Nxd5 Bg2 Nb6 O-O Be7 d3 O-O Be3 Be6 Rc1 Nd5 Nxd5 Bxd5 a3 a5 Bc5 h6 Bxe7 Qxe7",
     "lineUci": "c2c4 e7e5 b1c3 g8f6 g1f3 b8c6 g2g3 d7d5 c4d5 f6d5 f1g2 d5b6 e1g1 f8e7 d2d3 e8g8 c1e3 c8e6 a1c1 b6d5 c3d5 e6d5 a2a3 a7a5 e3c5 h7h6 c5e7 d8e7",
     "depth": 18,
-    "creates": "White's dark-squared bishop on c1 is bad: 5 of 7 white pawns stand on its colour.\nWhite's light-squared bishop on f1 is good: 2 of 7 white pawns stand on its colour.\nHalf-open for White: the c-file.\nHalf-open for Black: the d-file.",
+    "creates": "Minor pieces: White's dark-squared bishop on c1 is bad: 5 of 7 white pawns stand on its colour.\nMinor pieces: White's light-squared bishop on f1 is good: 2 of 7 white pawns stand on its colour.\nFiles: the c-file is half-open for White.\nFiles: the d-file is half-open for Black.",
     "removes": ""
    }
   ],
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 4764,
+   "durationMs": 2940,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:ImbalancesOf:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\"}": {
-  "executionId": "exec_08c09fe8-8a3d-4784-8d2b-4f4d7a3c5407",
+  "executionId": "exec_0c21d525-b722-40b1-b785-348109fd91d8",
   "operationId": "ImbalancesOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -102,7 +102,7 @@
    {
     "sideToMove": "white",
     "phase": "opening",
-    "facts": "Phase: opening. White to move.\nMaterial is level.\nWhite still has Nb1, Ng1, Bc1 and Bf1 undeveloped.\nWhite's king is still in the centre, on e1.\nBlack still has Nb8, Ng8, Bc8 and Bf8 undeveloped.\nBlack's king is still in the centre, on e8.",
+    "facts": "Phase: opening. White to move.\nMaterial: the sides are level.\nDevelopment: White still has Nb1, Ng1, Bc1 and Bf1 undeveloped.\nKing safety: White's king is still in the centre, on e1.\nDevelopment: Black still has Nb8, Ng8, Bc8 and Bf8 undeveloped.\nKing safety: Black's king is still in the centre, on e8.",
     "structure": "",
     "materialWhite": 39,
     "materialBlack": 39,
@@ -118,13 +118,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1827,
+   "durationMs": 1155,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1\",\"maxLines\":5,\"withinCp\":50}": {
-  "executionId": "exec_d8604566-5ed1-4f4e-ad1a-798c03005a4c",
+  "executionId": "exec_f3992b91-f407-4dfa-aa6c-13e3412dab57",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -143,7 +143,7 @@
     "line": "e5 Nf3 Nf6 Nxe5 Nxe4 Qe2 d5 Nc3 Nxc3 dxc3 Be7 Bf4 O-O O-O-O c6 Qh5 Nd7 Nxd7 Qxd7 Bd3 g6 Qh6",
     "lineUci": "e7e5 g1f3 g8f6 f3e5 f6e4 d1e2 d7d5 b1c3 e4c3 d2c3 f8e7 c1f4 e8g8 e1c1 c7c6 e2h5 b8d7 e5d7 d8d7 f1d3 g7g6 h5h6",
     "depth": 18,
-    "creates": "White has doubled pawns on the c-file.\nOpen file: e.\nHalf-open for White: the d-file.\nWhite holds an open file with the queen e2.",
+    "creates": "Pawn structure: White has doubled pawns on the c-file.\nFiles: the e-file is open.\nFiles: the d-file is half-open for White.\nFiles: White holds an open file with the queen e2.",
     "removes": ""
    },
    {
@@ -158,7 +158,7 @@
     "line": "e6 Nc3 d5 d4 Nf6 e5 Nfd7 f4 c5 Nf3 Nc6 Be3 a6 a3 cxd4 Nxd4 Nxd4 Bxd4 Bc5 Bxc5 Nxc5 Qd4 Qc7 O-O-O O-O h4",
     "lineUci": "e7e6 b1c3 d7d5 d2d4 g8f6 e4e5 f6d7 f2f4 c7c5 g1f3 b8c6 c1e3 a7a6 a2a3 c5d4 f3d4 c6d4 e3d4 f8c5 d4c5 d7c5 d1d4 d8c7 e1c1 e8g8 h2h4",
     "depth": 18,
-    "creates": "White's dark-squared bishop on c1 is bad: 5 of 8 white pawns stand on its colour.\nBlack's light-squared bishop on c8 is bad: 5 of 8 black pawns stand on its colour.\nWhite's pawn chain e5/d4 is locked and points to the kingside.\nBlack's pawn chain d5/e6 is locked and points to the queenside.\nWhite has outpost square on d6 (guarded by a pawn, beyond the reach of enemy pawns).\nBlack has outpost square on e4 (guarded by a pawn, beyond the reach of enemy pawns).",
+    "creates": "Minor pieces: White's dark-squared bishop on c1 is bad: 5 of 8 white pawns stand on its colour.\nMinor pieces: Black's light-squared bishop on c8 is bad: 5 of 8 black pawns stand on its colour.\nPawn structure: White's pawn chain e5/d4 is locked and points to the kingside.\nPawn structure: Black's pawn chain d5/e6 is locked and points to the queenside.\nKey squares: White has outpost square on d6 (guarded by a pawn, beyond the reach of enemy pawns).\nKey squares: Black has outpost square on e4 (guarded by a pawn, beyond the reach of enemy pawns).",
     "removes": ""
    },
    {
@@ -173,7 +173,7 @@
     "line": "Nc6 d4 d5 exd5 Qxd5 Nf3 e5 Nc3 Bb4 Bd2 Bxc3 Bxc3 e4 Ne5 Nxe5 dxe5 Qd8",
     "lineUci": "b8c6 d2d4 d7d5 e4d5 d8d5 g1f3 e7e5 b1c3 f8b4 c1d2 b4c3 d2c3 e5e4 f3e5 c6e5 d4e5 d5d8",
     "depth": 18,
-    "creates": "White has the bishop pair.\nMinor pieces: White has 2 bishops and 1 knight, Black 1 bishop and 2 knights.\nWhite has a queenside pawn majority (4 against 3, counting the a-d files).\nBlack has a kingside pawn majority (4 against 3, counting the e-h files).\nHalf-open for White: the e-file.\nHalf-open for Black: the d-file.",
+    "creates": "Minor pieces: White has the bishop pair.\nMinor pieces: White has 2 bishops and 1 knight, Black 1 bishop and 2 knights.\nPawn structure: White has a queenside pawn majority (4 against 3, counting the a-d files).\nPawn structure: Black has a kingside pawn majority (4 against 3, counting the e-h files).\nFiles: the e-file is half-open for White.\nFiles: the d-file is half-open for Black.",
     "removes": ""
    },
    {
@@ -188,7 +188,7 @@
     "line": "c5 Nf3 Nc6 d4 cxd4 Nxd4 e5 Nb5 d6 c4 Be7 Be2 Nf6 N5c3 Nd4 b3 Nxe2 Qxe2",
     "lineUci": "c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 e7e5 d4b5 d7d6 c2c4 f8e7 f1e2 g8f6 b5c3 c6d4 b2b3 d4e2 d1e2",
     "depth": 18,
-    "creates": "Black has a backward pawn on d6.\nHalf-open for White: the d-file.\nWhite has outpost square on d5 (guarded by a pawn, beyond the reach of enemy pawns).\nHalf-open for Black: the c-file.\nBlack has outpost square on d4 (guarded by a pawn, beyond the reach of enemy pawns).",
+    "creates": "Pawn structure: Black has a backward pawn on d6.\nFiles: the d-file is half-open for White.\nKey squares: White has outpost square on d5 (guarded by a pawn, beyond the reach of enemy pawns).\nFiles: the c-file is half-open for Black.\nKey squares: Black has outpost square on d4 (guarded by a pawn, beyond the reach of enemy pawns).",
     "removes": ""
    },
    {
@@ -203,20 +203,20 @@
     "line": "c6 d4 d5 e5 Bf5 h4 h5 c4 e6 Nc3 Be7 Nf3 Nh6 Bxh6 Rxh6 Bd3 dxc4 Bxf5 exf5",
     "lineUci": "c7c6 d2d4 d7d5 e4e5 c8f5 h2h4 h7h5 c2c4 e7e6 b1c3 f8e7 g1f3 g8h6 c1h6 h8h6 f1d3 d5c4 d3f5 e6f5",
     "depth": 18,
-    "creates": "White's dark-squared bishop on c1 is bad: 5 of 8 white pawns stand on its colour.\nBlack's dark-squared bishop on f8 is good: 2 of 8 black pawns stand on its colour.\nBlack's light-squared bishop on f5 is bad but active: 6 of 8 black pawns stand on its colour.\nWhite's pawn chain e5/d4 is locked and points to the kingside.\nBlack's pawn chain d5/e6 is locked and points to the queenside.\nWhite has more space (8 against 3 by pawn control of the opponent's half).\nWhite has outpost square on d6 (guarded by a pawn, beyond the reach of enemy pawns).",
+    "creates": "Minor pieces: White's dark-squared bishop on c1 is bad: 5 of 8 white pawns stand on its colour.\nMinor pieces: Black's dark-squared bishop on f8 is good: 2 of 8 black pawns stand on its colour.\nMinor pieces: Black's light-squared bishop on f5 is bad but active: 6 of 8 black pawns stand on its colour.\nPawn structure: White's pawn chain e5/d4 is locked and points to the kingside.\nPawn structure: Black's pawn chain d5/e6 is locked and points to the queenside.\nSpace: White has more space (8 against 3 by pawn control of the opponent's half).\nKey squares: White has outpost square on d6 (guarded by a pawn, beyond the reach of enemy pawns).",
     "removes": ""
    }
   ],
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 3905,
+   "durationMs": 2834,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:ImbalancesOf:{\"fen\":\"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1\"}": {
-  "executionId": "exec_d6e06675-273e-4c49-832c-cbae8528e945",
+  "executionId": "exec_0f61793b-81c8-4d87-80f0-5e5c0d195451",
   "operationId": "ImbalancesOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -226,7 +226,7 @@
    {
     "sideToMove": "black",
     "phase": "opening",
-    "facts": "Phase: opening. Black to move.\nMaterial is level.\nWhite still has Nb1, Ng1, Bc1 and Bf1 undeveloped.\nWhite's king is still in the centre, on e1.\nBlack still has Nb8, Ng8, Bc8 and Bf8 undeveloped.\nBlack's king is still in the centre, on e8.\nWhite has the freer pieces: 30 legal moves against 20.",
+    "facts": "Phase: opening. Black to move.\nMaterial: the sides are level.\nDevelopment: White still has Nb1, Ng1, Bc1 and Bf1 undeveloped.\nKing safety: White's king is still in the centre, on e1.\nDevelopment: Black still has Nb8, Ng8, Bc8 and Bf8 undeveloped.\nKing safety: Black's king is still in the centre, on e8.\nPiece activity: White has the freer pieces: 30 legal moves against 20.",
     "structure": "",
     "materialWhite": 39,
     "materialBlack": 39,
@@ -242,13 +242,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1295,
+   "durationMs": 1115,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:OpeningOfLine:{\"moves\":\"e4\"}": {
-  "executionId": "exec_373cd9c5-3d4b-4f70-b423-52be28070469",
+  "executionId": "exec_94d31e3b-0fc7-42f8-a082-31943bb48659",
   "operationId": "OpeningOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -266,13 +266,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1457,
+   "durationMs": 1199,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:TheoryOfLine:{\"moves\":\"e4\"}": {
-  "executionId": "exec_16b82c39-6343-4407-a015-9d2aede9b0b0",
+  "executionId": "exec_0195565c-a3cc-469c-95b5-a8434fb180a1",
   "operationId": "TheoryOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -291,13 +291,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 2322,
+   "durationMs": 1587,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\",\"maxLines\":5,\"withinCp\":50}": {
-  "executionId": "exec_0e6007fc-28c5-4c11-8f27-71d64ac59e39",
+  "executionId": "exec_b85d891e-bbd2-4af3-a283-c9c0e15cc76c",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -316,8 +316,8 @@
     "line": "Nc3 Nc6 Nf3 Nf6 Bb5 Bd6 d4 exd4 Nxd4 O-O Bg5 Be5",
     "lineUci": "b1c3 b8c6 g1f3 g8f6 f1b5 f8d6 d2d4 e5d4 f3d4 e8g8 c1g5 d6e5",
     "depth": 18,
-    "creates": "Black has a queenside pawn majority (4 against 3, counting the a-d files).\nWhite has a kingside pawn majority (4 against 3, counting the e-h files).\nHalf-open for White: the d-file.\nHalf-open for Black: the e-file.",
-    "removes": "Black's king is still in the centre, on e8."
+    "creates": "Pawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).\nPawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).\nFiles: the d-file is half-open for White.\nFiles: the e-file is half-open for Black.",
+    "removes": "King safety: Black's king is still in the centre, on e8."
    },
    {
     "rank": 2,
@@ -331,7 +331,7 @@
     "line": "Nf3 Nc6 d4 exd4 Nxd4 Nf6 Nxc6 bxc6 e5 Qe7 Qe2 Nd5 c4 Ba6 Qe4 Nb4 Nc3 Qe6 Be2",
     "lineUci": "g1f3 b8c6 d2d4 e5d4 f3d4 g8f6 d4c6 b7c6 e4e5 d8e7 d1e2 f6d5 c2c4 c8a6 e2e4 d5b4 b1c3 e7e6 f1e2",
     "depth": 18,
-    "creates": "Black has isolated pawn on a7.\nBlack has doubled pawns on the c-file.\nPawn islands: White 2, Black 3.\nBlack has a queenside pawn majority (4 against 3, counting the a-d files).\nWhite has a kingside pawn majority (4 against 3, counting the e-h files).\nWhite has more space (3 against 0 by pawn control of the opponent's half).\nHalf-open for White: the d-file.\nHalf-open for Black: the b and e-files.",
+    "creates": "Pawn structure: Black has isolated pawn on a7.\nPawn structure: Black has doubled pawns on the c-file.\nPawn structure: pawn islands, White 2, Black 3.\nPawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).\nPawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).\nSpace: White has more space (3 against 0 by pawn control of the opponent's half).\nFiles: the d-file is half-open for White.\nFiles: the b and e-files are half-open for Black.",
     "removes": ""
    },
    {
@@ -346,7 +346,7 @@
     "line": "Bc4 Nf6 d3 c6 Nf3 d5 Bb3 a5 a4 Bb4+ c3 Bd6 O-O O-O Bg5 dxe4 dxe4 h6 Bh4 Na6 Nbd2 Nc5 Bc2 Be6",
     "lineUci": "f1c4 g8f6 d2d3 c7c6 g1f3 d7d5 c4b3 a7a5 a2a4 f8b4 c2c3 b4d6 e1g1 e8g8 c1g5 d5e4 d3e4 h7h6 g5h4 b8a6 b1d2 a6c5 b3c2 c8e6",
     "depth": 18,
-    "creates": "White's light-squared bishop on b3 is bad: 5 of 8 white pawns stand on its colour.\nBlack's light-squared bishop on c8 is bad: 5 of 8 black pawns stand on its colour.",
+    "creates": "Minor pieces: White's light-squared bishop on b3 is bad: 5 of 8 white pawns stand on its colour.\nMinor pieces: Black's light-squared bishop on c8 is bad: 5 of 8 black pawns stand on its colour.",
     "removes": ""
    },
    {
@@ -361,8 +361,8 @@
     "line": "a3 Nf6 Nc3 Nc6 Nf3 d5 Bb5 Nxe4 Qe2 Nxc3 Qxe5+ Be7 Qxc3 O-O d4 Qd6 O-O Bf5 Re1 Be4 Bxc6 Qxc6 Qxc6 bxc6 Ne5 c5 dxc5 Bxc5",
     "lineUci": "a2a3 g8f6 b1c3 b8c6 g1f3 d7d5 f1b5 f6e4 d1e2 e4c3 e2e5 f8e7 e5c3 e8g8 d2d4 d8d6 e1g1 c8f5 f1e1 f5e4 b5c6 d6c6 c3c6 b7c6 f3e5 c6c5 d4c5 e7c5",
     "depth": 18,
-    "creates": "Black is 3 points up in material (pawn = 1, minor = 3, rook = 5, queen = 9).\nWhite's light-squared bishop on b5 is good: 2 of 7 white pawns stand on its colour.\nWhite's dark-squared bishop on c1 is bad: 5 of 7 white pawns stand on its colour.\nOpen file: e.\nWhite holds an open file with the queen e5.",
-    "removes": "Material is level."
+    "creates": "Material: Black is 3 points up (pawn 1, minor piece 3, rook 5, queen 9).\nMinor pieces: White's light-squared bishop on b5 is good: 2 of 7 white pawns stand on its colour.\nMinor pieces: White's dark-squared bishop on c1 is bad: 5 of 7 white pawns stand on its colour.\nFiles: the e-file is open.\nFiles: White holds an open file with the queen e5.",
+    "removes": "Material: the sides are level."
    },
    {
     "rank": 5,
@@ -376,20 +376,20 @@
     "line": "d4 exd4 Nf3 Bb4+ Nbd2 Nc6 Bd3 d6 O-O Nf6 Nb3 Bg4 h3 Bxf3 Qxf3 O-O Qe2 Re8 a3 Bc5 Bg5 h6 Bh4 g5 Bg3 Bb6",
     "lineUci": "d2d4 e5d4 g1f3 f8b4 b1d2 b8c6 f1d3 d7d6 e1g1 g8f6 d2b3 c8g4 h2h3 g4f3 d1f3 e8g8 f3e2 f8e8 a2a3 b4c5 c1g5 h7h6 g5h4 g7g5 h4g3 c5b6",
     "depth": 18,
-    "creates": "Black is 1 point up in material (a pawn).\nBlack's dark-squared bishop on b4 is bad but active: 5 of 8 black pawns stand on its colour.\nBlack has doubled pawns on the d-file.\nBlack has a queenside pawn majority (5 against 3, counting the a-d files).\nWhite has a kingside pawn majority (4 against 3, counting the e-h files).\nHalf-open for White: the d-file.\nHalf-open for Black: the e-file.",
-    "removes": "Material is level.\nWhite's king is still in the centre, on e1."
+    "creates": "Material: Black is a pawn up.\nMinor pieces: Black's dark-squared bishop on b4 is bad but active: 5 of 8 black pawns stand on its colour.\nPawn structure: Black has doubled pawns on the d-file.\nPawn structure: Black has a queenside pawn majority (5 against 3, counting the a-d files).\nPawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).\nFiles: the d-file is half-open for White.\nFiles: the e-file is half-open for Black.",
+    "removes": "Material: the sides are level.\nKing safety: White's king is still in the centre, on e1."
    }
   ],
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 4248,
+   "durationMs": 3347,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:ImbalancesOf:{\"fen\":\"rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\"}": {
-  "executionId": "exec_70e60932-9a76-4dee-85ed-ba1568916e6a",
+  "executionId": "exec_b184db8f-8752-4ef6-8697-67a1e026f110",
   "operationId": "ImbalancesOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -399,7 +399,7 @@
    {
     "sideToMove": "white",
     "phase": "opening",
-    "facts": "Phase: opening. White to move.\nMaterial is level.\nWhite still has Nb1, Ng1, Bc1 and Bf1 undeveloped.\nWhite's king is still in the centre, on e1.\nBlack still has Nb8, Ng8, Bc8 and Bf8 undeveloped.\nBlack's king is still in the centre, on e8.",
+    "facts": "Phase: opening. White to move.\nMaterial: the sides are level.\nDevelopment: White still has Nb1, Ng1, Bc1 and Bf1 undeveloped.\nKing safety: White's king is still in the centre, on e1.\nDevelopment: Black still has Nb8, Ng8, Bc8 and Bf8 undeveloped.\nKing safety: Black's king is still in the centre, on e8.",
     "structure": "",
     "materialWhite": 39,
     "materialBlack": 39,
@@ -415,13 +415,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1338,
+   "durationMs": 1083,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:OpeningOfLine:{\"moves\":\"e4 e5\"}": {
-  "executionId": "exec_df973a32-4a0b-452e-9ad9-a6823bfda2c0",
+  "executionId": "exec_948b5a6b-c3d1-4436-beda-a401d3c3f57f",
   "operationId": "OpeningOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -439,13 +439,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1433,
+   "durationMs": 1185,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:TheoryOfLine:{\"moves\":\"e4 e5\"}": {
-  "executionId": "exec_d04990f5-91e7-4ef4-b1f6-b022d9835ba2",
+  "executionId": "exec_dfc5c147-1229-4b73-954b-d19e45039c34",
   "operationId": "TheoryOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -464,13 +464,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1884,
+   "durationMs": 1365,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\",\"maxLines\":5,\"withinCp\":50}": {
-  "executionId": "exec_7d910f7c-d1ca-4c4d-9b96-48fdc3cd070f",
+  "executionId": "exec_2181ea49-1743-44f4-9e0c-e6fb2a00567f",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -489,7 +489,7 @@
     "line": "Nf3 Nc6 d4 cxd4 Nxd4 g6 Nc3 Bg7 Be3 Nf6 Nxc6 bxc6 e5 Ng8 f4 Rb8 Bd3 Rxb2 Qd2",
     "lineUci": "g1f3 b8c6 d2d4 c5d4 f3d4 g7g6 b1c3 f8g7 c1e3 g8f6 d4c6 b7c6 e4e5 f6g8 f2f4 a8b8 f1d3 b8b2 d1d2",
     "depth": 18,
-    "creates": "Black's light-squared bishop on c8 is bad: 5 of 7 black pawns stand on its colour.\nBlack's dark-squared bishop on g7 is good: 2 of 7 black pawns stand on its colour.\nBlack has isolated pawn on a7.\nHalf-open for White: the d-file.\nHalf-open for Black: the b-file.",
+    "creates": "Minor pieces: Black's light-squared bishop on c8 is bad: 5 of 7 black pawns stand on its colour.\nMinor pieces: Black's dark-squared bishop on g7 is good: 2 of 7 black pawns stand on its colour.\nPawn structure: Black has isolated pawn on a7.\nFiles: the d-file is half-open for White.\nFiles: the b-file is half-open for Black.",
     "removes": ""
    },
    {
@@ -504,8 +504,8 @@
     "line": "Nc3 Nc6 Nf3 e5 Bc4 Be7 d3 d6 O-O a6 a4 Nf6 Ng5 O-O f4 exf4 Bxf4 h6",
     "lineUci": "b1c3 b8c6 g1f3 e7e5 f1c4 f8e7 d2d3 d7d6 e1g1 a7a6 a2a4 g8f6 f3g5 e8g8 f2f4 e5f4 c1f4 h7h6",
     "depth": 18,
-    "creates": "White's light-squared bishop on c4 is bad but active: 5 of 8 white pawns stand on its colour.\nBlack has a backward pawn on d6.\nWhite has outpost square on d5 (guarded by a pawn, beyond the reach of enemy pawns).",
-    "removes": "White's king is still in the centre, on e1."
+    "creates": "Minor pieces: White's light-squared bishop on c4 is bad but active: 5 of 8 white pawns stand on its colour.\nPawn structure: Black has a backward pawn on d6.\nKey squares: White has outpost square on d5 (guarded by a pawn, beyond the reach of enemy pawns).",
+    "removes": "King safety: White's king is still in the centre, on e1."
    },
    {
     "rank": 3,
@@ -519,7 +519,7 @@
     "line": "Ne2 Nf6 Nbc3 e5 Ng3 h5 Bc4 h4 Nf5 h3 g4 Nc6 d3 g6 Ne3 Bh6 Rg1",
     "lineUci": "g1e2 g8f6 b1c3 e7e5 e2g3 h7h5 f1c4 h5h4 g3f5 h4h3 g2g4 b8c6 d2d3 g7g6 f5e3 f8h6 h1g1",
     "depth": 18,
-    "creates": "Black has more space (5 against 2 by pawn control of the opponent's half).\nWhite has outpost square on d5 (guarded by a pawn, beyond the reach of enemy pawns).",
+    "creates": "Space: Black has more space (5 against 2 by pawn control of the opponent's half).\nKey squares: White has outpost square on d5 (guarded by a pawn, beyond the reach of enemy pawns).",
     "removes": ""
    },
    {
@@ -534,7 +534,7 @@
     "line": "c3 Nf6 e5 Nd5 d4 cxd4 Nf3 e6 cxd4 d6 Nc3 Nc6 Bb5 dxe5 dxe5 Be7 O-O Nxc3",
     "lineUci": "c2c3 g8f6 e4e5 f6d5 d2d4 c5d4 g1f3 e7e6 c3d4 d7d6 b1c3 b8c6 f1b5 d6e5 d4e5 f8e7 e1g1 d5c3",
     "depth": 18,
-    "creates": "White's dark-squared bishop on c1 is bad: 5 of 7 white pawns stand on its colour.\nWhite's light-squared bishop on f1 is good: 2 of 7 white pawns stand on its colour.\nWhite has a backward pawn on d4.\nWhite has more space (5 against 0 by pawn control of the opponent's half).\nOpen file: c.\nBlack's knight on d5 stands on an outpost no pawn can challenge.",
+    "creates": "Minor pieces: White's dark-squared bishop on c1 is bad: 5 of 7 white pawns stand on its colour.\nMinor pieces: White's light-squared bishop on f1 is good: 2 of 7 white pawns stand on its colour.\nPawn structure: White has a backward pawn on d4.\nSpace: White has more space (5 against 0 by pawn control of the opponent's half).\nFiles: the c-file is open.\nKey squares: Black's knight on d5 stands on an outpost no pawn can challenge.",
     "removes": ""
    },
    {
@@ -549,20 +549,20 @@
     "line": "d4 cxd4 Nf3 e5 c3 Nc6 cxd4 exd4 Nxd4 Nf6 Nc3 Bb4 Bc4 Nxe4 O-O Bxc3 bxc3 d5 Bb5 O-O Nxc6 bxc6 Bxc6 Ba6 Bxa8",
     "lineUci": "d2d4 c5d4 g1f3 e7e5 c2c3 b8c6 c3d4 e5d4 f3d4 g8f6 b1c3 f8b4 f1c4 f6e4 e1g1 b4c3 b2c3 d7d5 c4b5 e8g8 d4c6 b7c6 b5c6 c8a6 c6a8",
     "depth": 18,
-    "creates": "Black's light-squared bishop on c8 is bad: 4 of 6 black pawns stand on its colour.\nBlack's dark-squared bishop on f8 is good: 2 of 6 black pawns stand on its colour.\nBlack has an isolated queen's pawn (d7).\nPawn islands: White 2, Black 3.\nBlack has a queenside pawn majority (3 against 2, counting the a-d files).\nWhite has a kingside pawn majority (4 against 3, counting the e-h files).\nOpen file: c.\nHalf-open for White: the d-file.\nWhite has outpost square on d5 (guarded by a pawn, beyond the reach of enemy pawns).\nHalf-open for Black: the e-file.",
+    "creates": "Minor pieces: Black's light-squared bishop on c8 is bad: 4 of 6 black pawns stand on its colour.\nMinor pieces: Black's dark-squared bishop on f8 is good: 2 of 6 black pawns stand on its colour.\nPawn structure: Black has an isolated queen's pawn (d7).\nPawn structure: pawn islands, White 2, Black 3.\nPawn structure: Black has a queenside pawn majority (3 against 2, counting the a-d files).\nPawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).\nFiles: the c-file is open.\nFiles: the d-file is half-open for White.\nKey squares: White has outpost square on d5 (guarded by a pawn, beyond the reach of enemy pawns).\nFiles: the e-file is half-open for Black.",
     "removes": ""
    }
   ],
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 4436,
+   "durationMs": 2936,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:ImbalancesOf:{\"fen\":\"rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\"}": {
-  "executionId": "exec_530014df-c74f-4dc1-8d8f-8df5ceffa224",
+  "executionId": "exec_c2514407-5330-496d-98a2-00488c5dc7f9",
   "operationId": "ImbalancesOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -572,7 +572,7 @@
    {
     "sideToMove": "white",
     "phase": "opening",
-    "facts": "Phase: opening. White to move.\nMaterial is level.\nWhite still has Nb1, Ng1, Bc1 and Bf1 undeveloped.\nWhite's king is still in the centre, on e1.\nBlack still has Nb8, Ng8, Bc8 and Bf8 undeveloped.\nBlack's king is still in the centre, on e8.\nWhite has the freer pieces: 30 legal moves against 22.",
+    "facts": "Phase: opening. White to move.\nMaterial: the sides are level.\nDevelopment: White still has Nb1, Ng1, Bc1 and Bf1 undeveloped.\nKing safety: White's king is still in the centre, on e1.\nDevelopment: Black still has Nb8, Ng8, Bc8 and Bf8 undeveloped.\nKing safety: Black's king is still in the centre, on e8.\nPiece activity: White has the freer pieces: 30 legal moves against 22.",
     "structure": "The pawn structure is the one reached in: Sicilian Defense (B20); Sicilian Defense: Closed (B23); Sicilian Defense: Old Sicilian (B30).",
     "materialWhite": 39,
     "materialBlack": 39,
@@ -588,13 +588,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1319,
+   "durationMs": 1061,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:OpeningOfLine:{\"moves\":\"e4 c5\"}": {
-  "executionId": "exec_dbc7cbef-f1c1-43ee-9399-6324b713968a",
+  "executionId": "exec_67b66c94-9a33-4db7-bfff-b6b37cbf65d2",
   "operationId": "OpeningOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -612,13 +612,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1514,
+   "durationMs": 1124,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:TheoryOfLine:{\"moves\":\"e4 c5\"}": {
-  "executionId": "exec_e980e80c-6278-4fdf-a272-a5bf58281b78",
+  "executionId": "exec_68bdd1b1-1655-433d-bc8f-3c312ae13d49",
   "operationId": "TheoryOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -637,13 +637,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1758,
+   "durationMs": 1355,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:BestMoves:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"maxLines\":5,\"withinCp\":50}": {
-  "executionId": "exec_c6353a97-954d-4e92-a6f0-6827783f8a51",
+  "executionId": "exec_6ee830b5-26d6-4cf0-9707-17430af3b11f",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -662,8 +662,8 @@
     "line": "Be6 Nc3 Bd6 Na4 Bxb3 axb3 O-O-O Be3 b6 Nc3 Kb7 Bf4 Ne7 Bxd6 Rxd6 Rxd6 cxd6 f3 Rd8 Rd1 Kc6",
     "lineUci": "c8e6 b1c3 f8d6 c3a4 e6b3 a2b3 e8c8 c1e3 b7b6 a4c3 c8b7 e3f4 g8e7 f4d6 d8d6 d1d6 c7d6 f2f3 h8d8 a1d1 b7c6",
     "depth": 18,
-    "creates": "White has doubled pawns on the b-file.\nBlack's dark-squared bishop on d6 is bad: 5 of 7 black pawns stand on its colour.\nHalf-open for White: the a-file.\nBlack holds an open file with the rook d8.\nThe kings are on opposite wings (White kingside, Black queenside): pawn storms cost the attacker nothing in king safety.",
-    "removes": "Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nBlack's king is still in the centre, on e8."
+    "creates": "Pawn structure: White has doubled pawns on the b-file.\nMinor pieces: Black's dark-squared bishop on d6 is bad: 5 of 7 black pawns stand on its colour.\nFiles: the a-file is half-open for White.\nFiles: Black holds an open file with the rook d8.\nKing safety: The kings are on opposite wings (White kingside, Black queenside): pawn storms cost the attacker nothing in king safety.",
+    "removes": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nKing safety: Black's king is still in the centre, on e8."
    },
    {
     "rank": 2,
@@ -677,8 +677,8 @@
     "line": "Bg4 f3 Be6 Bf4 c4 Nd4 O-O-O Nc3 Bf7 Be3 Bb4 a3 Bxc3 bxc3 Ne7 g4 h5",
     "lineUci": "c8g4 f2f3 g4e6 c1f4 c5c4 b3d4 e8c8 b1c3 e6f7 f4e3 f8b4 a2a3 b4c3 b2c3 g8e7 g2g4 h7h5",
     "depth": 18,
-    "creates": "White's dark-squared bishop on e3 is good: 2 of 7 white pawns stand on its colour.\nBlack holds an open file with the rook d8.\nThe kings are on opposite wings (White kingside, Black queenside): pawn storms cost the attacker nothing in king safety.",
-    "removes": "Black's king is still in the centre, on e8."
+    "creates": "Minor pieces: White's dark-squared bishop on e3 is good: 2 of 7 white pawns stand on its colour.\nFiles: Black holds an open file with the rook d8.\nKing safety: The kings are on opposite wings (White kingside, Black queenside): pawn storms cost the attacker nothing in king safety.",
+    "removes": "King safety: Black's king is still in the centre, on e8."
    },
    {
     "rank": 3,
@@ -692,8 +692,8 @@
     "line": "Bd7 Bf4 O-O-O Nc3 Be6 Rxd8+ Kxd8 Be3 b6 a4 a5 Nb5 Kc8 Rd1 g5 f4 h6 f5",
     "lineUci": "c8d7 c1f4 e8c8 b1c3 d7e6 d1d8 c8d8 f4e3 b7b6 a2a4 a6a5 c3b5 d8c8 a1d1 g7g5 f2f4 h7h6 f4f5",
     "depth": 18,
-    "creates": "Black's dark-squared bishop on f8 is bad: 5 of 7 black pawns stand on its colour.\nBlack's light-squared bishop on e6 is good: 2 of 7 black pawns stand on its colour.\nBlack's king is still in the centre, on d8.",
-    "removes": "White holds an open file with the rook d1.\nBlack's king is still in the centre, on e8."
+    "creates": "Minor pieces: Black's dark-squared bishop on f8 is bad: 5 of 7 black pawns stand on its colour.\nMinor pieces: Black's light-squared bishop on e6 is good: 2 of 7 black pawns stand on its colour.\nKing safety: Black's king is still in the centre, on d8.",
+    "removes": "Files: White holds an open file with the rook d1.\nKing safety: Black's king is still in the centre, on e8."
    },
    {
     "rank": 4,
@@ -707,8 +707,8 @@
     "line": "g5 Nc3 Be6 f4 Bg4 Rf1 c4 h3 cxb3 hxg4 bxc2 fxg5 Bc5+ Kh1 fxg5 Bxg5",
     "lineUci": "g7g5 b1c3 c8e6 f2f4 e6g4 d1f1 c5c4 h2h3 c4b3 h3g4 b3c2 f4g5 f8c5 g1h1 f6g5 c1g5",
     "depth": 18,
-    "creates": "White's dark-squared bishop on c1 is good: 2 of 6 white pawns stand on its colour.\nWhite has isolated pawns on g5, e4, g4 and g2.\nWhite has doubled pawns on the g-file.\nBlack's dark-squared bishop on f8 is good: 2 of 6 black pawns stand on its colour.\nBlack has isolated pawns on h7 and f6.\nBlack has a passed pawn on c2.\nWhite has more space (6 against 3 by pawn control of the opponent's half).\nHalf-open for White: the c, f and h-files.\nWhite has outpost square on f5 (guarded by a pawn, beyond the reach of enemy pawns).\nHalf-open for Black: the e and g-files.\nBlack has outpost square on e5 (guarded by a pawn, beyond the reach of enemy pawns).\nWhite's king on g1 is exposed: 1 shield pawn, open or half-open f and h-file nearby, 0 enemy pieces bearing on it.",
-    "removes": "Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nWhite holds an open file with the rook d1.\nHalf-open for Black: the e-file."
+    "creates": "Minor pieces: White's dark-squared bishop on c1 is good: 2 of 6 white pawns stand on its colour.\nPawn structure: White has isolated pawns on g5, e4, g4 and g2.\nPawn structure: White has doubled pawns on the g-file.\nMinor pieces: Black's dark-squared bishop on f8 is good: 2 of 6 black pawns stand on its colour.\nPawn structure: Black has isolated pawns on h7 and f6.\nPawn structure: Black has a passed pawn on c2.\nSpace: White has more space (6 against 3 by pawn control of the opponent's half).\nFiles: the c, f and h-files are half-open for White.\nKey squares: White has outpost square on f5 (guarded by a pawn, beyond the reach of enemy pawns).\nFiles: the e and g-files are half-open for Black.\nKey squares: Black has outpost square on e5 (guarded by a pawn, beyond the reach of enemy pawns).\nKing safety: White's king on g1 is exposed: 1 shield pawn, open or half-open f and h-file nearby, 0 enemy pieces bearing on it.",
+    "removes": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nFiles: White holds an open file with the rook d1.\nFiles: the e-file is half-open for Black."
    },
    {
     "rank": 5,
@@ -722,20 +722,20 @@
     "line": "Bd6 Na5 b6 Nc4 Be7 Bf4 Bd8 Nc3 Ne7 Ne3 Be6 h4 O-O a4 h5 Rd2 Nc6 Ncd5 Rf7 c3 Rd7 Rad1",
     "lineUci": "f8d6 b3a5 b7b6 a5c4 d6e7 c1f4 e7d8 b1c3 g8e7 c4e3 c8e6 h2h4 e8g8 a2a4 h7h5 d1d2 e7c6 c3d5 f8f7 c2c3 f7d7 a1d1",
     "depth": 18,
-    "creates": "Black's light-squared bishop on c8 is good: 2 of 7 black pawns stand on its colour.\nBlack's dark-squared bishop on d8 is bad: 5 of 7 black pawns stand on its colour.",
+    "creates": "Minor pieces: Black's light-squared bishop on c8 is good: 2 of 7 black pawns stand on its colour.\nMinor pieces: Black's dark-squared bishop on d8 is bad: 5 of 7 black pawns stand on its colour.",
     "removes": ""
    }
   ],
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 38,
+   "durationMs": 20,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:ImbalancesOf:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\"}": {
-  "executionId": "exec_e32cde15-85fe-4a0d-9162-fb272a004769",
+  "executionId": "exec_cc530db4-7987-4350-8181-32d1da2c5f9d",
   "operationId": "ImbalancesOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -745,7 +745,7 @@
    {
     "sideToMove": "black",
     "phase": "opening",
-    "facts": "Phase: opening. Black to move.\nMaterial is level.\nBlack has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nBlack has doubled pawns on the c-file.\nBlack has a queenside pawn majority (4 against 3, counting the a-d files).\nWhite has a kingside pawn majority (4 against 3, counting the e-h files).\nOpen file: d.\nWhite holds an open file with the rook d1.\nHalf-open for Black: the e-file.\nWhite still has Nb1 and Bc1 undeveloped.\nBlack still has Ng8, Bc8 and Bf8 undeveloped.\nBlack's king is still in the centre, on e8.\nWhite has the freer pieces: 34 legal moves against 23.",
+    "facts": "Phase: opening. Black to move.\nMaterial: the sides are level.\nMinor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nPawn structure: Black has doubled pawns on the c-file.\nPawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).\nPawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).\nFiles: the d-file is open.\nFiles: White holds an open file with the rook d1.\nFiles: the e-file is half-open for Black.\nDevelopment: White still has Nb1 and Bc1 undeveloped.\nDevelopment: Black still has Ng8, Bc8 and Bf8 undeveloped.\nKing safety: Black's king is still in the centre, on e8.\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
     "structure": "The pawn structure is close to the one reached in: Ruy Lopez: Exchange, Alekhine Variation (C68); Ruy Lopez: Exchange Variation, Alekhine Variation (C68) — 2 pawns different.",
     "materialWhite": 26,
     "materialBlack": 26,
@@ -761,13 +761,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 29,
+   "durationMs": 16,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:OpeningOfLine:{\"moves\":\"e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1\"}": {
-  "executionId": "exec_1167caa8-f02b-4561-ac69-f94c47390ac0",
+  "executionId": "exec_063e7a94-ca94-4118-9537-cc14d09bc278",
   "operationId": "OpeningOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -785,13 +785,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1448,
+   "durationMs": 1114,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:TheoryOfLine:{\"moves\":\"e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1\"}": {
-  "executionId": "exec_3f5ad2f3-701a-41be-92f7-97ac780d83dc",
+  "executionId": "exec_fd9c3a67-14b4-4008-87be-86f557702581",
   "operationId": "TheoryOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -810,13 +810,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1756,
+   "durationMs": 1282,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:OpeningOf:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\"}": {
-  "executionId": "exec_a1eac498-bd2f-4d7c-9f44-8fdb8574c501",
+  "executionId": "exec_20c6f963-9beb-43ed-ad05-3f76da7645ab",
   "operationId": "OpeningOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -826,13 +826,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1647,
+   "durationMs": 1101,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\",\"maxLines\":5,\"withinCp\":20}": {
-  "executionId": "exec_90921e03-0dde-42c8-bb2b-58ab83f46a07",
+  "executionId": "exec_c1b5b8e8-493b-4447-8549-96bf51d6dc48",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -851,7 +851,7 @@
     "line": "e4 e5 Nf3 Nc6 d4 exd4 Nxd4 Nf6 Nxc6 bxc6 Bd3 d5 e5 Nd7 O-O Nc5 f4 g6 Be3 Nxd3 cxd3 c5 Nc3",
     "lineUci": "e2e4 e7e5 g1f3 b8c6 d2d4 e5d4 f3d4 g8f6 d4c6 b7c6 f1d3 d7d5 e4e5 f6d7 e1g1 d7c5 f2f4 g7g6 c1e3 c5d3 c2d3 c6c5 b1c3",
     "depth": 18,
-    "creates": "Black has isolated pawn on a7.\nBlack has doubled pawns on the c-file.\nPawn islands: White 2, Black 3.\nBlack has a queenside pawn majority (4 against 3, counting the a-d files).\nWhite has a kingside pawn majority (4 against 3, counting the e-h files).\nHalf-open for White: the d-file.\nHalf-open for Black: the b and e-files.",
+    "creates": "Pawn structure: Black has isolated pawn on a7.\nPawn structure: Black has doubled pawns on the c-file.\nPawn structure: pawn islands, White 2, Black 3.\nPawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).\nPawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).\nFiles: the d-file is half-open for White.\nFiles: the b and e-files are half-open for Black.",
     "removes": ""
    },
    {
@@ -866,7 +866,7 @@
     "line": "d4 Nf6 c4 e6 Nf3 d5 Bg5 Be7 Nc3 h6 Bxf6 Bxf6 e3 c6 Bd3 dxc4 Bxc4",
     "lineUci": "d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 c1g5 f8e7 b1c3 h7h6 g5f6 e7f6 e2e3 c7c6 f1d3 d5c4 d3c4",
     "depth": 18,
-    "creates": "Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.",
+    "creates": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.",
     "removes": ""
    },
    {
@@ -881,7 +881,7 @@
     "line": "Nf3 Nf6 c4 e6 d4 d5 Bg5 Be7 Nc3 h6 Bxf6 Bxf6 e3 c6 Bd3 Nd7 O-O Be7",
     "lineUci": "g1f3 g8f6 c2c4 e7e6 d2d4 d7d5 c1g5 f8e7 b1c3 h7h6 g5f6 e7f6 e2e3 c7c6 f1d3 b8d7 e1g1 f6e7",
     "depth": 18,
-    "creates": "Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.",
+    "creates": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.",
     "removes": ""
    },
    {
@@ -896,7 +896,7 @@
     "line": "e3 Nf6 d4 e6 Nf3 Be7 c4 d5 b3 c5 Be2 cxd4 exd4 Bb4+ Nbd2",
     "lineUci": "e2e3 g8f6 d2d4 e7e6 g1f3 f8e7 c2c4 d7d5 b2b3 c7c5 f1e2 c5d4 e3d4 e7b4 b1d2",
     "depth": 18,
-    "creates": "Black's light-squared bishop on c8 is bad: 5 of 8 black pawns stand on its colour.",
+    "creates": "Minor pieces: Black's light-squared bishop on c8 is bad: 5 of 8 black pawns stand on its colour.",
     "removes": ""
    },
    {
@@ -911,20 +911,20 @@
     "line": "c4 e5 Nc3 Nf6 Nf3 Nc6 g3 d5 cxd5 Nxd5 Bg2 Nb6 O-O Be7 d3 O-O Be3 Be6 Rc1 Nd5 Nxd5 Bxd5 a3 a5 Bc5 h6 Bxe7 Qxe7",
     "lineUci": "c2c4 e7e5 b1c3 g8f6 g1f3 b8c6 g2g3 d7d5 c4d5 f6d5 f1g2 d5b6 e1g1 f8e7 d2d3 e8g8 c1e3 c8e6 a1c1 b6d5 c3d5 e6d5 a2a3 a7a5 e3c5 h7h6 c5e7 d8e7",
     "depth": 18,
-    "creates": "White's dark-squared bishop on c1 is bad: 5 of 7 white pawns stand on its colour.\nWhite's light-squared bishop on f1 is good: 2 of 7 white pawns stand on its colour.\nHalf-open for White: the c-file.\nHalf-open for Black: the d-file.",
+    "creates": "Minor pieces: White's dark-squared bishop on c1 is bad: 5 of 7 white pawns stand on its colour.\nMinor pieces: White's light-squared bishop on f1 is good: 2 of 7 white pawns stand on its colour.\nFiles: the c-file is half-open for White.\nFiles: the d-file is half-open for Black.",
     "removes": ""
    }
   ],
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 44,
+   "durationMs": 28,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\",\"maxLines\":5,\"withinCp\":100}": {
-  "executionId": "exec_109a12ed-0141-430b-9bd1-f6aacc9fb1de",
+  "executionId": "exec_c7e5fcf1-99c9-418f-8888-dbb37eab4d03",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -943,7 +943,7 @@
     "line": "e4 e5 Nf3 Nc6 d4 exd4 Nxd4 Nf6 Nxc6 bxc6 Bd3 d5 e5 Nd7 O-O Nc5 f4 g6 Be3 Nxd3 cxd3 c5 Nc3",
     "lineUci": "e2e4 e7e5 g1f3 b8c6 d2d4 e5d4 f3d4 g8f6 d4c6 b7c6 f1d3 d7d5 e4e5 f6d7 e1g1 d7c5 f2f4 g7g6 c1e3 c5d3 c2d3 c6c5 b1c3",
     "depth": 18,
-    "creates": "Black has isolated pawn on a7.\nBlack has doubled pawns on the c-file.\nPawn islands: White 2, Black 3.\nBlack has a queenside pawn majority (4 against 3, counting the a-d files).\nWhite has a kingside pawn majority (4 against 3, counting the e-h files).\nHalf-open for White: the d-file.\nHalf-open for Black: the b and e-files.",
+    "creates": "Pawn structure: Black has isolated pawn on a7.\nPawn structure: Black has doubled pawns on the c-file.\nPawn structure: pawn islands, White 2, Black 3.\nPawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).\nPawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).\nFiles: the d-file is half-open for White.\nFiles: the b and e-files are half-open for Black.",
     "removes": ""
    },
    {
@@ -958,7 +958,7 @@
     "line": "d4 Nf6 c4 e6 Nf3 d5 Bg5 Be7 Nc3 h6 Bxf6 Bxf6 e3 c6 Bd3 dxc4 Bxc4",
     "lineUci": "d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 c1g5 f8e7 b1c3 h7h6 g5f6 e7f6 e2e3 c7c6 f1d3 d5c4 d3c4",
     "depth": 18,
-    "creates": "Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.",
+    "creates": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.",
     "removes": ""
    },
    {
@@ -973,7 +973,7 @@
     "line": "Nf3 Nf6 c4 e6 d4 d5 Bg5 Be7 Nc3 h6 Bxf6 Bxf6 e3 c6 Bd3 Nd7 O-O Be7",
     "lineUci": "g1f3 g8f6 c2c4 e7e6 d2d4 d7d5 c1g5 f8e7 b1c3 h7h6 g5f6 e7f6 e2e3 c7c6 f1d3 b8d7 e1g1 f6e7",
     "depth": 18,
-    "creates": "Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.",
+    "creates": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.",
     "removes": ""
    },
    {
@@ -988,7 +988,7 @@
     "line": "e3 Nf6 d4 e6 Nf3 Be7 c4 d5 b3 c5 Be2 cxd4 exd4 Bb4+ Nbd2",
     "lineUci": "e2e3 g8f6 d2d4 e7e6 g1f3 f8e7 c2c4 d7d5 b2b3 c7c5 f1e2 c5d4 e3d4 e7b4 b1d2",
     "depth": 18,
-    "creates": "Black's light-squared bishop on c8 is bad: 5 of 8 black pawns stand on its colour.",
+    "creates": "Minor pieces: Black's light-squared bishop on c8 is bad: 5 of 8 black pawns stand on its colour.",
     "removes": ""
    },
    {
@@ -1003,20 +1003,20 @@
     "line": "c4 e5 Nc3 Nf6 Nf3 Nc6 g3 d5 cxd5 Nxd5 Bg2 Nb6 O-O Be7 d3 O-O Be3 Be6 Rc1 Nd5 Nxd5 Bxd5 a3 a5 Bc5 h6 Bxe7 Qxe7",
     "lineUci": "c2c4 e7e5 b1c3 g8f6 g1f3 b8c6 g2g3 d7d5 c4d5 f6d5 f1g2 d5b6 e1g1 f8e7 d2d3 e8g8 c1e3 c8e6 a1c1 b6d5 c3d5 e6d5 a2a3 a7a5 e3c5 h7h6 c5e7 d8e7",
     "depth": 18,
-    "creates": "White's dark-squared bishop on c1 is bad: 5 of 7 white pawns stand on its colour.\nWhite's light-squared bishop on f1 is good: 2 of 7 white pawns stand on its colour.\nHalf-open for White: the c-file.\nHalf-open for Black: the d-file.",
+    "creates": "Minor pieces: White's dark-squared bishop on c1 is bad: 5 of 7 white pawns stand on its colour.\nMinor pieces: White's light-squared bishop on f1 is good: 2 of 7 white pawns stand on its colour.\nFiles: the c-file is half-open for White.\nFiles: the d-file is half-open for Black.",
     "removes": ""
    }
   ],
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 39,
+   "durationMs": 22,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"maxLines\":5,\"withinCp\":20}": {
-  "executionId": "exec_22ccf654-be87-4c34-8c92-6665309802ce",
+  "executionId": "exec_64b17ae8-4350-41ce-aa24-c19ceb0e9846",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1035,8 +1035,8 @@
     "line": "Be6 Nc3 Bd6 Na4 Bxb3 axb3 O-O-O Be3 b6 Nc3 Kb7 Bf4 Ne7 Bxd6 Rxd6 Rxd6 cxd6 f3 Rd8 Rd1 Kc6",
     "lineUci": "c8e6 b1c3 f8d6 c3a4 e6b3 a2b3 e8c8 c1e3 b7b6 a4c3 c8b7 e3f4 g8e7 f4d6 d8d6 d1d6 c7d6 f2f3 h8d8 a1d1 b7c6",
     "depth": 18,
-    "creates": "White has doubled pawns on the b-file.\nBlack's dark-squared bishop on d6 is bad: 5 of 7 black pawns stand on its colour.\nHalf-open for White: the a-file.\nBlack holds an open file with the rook d8.\nThe kings are on opposite wings (White kingside, Black queenside): pawn storms cost the attacker nothing in king safety.",
-    "removes": "Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nBlack's king is still in the centre, on e8."
+    "creates": "Pawn structure: White has doubled pawns on the b-file.\nMinor pieces: Black's dark-squared bishop on d6 is bad: 5 of 7 black pawns stand on its colour.\nFiles: the a-file is half-open for White.\nFiles: Black holds an open file with the rook d8.\nKing safety: The kings are on opposite wings (White kingside, Black queenside): pawn storms cost the attacker nothing in king safety.",
+    "removes": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nKing safety: Black's king is still in the centre, on e8."
    },
    {
     "rank": 2,
@@ -1050,8 +1050,8 @@
     "line": "Bg4 f3 Be6 Bf4 c4 Nd4 O-O-O Nc3 Bf7 Be3 Bb4 a3 Bxc3 bxc3 Ne7 g4 h5",
     "lineUci": "c8g4 f2f3 g4e6 c1f4 c5c4 b3d4 e8c8 b1c3 e6f7 f4e3 f8b4 a2a3 b4c3 b2c3 g8e7 g2g4 h7h5",
     "depth": 18,
-    "creates": "White's dark-squared bishop on e3 is good: 2 of 7 white pawns stand on its colour.\nBlack holds an open file with the rook d8.\nThe kings are on opposite wings (White kingside, Black queenside): pawn storms cost the attacker nothing in king safety.",
-    "removes": "Black's king is still in the centre, on e8."
+    "creates": "Minor pieces: White's dark-squared bishop on e3 is good: 2 of 7 white pawns stand on its colour.\nFiles: Black holds an open file with the rook d8.\nKing safety: The kings are on opposite wings (White kingside, Black queenside): pawn storms cost the attacker nothing in king safety.",
+    "removes": "King safety: Black's king is still in the centre, on e8."
    },
    {
     "rank": 3,
@@ -1065,20 +1065,20 @@
     "line": "Bd7 Bf4 O-O-O Nc3 Be6 Rxd8+ Kxd8 Be3 b6 a4 a5 Nb5 Kc8 Rd1 g5 f4 h6 f5",
     "lineUci": "c8d7 c1f4 e8c8 b1c3 d7e6 d1d8 c8d8 f4e3 b7b6 a2a4 a6a5 c3b5 d8c8 a1d1 g7g5 f2f4 h7h6 f4f5",
     "depth": 18,
-    "creates": "Black's dark-squared bishop on f8 is bad: 5 of 7 black pawns stand on its colour.\nBlack's light-squared bishop on e6 is good: 2 of 7 black pawns stand on its colour.\nBlack's king is still in the centre, on d8.",
-    "removes": "White holds an open file with the rook d1.\nBlack's king is still in the centre, on e8."
+    "creates": "Minor pieces: Black's dark-squared bishop on f8 is bad: 5 of 7 black pawns stand on its colour.\nMinor pieces: Black's light-squared bishop on e6 is good: 2 of 7 black pawns stand on its colour.\nKing safety: Black's king is still in the centre, on d8.",
+    "removes": "Files: White holds an open file with the rook d1.\nKing safety: Black's king is still in the centre, on e8."
    }
   ],
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 38,
+   "durationMs": 22,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"maxLines\":5,\"withinCp\":100}": {
-  "executionId": "exec_19756ab2-acce-4c9c-92f6-797c43ff65bc",
+  "executionId": "exec_0954d61b-6488-4d1a-972d-9ba08238de55",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1097,8 +1097,8 @@
     "line": "Be6 Nc3 Bd6 Na4 Bxb3 axb3 O-O-O Be3 b6 Nc3 Kb7 Bf4 Ne7 Bxd6 Rxd6 Rxd6 cxd6 f3 Rd8 Rd1 Kc6",
     "lineUci": "c8e6 b1c3 f8d6 c3a4 e6b3 a2b3 e8c8 c1e3 b7b6 a4c3 c8b7 e3f4 g8e7 f4d6 d8d6 d1d6 c7d6 f2f3 h8d8 a1d1 b7c6",
     "depth": 18,
-    "creates": "White has doubled pawns on the b-file.\nBlack's dark-squared bishop on d6 is bad: 5 of 7 black pawns stand on its colour.\nHalf-open for White: the a-file.\nBlack holds an open file with the rook d8.\nThe kings are on opposite wings (White kingside, Black queenside): pawn storms cost the attacker nothing in king safety.",
-    "removes": "Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nBlack's king is still in the centre, on e8."
+    "creates": "Pawn structure: White has doubled pawns on the b-file.\nMinor pieces: Black's dark-squared bishop on d6 is bad: 5 of 7 black pawns stand on its colour.\nFiles: the a-file is half-open for White.\nFiles: Black holds an open file with the rook d8.\nKing safety: The kings are on opposite wings (White kingside, Black queenside): pawn storms cost the attacker nothing in king safety.",
+    "removes": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nKing safety: Black's king is still in the centre, on e8."
    },
    {
     "rank": 2,
@@ -1112,8 +1112,8 @@
     "line": "Bg4 f3 Be6 Bf4 c4 Nd4 O-O-O Nc3 Bf7 Be3 Bb4 a3 Bxc3 bxc3 Ne7 g4 h5",
     "lineUci": "c8g4 f2f3 g4e6 c1f4 c5c4 b3d4 e8c8 b1c3 e6f7 f4e3 f8b4 a2a3 b4c3 b2c3 g8e7 g2g4 h7h5",
     "depth": 18,
-    "creates": "White's dark-squared bishop on e3 is good: 2 of 7 white pawns stand on its colour.\nBlack holds an open file with the rook d8.\nThe kings are on opposite wings (White kingside, Black queenside): pawn storms cost the attacker nothing in king safety.",
-    "removes": "Black's king is still in the centre, on e8."
+    "creates": "Minor pieces: White's dark-squared bishop on e3 is good: 2 of 7 white pawns stand on its colour.\nFiles: Black holds an open file with the rook d8.\nKing safety: The kings are on opposite wings (White kingside, Black queenside): pawn storms cost the attacker nothing in king safety.",
+    "removes": "King safety: Black's king is still in the centre, on e8."
    },
    {
     "rank": 3,
@@ -1127,8 +1127,8 @@
     "line": "Bd7 Bf4 O-O-O Nc3 Be6 Rxd8+ Kxd8 Be3 b6 a4 a5 Nb5 Kc8 Rd1 g5 f4 h6 f5",
     "lineUci": "c8d7 c1f4 e8c8 b1c3 d7e6 d1d8 c8d8 f4e3 b7b6 a2a4 a6a5 c3b5 d8c8 a1d1 g7g5 f2f4 h7h6 f4f5",
     "depth": 18,
-    "creates": "Black's dark-squared bishop on f8 is bad: 5 of 7 black pawns stand on its colour.\nBlack's light-squared bishop on e6 is good: 2 of 7 black pawns stand on its colour.\nBlack's king is still in the centre, on d8.",
-    "removes": "White holds an open file with the rook d1.\nBlack's king is still in the centre, on e8."
+    "creates": "Minor pieces: Black's dark-squared bishop on f8 is bad: 5 of 7 black pawns stand on its colour.\nMinor pieces: Black's light-squared bishop on e6 is good: 2 of 7 black pawns stand on its colour.\nKing safety: Black's king is still in the centre, on d8.",
+    "removes": "Files: White holds an open file with the rook d1.\nKing safety: Black's king is still in the centre, on e8."
    },
    {
     "rank": 4,
@@ -1142,8 +1142,8 @@
     "line": "g5 Nc3 Be6 f4 Bg4 Rf1 c4 h3 cxb3 hxg4 bxc2 fxg5 Bc5+ Kh1 fxg5 Bxg5",
     "lineUci": "g7g5 b1c3 c8e6 f2f4 e6g4 d1f1 c5c4 h2h3 c4b3 h3g4 b3c2 f4g5 f8c5 g1h1 f6g5 c1g5",
     "depth": 18,
-    "creates": "White's dark-squared bishop on c1 is good: 2 of 6 white pawns stand on its colour.\nWhite has isolated pawns on g5, e4, g4 and g2.\nWhite has doubled pawns on the g-file.\nBlack's dark-squared bishop on f8 is good: 2 of 6 black pawns stand on its colour.\nBlack has isolated pawns on h7 and f6.\nBlack has a passed pawn on c2.\nWhite has more space (6 against 3 by pawn control of the opponent's half).\nHalf-open for White: the c, f and h-files.\nWhite has outpost square on f5 (guarded by a pawn, beyond the reach of enemy pawns).\nHalf-open for Black: the e and g-files.\nBlack has outpost square on e5 (guarded by a pawn, beyond the reach of enemy pawns).\nWhite's king on g1 is exposed: 1 shield pawn, open or half-open f and h-file nearby, 0 enemy pieces bearing on it.",
-    "removes": "Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nWhite holds an open file with the rook d1.\nHalf-open for Black: the e-file."
+    "creates": "Minor pieces: White's dark-squared bishop on c1 is good: 2 of 6 white pawns stand on its colour.\nPawn structure: White has isolated pawns on g5, e4, g4 and g2.\nPawn structure: White has doubled pawns on the g-file.\nMinor pieces: Black's dark-squared bishop on f8 is good: 2 of 6 black pawns stand on its colour.\nPawn structure: Black has isolated pawns on h7 and f6.\nPawn structure: Black has a passed pawn on c2.\nSpace: White has more space (6 against 3 by pawn control of the opponent's half).\nFiles: the c, f and h-files are half-open for White.\nKey squares: White has outpost square on f5 (guarded by a pawn, beyond the reach of enemy pawns).\nFiles: the e and g-files are half-open for Black.\nKey squares: Black has outpost square on e5 (guarded by a pawn, beyond the reach of enemy pawns).\nKing safety: White's king on g1 is exposed: 1 shield pawn, open or half-open f and h-file nearby, 0 enemy pieces bearing on it.",
+    "removes": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nFiles: White holds an open file with the rook d1.\nFiles: the e-file is half-open for Black."
    },
    {
     "rank": 5,
@@ -1157,20 +1157,20 @@
     "line": "Bd6 Na5 b6 Nc4 Be7 Bf4 Bd8 Nc3 Ne7 Ne3 Be6 h4 O-O a4 h5 Rd2 Nc6 Ncd5 Rf7 c3 Rd7 Rad1",
     "lineUci": "f8d6 b3a5 b7b6 a5c4 d6e7 c1f4 e7d8 b1c3 g8e7 c4e3 c8e6 h2h4 e8g8 a2a4 h7h5 d1d2 e7c6 c3d5 f8f7 c2c3 f7d7 a1d1",
     "depth": 18,
-    "creates": "Black's light-squared bishop on c8 is good: 2 of 7 black pawns stand on its colour.\nBlack's dark-squared bishop on d8 is bad: 5 of 7 black pawns stand on its colour.",
+    "creates": "Minor pieces: Black's light-squared bishop on c8 is good: 2 of 7 black pawns stand on its colour.\nMinor pieces: Black's dark-squared bishop on d8 is bad: 5 of 7 black pawns stand on its colour.",
     "removes": ""
    }
   ],
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 38,
+   "durationMs": 23,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:PlansInPosition:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\"}": {
-  "executionId": "exec_604aa15a-8372-4d74-af33-8d36abafc54a",
+  "executionId": "exec_cd360c8c-3ea4-4f85-9546-54da4a5c73a4",
   "operationId": "PlansInPosition",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1180,86 +1180,86 @@
    {
     "side": "white",
     "priority": 1,
-    "plan": "Develop quickly and seize open d-file",
-    "idea": "White should aim to complete development—especially Nc3 and Bf4-e3—bringing rooks to the open d-file to pressure Black's position and discourage Black's king from castling queenside. White's faster development can restrict Black's maneuvering and create tactical threats on d7 or d8.",
-    "moves": "Nc3 Bf4 Be3 Rd1",
-    "imbalances": "Open file: d.\nWhite holds an open file with the rook d1.\nWhite still has Nb1 and Bc1 undeveloped.\nWhite has the freer pieces: 34 legal moves against 23.",
-    "engineEvidence": "All main engine lines show White playing Nc3, Bf4, Be3, and rook to d1.",
-    "summary": "The position is balanced, but White is somewhat more comfortable due to freer development and the initiative on the open d-file. Black holds the bishop pair as a resource, but suffers from queenside pawn weaknesses and cramped pieces, with the king still in the center. Both sides have pawn majorities on opposite flanks, but immediate pawn play is not favored by the engine; piece activity and king safety are more pressing. Black's plans revolve around exchanging a pair of minor pieces to ease development and preparing to castle queenside, as shown by the candidate moves. White's plans focus on rapid development, pressure on the d-file, and using the slight lead in activity to restrict Black.",
-    "structure": "Ruy Lopez Exchange",
+    "plan": "Exploit open d-file and superior piece activity",
+    "idea": "White should use the open d-file and their more active rook to pressure Black's centralized king or contest open files after Black castles. Fast development of queenside pieces can increase initiative and support pressure on the queenside, especially against Black's c5/c7 weaknesses or backward d7 pawn.",
+    "moves": "Nc3 Bf4 Na4 Be3",
+    "imbalances": "Files: the d-file is open.\nFiles: White holds an open file with the rook d1.\nDevelopment: White still has Nb1 and Bc1 undeveloped.\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
+    "engineEvidence": "Nc3 and Na4 appear in multiple engine lines, consistently prioritizing activity and d-file pressure.",
+    "summary": "The position is equal with imbalances in minor pieces: Black keeps the bishop pair, but has less active pieces and doubled c-pawns. White's freer position and rook on the open d-file give a slight initiative, but also a development lag. Black is aiming to complete development and may castle queenside, using the bishop pair and pressure on the center and queenside to compensate for structural weakness. White will try to leverage piece activity, pressure the c5/c7 pawns or d-file, and provoke weaknesses while finishing development. The mutual majorities (Black queenside, White kingside) offer long-term play, but immediate plans focus on piece activity and king safety.",
+    "structure": "none",
     "opening": ""
    },
    {
     "side": "white",
     "priority": 2,
-    "plan": "Target queenside pawn weaknesses",
-    "idea": "After Black exchanges on b3 or develops the queenside, White can consider pressuring the c5 pawn or playing a4 to create further weaknesses. This leverages Black's doubled c-pawns and White's greater piece activity to open lines on the queenside.",
-    "moves": "a4 axb3 Nb5",
-    "imbalances": "Black has doubled pawns on the c-file.\nBlack has a queenside pawn majority (4 against 3, counting the a-d files).\nWhite has the freer pieces: 34 legal moves against 23.",
-    "engineEvidence": "The main line after Be6, Nc3, Bd6, Na4, Bxb3, axb3 shows White gaining a target on the c5 pawn.",
-    "summary": "The position is balanced, but White is somewhat more comfortable due to freer development and the initiative on the open d-file. Black holds the bishop pair as a resource, but suffers from queenside pawn weaknesses and cramped pieces, with the king still in the center. Both sides have pawn majorities on opposite flanks, but immediate pawn play is not favored by the engine; piece activity and king safety are more pressing. Black's plans revolve around exchanging a pair of minor pieces to ease development and preparing to castle queenside, as shown by the candidate moves. White's plans focus on rapid development, pressure on the d-file, and using the slight lead in activity to restrict Black.",
-    "structure": "Ruy Lopez Exchange",
+    "plan": "Target doubled c-pawns and queenside weaknesses",
+    "idea": "White can try to provoke or exploit Black's doubled c-pawns and generally weaker queenside, either by offering exchanges or opening up the position as Black castles long. Pressure along the b-file or through piece exchanges that highlight Black's pawn weaknesses is key.",
+    "moves": "Na4 Bf4 Nc3",
+    "imbalances": "Pawn structure: Black has doubled pawns on the c-file.\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
+    "engineEvidence": "Na4 and Bf4 in main lines play towards these weaknesses.",
+    "summary": "The position is equal with imbalances in minor pieces: Black keeps the bishop pair, but has less active pieces and doubled c-pawns. White's freer position and rook on the open d-file give a slight initiative, but also a development lag. Black is aiming to complete development and may castle queenside, using the bishop pair and pressure on the center and queenside to compensate for structural weakness. White will try to leverage piece activity, pressure the c5/c7 pawns or d-file, and provoke weaknesses while finishing development. The mutual majorities (Black queenside, White kingside) offer long-term play, but immediate plans focus on piece activity and king safety.",
+    "structure": "none",
     "opening": ""
    },
    {
     "side": "white",
     "priority": 3,
-    "plan": "Prepare potential kingside expansion",
-    "idea": "If Black castles queenside, White has the option in some lines to expand on the kingside with moves like f4 or h4, supporting an attack where Black's king resides, especially since pawn storms cost little in king safety with opposite-side castling.",
-    "moves": "f4 h4",
-    "imbalances": "White has a kingside pawn majority (4 against 3, counting the e-h files).\nBlack's king is still in the centre, on e8.\nWhite has the freer pieces: 34 legal moves against 23.",
-    "engineEvidence": "The engine lines do not immediately pursue this, but it's shown in lines where the kings go to opposite wings.",
-    "summary": "The position is balanced, but White is somewhat more comfortable due to freer development and the initiative on the open d-file. Black holds the bishop pair as a resource, but suffers from queenside pawn weaknesses and cramped pieces, with the king still in the center. Both sides have pawn majorities on opposite flanks, but immediate pawn play is not favored by the engine; piece activity and king safety are more pressing. Black's plans revolve around exchanging a pair of minor pieces to ease development and preparing to castle queenside, as shown by the candidate moves. White's plans focus on rapid development, pressure on the d-file, and using the slight lead in activity to restrict Black.",
-    "structure": "Ruy Lopez Exchange",
+    "plan": "Leverage kingside majority if queenside closes",
+    "idea": "If the queenside becomes blocked or less relevant, White may look to advance the kingside majority in the endgame, creating a passed pawn or opening lines against Black's king.",
+    "moves": "f4 h3",
+    "imbalances": "Pawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).",
+    "engineEvidence": "f4 and h3 are present in some secondary lines, supporting this plan.",
+    "summary": "The position is equal with imbalances in minor pieces: Black keeps the bishop pair, but has less active pieces and doubled c-pawns. White's freer position and rook on the open d-file give a slight initiative, but also a development lag. Black is aiming to complete development and may castle queenside, using the bishop pair and pressure on the center and queenside to compensate for structural weakness. White will try to leverage piece activity, pressure the c5/c7 pawns or d-file, and provoke weaknesses while finishing development. The mutual majorities (Black queenside, White kingside) offer long-term play, but immediate plans focus on piece activity and king safety.",
+    "structure": "none",
     "opening": ""
    },
    {
     "side": "black",
     "priority": 1,
-    "plan": "Exchange minor pieces to ease development",
-    "idea": "Black should aim to exchange a pair of minor pieces, especially the dark-squared bishops or one knight for White's bishop. This reduces White's activity and helps Black overcome development problems, as seen in the suggested Be6 or Bg4 lines.",
-    "moves": "Be6 Bg4 Bxb3",
-    "imbalances": "Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nBlack still has Ng8, Bc8 and Bf8 undeveloped.\nBlack's king is still in the centre, on e8.",
-    "engineEvidence": "Both Be6 and Bg4 directly pursue exchanges; lines show Bxb3 or trades on e6.",
-    "summary": "The position is balanced, but White is somewhat more comfortable due to freer development and the initiative on the open d-file. Black holds the bishop pair as a resource, but suffers from queenside pawn weaknesses and cramped pieces, with the king still in the center. Both sides have pawn majorities on opposite flanks, but immediate pawn play is not favored by the engine; piece activity and king safety are more pressing. Black's plans revolve around exchanging a pair of minor pieces to ease development and preparing to castle queenside, as shown by the candidate moves. White's plans focus on rapid development, pressure on the d-file, and using the slight lead in activity to restrict Black.",
-    "structure": "Ruy Lopez Exchange",
+    "plan": "Complete development and secure the king via queenside castling",
+    "idea": "Black should prioritize completing development while keeping the bishop pair; castling queenside brings the king to relative safety and activates the rook on the d-file. This plan is especially pressing due to central king vulnerability and the open d-file.",
+    "moves": "Be6 Bg4 Bd7 O-O-O",
+    "imbalances": "Minor pieces: Black has the bishop pair.\nPawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).\nDevelopment: Black still has Ng8, Bc8 and Bf8 undeveloped.\nKing safety: Black's king is still in the centre, on e8.",
+    "engineEvidence": "Be6, Bg4, Bd7, O-O-O in engine main lines show Black aiming to finish development and bring the king to safety.",
+    "summary": "The position is equal with imbalances in minor pieces: Black keeps the bishop pair, but has less active pieces and doubled c-pawns. White's freer position and rook on the open d-file give a slight initiative, but also a development lag. Black is aiming to complete development and may castle queenside, using the bishop pair and pressure on the center and queenside to compensate for structural weakness. White will try to leverage piece activity, pressure the c5/c7 pawns or d-file, and provoke weaknesses while finishing development. The mutual majorities (Black queenside, White kingside) offer long-term play, but immediate plans focus on piece activity and king safety.",
+    "structure": "none",
     "opening": ""
    },
    {
     "side": "black",
     "priority": 2,
-    "plan": "Castle queenside quickly for king safety",
-    "idea": "With the kingside unsafe for castling and the center open, Black should prepare castling long (O-O-O), moving the king off the e-file and linking the rooks for possible counterplay on the open d- and half-open e-file.",
-    "moves": "O-O-O Bd6 Bd7 Kb7",
-    "imbalances": "Black still has Ng8, Bc8 and Bf8 undeveloped.\nBlack's king is still in the centre, on e8.",
-    "engineEvidence": "In several main lines (Be6, Bg4), Black prepares or plays O-O-O quickly.",
-    "summary": "The position is balanced, but White is somewhat more comfortable due to freer development and the initiative on the open d-file. Black holds the bishop pair as a resource, but suffers from queenside pawn weaknesses and cramped pieces, with the king still in the center. Both sides have pawn majorities on opposite flanks, but immediate pawn play is not favored by the engine; piece activity and king safety are more pressing. Black's plans revolve around exchanging a pair of minor pieces to ease development and preparing to castle queenside, as shown by the candidate moves. White's plans focus on rapid development, pressure on the d-file, and using the slight lead in activity to restrict Black.",
-    "structure": "Ruy Lopez Exchange",
+    "plan": "Use bishop pair and majority for long-term queenside play",
+    "idea": "Black should utilize the bishop pair on an open board, and if queenside play opens up, seek to use the queenside pawn majority. This might involve advancing b5/b6 or playing for activity on the c-file as White develops.",
+    "moves": "Be6 Bd6 b6",
+    "imbalances": "Minor pieces: Black has the bishop pair.\nPawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).",
+    "engineEvidence": "Be6 and Bd6 lines preserve the bishop pair; b6 is cited in main lines as Black starts to support queenside play.",
+    "summary": "The position is equal with imbalances in minor pieces: Black keeps the bishop pair, but has less active pieces and doubled c-pawns. White's freer position and rook on the open d-file give a slight initiative, but also a development lag. Black is aiming to complete development and may castle queenside, using the bishop pair and pressure on the center and queenside to compensate for structural weakness. White will try to leverage piece activity, pressure the c5/c7 pawns or d-file, and provoke weaknesses while finishing development. The mutual majorities (Black queenside, White kingside) offer long-term play, but immediate plans focus on piece activity and king safety.",
+    "structure": "none",
     "opening": ""
    },
    {
     "side": "black",
     "priority": 3,
-    "plan": "Exploit the bishop pair in the middlegame",
-    "idea": "After easing development and ensuring king safety, Black can seek open lines or pawn breaks to utilize the bishop pair's long-term power, especially as the position becomes less blocked.",
-    "moves": "Bd6 b6 c4",
-    "imbalances": "Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nBlack has a queenside pawn majority (4 against 3, counting the a-d files).",
-    "engineEvidence": "The engine sometimes continues Bd6, b6, preparing further activity.",
-    "summary": "The position is balanced, but White is somewhat more comfortable due to freer development and the initiative on the open d-file. Black holds the bishop pair as a resource, but suffers from queenside pawn weaknesses and cramped pieces, with the king still in the center. Both sides have pawn majorities on opposite flanks, but immediate pawn play is not favored by the engine; piece activity and king safety are more pressing. Black's plans revolve around exchanging a pair of minor pieces to ease development and preparing to castle queenside, as shown by the candidate moves. White's plans focus on rapid development, pressure on the d-file, and using the slight lead in activity to restrict Black.",
-    "structure": "Ruy Lopez Exchange",
+    "plan": "Challenge White's central and kingside activity",
+    "idea": "Black can look for tactical responses or pawn breaks (like...g5 in some lines) to question White's control in the center and restrict their freer pieces. Countering White's threats promptly is critical given the development lag.",
+    "moves": "Bg4 g5",
+    "imbalances": "King safety: Black's king is still in the centre, on e8.\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
+    "engineEvidence": "Bg4 and g5 appear as second and fourth-best engine moves, showing attempts to challenge White's space and development lead.",
+    "summary": "The position is equal with imbalances in minor pieces: Black keeps the bishop pair, but has less active pieces and doubled c-pawns. White's freer position and rook on the open d-file give a slight initiative, but also a development lag. Black is aiming to complete development and may castle queenside, using the bishop pair and pressure on the center and queenside to compensate for structural weakness. White will try to leverage piece activity, pressure the c5/c7 pawns or d-file, and provoke weaknesses while finishing development. The mutual majorities (Black queenside, White kingside) offer long-term play, but immediate plans focus on piece activity and king safety.",
+    "structure": "none",
     "opening": ""
    }
   ],
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 19835,
+   "durationMs": 10851,
    "externalCalls": 1,
    "cacheHit": null
   }
  },
  "view:PlansInLine:{\"moves\":\"e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1\"}": {
-  "executionId": "exec_401863f5-81f6-4417-b463-1b186992be50",
+  "executionId": "exec_f343d905-857f-41aa-952a-3cdac51aab29",
   "operationId": "PlansInLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1269,80 +1269,80 @@
    {
     "side": "white",
     "priority": 1,
-    "plan": "Activate on the open file",
-    "idea": "White should use their rook on the open d-file to put pressure on Black's queenside and hinder Black's castling or activity. This makes use of White's more developed rook and holds the initiative as long as Black's king is centered.",
-    "moves": "Rd1 Nc3 Bf4 Be3",
-    "imbalances": "Open file: d.\nWhite holds an open file with the rook d1.\nWhite has the freer pieces: 34 legal moves against 23.",
-    "engineEvidence": "Lines after Be6 (Nc3, Rd1, Be3, etc.)",
-    "summary": "The position is quite balanced, but Black has the bishop pair while White has a kingside pawn majority and some lead in development. The doubled c-pawns give Black a slight structural weakness, but Black's bishop pair and possible queenside majority could become effective in an endgame. White will aim to exploit their space, activity, and open file, while Black seeks to complete development, prepare queenside castling, and use their bishops and pawns on the queenside. The engine's top moves for Black (Be6, Bg4, Bd7) focus on speedy development and king safety, showing that Black's main plan is to castle and activate the bishops, while White will try to grab space and use the open d-file and their freer pieces.",
-    "structure": "Double pawn majority (Ruy Lopez Exchange, Carlsbad-like, or French…)",
+    "plan": "Exploit open files and piece activity",
+    "idea": "With more active minor and major pieces and the open d-file, White should seize the initiative on open lines. This includes contesting the open file with rooks and using freer mobility to pressure Black's slightly undeveloped queenside.",
+    "moves": "Rd1 Nc3 Bf4",
+    "imbalances": "Files: the d-file is open.\nFiles: White holds an open file with the rook d1.\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
+    "engineEvidence": "All main engine lines for Black respond to White's expected rook or knight development, showing active piece play is essential.",
+    "summary": "The game is balanced, but both sides have dynamic possibilities. Black's doubled c-pawns and slightly lagging development are offset by the bishop pair. The open d- and half-open e-files offer active play for both sides, with White having freer pieces and a slight lead in development, while Black may seek queenside play or simplification. Key plans revolve around exploiting open lines, activating pieces, and possible pawn structure transformations (doubling on the b-file, creating outposts). Black's candidate moves all gravitate towards development and castling long, so both sides are preparing for middlegame activity.",
+    "structure": "none",
     "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago"
    },
    {
     "side": "white",
     "priority": 2,
-    "plan": "Exploit development lead",
-    "idea": "White must keep developing quickly (Nc3, Bf4/Be3), threatening Black's still-centralized king and possibly opening play in the center or queenside before Black can coordinate. This temporary initiative is key before Black's bishops and king become active or safe.",
-    "moves": "Nc3 Bf4 Be3",
-    "imbalances": "White still has Nb1 and Bc1 undeveloped.\nBlack still has Ng8, Bc8 and Bf8 undeveloped.\nWhite has the freer pieces: 34 legal moves against 23.",
-    "engineEvidence": "Lines after Be6, Bg4, and Bd7 all show Nc3 and Bf4/Be3",
-    "summary": "The position is quite balanced, but Black has the bishop pair while White has a kingside pawn majority and some lead in development. The doubled c-pawns give Black a slight structural weakness, but Black's bishop pair and possible queenside majority could become effective in an endgame. White will aim to exploit their space, activity, and open file, while Black seeks to complete development, prepare queenside castling, and use their bishops and pawns on the queenside. The engine's top moves for Black (Be6, Bg4, Bd7) focus on speedy development and king safety, showing that Black's main plan is to castle and activate the bishops, while White will try to grab space and use the open d-file and their freer pieces.",
-    "structure": "Double pawn majority (Ruy Lopez Exchange, Carlsbad-like, or French…)",
+    "plan": "Play against Black’s pawn structure",
+    "idea": "Black's doubled c-pawns can become a target, especially using knights and the bishop to create threats on the queenside, either via direct pressure or inducing further weaknesses.",
+    "moves": "Na5 Nc3 Bf4",
+    "imbalances": "Pawn structure: Black has doubled pawns on the c-file.",
+    "engineEvidence": "Nc3/Na4 in the engine lines and subsequent play targeting c5/c6 demonstrate these ideas.",
+    "summary": "The game is balanced, but both sides have dynamic possibilities. Black's doubled c-pawns and slightly lagging development are offset by the bishop pair. The open d- and half-open e-files offer active play for both sides, with White having freer pieces and a slight lead in development, while Black may seek queenside play or simplification. Key plans revolve around exploiting open lines, activating pieces, and possible pawn structure transformations (doubling on the b-file, creating outposts). Black's candidate moves all gravitate towards development and castling long, so both sides are preparing for middlegame activity.",
+    "structure": "none",
     "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago"
    },
    {
     "side": "white",
     "priority": 3,
-    "plan": "Advance kingside pawns",
-    "idea": "With a pawn majority on the kingside, White may consider kingside pawn advances (f2-f3, sometimes g2-g4) to gain space, especially if Black castles queenside. This provides space and potential attacking chances if the Black king goes to c8.",
-    "moves": "f3 g4 h3",
-    "imbalances": "White has a kingside pawn majority (4 against 3, counting the e-h files).\nWhite has the freer pieces: 34 legal moves against 23.",
-    "engineEvidence": "Bg4 f3, g5 lines (though g4 less shown)",
-    "summary": "The position is quite balanced, but Black has the bishop pair while White has a kingside pawn majority and some lead in development. The doubled c-pawns give Black a slight structural weakness, but Black's bishop pair and possible queenside majority could become effective in an endgame. White will aim to exploit their space, activity, and open file, while Black seeks to complete development, prepare queenside castling, and use their bishops and pawns on the queenside. The engine's top moves for Black (Be6, Bg4, Bd7) focus on speedy development and king safety, showing that Black's main plan is to castle and activate the bishops, while White will try to grab space and use the open d-file and their freer pieces.",
-    "structure": "Double pawn majority (Ruy Lopez Exchange, Carlsbad-like, or French…)",
+    "plan": "Leverage kingside pawn majority",
+    "idea": "Expanding or trading with f2-f4 or g2-g4 may become attractive if Black castles queenside, giving White chances for kingside space and play.",
+    "moves": "f4 g4",
+    "imbalances": "Pawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).",
+    "engineEvidence": "f3/f4 appears in secondary engine lines, especially if Black delays kingside development.",
+    "summary": "The game is balanced, but both sides have dynamic possibilities. Black's doubled c-pawns and slightly lagging development are offset by the bishop pair. The open d- and half-open e-files offer active play for both sides, with White having freer pieces and a slight lead in development, while Black may seek queenside play or simplification. Key plans revolve around exploiting open lines, activating pieces, and possible pawn structure transformations (doubling on the b-file, creating outposts). Black's candidate moves all gravitate towards development and castling long, so both sides are preparing for middlegame activity.",
+    "structure": "none",
     "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago"
    },
    {
     "side": "black",
     "priority": 1,
-    "plan": "Develop and castle queenside",
-    "idea": "Black's priority is to finish developing the bishops (Be6/Bg4, Bd6/Bd7) and castle queenside, where the pawn structure gives more safety. This is seen in the engine lines and fixes the king-in-the-center issue, crucial for activating the bishop pair.",
-    "moves": "Be6 Bd7 Bg4 O-O-O",
-    "imbalances": "Black has the bishop pair.\nBlack still has Ng8, Bc8 and Bf8 undeveloped.\nBlack's king is still in the centre, on e8.",
-    "engineEvidence": "Be6, Bg4, Bd7 all aiming to let O-O-O happen",
-    "summary": "The position is quite balanced, but Black has the bishop pair while White has a kingside pawn majority and some lead in development. The doubled c-pawns give Black a slight structural weakness, but Black's bishop pair and possible queenside majority could become effective in an endgame. White will aim to exploit their space, activity, and open file, while Black seeks to complete development, prepare queenside castling, and use their bishops and pawns on the queenside. The engine's top moves for Black (Be6, Bg4, Bd7) focus on speedy development and king safety, showing that Black's main plan is to castle and activate the bishops, while White will try to grab space and use the open d-file and their freer pieces.",
-    "structure": "Double pawn majority (Ruy Lopez Exchange, Carlsbad-like, or French…)",
+    "plan": "Develop and prepare queenside castling",
+    "idea": "Black’s pieces (bishops and queen) must be quickly developed to connect rooks and safeguard the king, ideally with queenside castling which also activates the rook on the open d-file.",
+    "moves": "Be6 Bd7 O-O-O",
+    "imbalances": "Minor pieces: Black has the bishop pair.\nDevelopment: Black still has Ng8, Bc8 and Bf8 undeveloped.\nKing safety: Black's king is still in the centre, on e8.\nFiles: the d-file is open.\nFiles: the e-file is half-open for Black.",
+    "engineEvidence": "Every top engine line includes rapid bishop development and queenside castling.",
+    "summary": "The game is balanced, but both sides have dynamic possibilities. Black's doubled c-pawns and slightly lagging development are offset by the bishop pair. The open d- and half-open e-files offer active play for both sides, with White having freer pieces and a slight lead in development, while Black may seek queenside play or simplification. Key plans revolve around exploiting open lines, activating pieces, and possible pawn structure transformations (doubling on the b-file, creating outposts). Black's candidate moves all gravitate towards development and castling long, so both sides are preparing for middlegame activity.",
+    "structure": "none",
     "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago"
    },
    {
     "side": "black",
     "priority": 2,
-    "plan": "Use the bishop pair",
-    "idea": "After castling and completing development, Black should activate their bishops—often via Be6/Bd6 and possible exchanges—to maximize their power on the open board. Trading bishops only when favorable, especially if it damages White's structure (such as Bxb3), is optimal.",
-    "moves": "Be6 Bd6 Bxb3",
-    "imbalances": "Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nBlack still has Ng8, Bc8 and Bf8 undeveloped.",
-    "engineEvidence": "Be6, Bd6, critical bishop moves",
-    "summary": "The position is quite balanced, but Black has the bishop pair while White has a kingside pawn majority and some lead in development. The doubled c-pawns give Black a slight structural weakness, but Black's bishop pair and possible queenside majority could become effective in an endgame. White will aim to exploit their space, activity, and open file, while Black seeks to complete development, prepare queenside castling, and use their bishops and pawns on the queenside. The engine's top moves for Black (Be6, Bg4, Bd7) focus on speedy development and king safety, showing that Black's main plan is to castle and activate the bishops, while White will try to grab space and use the open d-file and their freer pieces.",
-    "structure": "Double pawn majority (Ruy Lopez Exchange, Carlsbad-like, or French…)",
+    "plan": "Exchange to reduce White’s piece activity",
+    "idea": "By trading minor pieces (e.g., Bxb3 or Bg4 followed by Be6), Black can remove White's active pieces and lessen White's lead in mobility, especially if this leads to imbalanced pawn structures that favor the bishop pair.",
+    "moves": "Be6 Bg4 Bxb3",
+    "imbalances": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
+    "engineEvidence": "Be6, Bxb3, and Bg4 are all top engine suggestions aiming to exchange minor pieces.",
+    "summary": "The game is balanced, but both sides have dynamic possibilities. Black's doubled c-pawns and slightly lagging development are offset by the bishop pair. The open d- and half-open e-files offer active play for both sides, with White having freer pieces and a slight lead in development, while Black may seek queenside play or simplification. Key plans revolve around exploiting open lines, activating pieces, and possible pawn structure transformations (doubling on the b-file, creating outposts). Black's candidate moves all gravitate towards development and castling long, so both sides are preparing for middlegame activity.",
+    "structure": "none",
     "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago"
    },
    {
     "side": "black",
     "priority": 3,
-    "plan": "Generate queenside play and pressure open/half-open files",
-    "idea": "In the long run, Black can aim to use their queenside majority and the semi-open d/e-files to create counterplay—sometimes pushing c4 to undouble c-pawns or using the d8-rook for file pressure. With careful play, Black can offset the doubled c-pawns by activity.",
-    "moves": "b6 c4 Rd8",
-    "imbalances": "Black has doubled pawns on the c-file.\nBlack has a queenside pawn majority (4 against 3, counting the a-d files).\nHalf-open for Black: the e-file.",
-    "engineEvidence": "Be6 line with b6, c4 in Bg4 line",
-    "summary": "The position is quite balanced, but Black has the bishop pair while White has a kingside pawn majority and some lead in development. The doubled c-pawns give Black a slight structural weakness, but Black's bishop pair and possible queenside majority could become effective in an endgame. White will aim to exploit their space, activity, and open file, while Black seeks to complete development, prepare queenside castling, and use their bishops and pawns on the queenside. The engine's top moves for Black (Be6, Bg4, Bd7) focus on speedy development and king safety, showing that Black's main plan is to castle and activate the bishops, while White will try to grab space and use the open d-file and their freer pieces.",
-    "structure": "Double pawn majority (Ruy Lopez Exchange, Carlsbad-like, or French…)",
+    "plan": "Play for central control and kingside counterplay",
+    "idea": "Moves like g5 or pushing pawns central/kingside can help Black contest space and look for play against White’s king, especially if White overextends or weakens squares (as in the engine's g5 line).",
+    "moves": "g5 Be6 Bg4",
+    "imbalances": "Pawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).\nFiles: the e-file is half-open for Black.",
+    "engineEvidence": "g5 is a top-5 engine candidate, marking this as a concrete, if sharp, alternative plan.",
+    "summary": "The game is balanced, but both sides have dynamic possibilities. Black's doubled c-pawns and slightly lagging development are offset by the bishop pair. The open d- and half-open e-files offer active play for both sides, with White having freer pieces and a slight lead in development, while Black may seek queenside play or simplification. Key plans revolve around exploiting open lines, activating pieces, and possible pawn structure transformations (doubling on the b-file, creating outposts). Black's candidate moves all gravitate towards development and castling long, so both sides are preparing for middlegame activity.",
+    "structure": "none",
     "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago"
    }
   ],
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 23762,
+   "durationMs": 11010,
    "externalCalls": 1,
    "cacheHit": null
   }

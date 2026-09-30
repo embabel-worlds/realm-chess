@@ -24,7 +24,20 @@ const MATED = "3R2k1/5ppp/8/8/8/8/5PPP/6K1 b - - 1 1";
 const key = (name, args) => `view:${name}:${JSON.stringify(Object.fromEntries(Object.entries(args).sort()))}`;
 const rowsOf = (k) => fixtures[k].data;
 const best = (fen, withinCp = 50) => rowsOf(key("BestMoves", { fen, withinCp, maxLines: 5 }));
-const factsOf = (fen) => rowsOf(key("ImbalancesOf", { fen }))[0].facts.split("\n").filter((f) => f && !f.startsWith("Phase:"));
+/* The facts as the page shows them: grouped under their names, in the order the names first appear. */
+const factsOf = (fen) => {
+  const groups = new Map();
+  for (const f of rowsOf(key("ImbalancesOf", { fen }))[0].facts.split("\n")) {
+    if (!f || f.startsWith("Phase:")) continue;
+    const i = f.indexOf(": ");
+    const [cat, text] = [f.slice(0, i), f.slice(i + 2)];
+    if (!groups.has(cat)) groups.set(cat, []);
+    groups.get(cat).push(text);
+  }
+  return [...groups.values()].flat();
+};
+const namesOf = (fen) => [...new Set(rowsOf(key("ImbalancesOf", { fen }))[0].facts.split("\n")
+  .filter((f) => f && !f.startsWith("Phase:")).map((f) => f.slice(0, f.indexOf(": "))))];
 
 /* The runtime stub. `overrides` replaces envelopes; `delays` holds a call back, in ms. */
 function stub(overrides = {}, delays = {}) {
@@ -82,6 +95,7 @@ test("the start position renders every candidate and every imbalance the views r
   const errors = await open(page);
   await expect(moves(page)).toHaveText(best(START).map((r) => r.move));
   await expect(page.locator("#imbalances li")).toHaveText(factsOf(START));
+  await expect(page.locator("#imbalances .imb-name")).toHaveText(namesOf(START));
   await expect(page.locator("#who")).toHaveText("White to move");
   await expect(page.locator("#evalText")).toContainText(`+${(best(START)[0].whiteCp / 100).toFixed(2)}`);
   await expect(page.locator("#opening")).toHaveText("The starting position.");
@@ -195,10 +209,9 @@ test("with the engine playing Black, a move on the board is answered with the en
   await open(page);
   await expect(moves(page).first()).toBeVisible();
   await page.selectOption("#engineSide", "b");
-  const box = async (s) => page.locator(`rect[data-square="${s}"]`).boundingBox();
-  const a = await box("e2"), b = await box("e4");
-  await page.mouse.click(a.x + a.width / 2, a.y + a.height / 2);
-  await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
+  // Locator clicks scroll the board into view; coordinates taken from a bounding box do not.
+  await page.locator('rect[data-square="e2"]').click({ force: true });
+  await page.locator('rect[data-square="e4"]').click({ force: true });
   await expect(page.locator("#moves")).toContainText(`1. e4 ${best(E4)[0].move}`);
   await expect(page.locator("#who")).toHaveText("White to move");
 });
@@ -293,4 +306,17 @@ test("the How it works section opens from the footer link", async ({ page }) => 
   await page.click("footer.how a");
   await expect(page.locator("#how-it-works")).toBeVisible();
   await expect(page.locator("#how-it-works pre").first()).toContainText("MATCH (p:Position {fen: $fen})");
+});
+
+test("stepping quickly through a game asks only about the position you stop on", async ({ page }) => {
+  await open(page, {}, {}, link(EXCHANGE, 17));
+  await expect(moves(page).first()).toBeVisible();
+  const before = await page.evaluate(() => window.__calls.filter((k) => k.startsWith("view:BestMoves")).length);
+  for (let i = 0; i < 10; i++) await page.keyboard.press("ArrowLeft");
+  await expect(page.locator("#ply")).toHaveText("7 / 17");
+  await page.waitForTimeout(700);
+  const asked = await page.evaluate(() => window.__calls.filter((k) => k.startsWith("view:BestMoves")));
+  // One search for the ten positions stepped through: the last. (Its fixture is not captured, so
+  // the page shows an error for it — what is asserted is that nothing else was asked.)
+  expect(asked.length - before).toBe(1);
 });

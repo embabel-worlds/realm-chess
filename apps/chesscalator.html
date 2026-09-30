@@ -79,8 +79,11 @@
   @media (min-width:881px){.board-col{position:sticky;top:12px;max-height:calc(100vh - 70px);overflow:auto;}}
   .imbalances-box{margin-bottom:10px;}
   .imbalances-box h2.sec{margin-top:0;}
-  .imbalances-box ul.facts{font-size:.78rem;columns:2 240px;column-gap:18px;margin:0;}
-  .imbalances-box ul.facts li{break-inside:avoid;}
+  #imbalances{columns:2 250px;column-gap:18px;}
+  .imb-group{break-inside:avoid;margin-bottom:6px;}
+  .imb-name{font-size:.72rem;font-weight:600;letter-spacing:.04em;color:var(--cyan);text-transform:uppercase;}
+  .imbalances-box ul.facts{font-size:.78rem;margin:1px 0 0;padding-left:16px;}
+  .chip b{font-weight:600;margin-right:2px;}
   .nav{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;}
   .nav .ply{min-width:9ch;text-align:center;color:var(--dim);font-size:.8rem;font-variant-numeric:tabular-nums;}
   .moves span.mv{cursor:pointer;padding:0 2px;border-radius:3px;}
@@ -112,6 +115,7 @@
   details.theory{margin:8px 0 4px;border:1px solid var(--border);border-radius:8px;padding:8px 12px;background:var(--surface2);}
   details.theory summary{cursor:pointer;font-size:.86rem;font-weight:500;}
   details.theory summary .meta{font-weight:400;color:var(--dim);font-size:.78rem;}
+  #theory{max-height:280px;overflow:auto;padding-right:6px;}
   #theory p{font-size:.84rem;margin:6px 0;}
   #theory h5{font-size:.84rem;margin:8px 0 2px;font-weight:600;}
   .attribution{font-size:.72rem;color:var(--dim);margin-top:6px;}
@@ -340,6 +344,13 @@ let game = new Chess();
 let orientation = COLOR.white;
 let currentRows = [];
 let analysisSeq = 0;
+let settleTimer = null;
+let inFlight = null;   // AbortController for the current position's requests
+
+/* How long a position must stay on the board before the world is asked about it. Stepping
+ * through a game — a held arrow key, a run of Back — then costs one search, for the position
+ * you stop on, instead of a queue of searches for positions already gone. */
+const SETTLE_MS = 300;
 
 /* Sprites are served beside this page: the board's own asset folders are subdirectories, which
  * an app cannot serve, and a cross-origin sprite is refused by the browser. */
@@ -449,8 +460,16 @@ function play(san, { userMove = true } = {}) {
   show({ userMove });
 }
 
-async function analyse(userMove) {
+/*
+ * Asking the world about a position: after SETTLE_MS on it, and with every request tied to an
+ * AbortController that the next position aborts. An abandoned position's requests are
+ * cancelled, not merely ignored when they come back.
+ */
+function analyse(userMove) {
   const seq = ++analysisSeq;
+  if (inFlight) inFlight.abort();
+  inFlight = null;
+  clearTimeout(settleTimer);
   board.removeArrows();
   $("plans").replaceChildren();
   $("plansBtn").disabled = true;
@@ -463,17 +482,24 @@ async function analyse(userMove) {
     $("imbalances").replaceChildren();
     return;
   }
+  state("analysis", "\u2026");
+  settleTimer = setTimeout(() => { if (seq === analysisSeq) ask(seq, userMove); }, userMove ? 0 : SETTLE_MS);
+}
+
+async function ask(seq, userMove) {
+  inFlight = new AbortController();
+  const opts = { signal: inFlight.signal };
   state("analysis", "The engine is thinking — one to four seconds for a new position.");
   state("imbalances", "Reading the position…");
   const fen = game.fen();
   const within = Number($("within").value);
   const openingCall = fromStart()
-    ? (cursor === 0 ? Promise.resolve(null) : embabel.views.invoke("OpeningOfLine", { moves: playedLine() }))
-    : embabel.views.invoke("OpeningOf", { fen });
-  const theoryCall = fromStart() && cursor > 0 ? embabel.views.invoke("TheoryOfLine", { moves: playedLine() }) : Promise.resolve(null);
+    ? (cursor === 0 ? Promise.resolve(null) : embabel.views.invoke("OpeningOfLine", { moves: playedLine() }, opts))
+    : embabel.views.invoke("OpeningOf", { fen }, opts);
+  const theoryCall = fromStart() && cursor > 0 ? embabel.views.invoke("TheoryOfLine", { moves: playedLine() }, opts) : Promise.resolve(null);
   const [moves, imb, opening, theory] = await Promise.allSettled([
-    embabel.views.invoke("BestMoves", { fen, withinCp: within, maxLines: 5 }),
-    embabel.views.invoke("ImbalancesOf", { fen }),
+    embabel.views.invoke("BestMoves", { fen, withinCp: within, maxLines: 5 }, opts),
+    embabel.views.invoke("ImbalancesOf", { fen }, opts),
     openingCall,
     theoryCall,
   ]);
@@ -540,13 +566,35 @@ function renderTheory(theory) {
   box.hidden = false;
 }
 
+/* "King safety: White's king …" — the imbalance's name, then what it says. */
+function splitFact(f) {
+  const i = f.indexOf(": ");
+  return i > 0 ? { category: f.slice(0, i), text: f.slice(i + 2) } : { category: "", text: f };
+}
+
+/* The imbalances grouped under their names, in the order the realm gives them. */
 function renderImbalances(imb) {
   if (imb.status === "rejected") return state("imbalances", `The imbalances could not be read: ${failure(imb.reason)}`, "error");
   const row = rowsOf(imb.value)[0];
   if (!row) return state("imbalances", "No imbalances came back for this position.", "error");
-  const ul = el("ul", "facts");
-  for (const f of lines(row.facts)) if (!f.startsWith("Phase:")) ul.append(el("li", null, f));
-  $("imbalances").replaceChildren(ul);
+  const groups = new Map();
+  for (const f of lines(row.facts)) {
+    if (f.startsWith("Phase:")) continue;
+    const { category, text } = splitFact(f);
+    if (!groups.has(category)) groups.set(category, []);
+    groups.get(category).push(text);
+  }
+  const out = [];
+  for (const [category, texts] of groups) {
+    const g = el("div", "imb-group");
+    g.dataset.category = category;
+    g.append(el("div", "imb-name", category || "Other"));
+    const ul = el("ul", "facts");
+    for (const t of texts) ul.append(el("li", null, t));
+    g.append(ul);
+    out.push(g);
+  }
+  $("imbalances").replaceChildren(...out);
 }
 
 function candidate(r) {
@@ -566,8 +614,15 @@ function candidate(r) {
       : `${(lc / 100).toFixed(2)} worse${lc <= 20 ? " — style, not strength" : ""}`);
   const lineEl = el("div", "line", (r.line || "").split(" ").slice(0, 12).join(" "));
   const changes = el("div", "changes");
-  for (const c of lines(r.creates)) changes.append(el("span", "chip plus", c));
-  for (const c of lines(r.removes)) changes.append(el("span", "chip minus", c));
+  const chip = (cls, f) => {
+    const { category, text } = splitFact(f);
+    const c = el("span", "chip " + cls);
+    if (category) c.append(el("b", null, category), " ");
+    c.append(text);
+    return c;
+  };
+  for (const f of lines(r.creates)) changes.append(chip("plus", f));
+  for (const f of lines(r.removes)) changes.append(chip("minus", f));
   row.append(b, score, loss, lineEl);
   if (changes.childElementCount) row.append(changes);
   return row;
@@ -684,9 +739,10 @@ $("plansBtn").addEventListener("click", async () => {
   $("plansBtn").disabled = true;
   state("plans", "Reading the plans — an engine search and a model call, up to half a minute the first time.", "note");
   try {
+    const opts = inFlight ? { signal: inFlight.signal } : {};
     const env = fromStart() && cursor > 0
-      ? await embabel.views.invoke("PlansInLine", { moves: playedLine() })
-      : await embabel.views.invoke("PlansInPosition", { fen: game.fen() });
+      ? await embabel.views.invoke("PlansInLine", { moves: playedLine() }, opts)
+      : await embabel.views.invoke("PlansInPosition", { fen: game.fen() }, opts);
     if (seq !== analysisSeq) return;
     renderPlans(rowsOf(env));
   } catch (e) {

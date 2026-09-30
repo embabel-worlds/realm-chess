@@ -284,6 +284,14 @@ export function imbalancesOf(fen: string): Imbalances {
 }
 
 const Cap = (s: Side) => (s === "white" ? "White" : "Black");
+
+/* Silman's imbalances, by the names a player uses for them — plus where the kings stand in an
+ * endgame, which is not an imbalance but is what an endgame is about. */
+export const CATEGORIES = [
+  "Material", "Minor pieces", "Pawn structure", "Space", "Files", "Key squares",
+  "Development", "King safety", "King position", "Piece activity",
+] as const;
+export type Category = (typeof CATEGORIES)[number];
 const list = (xs: string[]) => (xs.length <= 1 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`);
 
 function materialFact(w: SideImbalances, b: SideImbalances): string {
@@ -300,75 +308,79 @@ function materialFact(w: SideImbalances, b: SideImbalances): string {
     parts.push(`${dM > 0 ? "White" : "Black"} has a minor piece for ${Math.abs(dP)} pawn${Math.abs(dP) > 1 ? "s" : ""}`);
   }
   if (parts.length === 0) {
-    if (diff === 0) return "Material is level.";
-    return `${diff > 0 ? "White" : "Black"} is ${Math.abs(diff)} point${Math.abs(diff) > 1 ? "s" : ""} up in material (${Math.abs(diff) === 1 ? "a pawn" : "pawn = 1, minor = 3, rook = 5, queen = 9"}).`;
+    if (diff === 0) return "the sides are level.";
+    return `${diff > 0 ? "White" : "Black"} is ${Math.abs(diff) === 1 ? "a pawn" : `${Math.abs(diff)} points`} up${Math.abs(diff) === 1 ? "" : " (pawn 1, minor piece 3, rook 5, queen 9)"}.`;
   }
   return `${parts.join("; ")} — ${diff === 0 ? "level by points" : `${diff > 0 ? "White" : "Black"} ${Math.abs(diff)} up by points`}.`;
 }
 
 function factsOf(x: Imbalances): string[] {
-  const out: string[] = [`Phase: ${x.phase}. ${Cap(x.sideToMove)} to move.`, materialFact(x.white, x.black)];
+  const out: string[] = [`Phase: ${x.phase}. ${Cap(x.sideToMove)} to move.`];
+  // Every imbalance is filed under Silman's name for it, so a reader sees WHICH imbalance a
+  // sentence is about — king safety, pawn structure — before what it says.
+  const add = (category: Category, sentence: string) => out.push(`${category}: ${sentence}`);
+  add("Material", materialFact(x.white, x.black));
   const w = x.white, b = x.black;
-  if (w.bishopPair !== b.bishopPair) out.push(`${w.bishopPair ? "White" : "Black"} has the bishop pair.`);
-  if (x.oppositeColouredBishops) out.push("Bishops of opposite colours: drawish in an endgame, but the attacker is effectively a piece up in a middlegame.");
+  if (w.bishopPair !== b.bishopPair) add("Minor pieces", `${w.bishopPair ? "White" : "Black"} has the bishop pair.`);
+  if (x.oppositeColouredBishops) add("Minor pieces", "Bishops of opposite colours: drawish in an endgame, but the attacker is effectively a piece up in a middlegame.");
   const minorLine = (s: SideImbalances) => `${s.material.bishops} bishop${s.material.bishops === 1 ? "" : "s"} and ${s.material.knights} knight${s.material.knights === 1 ? "" : "s"}`;
-  if (w.material.bishops !== b.material.bishops) out.push(`Minor pieces: White has ${minorLine(w)}, Black ${minorLine(b)}.`);
+  if (w.material.bishops !== b.material.bishops) add("Minor pieces", `White has ${minorLine(w)}, Black ${minorLine(b)}.`);
   for (const s of SIDES) {
     const me = x[s];
     for (const bi of me.bishops) if (bi.verdict !== "neither") {
-      out.push(`${Cap(s)}'s ${bi.colour}-squared bishop on ${bi.square} is ${bi.verdict}: ${bi.ownPawnsOnColour} of ${me.material.pawns} ${s} pawns stand on its colour.`);
+      add("Minor pieces", `${Cap(s)}'s ${bi.colour}-squared bishop on ${bi.square} is ${bi.verdict}: ${bi.ownPawnsOnColour} of ${me.material.pawns} ${s} pawns stand on its colour.`);
     }
     // With one pawn or none, "isolated" and "islands" describe nothing a plan could use.
     if (me.material.pawns <= 1) {
-      if (me.pawns.passed.length) out.push(`${Cap(s)} has a passed pawn on ${list(me.pawns.passed)}.`);
+      if (me.pawns.passed.length) add("Pawn structure", `${Cap(s)} has a passed pawn on ${list(me.pawns.passed)}.`);
       continue;
     }
-    if (me.pawns.isolatedQueenPawn) out.push(`${Cap(s)} has an isolated queen's pawn (${me.pawns.isolated.find((p) => p[0] === "d")}).`);
+    if (me.pawns.isolatedQueenPawn) add("Pawn structure", `${Cap(s)} has an isolated queen's pawn (${me.pawns.isolated.find((p) => p[0] === "d")}).`);
     const otherIsolated = me.pawns.isolated.filter((p) => p[0] !== "d");
-    if (otherIsolated.length) out.push(`${Cap(s)} has isolated pawn${otherIsolated.length > 1 ? "s" : ""} on ${list(otherIsolated)}.`);
-    if (me.pawns.doubled.length) out.push(`${Cap(s)} has doubled pawns on the ${list(me.pawns.doubled)}-file${me.pawns.doubled.length > 1 ? "s" : ""}.`);
-    if (me.pawns.backward.length) out.push(`${Cap(s)} has a backward pawn on ${list(me.pawns.backward)}.`);
-    if (me.pawns.hanging.length) out.push(`${Cap(s)} has hanging pawns on ${list(me.pawns.hanging)}.`);
+    if (otherIsolated.length) add("Pawn structure", `${Cap(s)} has isolated pawn${otherIsolated.length > 1 ? "s" : ""} on ${list(otherIsolated)}.`);
+    if (me.pawns.doubled.length) add("Pawn structure", `${Cap(s)} has doubled pawns on the ${list(me.pawns.doubled)}-file${me.pawns.doubled.length > 1 ? "s" : ""}.`);
+    if (me.pawns.backward.length) add("Pawn structure", `${Cap(s)} has a backward pawn on ${list(me.pawns.backward)}.`);
+    if (me.pawns.hanging.length) add("Pawn structure", `${Cap(s)} has hanging pawns on ${list(me.pawns.hanging)}.`);
     if (me.pawns.passed.length) {
       const prot = me.pawns.protectedPassed;
-      out.push(`${Cap(s)} has a passed pawn on ${list(me.pawns.passed)}${prot.length ? ` (${list(prot)} protected)` : ""}.`);
+      add("Pawn structure", `${Cap(s)} has a passed pawn on ${list(me.pawns.passed)}${prot.length ? ` (${list(prot)} protected)` : ""}.`);
     }
   }
-  if (w.pawns.islands !== b.pawns.islands && w.material.pawns > 1 && b.material.pawns > 1) out.push(`Pawn islands: White ${w.pawns.islands}, Black ${b.pawns.islands}.`);
+  if (w.pawns.islands !== b.pawns.islands && w.material.pawns > 1 && b.material.pawns > 1) add("Pawn structure", `pawn islands, White ${w.pawns.islands}, Black ${b.pawns.islands}.`);
   for (const wing of ["queenside", "kingside"] as const) {
     const wc = w.majority[wing], bc = b.majority[wing];
-    if (wc !== bc && wc + bc > 0) out.push(`${wc > bc ? "White" : "Black"} has a ${wing} pawn majority (${Math.max(wc, bc)} against ${Math.min(wc, bc)}, counting the ${wing === "queenside" ? "a-d" : "e-h"} files).`);
+    if (wc !== bc && wc + bc > 0) add("Pawn structure", `${wc > bc ? "White" : "Black"} has a ${wing} pawn majority (${Math.max(wc, bc)} against ${Math.min(wc, bc)}, counting the ${wing === "queenside" ? "a-d" : "e-h"} files).`);
   }
-  for (const ch of x.chains) out.push(`${Cap(ch.side)}'s pawn chain ${ch.pawns.join("/")} is locked and points to the ${ch.pointsTo}.`);
-  if (Math.abs(w.space - b.space) >= 3) out.push(`${w.space > b.space ? "White" : "Black"} has more space (${Math.max(w.space, b.space)} against ${Math.min(w.space, b.space)} by pawn control of the opponent's half).`);
-  if (x.openFiles.length) out.push(`Open file${x.openFiles.length > 1 ? "s" : ""}: ${list(x.openFiles)}.`);
+  for (const ch of x.chains) add("Pawn structure", `${Cap(ch.side)}'s pawn chain ${ch.pawns.join("/")} is locked and points to the ${ch.pointsTo}.`);
+  if (Math.abs(w.space - b.space) >= 3) add("Space", `${w.space > b.space ? "White" : "Black"} has more space (${Math.max(w.space, b.space)} against ${Math.min(w.space, b.space)} by pawn control of the opponent's half).`);
+  if (x.openFiles.length) add("Files", `the ${list(x.openFiles)}-file${x.openFiles.length > 1 ? "s are" : " is"} open.`);
   for (const s of SIDES) {
     const me = x[s];
-    if (me.halfOpenFiles.length) out.push(`Half-open for ${Cap(s)}: the ${list(me.halfOpenFiles)}-file${me.halfOpenFiles.length > 1 ? "s" : ""}.`);
-    if (me.rooksOnOpenFiles.length) out.push(`${Cap(s)} holds an open file with the ${list(me.rooksOnOpenFiles)}.`);
+    if (me.halfOpenFiles.length) add("Files", `the ${list(me.halfOpenFiles)}-file${me.halfOpenFiles.length > 1 ? "s are" : " is"} half-open for ${Cap(s)}.`);
+    if (me.rooksOnOpenFiles.length) add("Files", `${Cap(s)} holds an open file with the ${list(me.rooksOnOpenFiles)}.`);
     const occ = me.outposts.filter((o) => o.occupiedBy);
     const free = me.outposts.filter((o) => !o.occupiedBy).map((o) => o.square);
-    if (occ.length) out.push(`${Cap(s)}'s ${list(occ.map((o) => `${o.occupiedBy} on ${o.square}`))} stands on an outpost no pawn can challenge.`);
-    if (free.length) out.push(`${Cap(s)} has outpost square${free.length > 1 ? "s" : ""} on ${list(free)} (guarded by a pawn, beyond the reach of enemy pawns).`);
+    if (occ.length) add("Key squares", `${Cap(s)}'s ${list(occ.map((o) => `${o.occupiedBy} on ${o.square}`))} stands on an outpost no pawn can challenge.`);
+    if (free.length) add("Key squares", `${Cap(s)} has outpost square${free.length > 1 ? "s" : ""} on ${list(free)} (guarded by a pawn, beyond the reach of enemy pawns).`);
   }
   if (x.phase !== "endgame") {
     for (const s of SIDES) {
       const d = x[s].development;
-      if (x.phase === "opening" && d.undeveloped.length) out.push(`${Cap(s)} still has ${list(d.undeveloped)} undeveloped.`);
-      if (!d.castled && d.kingInCentre) out.push(`${Cap(s)}'s king is still in the centre, on ${x[s].king.square}.`);
+      if (x.phase === "opening" && d.undeveloped.length) add("Development", `${Cap(s)} still has ${list(d.undeveloped)} undeveloped.`);
+      if (!d.castled && d.kingInCentre) add("King safety", `${Cap(s)}'s king is still in the centre, on ${x[s].king.square}.`);
     }
-    if (x.oppositeSideCastling) out.push(`The kings are on opposite wings (White ${w.king.wing}, Black ${b.king.wing}): pawn storms cost the attacker nothing in king safety.`);
+    if (x.oppositeSideCastling) add("King safety", `The kings are on opposite wings (White ${w.king.wing}, Black ${b.king.wing}): pawn storms cost the attacker nothing in king safety.`);
     for (const s of SIDES) {
       const k = x[s].king;
       if (k.wing !== "centre" && (k.shield <= 1 || k.openFilesNear.length >= 2 || k.attackersNear >= 3)) {
-        out.push(`${Cap(s)}'s king on ${k.square} is exposed: ${k.shield} shield pawn${k.shield === 1 ? "" : "s"}, ${k.openFilesNear.length ? `open or half-open ${list(k.openFilesNear)}-file nearby, ` : ""}${k.attackersNear} enemy piece${k.attackersNear === 1 ? "" : "s"} bearing on it.`);
+        add("King safety", `${Cap(s)}'s king on ${k.square} is exposed: ${k.shield} shield pawn${k.shield === 1 ? "" : "s"}, ${k.openFilesNear.length ? `open or half-open ${list(k.openFilesNear)}-file nearby, ` : ""}${k.attackersNear} enemy piece${k.attackersNear === 1 ? "" : "s"} bearing on it.`);
       }
     }
   } else {
-    for (const s of SIDES) out.push(`${Cap(s)}'s king is on ${x[s].king.square}.`);
+    for (const s of SIDES) add("King position", `${Cap(s)}'s king is on ${x[s].king.square}.`);
   }
   if (w.mobility !== null && b.mobility !== null && Math.abs(w.mobility - b.mobility) >= 8) {
-    out.push(`${w.mobility > b.mobility ? "White" : "Black"} has the freer pieces: ${Math.max(w.mobility, b.mobility)} legal moves against ${Math.min(w.mobility, b.mobility)}.`);
+    add("Piece activity", `${w.mobility > b.mobility ? "White" : "Black"} has the freer pieces: ${Math.max(w.mobility, b.mobility)} legal moves against ${Math.min(w.mobility, b.mobility)}.`);
   }
   return out;
 }
@@ -378,7 +390,7 @@ function factsOf(x: Imbalances): string[] {
  * pieces are freer, what is still undeveloped, where an endgame king happens to stand, and the
  * move count.
  */
-const VOLATILE = [/^Phase:/, /freer pieces/, /undeveloped\.$/, /'s king is on [a-h][1-8]\.$/];
+const VOLATILE = [/^Phase:/, /^Piece activity:/, /^Development:/, /^King position:/];
 
 /*
  * The identity of a fact, stripped of the detail that moves with the pieces: which square a

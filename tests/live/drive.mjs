@@ -27,10 +27,8 @@ console.log("candidates:", firstMoves.join(", "), "| status:", await page.locato
 
 // Play e2-e4 by dragging on the board, then let the engine answer as Black.
 await page.selectOption("#engineSide", "b");
-const sq = async (s) => (await page.locator(`rect[data-square="${s}"]`).boundingBox());
-const a = await sq("e2"), b = await sq("e4");
-await page.mouse.click(a.x + a.width / 2, a.y + a.height / 2);
-await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
+await page.locator('rect[data-square="e2"]').click({ force: true });
+await page.locator('rect[data-square="e4"]').click({ force: true });
 await page.waitForFunction(() => document.querySelector("#moves").textContent.includes("1. e4 "), null, { timeout: 30000 });
 await page.waitForFunction(() => /1\. e4 \S+/.test(document.querySelector("#moves").textContent.trim()), null, { timeout: 30000 });
 console.log("after 1.e4 and the engine's reply:", (await page.locator("#moves").textContent()).trim());
@@ -54,7 +52,7 @@ await page.click('#moves span.mv[data-ply="6"]');
 await page.waitForFunction(() => document.querySelector("#ply").textContent.startsWith("6"));
 await page.waitForSelector(".cand button.mv", { timeout: 30000 });
 const ba4 = page.getByRole("button", { name: "Ba4", exact: true });
-if (await ba4.count()) await ba4.click(); else { const a = await page.locator('rect[data-square="b5"]').boundingBox(), b = await page.locator('rect[data-square="a4"]').boundingBox(); await page.mouse.click(a.x + a.width / 2, a.y + a.height / 2); await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2); }
+if (await ba4.count()) await ba4.click(); else { await page.locator('rect[data-square="b5"]').click({ force: true }); await page.locator('rect[data-square="a4"]').click({ force: true }); }
 await page.waitForFunction(() => document.querySelector("#ply").textContent.trim() === "7 / 7", null, { timeout: 10000 });
 await page.waitForFunction(() => document.querySelector("#opening").textContent.includes("Ruy Lopez"), null, { timeout: 30000 });
 console.log("after 4.Ba4:", (await page.locator("#opening").textContent()).trim(), "| moves:", (await page.locator("#moves").textContent()).trim());

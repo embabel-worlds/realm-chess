@@ -56,6 +56,18 @@ describe("imbalance details", () => {
     const x = imbalancesOf(fen("ruy-lopez-exchange"));
     expect(x.black.bishopPair).toBe(true);
     expect(x.white.bishopPair).toBe(false);
-    expect(x.facts).toContain("Material is level.");
+    expect(x.facts).toContain("Material: the sides are level.");
+  });
+});
+
+describe("imbalance names", () => {
+  it("every imbalance is filed under one of Silman's names", async () => {
+    const { CATEGORIES } = await import("../src/lib/imbalances");
+    for (const p of battery()) {
+      for (const f of imbalancesOf(p.fen).facts) {
+        if (f.startsWith("Phase:")) continue;
+        expect(CATEGORIES.some((c) => f.startsWith(`${c}: `)), f).toBe(true);
+      }
+    }
   });
 });
