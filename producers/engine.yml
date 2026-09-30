@@ -1,0 +1,21 @@
+# The engine as a producer: a Position key in, the engine's best lines out.
+#
+# The key is a FEN, which carries "/" and spaces. `keyArgs` refuses both, so `keyArg` hands the
+# keys over as a plain list and the handler searches them one at a time.
+#
+# No `pushdown:`, deliberately. The engine takes no filter: "within 50 centipawns" is decided
+# over the lines it returns, graph-side, and declaring a filter it does not apply would make
+# the engine count lines it never produced.
+- name: candidateLines
+  kind: remote
+  operation: analysePosition
+  keyArg: fens
+  records: "$[*]"
+  args:
+    multiPv: 5
+    depth: 18
+  # A search is not deterministic — the same position at the same depth can rank two close
+  # moves either way — so a cached answer is what keeps an explanation consistent with the
+  # numbers shown beside it. Positions do not change; a week is a choice about staleness of
+  # the ENGINE, not of the position.
+  cache: { kind: ttl, seconds: 604800, negativeTtlSeconds: 604800 }

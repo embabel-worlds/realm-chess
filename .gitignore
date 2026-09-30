@@ -1,0 +1,4 @@
+node_modules/
+tests/live/last-run.png
+test-results/
+playwright-report/

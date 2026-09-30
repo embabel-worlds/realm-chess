@@ -1,0 +1,73 @@
+# A position, the engine's best lines in it, and what each line is trying to do.
+#
+#   Position ──HAS_CANDIDATE──▶ CandidateMove      one row per engine line, computed on demand
+#   CandidateMove.plan ───────── PlanMeaning        what that plan means, seeded from reference/
+#
+# Nothing here is stored except the plan catalogue. A Position is usually pinned from a
+# view parameter — `MATCH (p:Position {fen: $fen})` — and the engine runs when the query asks.
+
+- name: Position
+  description: "A chess position, identified by its FEN (Forsyth-Edwards Notation). Rarely stored: pin one in a query with `MATCH (p:Position {fen: $fen})` and the engine analyses it on demand. The FEN must be complete — six fields, side to move included — because who is to move changes every score."
+  properties:
+    fen:
+      description: "Full FEN, e.g. `rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1`. Identity, and the engine's input."
+      metadata:
+        identity: "true"
+
+- name: CandidateMove
+  description: "One of the engine's best lines in a position (Stockfish 19, five lines, depth 18), with the plan it pursues. Reached from Position via HAS_CANDIDATE. THE SCORE IS FOR THE SIDE TO MOVE: +81 in a position where Black is to move is good for Black. `whiteCp` is the same number from White's side, which is what a board display shows. `lossCp` is how much worse than the best line this one is, in centipawns — the ONLY field to filter on for 'moves within half a pawn of best' (lossCp <= 50; a pawn is 100). `rank` is the engine's order, 1 to 5, and says nothing about how much worse a move is. `plan` is decided by rules over the moves, not by a model; `facts` is everything those rules saw, and is what an explanation should be written from."
+  virtualJoins:
+    - anchorLabel: Position
+      relationship: HAS_CANDIDATE
+      keyField: fen
+      recordKeyField: fen
+      producer: candidateLines
+      maxAnchors: 8
+      description: "The engine's best lines in the position — for 'what are the best moves here', 'which moves are within half a pawn of best', 'what plans does the engine see'."
+  properties:
+    candidateId:
+      description: "The FEN and the first move in UCI. Identity: stable across searches, where the rank is not."
+      metadata:
+        identity: "true"
+    fen: "The position this line was computed in."
+    rank: "The engine's order: 1 is its best, up to 5. Sort by it; never filter on it for 'within N pawns of best' — that is lossCp."
+    uci: "First move in UCI coordinates, e.g. `g2g4`."
+    san: "First move in standard algebraic notation, e.g. `g4`. What to show a person."
+    side: "`white` or `black`: who plays this move."
+    scoreCp: "Centipawns for the side to move (100 = a pawn). Null when the line is a forced mate."
+    mate: "Moves to mate, positive when the side to move mates. Null otherwise."
+    whiteCp: "The same score from White's point of view. Null for mates."
+    lossCp: "Centipawns worse than the best line; 0 for the best. 'Within half a pawn' is lossCp <= 50, 'within a pawn' lossCp <= 100. Null when the best line is a mate and this one is not."
+    depth: "Search depth reached, in plies."
+    pvSan: "The whole line in SAN, space-separated."
+    pvUci: "The whole line in UCI, space-separated."
+    plan: "The plan this line pursues, one of the PlanMeaning names. Join `(m:PlanMeaning {name: c.plan})` for what it means."
+    planTags: "Every plan the rules matched, comma-separated, most specific first; `plan` is the first."
+    kingsidePawnMoves: "The side to move's pawn moves on the f-h files in the first ten plies."
+    centrePawnMoves: "Its pawn moves on the d-e files."
+    queensidePawnMoves: "Its pawn moves on the a-c files."
+    pawnBreaks: "Pawn moves that strike an enemy pawn on the mover's own initiative."
+    castles: "`kingside`, `queenside`, or empty: castling within the line."
+    ownKing: "Where the mover's king stands after ten plies: queenside, centre or kingside."
+    enemyKing: "Where the opponent's king stands after ten plies."
+    exchanges: "Captures by either side in the first ten plies."
+    materialDelta: "Material change for the side to move once the exchanges settle (pawn 1, minor 3, rook 5, queen 9)."
+    queensTraded: "Whether the queens come off in the first ten plies."
+    pieceMoves: "The mover's quiet piece moves in the first ten plies."
+    facts: "One line of text stating everything above. Write explanations from this, not from the raw moves."
+    engine: "Which engine produced the line."
+    elapsedMs: "Engine time for the position, in milliseconds."
+
+- name: PlanMeaning
+  description: "A chess plan and what it means — the realm's plan vocabulary, 18 stored rows seeded from reference/plans.yml. For 'what does minority attack mean' or 'what is a pawn storm', run the WhatPlanMeans view. `name` values are hyphenated and lower-case, NEVER spaced: 'minority-attack', 'kingside-pawn-storm', 'central-break' — so {name: 'minority attack'} matches nothing; match with `m.name CONTAINS 'storm'` or `toLower(m.title) CONTAINS 'pawn storm'`. Join from CandidateMove on `name = c.plan`."
+  properties:
+    name:
+      description: "The plan's name, as CandidateMove.plan spells it. Identity."
+      metadata:
+        identity: "true"
+    title: "The plan in plain words, for display."
+    meaning: "What the plan is."
+    when: "When it is the right idea."
+    concedes: "What it costs or risks."
+    detectedBy: "The exact rule the line reader applies."
+    order: "Priority: when a line matches several plans, the lowest order wins."

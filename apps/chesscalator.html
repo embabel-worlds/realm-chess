@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chesscalator</title>
+<meta name="description" content="Play moves on a board; Stockfish returns its best lines, grouped by the plan each pursues, with an explanation of how the plans differ.">
+<link rel="stylesheet" href="/api/v1/apps-runtime/v1/theme.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/assets/chessboard.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/assets/extensions/arrows/arrows.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/assets/extensions/markers/markers.css">
+<script src="/api/v1/apps-runtime/v1/embabel.js"></script>
+<script type="application/embabel-app+json">
+{"version":1,"name":"chesscalator","requires":{"lenses":[],"views":["BestMoves","ExplainPlans"],"realms":["chess"],"namespaces":[]}}
+</script>
+<style>
+  :root{--bg:#0a0a0f;--surface:#13131a;--surface2:#191922;--border:#1e1e2e;--cyan:#63c0f5;--purple:#9f77cd;
+        --green:#3fd73c;--dim:#8a8f98;--text:#e5e7eb;--amber:#e8b64c;--red:#e2685f;}
+  *{box-sizing:border-box;}
+  body{margin:0;padding:0 0 56px;background:var(--bg);color:var(--text);
+       font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.5;}
+  .wrap{max-width:1180px;margin:0 auto;padding:22px 16px 8px;}
+  header h1{margin:0;font-size:1.6rem;font-weight:300;letter-spacing:.1em;text-transform:uppercase;}
+  header p{margin:4px 0 0;color:var(--dim);font-size:.88rem;max-width:78ch;}
+  .layout{display:grid;grid-template-columns:minmax(280px,540px) 1fr;gap:22px;margin-top:18px;align-items:start;}
+  @media (max-width:880px){.layout{grid-template-columns:1fr;}}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  #board{width:100%;aspect-ratio:1/1;}
+  .controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center;}
+  button,select,input{font-family:inherit;font-size:.84rem;}
+  .btn{background:transparent;border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;}
+  .btn:hover{border-color:var(--cyan);}
+  .btn.primary{background:var(--cyan);border-color:var(--cyan);color:#06121c;}
+  .btn:disabled{opacity:.45;cursor:default;}
+  select,input[type=text]{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:6px;}
+  label.inline{color:var(--dim);font-size:.8rem;display:flex;align-items:center;gap:6px;}
+  .fen{display:flex;gap:6px;margin-top:10px;}
+  .fen input{flex:1;min-width:0;font-family:ui-monospace,Menlo,monospace;font-size:.76rem;}
+  .fen-error{color:var(--red);font-size:.8rem;margin-top:4px;min-height:1em;}
+  .moves{margin-top:12px;font-family:ui-monospace,Menlo,monospace;font-size:.82rem;color:var(--dim);
+         max-height:120px;overflow:auto;word-break:break-word;}
+  .moves b{color:var(--text);font-weight:500;}
+  .status{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+  .status .who{font-size:1.1rem;font-weight:500;}
+  .status .eval{font-variant-numeric:tabular-nums;color:var(--dim);font-size:.9rem;}
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0 4px;}
+  .toolbar .spacer{flex:1;}
+  .note{color:var(--dim);font-size:.8rem;}
+  .state{padding:18px 4px;color:var(--dim);font-size:.9rem;}
+  .state.error{color:var(--red);}
+  .plan{border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:8px;padding:12px 14px;margin-top:10px;background:var(--surface2);}
+  .plan.best{border-left-color:var(--green);}
+  .plan h3{margin:0;font-size:1rem;font-weight:500;}
+  .plan .meaning{color:var(--dim);font-size:.82rem;margin:3px 0 8px;}
+  .cand{display:grid;grid-template-columns:auto auto 1fr;gap:4px 12px;align-items:baseline;padding:6px 0;border-top:1px dashed var(--border);}
+  .cand:first-of-type{border-top:0;}
+  .cand button.mv{background:transparent;border:1px solid var(--cyan);color:var(--cyan);border-radius:5px;padding:2px 9px;
+                  cursor:pointer;font-weight:600;font-family:ui-monospace,Menlo,monospace;}
+  .cand button.mv:hover{background:var(--cyan);color:#06121c;}
+  .cand .score{font-variant-numeric:tabular-nums;font-size:.85rem;}
+  .cand .loss{font-size:.78rem;color:var(--dim);}
+  .cand .loss.style{color:var(--green);}
+  .cand .loss.cost{color:var(--amber);}
+  .cand .line{grid-column:1 / -1;font-family:ui-monospace,Menlo,monospace;font-size:.76rem;color:var(--dim);}
+  .explain{margin-top:14px;}
+  .explain p{margin:0 0 10px;font-size:.92rem;}
+  .legend{margin-top:12px;font-size:.78rem;color:var(--dim);}
+  footer.how{max-width:1180px;margin:18px auto 0;padding:0 16px;font-size:.75rem;}
+  footer.how a{color:var(--dim);text-decoration:none;} footer.how a:hover{color:var(--cyan);}
+  #how-it-works{display:none;max-width:1180px;margin:10px auto 0;padding:0 16px;}
+  #how-it-works:target{display:block;}
+  #how-it-works h2{font-weight:300;letter-spacing:.06em;text-transform:uppercase;font-size:1.1rem;margin:22px 0 6px;}
+  #how-it-works h3{font-size:.95rem;margin:16px 0 4px;}
+  #how-it-works p,#how-it-works li{font-size:.86rem;color:#c9cdd4;max-width:90ch;}
+  #how-it-works pre{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;
+                    overflow-x:auto;font-size:.75rem;line-height:1.45;}
+  #how-it-works code{font-size:.82rem;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Chesscalator</h1>
+    <p>Play moves for either side. After each move Stockfish returns its best lines, grouped by the plan each
+      one pursues — and on request, an explanation of how those plans differ.</p>
+  </header>
+
+  <div class="layout">
+    <section class="panel" aria-label="Board">
+      <div id="board"></div>
+      <div class="controls">
+        <button class="btn" id="new">New game</button>
+        <button class="btn" id="undo">Take back</button>
+        <button class="btn" id="flip">Flip board</button>
+        <label class="inline">Engine plays
+          <select id="engineSide">
+            <option value="">neither side</option>
+            <option value="b">Black</option>
+            <option value="w">White</option>
+          </select>
+        </label>
+      </div>
+      <div class="fen">
+        <input type="text" id="fenInput" aria-label="Position as FEN" spellcheck="false">
+        <button class="btn" id="loadFen">Load FEN</button>
+      </div>
+      <div class="fen-error" id="fenError" role="alert"></div>
+      <div class="moves" id="moves" aria-label="Moves played"></div>
+    </section>
+
+    <section class="panel" aria-label="Analysis">
+      <div class="status"><span class="who" id="who"></span><span class="eval" id="evalText"></span></div>
+      <div class="toolbar">
+        <label class="inline">Show moves within
+          <select id="within">
+            <option value="20">0.20 of best</option>
+            <option value="50" selected>0.50 of best</option>
+            <option value="100">1.00 of best</option>
+          </select>
+        </label>
+        <span class="spacer"></span>
+        <button class="btn primary" id="explainBtn" disabled>Explain these plans</button>
+      </div>
+      <div id="analysis"><div class="state">Make a move, or load a position.</div></div>
+      <div class="explain" id="explanation"></div>
+      <div class="legend">Scores are in pawns from White's side: +0.80 means White is better by most of a pawn.
+        "0.34 worse" is how much a move gives up against the engine's best. Within 0.20 the engine cannot reliably
+        tell moves apart — the choice is style, not strength. Hover a move to see it on the board; click to play it.</div>
+    </section>
+  </div>
+</div>
+
+<footer class="how"><a href="#how-it-works">How it works</a></footer>
+
+<section id="how-it-works" aria-label="How it works">
+  <h2>How it works</h2>
+
+  <h3>1. The data</h3>
+  <p>Nothing on this page is stored except the plan catalogue. When you make a move, the page asks the world for
+    <code>BestMoves</code> in the new position. That view pins a <code>Position</code> by its FEN and follows
+    <code>HAS_CANDIDATE</code> to <code>CandidateMove</code> — a virtual type. Its rows come from the
+    <code>candidateLines</code> producer, which calls the realm's own handler, <code>chess.analysePosition</code>.
+    The handler runs <b>Stockfish 19</b> (the lite, single-threaded WebAssembly build) under Node in the appliance's
+    sandbox: five lines, depth 18. A position the world has not seen takes one to four seconds; a position seen in
+    the last seven days answers from cache, which also keeps the numbers and any explanation of them in step
+    — two searches of the same position can order close moves differently.</p>
+  <p>Each line is then <b>read for its plan by rules, not by a model</b>: which of the mover's pawns advance on
+    which wing, whether a pawn strikes an enemy pawn on the mover's initiative, when and where the king castles,
+    where both kings end up after ten plies, how many captures, and the material once exchanges settle. The first
+    rule that matches, in a fixed order, names the plan. <code>PlanMeaning</code> — seeded from the realm's
+    <code>reference/plans.yml</code> — says what each plan means, when it is right, what it concedes, and the rule
+    that detects it.</p>
+
+  <h3>2. The questions</h3>
+  <p><b>BestMoves</b> — "which moves are within this much of the engine's best?" Parameters: <code>fen</code>
+    (the position), <code>withinCp</code> (default 50 centipawns; the selector above sets it), <code>maxLines</code>
+    (default 5). The best move is always included.</p>
+<pre>MATCH (p:Position {fen: $fen})-[:HAS_CANDIDATE]->(c:CandidateMove)
+WHERE toInteger(c.rank) = 1 OR (c.lossCp IS NOT NULL AND toInteger(c.lossCp) &lt;= $withinCp)
+OPTIONAL MATCH (m:PlanMeaning {name: c.plan})
+RETURN toInteger(c.rank) AS rank, c.san AS move, c.uci AS uci, c.side AS side,
+       c.scoreCp AS scoreCp, c.mate AS mate, c.whiteCp AS whiteCp, c.lossCp AS lossCp,
+       c.plan AS plan, m.title AS planTitle, m.meaning AS planMeaning, c.planTags AS planTags,
+       c.pvSan AS line, c.pvUci AS lineUci, toInteger(c.depth) AS depth, c.facts AS facts
+ORDER BY rank
+LIMIT $maxLines</pre>
+  <p>The page groups the rows it gets by <code>plan</code>, keeping the engine's order.</p>
+  <p><b>ExplainPlans</b> — "how do these plans differ?" Same <code>fen</code> and <code>withinCp</code>. It costs
+    one model call per new position and runs only when you press the button. The model is given, per move, the
+    rule-read facts, the plan's catalogue entry, and a verdict on its cost decided in the query — "a difference of
+    style, not strength" within 20 centipawns, "a real, if small, concession" beyond. It is told to write from
+    those facts only, never inventing a move or an evaluation.</p>
+<pre>MATCH (p:Position {fen: $fen})-[:HAS_CANDIDATE]->(c:CandidateMove)
+WHERE toInteger(c.rank) = 1 OR (c.lossCp IS NOT NULL AND toInteger(c.lossCp) &lt;= $withinCp)
+OPTIONAL MATCH (m:PlanMeaning {name: c.plan})
+WITH c, c.san + ' (' + CASE ... verdict on lossCp ... END + '): ' + c.facts
+        + '. Plan "' + m.title + '" means: ' + m.meaning + ' It concedes: ' + m.concedes AS evidence
+ORDER BY toInteger(c.rank)
+RETURN count(c) AS movesConsidered, collect(c.san) AS moves,
+       synthesize(evidence, 'Explain to a club player the choice between these candidate moves ...') AS explanation</pre>
+  <p>The full query and instruction are in the realm's <code>views/chess.yml</code>; the realm also ships
+    <code>PlansInPosition</code> (the same grouping, done in the query), <code>PlanCatalogue</code> and
+    <code>WhatPlanMeans</code>, which this page does not call.</p>
+
+  <h3>3. When it looks wrong</h3>
+  <ul>
+    <li><b>"The engine is thinking" for several seconds</b> — a position the world has not seen is searched from
+      scratch: one to four seconds, longer the first time after the appliance restarts.</li>
+    <li><b>No moves shown after a position loads</b> — checkmate or stalemate (the status says which), or the
+      engine did not answer; the error names the reason. A FEN the page rejects is not a legal position.</li>
+    <li><b>A plan label that seems off</b> — the label is a reading of the engine's line by fixed rules, not a
+      verdict on the position; read the line beneath the move. "Improve the pieces" and "Manoeuvring" mean the
+      rules found no pawn plan to name. Report a misreading with the FEN and the line.</li>
+    <li><b>The explanation contradicts the numbers</b> — it is written by the world's configured model from the
+      facts shown; the numbers beside each move are the engine's and are authoritative.</li>
+    <li><b>The same position gives different moves on another day</b> — cached lines expire after seven days, and
+      a fresh search can order close moves differently.</li>
+  </ul>
+
+  <h3>4. What made this possible</h3>
+  <ul>
+    <li>The engine is a realm verb behind a producer, so "best moves in this position" is a query: the same
+      <code>MATCH (:Position {fen: $fen})-[:HAS_CANDIDATE]-&gt;(c) WHERE c.lossCp &lt;= 50</code> this page runs is
+      available to <code>kg_query</code>, to the assistant, and over REST — there is no chess backend to deploy.</li>
+    <li>The engine runs in the appliance's own sandbox as WebAssembly, and its answers are cached by the query
+      engine per position (section 1), so this page and an assistant asking about the same position read the
+      same lines.</li>
+    <li>The explanation is a <code>synthesize()</code> aggregation inside the query that fetched the lines
+      (section 2), over facts computed by rules — not a separate pipeline reading raw moves.</li>
+  </ul>
+</section>
+
+<div id="embabel-badge" style="position:fixed;bottom:0;left:0;right:0;text-align:center;padding:6px 0;background:rgba(10,10,15,0.9);border-top:1px solid rgba(99,192,245,0.2);font-size:0.75rem;color:#6b7280;z-index:9999;pointer-events:none;">
+  Created with <a href="https://worlds.embabel.com" target="_blank" rel="noopener noreferrer" style="color:#63c0f5;text-decoration:none;pointer-events:auto;">Embabel Worlds</a>
+</div>
+
+<script type="module">
+import { Chessboard, COLOR, INPUT_EVENT_TYPE, FEN } from "https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/src/Chessboard.js";
+import { Arrows, ARROW_TYPE } from "https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/src/extensions/arrows/Arrows.js";
+import { Markers, MARKER_TYPE } from "https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/src/extensions/markers/Markers.js";
+import { Chess } from "https://cdn.jsdelivr.net/npm/chess.js@1.4.0/dist/esm/chess.js";
+
+/*
+ * The page holds the game; the world holds the engine. Every analysis is one call to the
+ * BestMoves view for the current FEN, and the explanation one call to ExplainPlans — there is
+ * no other traffic. A response for a position the board has already left is dropped, not shown.
+ */
+
+const $ = (id) => document.getElementById(id);
+const game = new Chess();
+let orientation = COLOR.white;
+let currentRows = [];
+let analysisSeq = 0;
+
+/* Sprites are served beside this page: the board's own asset folders are subdirectories, which
+ * an app cannot serve, and a cross-origin sprite is refused by the browser. */
+const board = new Chessboard($("board"), {
+  position: FEN.start,
+  assetsUrl: "./",
+  style: { pieces: { file: "chesscalator-pieces.svg" }, animationDuration: 200 },
+  extensions: [
+    { class: Arrows, props: { sprite: "chesscalator-arrows.svg" } },
+    { class: Markers, props: { sprite: "chesscalator-markers.svg", autoMarkers: MARKER_TYPE.square } },
+  ],
+});
+
+/* A view envelope carries its rows under `data` — as the array itself, or as `data.rows` — and
+ * older runtimes put them at `rows`. Reading only one of those turns every answer into "no lines". */
+const rowsOf = (env) =>
+  !env ? [] : Array.isArray(env.data) ? env.data : env.data && Array.isArray(env.data.rows) ? env.data.rows
+  : Array.isArray(env.rows) ? env.rows : [];
+
+const fmt = (cp) => (cp > 0 ? "+" : cp < 0 ? "−" : "") + (Math.abs(cp) / 100).toFixed(2);
+const sideName = (c) => (c === "w" ? "White" : "Black");
+
+function renderMoves() {
+  const hist = game.history();
+  const el = $("moves");
+  el.textContent = "";
+  for (let i = 0; i < hist.length; i += 2) {
+    const n = document.createElement("b");
+    n.textContent = `${i / 2 + 1}.`;
+    el.append(n, ` ${hist[i]}${hist[i + 1] ? " " + hist[i + 1] : ""}  `);
+  }
+  el.scrollTop = el.scrollHeight;
+  $("fenInput").value = game.fen();
+}
+
+function statusLine() {
+  const who = $("who");
+  if (game.isCheckmate()) return (who.textContent = `Checkmate — ${sideName(game.turn() === "w" ? "b" : "w")} wins`), true;
+  if (game.isStalemate()) return (who.textContent = "Stalemate — a draw"), true;
+  if (game.isDraw()) return (who.textContent = "Drawn position"), true;
+  who.textContent = `${sideName(game.turn())} to move${game.inCheck() ? ", in check" : ""}`;
+  return false;
+}
+
+function state(text, cls = "") {
+  const d = document.createElement("div");
+  d.className = "state " + cls;
+  d.textContent = text;
+  $("analysis").replaceChildren(d);
+}
+
+async function analyse() {
+  const seq = ++analysisSeq;
+  board.removeArrows();
+  $("explanation").textContent = "";
+  $("explainBtn").disabled = true;
+  $("evalText").textContent = "";
+  currentRows = [];
+  if (statusLine()) {
+    state("No moves to analyse: the game is over.");
+    return;
+  }
+  state("The engine is thinking — one to four seconds for a new position.");
+  const fen = game.fen();
+  let env;
+  try {
+    env = await embabel.views.invoke("BestMoves", { fen, withinCp: Number($("within").value), maxLines: 5 });
+  } catch (e) {
+    if (seq !== analysisSeq) return;
+    state(`The engine did not answer: ${e && e.message ? e.message : e}`, "error");
+    return;
+  }
+  if (seq !== analysisSeq) return;
+  const rows = rowsOf(env);
+  currentRows = rows;
+  if (rows.length === 0) {
+    const w = (env && env.warnings) || [];
+    state(w.length ? `No lines: ${w.map((x) => x.message || x).join("; ")}` : "The engine returned no lines for this position.", "error");
+    return;
+  }
+  const best = rows[0];
+  $("evalText").textContent = best.mate != null
+    ? `mate in ${Math.abs(best.mate)} for ${best.mate > 0 ? sideName(game.turn()) : sideName(game.turn() === "w" ? "b" : "w")}`
+    : `${fmt(best.whiteCp)} · depth ${best.depth}`;
+  renderPlans(rows);
+  $("explainBtn").disabled = false;
+  maybeEngineMove(seq);
+}
+
+function renderPlans(rows) {
+  const groups = new Map();
+  for (const r of rows) {
+    if (!groups.has(r.plan)) groups.set(r.plan, { title: r.planTitle || r.plan, meaning: r.planMeaning || "", rows: [] });
+    groups.get(r.plan).rows.push(r);
+  }
+  const out = [];
+  let first = true;
+  for (const g of groups.values()) {
+    const card = document.createElement("div");
+    card.className = "plan" + (first ? " best" : "");
+    first = false;
+    const h = document.createElement("h3");
+    h.textContent = g.title;
+    const m = document.createElement("div");
+    m.className = "meaning";
+    m.textContent = g.meaning;
+    card.append(h, m);
+    for (const r of g.rows) card.append(candidate(r));
+    out.push(card);
+  }
+  $("analysis").replaceChildren(...out);
+}
+
+function candidate(r) {
+  const row = document.createElement("div");
+  row.className = "cand";
+  const b = document.createElement("button");
+  b.className = "mv";
+  b.textContent = r.move;
+  b.title = `Play ${r.move}`;
+  b.addEventListener("mouseenter", () => showArrow(r.uci));
+  b.addEventListener("focus", () => showArrow(r.uci));
+  b.addEventListener("mouseleave", () => board.removeArrows());
+  b.addEventListener("click", () => playUci(r.uci));
+  const score = document.createElement("span");
+  score.className = "score";
+  score.textContent = r.mate != null ? `mate in ${Math.abs(r.mate)}` : fmt(r.whiteCp);
+  const loss = document.createElement("span");
+  const lc = r.lossCp == null ? null : Number(r.lossCp);
+  loss.className = "loss " + (Number(r.rank) === 1 ? "" : lc != null && lc <= 20 ? "style" : "cost");
+  loss.textContent = Number(r.rank) === 1 ? "engine's best"
+    : lc == null ? "not comparable with the mate"
+    : `${(lc / 100).toFixed(2)} worse${lc <= 20 ? " — style, not strength" : ""}`;
+  const line = document.createElement("div");
+  line.className = "line";
+  line.textContent = (r.line || "").split(" ").slice(0, 12).join(" ");
+  row.append(b, score, loss, line);
+  return row;
+}
+
+function showArrow(uci) {
+  board.removeArrows();
+  if (uci) board.addArrow(ARROW_TYPE.info, uci.slice(0, 2), uci.slice(2, 4));
+}
+
+function after() {
+  board.setPosition(game.fen(), true);
+  renderMoves();
+  analyse();
+}
+
+function playUci(uci) {
+  try {
+    game.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] || "q" });
+  } catch { return; }
+  after();
+}
+
+/* The engine answers for its side with the best line it just computed — the same rows the
+ * panel shows, so what it plays is always the move listed first. */
+function maybeEngineMove(seq) {
+  const side = $("engineSide").value;
+  if (!side || side !== game.turn() || currentRows.length === 0) return;
+  setTimeout(() => { if (seq === analysisSeq) playUci(currentRows[0].uci); }, 600);
+}
+
+board.enableMoveInput((event) => {
+  switch (event.type) {
+    case INPUT_EVENT_TYPE.moveInputStarted: {
+      const side = $("engineSide").value;
+      if (side && side === game.turn()) return false;
+      return game.moves({ square: event.squareFrom }).length > 0;
+    }
+    case INPUT_EVENT_TYPE.validateMoveInput: {
+      let move = null;
+      // Promotion goes to a queen: a promotion dialog is not worth its weight here.
+      try { move = game.move({ from: event.squareFrom, to: event.squareTo, promotion: "q" }); } catch { move = null; }
+      if (move) setTimeout(after);
+      return !!move;
+    }
+    default:
+      return true;
+  }
+});
+
+$("new").addEventListener("click", () => { game.reset(); $("fenError").textContent = ""; after(); });
+$("undo").addEventListener("click", () => {
+  game.undo();
+  // Against the engine, take back a whole turn so it is your move again.
+  const side = $("engineSide").value;
+  if (side && side === game.turn()) game.undo();
+  after();
+});
+$("flip").addEventListener("click", () => {
+  orientation = orientation === COLOR.white ? COLOR.black : COLOR.white;
+  board.setOrientation(orientation);
+});
+$("engineSide").addEventListener("change", () => maybeEngineMove(analysisSeq));
+$("within").addEventListener("change", analyse);
+$("loadFen").addEventListener("click", () => {
+  const fen = $("fenInput").value.trim();
+  try {
+    game.load(fen);
+    $("fenError").textContent = "";
+  } catch (e) {
+    $("fenError").textContent = `Not a legal position: ${e.message}`;
+    return;
+  }
+  after();
+});
+
+$("explainBtn").addEventListener("click", async () => {
+  const seq = analysisSeq;
+  const out = $("explanation");
+  $("explainBtn").disabled = true;
+  out.textContent = "Writing the explanation — a few seconds.";
+  out.className = "explain note";
+  try {
+    const env = await embabel.views.invoke("ExplainPlans", { fen: game.fen(), withinCp: Number($("within").value) });
+    if (seq !== analysisSeq) return;
+    const rows = rowsOf(env);
+    const text = rows[0] && rows[0].explanation;
+    out.className = "explain";
+    if (!text) { out.textContent = "No explanation came back for this position."; return; }
+    out.replaceChildren(...String(text).split(/\n\s*\n/).map((para) => {
+      const p = document.createElement("p");
+      p.textContent = para.trim();
+      return p;
+    }));
+  } catch (e) {
+    if (seq !== analysisSeq) return;
+    out.className = "explain state error";
+    out.textContent = `The explanation failed: ${e && e.message ? e.message : e}`;
+  } finally {
+    if (seq === analysisSeq) $("explainBtn").disabled = false;
+  }
+});
+
+renderMoves();
+analyse();
+</script>
+</body>
+</html>

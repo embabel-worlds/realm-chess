@@ -1,0 +1,115 @@
+# The realm's answer surface: the engine's best moves in a position, grouped by plan, explained.
+#
+# THREE RULES, each because getting it wrong gives a confident wrong answer rather than an error.
+#
+# 1. THE SCORE IS FOR THE SIDE TO MOVE. `scoreCp` +81 with Black to move is good for Black.
+#    Displays use `whiteCp`; comparisons between candidates use `lossCp`, which needs no sign.
+#
+# 2. "WITHIN N CENTIPAWNS" MEANS OF THE BEST LINE, not of zero. A move that keeps +3.00 when the
+#    best keeps +3.40 is 40 worse, not "winning". The best line is always included, even when
+#    it is a forced mate and nothing else can be compared with it.
+#
+# 3. A PLAN IS A READING, NOT A FACT ABOUT THE POSITION. It is decided by rules over the moves
+#    of one engine line (src/lib/plans.ts, restated in reference/plans.yml). Explanations are
+#    written from `facts` — what those rules saw — and never from a model reading raw moves.
+#
+# Values from the producer can arrive as strings: compare and sort through toInteger().
+
+- name: BestMoves
+  description: "The engine's best moves in a position, strongest first: every move within `withinCp` centipawns of the best, and always the best itself. Each row carries the line, its score for the side to move and for White, how much worse than best it is, and the plan it pursues with what that plan means. Answers 'what are the best moves here', 'which moves are within half a pawn of best', 'what should White play'."
+  params:
+    fen:
+      type: string
+      default: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+      description: "The position, as a complete FEN (six fields)."
+    withinCp:
+      type: int
+      default: 50
+      description: "Keep moves at most this many CENTIPAWNS worse than the best (100 = one pawn): 'within half a pawn' is 50, 'within a pawn' is 100, 'within a quarter of a pawn' is 25. Always a whole number of centipawns, never a fraction of a pawn."
+    maxLines:
+      type: int
+      default: 5
+      description: "At most this many moves, best first. The engine computes five."
+  cypher: |
+    MATCH (p:Position {fen: $fen})-[:HAS_CANDIDATE]->(c:CandidateMove)
+    WHERE toInteger(c.rank) = 1 OR (c.lossCp IS NOT NULL AND toInteger(c.lossCp) <= $withinCp)
+    OPTIONAL MATCH (m:PlanMeaning {name: c.plan})
+    RETURN toInteger(c.rank) AS rank, c.san AS move, c.uci AS uci, c.side AS side,
+           c.scoreCp AS scoreCp, c.mate AS mate, c.whiteCp AS whiteCp, c.lossCp AS lossCp,
+           c.plan AS plan, m.title AS planTitle, m.meaning AS planMeaning, c.planTags AS planTags,
+           c.pvSan AS line, c.pvUci AS lineUci, toInteger(c.depth) AS depth, c.facts AS facts
+    ORDER BY rank
+    LIMIT $maxLines
+
+- name: PlansInPosition
+  description: "The plans behind the engine's best moves in a position: the candidate moves (within `withinCp` of best) grouped by the plan each pursues, with what the plan means and what it concedes. Answers 'what are the plans here', 'what is White trying to do', 'what's the difference between g4 and a3 here'."
+  params:
+    fen:
+      type: string
+      default: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+      description: "The position, as a complete FEN."
+    withinCp:
+      type: int
+      default: 50
+      description: "Consider moves at most this many CENTIPAWNS worse than the best (100 = one pawn): 'within half a pawn' is 50, 'within a pawn' is 100, 'within a quarter of a pawn' is 25. Always a whole number of centipawns, never a fraction of a pawn."
+  cypher: |
+    MATCH (p:Position {fen: $fen})-[:HAS_CANDIDATE]->(c:CandidateMove)
+    WHERE toInteger(c.rank) = 1 OR (c.lossCp IS NOT NULL AND toInteger(c.lossCp) <= $withinCp)
+    WITH c ORDER BY toInteger(c.rank)
+    OPTIONAL MATCH (m:PlanMeaning {name: c.plan})
+    WITH c.plan AS plan, m, collect(c.san) AS moves, collect(c.pvSan) AS lines,
+         min(toInteger(c.rank)) AS bestRank, min(toInteger(c.lossCp)) AS bestLossCp
+    RETURN plan, m.title AS title, moves, bestRank, bestLossCp, lines[0] AS exampleLine,
+           m.meaning AS meaning, m.when AS rightWhen, m.concedes AS concedes
+    ORDER BY bestRank
+
+# The verdict on each move's cost is decided in the query, not by the model: asked to judge
+# "within 20 centipawns" itself, it called a 34-centipawn gap a matter of style.
+- name: ExplainPlans
+  description: "A short explanation, in prose, of the choice between the engine's best moves in a position: which plans they represent, how those plans differ, and what each concedes — written only from the engine's lines and the rule-read facts about them. Costs one model call per new position. Answers 'explain the plans here', 'why does the engine like g4 and Kb1', 'what's the idea behind these moves'."
+  params:
+    fen:
+      type: string
+      default: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+      description: "The position, as a complete FEN."
+    withinCp:
+      type: int
+      default: 50
+      description: "Explain moves at most this many CENTIPAWNS worse than the best (100 = one pawn): 'within half a pawn' is 50, 'within a pawn' is 100, 'within a quarter of a pawn' is 25. Always a whole number of centipawns, never a fraction of a pawn."
+  cypher: |
+    MATCH (p:Position {fen: $fen})-[:HAS_CANDIDATE]->(c:CandidateMove)
+    WHERE toInteger(c.rank) = 1 OR (c.lossCp IS NOT NULL AND toInteger(c.lossCp) <= $withinCp)
+    OPTIONAL MATCH (m:PlanMeaning {name: c.plan})
+    WITH c, c.san + ' (' +
+            CASE WHEN toInteger(c.rank) = 1 THEN "the engine's best move"
+                 WHEN c.lossCp IS NULL THEN 'not comparable with the best move, which is a forced mate'
+                 WHEN toInteger(c.lossCp) <= 20 THEN toString(c.lossCp) + ' centipawns worse than the best move: a difference of style, not strength'
+                 ELSE toString(c.lossCp) + ' centipawns worse than the best move: a real, if small, concession' END +
+            '): ' + c.facts + '. Plan "' + coalesce(m.title, c.plan) + '" means: ' + coalesce(m.meaning, 'no catalogue entry') +
+            ' It concedes: ' + coalesce(m.concedes, 'not stated') AS evidence
+    ORDER BY toInteger(c.rank)
+    RETURN count(c) AS movesConsidered, collect(c.san) AS moves,
+           synthesize(evidence, 'Explain to a club player the choice between these candidate moves from one chess position. Group the moves that pursue the same plan and name each plan in plain words. Refer to every move by its notation (g4, O-O-O, Nb3), never by a candidate number. Each item names the move played NOW; the other moves in its line come later, so write "Nb3, with O-O-O to follow" and never imply a later move is played now. Then contrast the plans: which is sharper, which is quieter, what each concedes. For how much a move gives up, repeat the verdict stated beside it; call the choice a matter of style only for moves marked that way. Scores are for the side to move. Use ONLY the facts given: never invent a move, a square or an evaluation. 120 to 220 words of plain prose, no headings, no lists.') AS explanation
+
+- name: PlanCatalogue
+  description: "The realm's plan vocabulary: every plan the line reader can name, what it means, when it is right, what it concedes, and the rule that detects it. Answers 'what plans does the engine know', 'what does minority attack mean here'."
+  cypher: |
+    MATCH (m:PlanMeaning)
+    RETURN m.name AS plan, m.title AS title, m.meaning AS meaning, m.when AS rightWhen,
+           m.concedes AS concedes, m.detectedBy AS detectedBy
+    ORDER BY toInteger(m.order)
+
+- name: WhatPlanMeans
+  description: "What one chess plan means, in the words a player would use — 'minority attack', 'pawn storm', 'prophylaxis', 'central break'. Returns what it is, when it is right, what it concedes, and how the engine's line reader detects it. Answers 'what does minority attack mean', 'what is a pawn storm', 'explain prophylaxis'."
+  params:
+    plan:
+      type: string
+      default: "minority attack"
+      description: "The plan as a person names it, in any case, with spaces or hyphens: 'minority attack', 'kingside pawn storm', 'storm'."
+  cypher: |
+    MATCH (m:PlanMeaning)
+    WHERE toLower(m.title) CONTAINS toLower(trim($plan))
+       OR m.name CONTAINS replace(toLower(trim($plan)), ' ', '-')
+    RETURN m.name AS plan, m.title AS title, m.meaning AS meaning, m.when AS rightWhen,
+           m.concedes AS concedes, m.detectedBy AS detectedBy
+    ORDER BY toInteger(m.order)
