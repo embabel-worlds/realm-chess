@@ -30,20 +30,34 @@ let queue: Promise<unknown> = Promise.resolve();
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-/* The engine files sit in dist/engine/, one level up from the bundled dist/api/<ns>.js. */
+/*
+ * The engine files sit in dist/engine/, one level up from the bundled dist/api/<ns>.js.
+ *
+ * The Stockfish build's emscripten wrapper assigns `fetch = null` as a global while it loads.
+ * In the sandbox that global IS the gateway's transport — every `ctx.<ns>.<method>` call after
+ * the engine started failed with "fetch is not a function". So the global is put back once the
+ * engine is up; the engine has read its wasm from disk by then and never fetches.
+ */
 function start(): Promise<Module> {
+  const savedFetch = globalThis.fetch;
+  const restore = () => { if (globalThis.fetch !== savedFetch) globalThis.fetch = savedFetch; };
   const js = path.join(__dirname, "..", "engine", "stockfish-19-lite-single.js");
   // A runtime require of a computed path, which the bundler leaves alone: the engine ships as
   // its own files beside the bundle, not inside it.
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const init = require(js);
+  restore();
   const module: any = {
     locateFile: (f: string) => (f.endsWith(".wasm") ? js.replace(/\.js$/, ".wasm") : js),
     listener: (line: string) => output.push(line),
   };
   return init()(module).then(async () => {
     while (module._isReady && !module._isReady()) await sleep(10);
+    restore();
     return module as Module;
+  }, (e: unknown) => {
+    restore();
+    throw e;
   });
 }
 

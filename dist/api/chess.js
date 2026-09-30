@@ -2054,7 +2054,7 @@ var require_chess = __commonJS({
     var RANK_2 = 6;
     var RANK_7 = 1;
     var RANK_8 = 0;
-    var SIDES = {
+    var SIDES2 = {
       [KING]: BITS.KSIDE_CASTLE,
       [QUEEN]: BITS.QSIDE_CASTLE
     };
@@ -2070,18 +2070,18 @@ var require_chess = __commonJS({
     };
     var SECOND_RANK = { b: RANK_7, w: RANK_2 };
     var SAN_NULLMOVE = "--";
-    function rank(square) {
+    function rank2(square) {
       return square >> 4;
     }
-    function file(square) {
+    function file2(square) {
       return square & 15;
     }
     function isDigit(c) {
       return "0123456789".indexOf(c) !== -1;
     }
     function algebraic(square) {
-      const f = file(square);
-      const r = rank(square);
+      const f = file2(square);
+      const r = rank2(square);
       return "abcdefgh".substring(f, f + 1) + "87654321".substring(r, r + 1);
     }
     function swapColor(color) {
@@ -2192,10 +2192,10 @@ var require_chess = __commonJS({
         const ambigPiece = moves[i].piece;
         if (piece === ambigPiece && from !== ambigFrom && to === ambigTo) {
           ambiguities++;
-          if (rank(from) === rank(ambigFrom)) {
+          if (rank2(from) === rank2(ambigFrom)) {
             sameRank++;
           }
-          if (file(from) === file(ambigFrom)) {
+          if (file2(from) === file2(ambigFrom)) {
             sameFile++;
           }
         }
@@ -2212,7 +2212,7 @@ var require_chess = __commonJS({
       return "";
     }
     function addMove(moves, color, from, to, piece, captured = void 0, flags = BITS.NORMAL) {
-      const r = rank(to);
+      const r = rank2(to);
       if (piece === PAWN && (r === RANK_1 || r === RANK_8)) {
         for (let i = 0; i < PROMOTIONS.length; i++) {
           const promotion = PROMOTIONS[i];
@@ -2255,7 +2255,7 @@ var require_chess = __commonJS({
     function strippedSan(move) {
       return move.replace(/=/, "").replace(/[+#]?[?!]*$/, "");
     }
-    var Chess3 = class {
+    var Chess5 = class {
       _board = new Array(128);
       _turn = WHITE;
       _header = {};
@@ -2507,10 +2507,10 @@ var require_chess = __commonJS({
         }
         return false;
       }
-      _set(sq, piece) {
-        this._hash ^= this._pieceKey(sq);
-        this._board[sq] = piece;
-        this._hash ^= this._pieceKey(sq);
+      _set(sq2, piece) {
+        this._hash ^= this._pieceKey(sq2);
+        this._board[sq2] = piece;
+        this._hash ^= this._pieceKey(sq2);
       }
       _put({ type, color }, square) {
         if (SYMBOLS.indexOf(type.toLowerCase()) === -1) {
@@ -2519,23 +2519,23 @@ var require_chess = __commonJS({
         if (!(square in Ox88)) {
           return false;
         }
-        const sq = Ox88[square];
-        if (type == KING && !(this._kings[color] == EMPTY || this._kings[color] == sq)) {
+        const sq2 = Ox88[square];
+        if (type == KING && !(this._kings[color] == EMPTY || this._kings[color] == sq2)) {
           return false;
         }
-        const currentPieceOnSquare = this._board[sq];
+        const currentPieceOnSquare = this._board[sq2];
         if (currentPieceOnSquare && currentPieceOnSquare.type === KING) {
           this._kings[currentPieceOnSquare.color] = EMPTY;
         }
-        this._set(sq, { type, color });
+        this._set(sq2, { type, color });
         if (type === KING) {
-          this._kings[color] = sq;
+          this._kings[color] = sq2;
         }
         return true;
       }
-      _clear(sq) {
-        this._hash ^= this._pieceKey(sq);
-        delete this._board[sq];
+      _clear(sq2) {
+        this._hash ^= this._pieceKey(sq2);
+        delete this._board[sq2];
       }
       remove(square) {
         const piece = this.get(square);
@@ -2675,7 +2675,7 @@ var require_chess = __commonJS({
         return !this.isCheck() && this._moves().length === 0;
       }
       isInsufficientMaterial() {
-        const pieces = {
+        const pieces2 = {
           b: 0,
           n: 0,
           r: 0,
@@ -2694,7 +2694,7 @@ var require_chess = __commonJS({
           }
           const piece = this._board[i];
           if (piece) {
-            pieces[piece.type] = piece.type in pieces ? pieces[piece.type] + 1 : 1;
+            pieces2[piece.type] = piece.type in pieces2 ? pieces2[piece.type] + 1 : 1;
             if (piece.type === BISHOP) {
               bishops.push(squareColor);
             }
@@ -2705,10 +2705,10 @@ var require_chess = __commonJS({
           return true;
         } else if (
           // k vs. kn .... or .... k vs. kb
-          numPieces === 3 && (pieces[BISHOP] === 1 || pieces[KNIGHT] === 1)
+          numPieces === 3 && (pieces2[BISHOP] === 1 || pieces2[KNIGHT] === 1)
         ) {
           return true;
-        } else if (numPieces === pieces[BISHOP] + 2) {
+        } else if (numPieces === pieces2[BISHOP] + 2) {
           let sum = 0;
           const len = bishops.length;
           for (let i = 0; i < len; i++) {
@@ -2740,7 +2740,7 @@ var require_chess = __commonJS({
           return moves.map((move) => this._moveToSan(move, moves));
         }
       }
-      _moves({ legal = true, piece = void 0, square = void 0 } = {}) {
+      _moves({ legal: legal2 = true, piece = void 0, square = void 0 } = {}) {
         const forSquare = square ? square.toLowerCase() : void 0;
         const forPiece = piece?.toLowerCase();
         const moves = [];
@@ -2774,7 +2774,7 @@ var require_chess = __commonJS({
             if (!this._board[to]) {
               addMove(moves, us, from, to, PAWN);
               to = from + PAWN_OFFSETS[us][1];
-              if (SECOND_RANK[us] === rank(from) && !this._board[to]) {
+              if (SECOND_RANK[us] === rank2(from) && !this._board[to]) {
                 addMove(moves, us, from, to, PAWN, void 0, BITS.BIG_PAWN);
               }
             }
@@ -2830,7 +2830,7 @@ var require_chess = __commonJS({
             }
           }
         }
-        if (!legal || this._kings[us] === -1) {
+        if (!legal2 || this._kings[us] === -1) {
           return moves;
         }
         const legalMoves = [];
@@ -3358,8 +3358,8 @@ var require_chess = __commonJS({
       ascii() {
         let s = "   +------------------------+\n";
         for (let i = Ox88.a8; i <= Ox88.h1; i++) {
-          if (file(i) === 0) {
-            s += " " + "87654321"[rank(i)] + " |";
+          if (file2(i) === 0) {
+            s += " " + "87654321"[rank2(i)] + " |";
           }
           if (this._board[i]) {
             const piece = this._board[i].type;
@@ -3428,8 +3428,8 @@ var require_chess = __commonJS({
       }
       squareColor(square) {
         if (square in Ox88) {
-          const sq = Ox88[square];
-          return (rank(sq) + file(sq)) % 2 === 0 ? "light" : "dark";
+          const sq2 = Ox88[square];
+          return (rank2(sq2) + file2(sq2)) % 2 === 0 ? "light" : "dark";
         }
         return null;
       }
@@ -3534,9 +3534,9 @@ var require_chess = __commonJS({
         for (const side of [KING, QUEEN]) {
           if (rights[side] !== void 0) {
             if (rights[side]) {
-              this._castling[color] |= SIDES[side];
+              this._castling[color] |= SIDES2[side];
             } else {
-              this._castling[color] &= ~SIDES[side];
+              this._castling[color] &= ~SIDES2[side];
             }
           }
         }
@@ -3546,8 +3546,8 @@ var require_chess = __commonJS({
       }
       getCastlingRights(color) {
         return {
-          [KING]: (this._castling[color] & SIDES[KING]) !== 0,
-          [QUEEN]: (this._castling[color] & SIDES[QUEEN]) !== 0
+          [KING]: (this._castling[color] & SIDES2[KING]) !== 0,
+          [QUEEN]: (this._castling[color] & SIDES2[QUEEN]) !== 0
         };
       }
       moveNumber() {
@@ -3556,7 +3556,7 @@ var require_chess = __commonJS({
     };
     exports2.BISHOP = BISHOP;
     exports2.BLACK = BLACK;
-    exports2.Chess = Chess3;
+    exports2.Chess = Chess5;
     exports2.DEFAULT_POSITION = DEFAULT_POSITION;
     exports2.KING = KING;
     exports2.KNIGHT = KNIGHT;
@@ -3575,10 +3575,13 @@ var require_chess = __commonJS({
 // src/api/chess.ts
 var chess_exports = {};
 __export(chess_exports, {
-  analysePosition: () => analysePosition
+  analysePosition: () => analysePosition,
+  explainPlans: () => explainPlans,
+  openingLookup: () => openingLookup,
+  positionImbalances: () => positionImbalances
 });
 module.exports = __toCommonJS(chess_exports);
-var import_chess2 = __toESM(require_chess());
+var import_chess4 = __toESM(require_chess());
 
 // src/lib/engine.ts
 var path = __toESM(require("path"));
@@ -3587,15 +3590,24 @@ var output = [];
 var queue = Promise.resolve();
 var sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 function start() {
+  const savedFetch = globalThis.fetch;
+  const restore = () => {
+    if (globalThis.fetch !== savedFetch) globalThis.fetch = savedFetch;
+  };
   const js = path.join(__dirname, "..", "engine", "stockfish-19-lite-single.js");
   const init = require(js);
+  restore();
   const module2 = {
     locateFile: (f) => f.endsWith(".wasm") ? js.replace(/\.js$/, ".wasm") : js,
     listener: (line) => output.push(line)
   };
   return init()(module2).then(async () => {
     while (module2._isReady && !module2._isReady()) await sleep(10);
+    restore();
     return module2;
+  }, (e) => {
+    restore();
+    throw e;
   });
 }
 function send(m, cmd) {
@@ -3645,76 +3657,305 @@ function search(fen, multiPv, depth) {
   return next;
 }
 
-// src/lib/plans.ts
+// src/lib/imbalances.ts
 var import_chess = __toESM(require_chess());
-var PLAN_PLIES = 10;
-var PLAN_ORDER = [
-  "mating-attack",
-  "wins-material",
-  "passed-pawn",
-  "kingside-pawn-storm",
-  "queenside-pawn-storm",
-  "minority-attack",
-  "sacrifice-for-initiative",
-  "central-break",
-  "central-control",
-  "simplification",
-  "kingside-expansion",
-  "queenside-expansion",
-  "king-activity",
-  "king-safety",
-  "prophylaxis",
-  "development",
-  "piece-improvement",
-  "manoeuvring"
-];
+var SIDES = ["white", "black"];
+var colourOf = (s) => s === "white" ? "w" : "b";
+var other = (s) => s === "white" ? "black" : "white";
 var VALUE = { p: 1, n: 3, b: 3, r: 5, q: 9, k: 0 };
-function wingOf(square) {
-  const f = square[0];
-  return f <= "c" ? "queenside" : f <= "e" ? "centre" : "kingside";
+var FILES = "abcdefgh";
+var PIECE_NAME = { p: "pawn", n: "knight", b: "bishop", r: "rook", q: "queen", k: "king" };
+var file = (sq2) => FILES.indexOf(sq2[0]);
+var rank = (sq2) => Number(sq2[1]);
+var sq = (f, r) => `${FILES[f]}${r}`;
+var onBoard = (f, r) => f >= 0 && f < 8 && r >= 1 && r <= 8;
+var relRank = (s, r) => s === "white" ? r : 9 - r;
+var forward = (s) => s === "white" ? 1 : -1;
+var isLight = (square) => (file(square) + rank(square)) % 2 === 0;
+function pieces(c) {
+  const out = [];
+  for (const row of c.board()) for (const p of row) if (p) out.push({ type: p.type, color: p.color, square: p.square });
+  return out;
 }
-function material(c, colour) {
-  let total = 0;
-  for (const row of c.board()) for (const p of row) if (p && p.color === colour) total += VALUE[p.type];
-  return total;
+function pawnsOf(all, s) {
+  return all.filter((p) => p.type === "p" && p.color === colourOf(s)).map((p) => p.square);
 }
-function kingSquare(c, colour) {
-  for (const row of c.board()) for (const p of row) if (p && p.type === "k" && p.color === colour) return p.square;
-  return "e1";
+function pawnAttacks(s, square) {
+  const f = file(square), r = rank(square) + forward(s);
+  return [f - 1, f + 1].filter((x) => onBoard(x, r)).map((x) => sq(x, r));
 }
-function pawnsOnWing(c, colour, wing) {
-  let n = 0;
-  for (const row of c.board()) for (const p of row) if (p && p.type === "p" && p.color === colour && wingOf(p.square) === wing) n++;
-  return n;
-}
-function hasQueen(c, colour) {
-  return c.board().some((row) => row.some((p) => p?.type === "q" && p.color === colour));
-}
-function isPawnBreak(after, m) {
-  if (m.piece !== "p") return false;
-  if (m.captured === "p") return true;
-  const file = m.to.charCodeAt(0);
-  const rank = Number(m.to[1]) + (m.color === "w" ? 1 : -1);
-  if (rank < 1 || rank > 8) return false;
-  return [file - 1, file + 1].some((f) => {
-    if (f < 97 || f > 104) return false;
-    const p = after.get(`${String.fromCharCode(f)}${rank}`);
-    return !!p && p.type === "p" && p.color !== m.color;
+function enemyPawnCanReach(enemyPawns, enemy, square) {
+  const f = file(square), r = rank(square);
+  return enemyPawns.some((p) => {
+    if (Math.abs(file(p) - f) !== 1) return false;
+    return enemy === "black" ? rank(p) > r : rank(p) < r;
   });
 }
-function coversAdvanceSquare(after, m) {
-  if (m.piece !== "p") return false;
-  const dir = m.color === "w" ? 1 : -1;
-  const file = m.to.charCodeAt(0);
-  const rank = Number(m.to[1]) + dir;
-  if (rank < 1 || rank > 8) return false;
-  return [file - 1, file + 1].some((f) => {
-    if (f < 99 || f > 102) return false;
-    const covered = `${String.fromCharCode(f)}${rank}`;
-    const behind = after.get(`${String.fromCharCode(f)}${rank - dir}`);
-    return !after.get(covered) && !!behind && behind.type === "p" && behind.color === m.color;
+function sideImbalances(c, all, s, openFiles) {
+  const me = colourOf(s), them = other(s);
+  const mine = all.filter((p) => p.color === me);
+  const myPawns = pawnsOf(all, s);
+  const theirPawns = pawnsOf(all, them);
+  const count = (t) => mine.filter((p) => p.type === t).length;
+  const material = {
+    pawns: count("p"),
+    knights: count("n"),
+    bishops: count("b"),
+    rooks: count("r"),
+    queens: count("q"),
+    points: mine.reduce((a, p) => a + VALUE[p.type], 0)
+  };
+  const bishops = mine.filter((p) => p.type === "b").map((b) => {
+    const light = isLight(b.square);
+    const onColour = myPawns.filter((p) => isLight(p) === light).length;
+    const bad = onColour / myPawns.length >= 0.6;
+    const outside = relRank(s, rank(b.square)) >= 4;
+    const verdict = myPawns.length < 3 ? "neither" : bad ? outside ? "bad but active" : "bad" : onColour / myPawns.length <= 0.35 ? "good" : "neither";
+    return { square: b.square, colour: light ? "light" : "dark", ownPawnsOnColour: onColour, verdict };
   });
+  const filesWith = (f, pawns) => pawns.filter((p) => file(p) === f);
+  const doubled = [...new Set(myPawns.map(file))].filter((f) => filesWith(f, myPawns).length > 1).map((f) => FILES[f]);
+  const isolated = myPawns.filter((p) => filesWith(file(p) - 1, myPawns).length === 0 && filesWith(file(p) + 1, myPawns).length === 0);
+  const passed = myPawns.filter((p) => !theirPawns.some((t) => Math.abs(file(t) - file(p)) <= 1 && (s === "white" ? rank(t) > rank(p) : rank(t) < rank(p))));
+  const protectedPassed = passed.filter((p) => myPawns.some((q) => pawnAttacks(s, q).includes(p)));
+  const backward = myPawns.filter((p) => {
+    if (isolated.includes(p) || passed.includes(p)) return false;
+    const behindOrLevel = myPawns.some((q) => Math.abs(file(q) - file(p)) === 1 && relRank(s, rank(q)) <= relRank(s, rank(p)));
+    if (behindOrLevel) return false;
+    const stop = rank(p) + forward(s);
+    if (!onBoard(file(p), stop)) return false;
+    return theirPawns.some((t) => pawnAttacks(them, t).includes(sq(file(p), stop)));
+  });
+  const hanging = [];
+  for (const p of myPawns) for (const q of myPawns) {
+    if (file(q) !== file(p) + 1 || rank(q) !== rank(p)) continue;
+    if (file(p) < 2 || file(q) > 4 || relRank(s, rank(p)) < 3) continue;
+    const left = filesWith(file(p) - 1, myPawns).length, right = filesWith(file(q) + 1, myPawns).length;
+    if (left === 0 && right === 0 && filesWith(file(p), myPawns).length === 1 && filesWith(file(q), myPawns).length === 1) hanging.push(p, q);
+  }
+  const occupiedFiles = [...new Set(myPawns.map(file))].sort((a, b) => a - b);
+  let islands = 0;
+  occupiedFiles.forEach((f, i) => {
+    if (i === 0 || f !== occupiedFiles[i - 1] + 1) islands++;
+  });
+  const isolatedQueenPawn = isolated.some((p) => p[0] === "d");
+  const majority = {
+    queenside: myPawns.filter((p) => file(p) <= 3).length,
+    kingside: myPawns.filter((p) => file(p) >= 4).length
+  };
+  const controlled = /* @__PURE__ */ new Set();
+  for (const p of myPawns) for (const a of pawnAttacks(s, p)) if (relRank(s, rank(a)) >= 5) controlled.add(a);
+  const space = controlled.size + myPawns.filter((p) => relRank(s, rank(p)) >= 5).length;
+  const outposts = [];
+  for (let f = 1; f <= 6; f++) for (let rr = 4; rr <= 6; rr++) {
+    const r = s === "white" ? rr : 9 - rr;
+    const square = sq(f, r);
+    const occupant = c.get(square);
+    if (occupant?.type === "p") continue;
+    const guarded = myPawns.some((p) => pawnAttacks(s, p).includes(square));
+    if (!guarded || enemyPawnCanReach(theirPawns, them, square)) continue;
+    outposts.push({ square, occupiedBy: occupant && occupant.color === me ? `${PIECE_NAME[occupant.type]}` : null });
+  }
+  outposts.sort((a, b) => Math.abs(3.5 - file(a.square)) - Math.abs(3.5 - file(b.square)));
+  const halfOpenFiles = [...FILES].filter((f, i) => filesWith(i, myPawns).length === 0 && filesWith(i, theirPawns).length > 0);
+  const rooksOnOpenFiles = mine.filter((p) => (p.type === "r" || p.type === "q") && openFiles.includes(p.square[0])).map((p) => `${PIECE_NAME[p.type]} ${p.square}`);
+  const home = s === "white" ? { n: ["b1", "g1"], b: ["c1", "f1"] } : { n: ["b8", "g8"], b: ["c8", "f8"] };
+  const undeveloped = [
+    ...home.n.filter((h) => c.get(h)?.type === "n" && c.get(h)?.color === me).map((h) => `N${h}`),
+    ...home.b.filter((h) => c.get(h)?.type === "b" && c.get(h)?.color === me).map((h) => `B${h}`)
+  ];
+  const kingSq = mine.find((p) => p.type === "k").square;
+  const backRank = s === "white" ? 1 : 8;
+  const rights = c.getCastlingRights(me);
+  const castled = rank(kingSq) === backRank && !rights.k && !rights.q ? file(kingSq) >= 6 ? "kingside" : file(kingSq) <= 2 ? "queenside" : null : null;
+  const kingInCentre = file(kingSq) >= 3 && file(kingSq) <= 4;
+  const kingWing = file(kingSq) <= 2 ? "queenside" : file(kingSq) >= 5 ? "kingside" : "centre";
+  const shield = myPawns.filter((p) => Math.abs(file(p) - file(kingSq)) <= 1 && relRank(s, rank(p)) > relRank(s, rank(kingSq)) && relRank(s, rank(p)) <= relRank(s, rank(kingSq)) + 2).length;
+  const openFilesNear = [file(kingSq) - 1, file(kingSq), file(kingSq) + 1].filter((f) => f >= 0 && f < 8).map((f) => FILES[f]).filter((f) => openFiles.includes(f) || !myPawns.some((p) => p[0] === f));
+  const zone = /* @__PURE__ */ new Set();
+  for (let df = -1; df <= 1; df++) for (let dr = -1; dr <= 1; dr++) {
+    const f = file(kingSq) + df, r = rank(kingSq) + dr;
+    if (onBoard(f, r)) zone.add(sq(f, r));
+  }
+  const attackers = /* @__PURE__ */ new Set();
+  for (const z of zone) for (const a of c.attackers(z, colourOf(them))) {
+    if (c.get(a)?.type !== "p") attackers.add(a);
+  }
+  return {
+    material,
+    bishopPair: material.bishops >= 2 && new Set(bishops.map((b) => b.colour)).size === 2,
+    bishops,
+    pawns: { islands, doubled, isolated, backward, passed, protectedPassed, hanging: [...new Set(hanging)], isolatedQueenPawn },
+    majority,
+    space,
+    outposts: outposts.slice(0, 4),
+    halfOpenFiles,
+    rooksOnOpenFiles,
+    development: { undeveloped, castled, kingInCentre },
+    king: { square: kingSq, wing: kingWing, shield, openFilesNear, attackersNear: attackers.size },
+    mobility: mobilityOf(c, me)
+  };
 }
+function mobilityOf(c, colour) {
+  if (c.turn() === colour) return c.moves().length;
+  const parts = c.fen().split(" ");
+  parts[1] = colour;
+  parts[3] = "-";
+  try {
+    const flipped = new import_chess.Chess(parts.join(" "));
+    return flipped.moves().length;
+  } catch {
+    return null;
+  }
+}
+function chainsOf(all) {
+  const out = [];
+  for (const s of SIDES) {
+    const mine = pawnsOf(all, s), theirs = pawnsOf(all, other(s));
+    const locked = (p) => theirs.includes(sq(file(p), rank(p) + forward(s)));
+    for (const head of mine) {
+      if (!locked(head) || file(head) < 2 || file(head) > 5) continue;
+      for (const base of mine) {
+        if (!locked(base)) continue;
+        if (Math.abs(file(base) - file(head)) !== 1 || relRank(s, rank(base)) !== relRank(s, rank(head)) - 1) continue;
+        if (file(base) < 2 || file(base) > 5) continue;
+        if (!(file(head) === 3 || file(head) === 4 || file(base) === 3 || file(base) === 4)) continue;
+        out.push({ side: s, pawns: [head, base], pointsTo: file(head) < file(base) ? "queenside" : "kingside" });
+      }
+    }
+  }
+  return out;
+}
+function imbalancesOf(fen) {
+  const c = new import_chess.Chess(fen);
+  const all = pieces(c);
+  const openFiles = [...FILES].filter((f) => !all.some((p) => p.type === "p" && p.square[0] === f));
+  const white = sideImbalances(c, all, "white", openFiles);
+  const black = sideImbalances(c, all, "black", openFiles);
+  const chains = chainsOf(all);
+  const nonPawn = (s) => s.material.points - s.material.pawns;
+  const fullmove = Number(fen.split(" ")[5] ?? "1");
+  const phase = white.material.queens + black.material.queens === 0 && nonPawn(white) <= 13 && nonPawn(black) <= 13 || nonPawn(white) + nonPawn(black) <= 20 ? "endgame" : fullmove <= 12 && white.development.undeveloped.length + black.development.undeveloped.length >= 2 ? "opening" : "middlegame";
+  const oppositeSideCastling = white.king.wing !== "centre" && black.king.wing !== "centre" && white.king.wing !== black.king.wing;
+  const wb = white.bishops, bb = black.bishops;
+  const oppositeColouredBishops = wb.length === 1 && bb.length === 1 && wb[0].colour !== bb[0].colour && white.material.knights + black.material.knights === 0;
+  const result = {
+    fen,
+    sideToMove: c.turn() === "w" ? "white" : "black",
+    phase,
+    white,
+    black,
+    openFiles,
+    chains,
+    oppositeSideCastling,
+    oppositeColouredBishops,
+    facts: []
+  };
+  result.facts = factsOf(result);
+  return result;
+}
+var Cap = (s) => s === "white" ? "White" : "Black";
+var list = (xs) => xs.length <= 1 ? xs.join("") : `${xs.slice(0, -1).join(", ")} and ${xs[xs.length - 1]}`;
+function materialFact(w, b) {
+  const diff = w.material.points - b.material.points;
+  const minors = (s) => s.material.knights + s.material.bishops;
+  const dR = w.material.rooks - b.material.rooks, dM = minors(w) - minors(b), dQ = w.material.queens - b.material.queens;
+  const dP = w.material.pawns - b.material.pawns;
+  const parts = [];
+  if (dQ !== 0 && dR !== 0 && Math.sign(dQ) !== Math.sign(dR)) parts.push(`${dQ > 0 ? "White" : "Black"} has a queen against ${Math.abs(dR) === 2 ? "two rooks" : "a rook and more"}`);
+  else if (dR !== 0 && dM !== 0 && Math.sign(dR) !== Math.sign(dM)) {
+    const up = dR > 0 ? "White" : "Black";
+    parts.push(Math.abs(dR) === 1 && Math.abs(dM) === 1 ? `${up} is up the exchange (a rook for a minor piece)` : `${up} has rooks against minor pieces`);
+  } else if (dM !== 0 && dP !== 0 && Math.sign(dM) !== Math.sign(dP)) {
+    parts.push(`${dM > 0 ? "White" : "Black"} has a minor piece for ${Math.abs(dP)} pawn${Math.abs(dP) > 1 ? "s" : ""}`);
+  }
+  if (parts.length === 0) {
+    if (diff === 0) return "Material is level.";
+    return `${diff > 0 ? "White" : "Black"} is ${Math.abs(diff)} point${Math.abs(diff) > 1 ? "s" : ""} up in material (${Math.abs(diff) === 1 ? "a pawn" : "pawn = 1, minor = 3, rook = 5, queen = 9"}).`;
+  }
+  return `${parts.join("; ")} \u2014 ${diff === 0 ? "level by points" : `${diff > 0 ? "White" : "Black"} ${Math.abs(diff)} up by points`}.`;
+}
+function factsOf(x) {
+  const out = [`Phase: ${x.phase}. ${Cap(x.sideToMove)} to move.`, materialFact(x.white, x.black)];
+  const w = x.white, b = x.black;
+  if (w.bishopPair !== b.bishopPair) out.push(`${w.bishopPair ? "White" : "Black"} has the bishop pair.`);
+  if (x.oppositeColouredBishops) out.push("Bishops of opposite colours: drawish in an endgame, but the attacker is effectively a piece up in a middlegame.");
+  const minorLine = (s) => `${s.material.bishops} bishop${s.material.bishops === 1 ? "" : "s"} and ${s.material.knights} knight${s.material.knights === 1 ? "" : "s"}`;
+  if (w.material.bishops !== b.material.bishops) out.push(`Minor pieces: White has ${minorLine(w)}, Black ${minorLine(b)}.`);
+  for (const s of SIDES) {
+    const me = x[s];
+    for (const bi of me.bishops) if (bi.verdict !== "neither") {
+      out.push(`${Cap(s)}'s ${bi.colour}-squared bishop on ${bi.square} is ${bi.verdict}: ${bi.ownPawnsOnColour} of ${me.material.pawns} ${s} pawns stand on its colour.`);
+    }
+    if (me.material.pawns <= 1) {
+      if (me.pawns.passed.length) out.push(`${Cap(s)} has a passed pawn on ${list(me.pawns.passed)}.`);
+      continue;
+    }
+    if (me.pawns.isolatedQueenPawn) out.push(`${Cap(s)} has an isolated queen's pawn (${me.pawns.isolated.find((p) => p[0] === "d")}).`);
+    const otherIsolated = me.pawns.isolated.filter((p) => p[0] !== "d");
+    if (otherIsolated.length) out.push(`${Cap(s)} has isolated pawn${otherIsolated.length > 1 ? "s" : ""} on ${list(otherIsolated)}.`);
+    if (me.pawns.doubled.length) out.push(`${Cap(s)} has doubled pawns on the ${list(me.pawns.doubled)}-file${me.pawns.doubled.length > 1 ? "s" : ""}.`);
+    if (me.pawns.backward.length) out.push(`${Cap(s)} has a backward pawn on ${list(me.pawns.backward)}.`);
+    if (me.pawns.hanging.length) out.push(`${Cap(s)} has hanging pawns on ${list(me.pawns.hanging)}.`);
+    if (me.pawns.passed.length) {
+      const prot = me.pawns.protectedPassed;
+      out.push(`${Cap(s)} has a passed pawn on ${list(me.pawns.passed)}${prot.length ? ` (${list(prot)} protected)` : ""}.`);
+    }
+  }
+  if (w.pawns.islands !== b.pawns.islands && w.material.pawns > 1 && b.material.pawns > 1) out.push(`Pawn islands: White ${w.pawns.islands}, Black ${b.pawns.islands}.`);
+  for (const wing of ["queenside", "kingside"]) {
+    const wc = w.majority[wing], bc = b.majority[wing];
+    if (wc !== bc && wc + bc > 0) out.push(`${wc > bc ? "White" : "Black"} has a ${wing} pawn majority (${Math.max(wc, bc)} against ${Math.min(wc, bc)}, counting the ${wing === "queenside" ? "a-d" : "e-h"} files).`);
+  }
+  for (const ch of x.chains) out.push(`${Cap(ch.side)}'s pawn chain ${ch.pawns.join("/")} is locked and points to the ${ch.pointsTo}.`);
+  if (Math.abs(w.space - b.space) >= 3) out.push(`${w.space > b.space ? "White" : "Black"} has more space (${Math.max(w.space, b.space)} against ${Math.min(w.space, b.space)} by pawn control of the opponent's half).`);
+  if (x.openFiles.length) out.push(`Open file${x.openFiles.length > 1 ? "s" : ""}: ${list(x.openFiles)}.`);
+  for (const s of SIDES) {
+    const me = x[s];
+    if (me.halfOpenFiles.length) out.push(`Half-open for ${Cap(s)}: the ${list(me.halfOpenFiles)}-file${me.halfOpenFiles.length > 1 ? "s" : ""}.`);
+    if (me.rooksOnOpenFiles.length) out.push(`${Cap(s)} holds an open file with the ${list(me.rooksOnOpenFiles)}.`);
+    const occ = me.outposts.filter((o) => o.occupiedBy);
+    const free = me.outposts.filter((o) => !o.occupiedBy).map((o) => o.square);
+    if (occ.length) out.push(`${Cap(s)}'s ${list(occ.map((o) => `${o.occupiedBy} on ${o.square}`))} stands on an outpost no pawn can challenge.`);
+    if (free.length) out.push(`${Cap(s)} has outpost square${free.length > 1 ? "s" : ""} on ${list(free)} (guarded by a pawn, beyond the reach of enemy pawns).`);
+  }
+  if (x.phase !== "endgame") {
+    for (const s of SIDES) {
+      const d = x[s].development;
+      if (x.phase === "opening" && d.undeveloped.length) out.push(`${Cap(s)} still has ${list(d.undeveloped)} undeveloped.`);
+      if (!d.castled && d.kingInCentre) out.push(`${Cap(s)}'s king is still in the centre, on ${x[s].king.square}.`);
+    }
+    if (x.oppositeSideCastling) out.push(`The kings are on opposite wings (White ${w.king.wing}, Black ${b.king.wing}): pawn storms cost the attacker nothing in king safety.`);
+    for (const s of SIDES) {
+      const k = x[s].king;
+      if (k.wing !== "centre" && (k.shield <= 1 || k.openFilesNear.length >= 2 || k.attackersNear >= 3)) {
+        out.push(`${Cap(s)}'s king on ${k.square} is exposed: ${k.shield} shield pawn${k.shield === 1 ? "" : "s"}, ${k.openFilesNear.length ? `open or half-open ${list(k.openFilesNear)}-file nearby, ` : ""}${k.attackersNear} enemy piece${k.attackersNear === 1 ? "" : "s"} bearing on it.`);
+      }
+    }
+  } else {
+    for (const s of SIDES) out.push(`${Cap(s)}'s king is on ${x[s].king.square}.`);
+  }
+  if (w.mobility !== null && b.mobility !== null && Math.abs(w.mobility - b.mobility) >= 8) {
+    out.push(`${w.mobility > b.mobility ? "White" : "Black"} has the freer pieces: ${Math.max(w.mobility, b.mobility)} legal moves against ${Math.min(w.mobility, b.mobility)}.`);
+  }
+  return out;
+}
+var VOLATILE = [/^Phase:/, /freer pieces/, /undeveloped\.$/, /'s king is on [a-h][1-8]\.$/];
+function factKey(fact) {
+  return fact.replace(/(bishop) on [a-h][1-8]/, "$1").replace(/(open file with the) (rook|queen) ([a-h])[1-8]/g, "$1 $3-file").replace(/ \([^)]*\)/g, "").replace(/: \d+ of \d+ .*$/, "").replace(/(king on [a-h][1-8] is exposed).*$/, "$1");
+}
+function imbalanceChanges(before, after) {
+  const keyed = (xs) => new Map(xs.filter((f) => !VOLATILE.some((v) => v.test(f))).map((f) => [factKey(f), f]));
+  const b = keyed(before.facts), a = keyed(after.facts);
+  return {
+    gained: [...a].filter(([k]) => !b.has(k)).map(([, f]) => f),
+    lost: [...b].filter(([k]) => !a.has(k)).map(([, f]) => f)
+  };
+}
+
+// src/lib/lines.ts
+var import_chess2 = __toESM(require_chess());
+var LINE_PLIES = 10;
 function uciToMove(c, uci) {
   try {
     return c.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci.length > 4 ? uci[4] : void 0 });
@@ -3722,204 +3963,272 @@ function uciToMove(c, uci) {
     return null;
   }
 }
-function nonPawnMaterial(c, colour) {
-  let total = 0;
-  for (const row of c.board()) for (const p of row) if (p && p.color === colour && p.type !== "p") total += VALUE[p.type];
-  return total;
-}
-function isPassed(c, square, colour) {
-  const file = square.charCodeAt(0);
-  const rank = Number(square[1]);
-  for (const row of c.board()) for (const p of row) {
-    if (!p || p.type !== "p" || p.color === colour) continue;
-    const pf = p.square.charCodeAt(0);
-    const pr = Number(p.square[1]);
-    if (Math.abs(pf - file) <= 1 && (colour === "w" ? pr > rank : pr < rank)) return false;
-  }
-  return true;
-}
-function readLine(fen, pv, score) {
-  const start2 = new import_chess.Chess(fen);
-  const me = start2.turn();
-  const them = me === "w" ? "b" : "w";
-  const startBalance = material(start2, me) - material(start2, them);
-  const queensAtStart = hasQueen(start2, "w") && hasQueen(start2, "b");
-  const middlegame = hasQueen(start2, me) || nonPawnMaterial(start2, me) >= 13;
-  const board = new import_chess.Chess(fen);
-  const plies = [];
+function readLine(fen, pv, before = imbalancesOf(fen)) {
+  const board = new import_chess2.Chess(fen);
+  const moves = [];
+  const fens = [];
   for (const u of pv) {
     const m = uciToMove(board, u);
     if (!m) break;
-    plies.push({ move: m, balance: material(board, me) - material(board, them), after: new import_chess.Chess(board.fen()) });
+    moves.push(m);
+    fens.push(board.fen());
   }
-  const pvSan = plies.map((p) => p.move.san);
-  let settle = Math.min(PLAN_PLIES, plies.length);
-  while (settle < plies.length && plies[settle].move.captured) settle++;
-  const materialDelta = (settle === 0 ? startBalance : plies[settle - 1].balance) - startBalance;
-  const horizon = plies.slice(0, PLAN_PLIES);
-  const endBoard = horizon.length ? horizon[horizon.length - 1].after : start2;
-  const ownKing = wingOf(kingSquare(endBoard, me));
-  const enemyKing = wingOf(kingSquare(endBoard, them));
-  const pawnMoves = { queenside: [], centre: [], kingside: [] };
-  const pawnBreaks = [];
-  const pieceMoves = [];
-  const kingMoves = [];
-  const passedPushes = [];
-  const developing = [];
-  const supporting = [];
-  let castlesAtOwnMove = 0;
-  let castles = null;
-  let ownCaptures = 0, ownChecks = 0, exchanges = 0;
-  let queensTraded = false;
-  const own = horizon.filter((p) => p.move.color === me);
-  const firstMove = own[0]?.move ?? null;
-  horizon.forEach((p, i) => {
-    const m = p.move;
-    if (m.captured) exchanges++;
-    if (queensAtStart && !(hasQueen(p.after, "w") && hasQueen(p.after, "b"))) queensTraded = true;
-    if (m.color !== me) return;
-    if (m.captured) ownCaptures++;
-    if (m.san.includes("+") || m.san.includes("#")) ownChecks++;
-    const ownIndex = own.indexOf(p) + 1;
-    if (m.flags.includes("k") || m.flags.includes("q")) {
-      castles ??= m.flags.includes("k") ? "kingside" : "queenside";
-      castlesAtOwnMove ||= ownIndex;
-    } else if (m.piece === "k") kingMoves.push(m.san);
-    else if (m.piece === "p") {
-      pawnMoves[wingOf(m.to)].push(m.san);
-      if (isPassed(p.after, m.to, me)) passedPushes.push(m.san);
-      const previous = i > 0 ? horizon[i - 1].move : null;
-      const answering = !!previous && previous.to === m.to;
-      if (!answering && isPawnBreak(p.after, m)) pawnBreaks.push(m.san);
-      else if (!m.captured && coversAdvanceSquare(p.after, m)) supporting.push(m.san);
-    } else if (!m.captured) {
-      pieceMoves.push(m.san);
-      if ((m.piece === "n" || m.piece === "b") && m.from[1] === (me === "w" ? "1" : "8")) developing.push(m.san);
-    }
-  });
-  const oppositeWings = ownKing !== enemyKing && ownKing !== "centre" && enemyKing !== "centre";
-  const storm = (wing) => middlegame && enemyKing === wing && (pawnMoves[wing].length >= 2 || pawnMoves[wing].length >= 1 && oppositeWings);
-  const tags = [];
-  if (score.mate !== null && score.mate > 0) tags.push("mating-attack");
-  if (materialDelta >= 2) tags.push("wins-material");
-  if (passedPushes.length > 0) tags.push("passed-pawn");
-  if (storm("kingside")) tags.push("kingside-pawn-storm");
-  if (storm("queenside")) tags.push("queenside-pawn-storm");
-  const minority = middlegame && pawnMoves.queenside.length >= 1 && enemyKing !== "queenside" && pawnsOnWing(start2, me, "queenside") < pawnsOnWing(start2, them, "queenside") && pawnMoves.queenside.some((s) => /^b/.test(s));
-  if (minority) tags.push("minority-attack");
-  if (materialDelta <= -2 && score.mate === null) tags.push("sacrifice-for-initiative");
-  if (pawnBreaks.some((s) => /^[c-f]/.test(s))) tags.push("central-break");
-  if (supporting.length > 0) tags.push("central-control");
-  if (queensTraded || exchanges >= 4) tags.push("simplification");
-  if (middlegame && pawnMoves.kingside.length >= 2 && !tags.includes("kingside-pawn-storm")) tags.push("kingside-expansion");
-  if (middlegame && pawnMoves.queenside.length >= 2 && !tags.includes("queenside-pawn-storm") && !minority) {
-    tags.push("queenside-expansion");
+  let settle = Math.min(LINE_PLIES, moves.length);
+  while (settle < moves.length && moves[settle].captured) settle++;
+  const settledFen = settle === 0 ? fen : fens[settle - 1];
+  const { gained, lost } = imbalanceChanges(before, imbalancesOf(settledFen));
+  return { pvSan: moves.map((m) => m.san), settledFen, settledPlies: settle, gained, lost };
+}
+
+// src/lib/openings.ts
+var import_chess3 = __toESM(require_chess());
+var import_node_fs = require("node:fs");
+var path2 = __toESM(require("node:path"));
+function positionKey(fen) {
+  const c = new import_chess3.Chess(fen);
+  const [board, turn, castling, ep] = c.fen().split(" ");
+  const epLegal = ep !== "-" && c.moves({ verbose: true }).some((m) => m.flags.includes("e"));
+  return `${board} ${turn} ${castling} ${epLegal ? ep : "-"}`;
+}
+var book = null;
+function load() {
+  if (!book) book = JSON.parse((0, import_node_fs.readFileSync)(path2.join(__dirname, "..", "data", "openings.json"), "utf8"));
+  return book;
+}
+function openingOf(fen) {
+  return load()[positionKey(fen)] ?? null;
+}
+var skeletons = null;
+var MAX_FAMILIES = 2;
+function pawnSet(fen) {
+  const c = new import_chess3.Chess(fen);
+  const out = /* @__PURE__ */ new Set();
+  for (const row of c.board()) for (const p of row) if (p && p.type === "p") out.add(p.color + p.square);
+  return out;
+}
+function structureOf(fen, maxDifferent = 2) {
+  if (!skeletons) skeletons = JSON.parse((0, import_node_fs.readFileSync)(path2.join(__dirname, "..", "data", "skeletons.json"), "utf8"));
+  const mine = pawnSet(fen);
+  const exact = skeletons[[...mine].sort().join(" ")];
+  if (exact) return exact.families <= MAX_FAMILIES ? { openings: exact.openings, pawnsDifferent: 0 } : null;
+  let best = null;
+  for (const [key, { families, openings }] of Object.entries(skeletons)) {
+    if (families > MAX_FAMILIES) continue;
+    const theirs = new Set(key.split(" "));
+    let diff = 0;
+    for (const p of mine) if (!theirs.has(p)) diff++;
+    for (const p of theirs) if (!mine.has(p)) diff++;
+    const moved = Math.ceil(diff / 2);
+    if (moved <= maxDifferent && (!best || moved < best.pawnsDifferent)) best = { openings, pawnsDifferent: moved };
   }
-  if (!queensAtStart && kingMoves.length >= 2) tags.push("king-activity");
-  if (castles && castlesAtOwnMove <= 2) tags.push("king-safety");
-  if (firstMove && queensAtStart && !firstMove.captured && !firstMove.san.includes("+") && (firstMove.piece === "k" && !firstMove.flags.includes("k") && !firstMove.flags.includes("q") || firstMove.piece === "p" && /^[ah]/.test(firstMove.from) && Math.abs(Number(firstMove.to[1]) - Number(firstMove.from[1])) === 1 && !tags.includes("kingside-pawn-storm") && !tags.includes("queenside-pawn-storm"))) {
-    tags.push("prophylaxis");
-  }
-  if (developing.length >= 2 || firstMove && developing[0] === firstMove.san) tags.push("development");
-  if (pieceMoves.length >= 2) tags.push("piece-improvement");
-  if (tags.length === 0) tags.push("manoeuvring");
-  const ordered = PLAN_ORDER.filter((p) => tags.includes(p));
-  let plan = ordered[0];
-  const castlesNow = !!firstMove && (firstMove.flags.includes("k") || firstMove.flags.includes("q"));
-  if (castlesNow && ["simplification", "kingside-expansion", "queenside-expansion", "piece-improvement", "development"].includes(plan)) {
-    plan = "king-safety";
-  }
-  const side = me === "w" ? "white" : "black";
-  const san = pvSan[0] ?? pv[0];
-  const evalText = score.mate !== null ? `mate in ${Math.abs(score.mate)}${score.mate < 0 ? " against" : ""}` : `${score.cp >= 0 ? "+" : ""}${(score.cp / 100).toFixed(2)}`;
-  const list = (xs) => xs.length ? xs.join(" ") : "none";
-  const ordinal = (n) => ["first", "second", "third", "fourth", "fifth"][n - 1] ?? `${n}th`;
-  const facts = [
-    `${side} plays ${san} now (${evalText} for ${side}); every other move below comes later in the line`,
-    `plan: ${plan}${ordered.length > 1 ? ` (also ${ordered.filter((t) => t !== plan).join(", ")})` : ""}`,
-    `line: ${pvSan.slice(0, PLAN_PLIES).join(" ")}`,
-    `${side} pawn moves - queenside: ${list(pawnMoves.queenside)}; centre: ${list(pawnMoves.centre)}; kingside: ${list(pawnMoves.kingside)}`,
-    `pawn breaks: ${list(pawnBreaks)}`,
-    `castles: ${castles ? `${castles}, as its ${ordinal(castlesAtOwnMove)} move` : "no"}; ${side} king ends on the ${ownKing}, the opponent's on the ${enemyKing}`,
-    `captures in the first ${PLAN_PLIES} plies: ${exchanges}${queensTraded ? ", queens traded" : ""}`,
-    `material once exchanges settle: ${materialDelta > 0 ? "+" : ""}${materialDelta} for ${side}`,
-    `piece moves: ${list(pieceMoves)}`
-  ].join("; ");
-  return {
-    side,
-    san,
-    pvSan,
-    plan,
-    tags: ordered,
-    pawnMoves,
-    castles,
-    ownKing,
-    enemyKing,
-    ownCaptures,
-    ownChecks,
-    exchanges,
-    materialDelta,
-    queensTraded,
-    pawnBreaks,
-    pieceMoves,
-    facts
-  };
+  return best;
+}
+function structureSentence(m) {
+  if (!m) return null;
+  const names = m.openings.slice(0, 3).map((o) => `${o.name} (${o.eco})`).join("; ");
+  return m.pawnsDifferent === 0 ? `The pawn structure is the one reached in: ${names}.` : `The pawn structure is close to the one reached in: ${names} \u2014 ${m.pawnsDifferent} pawn${m.pawnsDifferent > 1 ? "s" : ""} different.`;
 }
 
 // src/api/chess.ts
 var ENGINE = "Stockfish 19 lite (single-threaded WebAssembly)";
+function legal(fen) {
+  try {
+    return new import_chess4.Chess(fen.trim());
+  } catch (e) {
+    throw new Error(`Not a legal position: ${fen} (${e.message})`);
+  }
+}
+function candidateRecords(fen, lines, before, elapsedMs) {
+  const whiteToMove = before.sideToMove === "white";
+  const best = lines[0];
+  return lines.map((l) => {
+    const scoreCp = l.kind === "cp" ? l.value : null;
+    const mate = l.kind === "mate" ? l.value : null;
+    const r = readLine(fen, l.pv, before);
+    return {
+      candidateId: `${fen} ${l.pv[0]}`,
+      fen,
+      rank: l.multipv,
+      uci: l.pv[0],
+      san: r.pvSan[0] ?? l.pv[0],
+      side: before.sideToMove,
+      scoreCp,
+      mate,
+      whiteCp: scoreCp === null ? null : whiteToMove ? scoreCp : -scoreCp,
+      lossCp: best.kind === "cp" && scoreCp !== null ? best.value - scoreCp : best.kind === "mate" && l.kind === "mate" && Math.sign(best.value) === Math.sign(l.value) ? 0 : null,
+      depth: l.depth,
+      pvSan: r.pvSan.join(" "),
+      pvUci: l.pv.join(" "),
+      creates: r.gained.join("\n"),
+      removes: r.lost.join("\n"),
+      engine: ENGINE,
+      elapsedMs
+    };
+  });
+}
+async function linesFor(fen, multiPv, depth) {
+  const t = Date.now();
+  const { lines } = await search(fen, multiPv, depth);
+  return { lines, elapsedMs: Date.now() - t };
+}
+var clamp = (v, dflt, lo, hi) => Math.min(Math.max(Math.trunc(v ?? dflt), lo), hi);
 async function analysePosition(_ctx, args) {
-  const multiPv = Math.min(Math.max(Math.trunc(args.multiPv ?? 5), 1), 8);
-  const depth = Math.min(Math.max(Math.trunc(args.depth ?? 18), 6), 22);
+  const multiPv = clamp(args.multiPv, 5, 1, 8);
+  const depth = clamp(args.depth, 18, 6, 22);
   const out = [];
   for (const raw of args.fens ?? []) {
     const fen = raw.trim();
-    let board;
+    if (legal(fen).moves().length === 0) continue;
+    const { lines, elapsedMs } = await linesFor(fen, multiPv, depth);
+    out.push(...candidateRecords(fen, lines, imbalancesOf(fen), elapsedMs));
+  }
+  return out;
+}
+async function positionImbalances(_ctx, args) {
+  return (args.fens ?? []).map((raw) => {
+    const fen = raw.trim();
+    legal(fen);
+    const x = imbalancesOf(fen);
+    return {
+      fen,
+      sideToMove: x.sideToMove,
+      phase: x.phase,
+      facts: x.facts.join("\n"),
+      structure: structureSentence(structureOf(fen)) ?? "",
+      materialWhite: x.white.material.points,
+      materialBlack: x.black.material.points,
+      bishopPairWhite: x.white.bishopPair,
+      bishopPairBlack: x.black.bishopPair,
+      isolatedQueenPawnWhite: x.white.pawns.isolatedQueenPawn,
+      isolatedQueenPawnBlack: x.black.pawns.isolatedQueenPawn,
+      passedWhite: x.white.pawns.passed.join(" "),
+      passedBlack: x.black.pawns.passed.join(" "),
+      openFiles: x.openFiles.join(" "),
+      oppositeSideCastling: x.oppositeSideCastling,
+      oppositeColouredBishops: x.oppositeColouredBishops,
+      detail: JSON.stringify(x)
+    };
+  });
+}
+async function openingLookup(_ctx, args) {
+  const out = [];
+  for (const raw of args.fens ?? []) {
+    const fen = raw.trim();
+    legal(fen);
+    const hit = openingOf(fen);
+    if (hit) out.push({ fen, ...hit });
+  }
+  return out;
+}
+function promptFor(fen, x, opening, structure, candidates, withinCp) {
+  const lines = candidates.filter((c) => c.rank === 1 || c.lossCp !== null && c.lossCp <= withinCp).map((c) => {
+    const score = c.mate !== null ? `mate in ${Math.abs(c.mate)}${c.mate < 0 ? " against the side to move" : ""}` : `${(c.whiteCp / 100).toFixed(2)} from White's side`;
+    const loss = c.rank === 1 ? "the engine's best" : c.lossCp === null ? "not comparable with the mate" : `${c.lossCp} centipawns worse than best`;
+    return [
+      `- ${c.san} (${score}; ${loss}; depth ${c.depth})`,
+      `  line: ${c.pvSan.split(" ").slice(0, 12).join(" ")}`,
+      c.creates ? `  creates: ${c.creates.split("\n").join(" | ")}` : "",
+      c.removes ? `  removes: ${c.removes.split("\n").join(" | ")}` : ""
+    ].filter(Boolean).join("\n");
+  }).join("\n");
+  return `Use the chess-plans skill. Read it before answering.
+
+Position (FEN): ${fen}
+${x.sideToMove === "white" ? "White" : "Black"} to move.
+Opening book: ${opening ? `${opening.eco} ${opening.name} (${opening.pgn})` : "not a named book position"}
+Pawn structure: ${structure ?? "matches no book line's pawns within two pawns"}
+
+Imbalances (computed from the board, numbered):
+${citable(x).map((f, i) => `[${i + 1}] ${f}`).join("\n")}
+
+The engine's candidate moves for the side to move (Stockfish, within ${withinCp} centipawns of best):
+${lines}
+
+First decide which row of the skill's structure table (section 4) this position is, from the
+pawn structure and imbalances above \u2014 or "none" \u2014 and let that row's plans lead unless the
+engine's moves show they do not work here.
+Name the plans for BOTH sides \u2014 up to three each, most important first \u2014 as the skill describes.
+Ground every plan in the numbered imbalances and, for the side to move, in the candidate moves.
+Cite imbalances by number, in the "imbalances" field ONLY \u2014 never write the numbers in the
+summary or the ideas; a reader does not see the list. Do not state any imbalance that is not in
+the numbered list: if a file, pawn weakness or outpost is not listed, it is not there.
+Reply with ONLY this JSON, no prose outside it:
+{"structure": "<the matching row's name exactly as the first column of the skill's structure table gives it, e.g. Carlsbad (QGD Exchange) \u2014 or none>",
+ "summary": "<3-6 sentences: who stands better and why, and how the two sides' plans meet>",
+ "plans": [{"side": "white|black", "priority": 1, "name": "<short name>", "idea": "<2-4 sentences>",
+            "moves": ["<key moves in SAN>"], "imbalances": [<numbers of the imbalances it uses>],
+            "engineEvidence": "<which candidate moves carry it, or 'none of the engine's top moves'>"}]}`;
+}
+var citable = (x) => x.facts.filter((f) => !f.startsWith("Phase:"));
+function citedImbalances(x, cited) {
+  const facts = citable(x);
+  const list2 = Array.isArray(cited) ? cited : cited ? [cited] : [];
+  return list2.map((c) => facts[Number(String(c).replace(/[^0-9]/g, "")) - 1]).filter((f) => !!f);
+}
+function parseModelJson(text) {
+  const body = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/, "");
+  const start2 = body.indexOf("{"), end = body.lastIndexOf("}");
+  if (start2 < 0 || end < start2) throw new Error(`The model did not answer in JSON: ${text.slice(0, 200)}`);
+  const candidate = body.slice(start2, end + 1);
+  try {
+    return JSON.parse(candidate);
+  } catch {
+    return JSON.parse(candidate.replace(/,\s*([}\]])/g, "$1"));
+  }
+}
+var asList = (v) => Array.isArray(v) ? v : v ? [v] : [];
+var uncite = (text) => (text ?? "").replace(/\s*\((?:#?\d+(?:\s*[,&]\s*#?\d+)*)\)/g, "").replace(/\s+([.,;:])/g, "$1");
+async function explainPlans(ctx, args) {
+  const withinCp = clamp(args.withinCp, 50, 0, 300);
+  const multiPv = clamp(args.multiPv, 5, 1, 8);
+  const depth = clamp(args.depth, 18, 6, 22);
+  const gateway = ctx;
+  const out = [];
+  for (const raw of args.fens ?? []) {
+    const fen = raw.trim();
+    if (legal(fen).moves().length === 0) continue;
+    const x = imbalancesOf(fen);
+    const hit = openingOf(fen);
+    const opening = hit ? { fen, ...hit } : null;
+    const structure = structureSentence(structureOf(fen));
+    const { lines, elapsedMs } = await linesFor(fen, multiPv, depth);
+    const candidates = candidateRecords(fen, lines, x, elapsedMs);
+    const ask = (prompt2) => gateway.ai.complete({
+      prompt: prompt2,
+      skills: ["chess-plans"],
+      ...args.role ? { role: args.role } : {}
+    }).then((r) => typeof r === "string" ? r : JSON.stringify(r));
+    const prompt = promptFor(fen, x, opening, structure, candidates, withinCp);
+    let text = await ask(prompt);
+    let parsed;
     try {
-      board = new import_chess2.Chess(fen);
+      parsed = parseModelJson(text);
     } catch (e) {
-      throw new Error(`Not a legal position: ${fen} (${e.message})`);
+      text = await ask(`${prompt}
+
+Your previous answer was not valid JSON (${e.message}). Reply again with ONLY the JSON object.`);
+      parsed = parseModelJson(text);
     }
-    if (board.moves().length === 0) continue;
-    const t = Date.now();
-    const { lines } = await search(fen, multiPv, depth);
-    const elapsedMs = Date.now() - t;
-    const best = lines[0];
-    const whiteToMove = board.turn() === "w";
-    for (const l of lines) {
-      const scoreCp = l.kind === "cp" ? l.value : null;
-      const mate = l.kind === "mate" ? l.value : null;
-      const s = readLine(fen, l.pv, { cp: scoreCp, mate });
+    const plans = (parsed.plans ?? []).filter((p) => p.side === "white" || p.side === "black");
+    if (plans.length === 0) throw new Error(`The model named no plans for ${fen}: ${text.slice(0, 200)}`);
+    const count = { white: 0, black: 0 };
+    for (const p of plans) {
+      const side = p.side;
+      const priority = typeof p.priority === "number" ? p.priority : ++count[side];
       out.push({
-        candidateId: `${fen} ${l.pv[0]}`,
+        planId: `${fen}#${side}#${priority}#${(p.name ?? "").slice(0, 40)}`,
         fen,
-        rank: l.multipv,
-        uci: l.pv[0],
-        san: s.san,
-        side: s.side,
-        scoreCp,
-        mate,
-        whiteCp: scoreCp === null ? null : whiteToMove ? scoreCp : -scoreCp,
-        lossCp: best.kind === "cp" && scoreCp !== null ? best.value - scoreCp : best.kind === "mate" && l.kind === "mate" && Math.sign(best.value) === Math.sign(l.value) ? 0 : null,
-        depth: l.depth,
-        pvSan: s.pvSan.join(" "),
-        pvUci: l.pv.join(" "),
-        plan: s.plan,
-        planTags: s.tags.join(","),
-        kingsidePawnMoves: s.pawnMoves.kingside.join(" "),
-        centrePawnMoves: s.pawnMoves.centre.join(" "),
-        queensidePawnMoves: s.pawnMoves.queenside.join(" "),
-        pawnBreaks: s.pawnBreaks.join(" "),
-        castles: s.castles ?? "",
-        ownKing: s.ownKing,
-        enemyKing: s.enemyKing,
-        exchanges: s.exchanges,
-        materialDelta: s.materialDelta,
-        queensTraded: s.queensTraded,
-        pieceMoves: s.pieceMoves.join(" "),
-        facts: `${s.facts}; engine: ${ENGINE}, depth ${l.depth}, plan read over ${PLAN_PLIES} plies`,
-        engine: ENGINE,
-        elapsedMs
+        side,
+        priority,
+        name: p.name ?? "",
+        idea: uncite(p.idea),
+        moves: asList(p.moves).join(" "),
+        imbalances: citedImbalances(x, p.imbalances).join("\n"),
+        engineEvidence: uncite(p.engineEvidence),
+        summary: uncite(parsed.summary),
+        structure: parsed.structure ?? "",
+        opening: opening ? `${opening.eco} ${opening.name}` : "",
+        model: args.role ?? "default"
       });
     }
   }
@@ -3927,7 +4236,10 @@ async function analysePosition(_ctx, args) {
 }
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
-  analysePosition
+  analysePosition,
+  explainPlans,
+  openingLookup,
+  positionImbalances
 });
 /*! Bundled license information:
 

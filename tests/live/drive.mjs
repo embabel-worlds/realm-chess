@@ -20,7 +20,7 @@ await page.route(`${base}/**`, (route) => route.continue({ headers: { ...route.r
 
 const t0 = Date.now();
 await page.goto(`${base}/apps/chess/chesscalator.html`);
-await page.waitForSelector(".plan .cand button.mv", { timeout: 30000 });
+await page.waitForSelector(".cand button.mv", { timeout: 30000 });
 console.log(`start position analysed in ${Date.now() - t0} ms`);
 const firstMoves = await page.locator(".cand button.mv").allTextContents();
 console.log("candidates:", firstMoves.join(", "), "| status:", await page.locator("#who").textContent(), await page.locator("#evalText").textContent());
@@ -35,21 +35,21 @@ await page.waitForFunction(() => document.querySelector("#moves").textContent.in
 await page.waitForFunction(() => /1\. e4 \S+/.test(document.querySelector("#moves").textContent.trim()), null, { timeout: 30000 });
 console.log("after 1.e4 and the engine's reply:", (await page.locator("#moves").textContent()).trim());
 
-// Load the Yugoslav, then ask for the explanation.
+// Load the Exchange Ruy, then ask for the plans.
 await page.selectOption("#engineSide", "");
-await page.fill("#fenInput", "r1bq1rk1/pp2ppbp/2np1np1/8/3NP3/2N1BP2/PPPQ2PP/R3KB1R w KQ - 3 9");
+await page.fill("#fenInput", "r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9");
 await page.click("#loadFen");
-await page.waitForFunction(() => [...document.querySelectorAll(".cand button.mv")].some((b) => b.textContent === "g4"), null, { timeout: 30000 });
-const plans = await page.locator(".plan h3").allTextContents();
-const moves = await page.locator(".cand button.mv").allTextContents();
-console.log("yugoslav plans:", plans.join(" | "), "| moves:", moves.join(", "));
+await page.waitForFunction(() => document.querySelectorAll(".cand button.mv").length > 0 && document.querySelectorAll("#imbalances li").length > 0, null, { timeout: 30000 });
+console.log("ruy exchange moves:", (await page.locator(".cand button.mv").allTextContents()).join(", "));
+console.log("opening line:", (await page.locator("#opening").textContent()).trim());
+console.log("imbalances:", (await page.locator("#imbalances li").allTextContents()).slice(0, 4).join(" | "));
+console.log("change chips on first move:", await page.locator(".cand").first().locator(".chip").count());
 await page.locator(".cand button.mv").first().hover();
-console.log("arrow on hover:", await page.locator(".arrow").count() > 0 || await page.locator("[class*=arrow]").count() > 0);
-await page.click("#explainBtn");
-await page.waitForSelector("#explanation p", { timeout: 60000 });
-console.log("explanation:", (await page.locator("#explanation").textContent()).slice(0, 400), "...");
-
-await page.locator(".cand button.mv").first().hover();
+console.log("arrow on hover:", await page.locator("[class*=arrow]").count() > 0);
+const t1 = Date.now();
+await page.click("#plansBtn");
+await page.waitForSelector(".plans .side .plan", { timeout: 120000 });
+console.log(`plans in ${Date.now() - t1} ms:`, (await page.locator(".side[data-side=white] .plan h4").allTextContents()).join(" | "), "//", (await page.locator(".side[data-side=black] .plan h4").allTextContents()).join(" | "));
 await page.screenshot({ path: "tests/live/last-run.png", fullPage: true });
 
 // Bad FEN is refused in place.

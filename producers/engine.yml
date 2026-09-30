@@ -1,11 +1,14 @@
-# The engine as a producer: a Position key in, the engine's best lines out.
+# Every producer is a verb in src/api/chess.ts, keyed by FEN. A FEN carries "/" and spaces,
+# which `keyArgs` refuses, so `keyArg` hands the keys over as a plain list.
 #
-# The key is a FEN, which carries "/" and spaces. `keyArgs` refuses both, so `keyArg` hands the
-# keys over as a plain list and the handler searches them one at a time.
+# None declares `pushdown:`. Nothing here takes a filter: "within 50 centipawns" and the like
+# are decided over what comes back, graph-side, and declaring a filter a source does not apply
+# would make the engine count rows it never produced.
 #
-# No `pushdown:`, deliberately. The engine takes no filter: "within 50 centipawns" is decided
-# over the lines it returns, graph-side, and declaring a filter it does not apply would make
-# the engine count lines it never produced.
+# Caches are long because positions do not change. For the engine and the plans the cache also
+# keeps an explanation consistent with the numbers beside it: a search is not repeatable, and
+# neither is a model's answer.
+
 - name: candidateLines
   kind: remote
   operation: analysePosition
@@ -14,8 +17,33 @@
   args:
     multiPv: 5
     depth: 18
-  # A search is not deterministic — the same position at the same depth can rank two close
-  # moves either way — so a cached answer is what keeps an explanation consistent with the
-  # numbers shown beside it. Positions do not change; a week is a choice about staleness of
-  # the ENGINE, not of the position.
   cache: { kind: ttl, seconds: 604800, negativeTtlSeconds: 604800 }
+
+- name: positionImbalances
+  kind: remote
+  operation: positionImbalances
+  keyArg: fens
+  records: "$[*]"
+  cache: { kind: ttl, seconds: 2592000, negativeTtlSeconds: 2592000 }
+
+# A position the book does not name returns no row, and that absence is cached like a row.
+- name: openingLookup
+  kind: remote
+  operation: openingLookup
+  keyArg: fens
+  records: "$[*]"
+  cache: { kind: ttl, seconds: 2592000, negativeTtlSeconds: 2592000 }
+
+# One engine search and one model call per position; `role` picks the model tier the skill is
+# applied with.
+- name: positionPlans
+  kind: remote
+  operation: explainPlans
+  keyArg: fens
+  records: "$[*]"
+  args:
+    withinCp: 50
+    multiPv: 5
+    depth: 18
+    role: best
+  cache: { kind: ttl, seconds: 604800 }

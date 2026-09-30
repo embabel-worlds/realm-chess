@@ -16,16 +16,13 @@ const root = join(here, "..");
 const fixtures = JSON.parse(readFileSync(join(here, "fixtures/envelopes.json"), "utf8"));
 
 const START = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-const YUGO = "r1bq1rk1/pp2ppbp/2np1np1/8/3NP3/2N1BP2/PPPQ2PP/R3KB1R w KQ - 3 9";
+const E4 = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
+const RUY = "r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9";
 const MATED = "3R2k1/5ppp/8/8/8/8/5PPP/6K1 b - - 1 1";
 const key = (name, args) => `view:${name}:${JSON.stringify(Object.fromEntries(Object.entries(args).sort()))}`;
 const rowsOf = (k) => fixtures[k].data;
-/* The page groups moves by plan, each group where its best move ranks — the order a reader sees. */
-const grouped = (rows) => {
-  const g = new Map();
-  for (const r of rows) (g.get(r.plan) ?? g.set(r.plan, []).get(r.plan)).push(r.move);
-  return [...g.values()].flat();
-};
+const best = (fen, withinCp = 50) => rowsOf(key("BestMoves", { fen, withinCp, maxLines: 5 }));
+const factsOf = (fen) => rowsOf(key("ImbalancesOf", { fen }))[0].facts.split("\n").filter((f) => f && !f.startsWith("Phase:"));
 
 /* The runtime stub. `overrides` replaces envelopes; `delays` holds a call back, in ms. */
 function stub(overrides = {}, delays = {}) {
@@ -74,14 +71,18 @@ async function open(page, overrides, delays) {
 
 const moves = (page) => page.locator(".cand button.mv");
 
-test("the start position renders every candidate the view returned, grouped by plan", async ({ page }) => {
+async function load(page, fen) {
+  await page.fill("#fenInput", fen);
+  await page.click("#loadFen");
+}
+
+test("the start position renders every candidate and every imbalance the views returned", async ({ page }) => {
   const errors = await open(page);
-  const rows = rowsOf(key("BestMoves", { fen: START, withinCp: 50, maxLines: 5 }));
-  await expect(moves(page)).toHaveCount(rows.length);
-  await expect(moves(page)).toHaveText(grouped(rows));
-  await expect(page.locator(".plan")).toHaveCount(new Set(rows.map((r) => r.plan)).size);
+  await expect(moves(page)).toHaveText(best(START).map((r) => r.move));
+  await expect(page.locator("#imbalances li")).toHaveText(factsOf(START));
   await expect(page.locator("#who")).toHaveText("White to move");
-  await expect(page.locator("#evalText")).toContainText(`+${(rows[0].whiteCp / 100).toFixed(2)}`);
+  await expect(page.locator("#evalText")).toContainText(`+${(best(START)[0].whiteCp / 100).toFixed(2)}`);
+  await expect(page.locator("#opening")).toHaveText("Not a book position.");
   expect(errors).toEqual([]);
 });
 
@@ -93,16 +94,32 @@ test("the Embabel badge is visible, attributed and linked", async ({ page }) => 
   await expect(badge.locator("a")).toHaveAttribute("href", /embabel\.com/);
 });
 
+test("a book position shows its name; a deeper one the structure it resembles", async ({ page }) => {
+  await open(page);
+  await page.getByRole("button", { name: "e4", exact: true }).click();
+  const o = rowsOf(key("OpeningOf", { fen: E4 }))[0];
+  await expect(page.locator("#opening")).toHaveText(`${o.eco} ${o.name}`);
+  await load(page, RUY);
+  await expect(page.locator("#opening")).toContainText("Ruy Lopez: Exchange");
+});
+
+test("each move shows the imbalances its line creates and removes", async ({ page }) => {
+  await open(page);
+  await load(page, RUY);
+  const first = best(RUY)[0];
+  const card = page.locator(".cand").first();
+  await expect(card.locator(".chip.plus")).toHaveCount(first.creates.split("\n").filter(Boolean).length);
+  await expect(card.locator(".chip.minus")).toHaveCount(first.removes.split("\n").filter(Boolean).length);
+});
+
 test("the tolerance selector re-asks the view with the new withinCp", async ({ page }) => {
   await open(page);
-  await expect(moves(page).first()).toBeVisible();
-  await page.fill("#fenInput", YUGO);
-  await page.click("#loadFen");
-  await expect(moves(page)).toHaveCount(rowsOf(key("BestMoves", { fen: YUGO, withinCp: 50, maxLines: 5 })).length);
+  await load(page, RUY);
+  await expect(moves(page)).toHaveCount(best(RUY).length);
   await page.selectOption("#within", "20");
-  await expect(moves(page)).toHaveCount(rowsOf(key("BestMoves", { fen: YUGO, withinCp: 20, maxLines: 5 })).length);
+  await expect(moves(page)).toHaveCount(best(RUY, 20).length);
   await page.selectOption("#within", "100");
-  await expect(moves(page)).toHaveCount(rowsOf(key("BestMoves", { fen: YUGO, withinCp: 100, maxLines: 5 })).length);
+  await expect(moves(page)).toHaveCount(best(RUY, 100).length);
 });
 
 test("clicking a candidate plays it and analyses the new position", async ({ page }) => {
@@ -110,8 +127,7 @@ test("clicking a candidate plays it and analyses the new position", async ({ pag
   await page.getByRole("button", { name: "e4", exact: true }).click();
   await expect(page.locator("#moves")).toContainText("1. e4");
   await expect(page.locator("#who")).toHaveText("Black to move");
-  const reply = rowsOf(key("BestMoves", { fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1", withinCp: 50, maxLines: 5 }));
-  await expect(moves(page)).toHaveText(grouped(reply));
+  await expect(moves(page)).toHaveText(best(E4).map((r) => r.move));
   expect(errors).toEqual([]);
 });
 
@@ -123,8 +139,7 @@ test("with the engine playing Black, a move on the board is answered with the en
   const a = await box("e2"), b = await box("e4");
   await page.mouse.click(a.x + a.width / 2, a.y + a.height / 2);
   await page.mouse.click(b.x + b.width / 2, b.y + b.height / 2);
-  const reply = rowsOf(key("BestMoves", { fen: "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1", withinCp: 50, maxLines: 5 }))[0];
-  await expect(page.locator("#moves")).toContainText(`1. e4 ${reply.move}`);
+  await expect(page.locator("#moves")).toContainText(`1. e4 ${best(E4)[0].move}`);
   await expect(page.locator("#who")).toHaveText("White to move");
 });
 
@@ -134,22 +149,26 @@ test("hovering a candidate draws it on the board", async ({ page }) => {
   await expect(page.locator(".arrow-info, [class*='arrow']").first()).toBeAttached();
 });
 
-test("the explanation renders the view's prose, as text", async ({ page }) => {
+test("the plans render for both sides, with the summary and no citation numbers", async ({ page }) => {
   await open(page);
-  await page.fill("#fenInput", YUGO);
-  await page.click("#loadFen");
-  await expect(moves(page).first()).toHaveText("g4");
-  await page.click("#explainBtn");
-  const text = rowsOf(key("ExplainPlans", { fen: YUGO, withinCp: 50 }))[0].explanation;
-  await expect(page.locator("#explanation p").first()).toContainText(text.split(/\n\s*\n/)[0].slice(0, 60));
+  await load(page, RUY);
+  await expect(moves(page).first()).toBeVisible();
+  await page.click("#plansBtn");
+  const plans = rowsOf(key("PlansInPosition", { fen: RUY }));
+  for (const side of ["white", "black"]) {
+    await expect(page.locator(`.side[data-side=${side}] .plan`)).toHaveCount(plans.filter((p) => p.side === side).length);
+  }
+  const whiteFirst = plans.filter((p) => p.side === "white").sort((a, b) => a.priority - b.priority)[0];
+  await expect(page.locator(".side[data-side=white] .plan.first h4")).toHaveText(whiteFirst.plan);
+  await expect(page.locator(".summary")).toHaveText(plans[0].summary);
+  expect(await page.locator("#plans").textContent()).not.toMatch(/\(\d+(,\s*\d+)*\)/);
 });
 
 test("an illegal FEN is refused in place and nothing is asked of the world", async ({ page }) => {
   await open(page);
   await expect(moves(page).first()).toBeVisible();
   const before = await page.evaluate(() => window.__calls.length);
-  await page.fill("#fenInput", "8/8/8/8/8/8/8/8 w - - 0 1");
-  await page.click("#loadFen");
+  await load(page, "8/8/8/8/8/8/8/8 w - - 0 1");
   await expect(page.locator("#fenError")).toContainText("Not a legal position");
   expect(await page.evaluate(() => window.__calls.length)).toBe(before);
 });
@@ -158,18 +177,18 @@ test("a finished game says so and does not call the engine", async ({ page }) =>
   await open(page);
   await expect(moves(page).first()).toBeVisible();
   const before = await page.evaluate(() => window.__calls.length);
-  await page.fill("#fenInput", MATED);
-  await page.click("#loadFen");
-  await expect(page.locator("#who")).toHaveText("Checkmate — White wins");
+  await load(page, MATED);
+  await expect(page.locator("#who")).toHaveText("Checkmate \u2014 White wins");
   await expect(page.locator("#analysis")).toContainText("the game is over");
   expect(await page.evaluate(() => window.__calls.length)).toBe(before);
 });
 
-test("a failed view shows the error, loudly", async ({ page }) => {
+test("a failed engine view shows the error loudly, and the imbalances still render", async ({ page }) => {
   const k = key("BestMoves", { fen: START, withinCp: 50, maxLines: 5 });
   await open(page, { [k]: { status: "FAILED", error: { message: "sandbox unavailable" } } });
   await expect(page.locator("#analysis .state.error")).toContainText("The engine did not answer: sandbox unavailable");
-  await expect(page.locator("#explainBtn")).toBeDisabled();
+  await expect(page.locator("#imbalances li")).toHaveCount(factsOf(START).length);
+  await expect(page.locator("#plansBtn")).toBeDisabled();
 });
 
 test("an empty answer with warnings says what the warning was", async ({ page }) => {
@@ -178,29 +197,34 @@ test("an empty answer with warnings says what the warning was", async ({ page })
   await expect(page.locator("#analysis .state.error")).toContainText("No lines: candidateLines: source unavailable");
 });
 
-test("an answer for a position the board has left is dropped, not shown", async ({ page }) => {
-  const k = key("BestMoves", { fen: START, withinCp: 50, maxLines: 5 });
-  await open(page, {}, { [k]: 800 });
-  // Load another position while the first answer is still in flight.
-  await page.fill("#fenInput", YUGO);
-  await page.click("#loadFen");
-  await expect(moves(page).first()).toHaveText("g4");
-  await page.waitForTimeout(1000);
-  await expect(moves(page).first()).toHaveText("g4");
-  await expect(page.locator("#who")).toHaveText("White to move");
+test("failed plans say so, and leave the rest of the page alone", async ({ page }) => {
+  const k = key("PlansInPosition", { fen: RUY });
+  await open(page, { [k]: { status: "FAILED", error: { message: "no skill named 'chess-plans'" } } });
+  await load(page, RUY);
+  await expect(moves(page).first()).toBeVisible();
+  await page.click("#plansBtn");
+  await expect(page.locator("#plans .state.error")).toContainText("The plans could not be read: no skill named 'chess-plans'");
+  await expect(moves(page)).toHaveCount(best(RUY).length);
 });
 
-test("the board takes a move at once while an explanation is still being written", async ({ page }) => {
-  await open(page, {}, { [key("ExplainPlans", { fen: YUGO, withinCp: 50 })]: 800 });
-  await page.fill("#fenInput", YUGO);
-  await page.click("#loadFen");
-  await expect(moves(page).first()).toHaveText("g4");
-  await page.click("#explainBtn");
-  await page.getByRole("button", { name: "Bc4", exact: true }).click();
-  await expect(page.locator("#moves")).toContainText("Bc4");
+test("an answer for a position the board has left is dropped, not shown", async ({ page }) => {
+  await open(page, {}, { [key("BestMoves", { fen: START, withinCp: 50, maxLines: 5 })]: 800 });
+  await load(page, RUY);
+  await expect(moves(page).first()).toHaveText(best(RUY)[0].move);
   await page.waitForTimeout(1000);
-  // The explanation belonged to the position before Bc4, so it must not appear under it.
-  await expect(page.locator("#explanation p")).toHaveCount(0);
+  await expect(moves(page).first()).toHaveText(best(RUY)[0].move);
+  await expect(page.locator("#who")).toHaveText("Black to move");
+});
+
+test("the board takes a move at once while the plans are still loading, and the old plans never appear", async ({ page }) => {
+  await open(page, {}, { [key("PlansInPosition", { fen: RUY })]: 800 });
+  await load(page, RUY);
+  await expect(moves(page).first()).toBeVisible();
+  await page.click("#plansBtn");
+  await page.getByRole("button", { name: best(RUY)[0].move, exact: true }).click();
+  await expect(page.locator("#moves")).toContainText(best(RUY)[0].move);
+  await page.waitForTimeout(1000);
+  await expect(page.locator(".plans .plan")).toHaveCount(0);
 });
 
 test("the How it works section opens from the footer link", async ({ page }) => {

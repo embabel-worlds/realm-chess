@@ -4,14 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chesscalator</title>
-<meta name="description" content="Play moves on a board; Stockfish returns its best lines, grouped by the plan each pursues, with an explanation of how the plans differ.">
+<meta name="description" content="Play moves on a board; Stockfish gives its best lines, the position's imbalances are computed from the board, and on request a model with the chess-plans skill names the plans for both sides.">
 <link rel="stylesheet" href="/api/v1/apps-runtime/v1/theme.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/assets/chessboard.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/assets/extensions/arrows/arrows.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/assets/extensions/markers/markers.css">
 <script src="/api/v1/apps-runtime/v1/embabel.js"></script>
 <script type="application/embabel-app+json">
-{"version":1,"name":"chesscalator","requires":{"lenses":[],"views":["BestMoves","ExplainPlans"],"realms":["chess"],"namespaces":[]}}
+{"version":1,"name":"chesscalator","requires":{"lenses":[],"views":["BestMoves","ImbalancesOf","OpeningOf","PlansInPosition"],"realms":["chess"],"namespaces":[]}}
 </script>
 <style>
   :root{--bg:#0a0a0f;--surface:#13131a;--surface2:#191922;--border:#1e1e2e;--cyan:#63c0f5;--purple:#9f77cd;
@@ -26,6 +26,15 @@
   @media (max-width:880px){.layout{grid-template-columns:1fr;}}
   .panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
   #board{width:100%;aspect-ratio:1/1;}
+  /* The board in Embabel's colours: the theme's teal accent for the dark squares, a cool pale grey
+   * for the light ones — contrast enough for both piece colours — in place of the default wood. */
+  :root{--board-light:#dde8ea;--board-dark:#5a9aa2;}
+  .cm-chessboard.default .board .square.white{fill:var(--board-light);}
+  .cm-chessboard.default .board .square.black{fill:var(--board-dark);}
+  .cm-chessboard.default.border-type-none .board .border{stroke:var(--board-dark);fill:var(--board-dark);}
+  .cm-chessboard.default .coordinates .coordinate.white{fill:var(--board-dark);}
+  .cm-chessboard.default .coordinates .coordinate.black{fill:var(--board-light);}
+  .cm-chessboard .markers .marker.marker-square{fill:#63c0c9;opacity:.35;}
   .controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center;}
   button,select,input{font-family:inherit;font-size:.84rem;}
   .btn{background:transparent;border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;}
@@ -65,6 +74,25 @@
   .explain{margin-top:14px;}
   .explain p{margin:0 0 10px;font-size:.92rem;}
   .legend{margin-top:12px;font-size:.78rem;color:var(--dim);}
+  .opening{color:var(--dim);font-size:.84rem;margin:2px 0 6px;min-height:1.2em;}
+  .opening b{color:var(--text);font-weight:500;}
+  h2.sec{font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin:16px 0 4px;}
+  .changes{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:4px;}
+  .chip{font-size:.72rem;border-radius:999px;padding:1px 8px;border:1px solid var(--border);color:var(--dim);}
+  .chip.plus{border-color:rgba(63,215,60,.45);color:#9ee89c;}
+  .chip.minus{border-color:rgba(226,104,95,.45);color:#f0a39c;}
+  ul.facts{margin:4px 0 0;padding-left:18px;font-size:.84rem;}
+  ul.facts li{margin:2px 0;}
+  .plans{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;}
+  @media (max-width:640px){.plans{grid-template-columns:1fr;}}
+  .side h3{margin:0 0 6px;font-size:.95rem;font-weight:500;}
+  .plan{border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:8px;padding:10px 12px;margin-bottom:8px;background:var(--surface2);}
+  .plan.first{border-left-color:var(--green);}
+  .plan h4{margin:0;font-size:.92rem;font-weight:500;}
+  .plan p{margin:4px 0;font-size:.84rem;}
+  .plan .meta{font-size:.76rem;color:var(--dim);}
+  .summary{font-size:.9rem;margin:8px 0 4px;}
+
   footer.how{max-width:1180px;margin:18px auto 0;padding:0 16px;font-size:.75rem;}
   footer.how a{color:var(--dim);text-decoration:none;} footer.how a:hover{color:var(--cyan);}
   #how-it-works{display:none;max-width:1180px;margin:10px auto 0;padding:0 16px;}
@@ -81,8 +109,9 @@
 <div class="wrap">
   <header>
     <h1>Chesscalator</h1>
-    <p>Play moves for either side. After each move Stockfish returns its best lines, grouped by the plan each
-      one pursues — and on request, an explanation of how those plans differ.</p>
+    <p>Play moves for either side. After each move you get the engine's best lines, the position's imbalances —
+      computed from the board, in Jeremy Silman's sense — and its opening. Ask for the plans and a model with the
+      chess-plans skill says what each side should be trying to do.</p>
   </header>
 
   <div class="layout">
@@ -110,6 +139,7 @@
 
     <section class="panel" aria-label="Analysis">
       <div class="status"><span class="who" id="who"></span><span class="eval" id="evalText"></span></div>
+      <div class="opening" id="opening"></div>
       <div class="toolbar">
         <label class="inline">Show moves within
           <select id="within">
@@ -119,13 +149,17 @@
           </select>
         </label>
         <span class="spacer"></span>
-        <button class="btn primary" id="explainBtn" disabled>Explain these plans</button>
+        <button class="btn primary" id="plansBtn" disabled>Show the plans</button>
       </div>
+      <div id="plans"></div>
+      <h2 class="sec">The engine's moves</h2>
       <div id="analysis"><div class="state">Make a move, or load a position.</div></div>
-      <div class="explain" id="explanation"></div>
+      <h2 class="sec">Imbalances</h2>
+      <div id="imbalances"></div>
       <div class="legend">Scores are in pawns from White's side: +0.80 means White is better by most of a pawn.
-        "0.34 worse" is how much a move gives up against the engine's best. Within 0.20 the engine cannot reliably
-        tell moves apart — the choice is style, not strength. Hover a move to see it on the board; click to play it.</div>
+        "0.34 worse" is how much a move gives up against the engine's best; within 0.20 the choice is style, not
+        strength. Green and red tags are the imbalances a move's line creates and removes. Hover a move to see it on
+        the board; click to play it.</div>
     </section>
   </div>
 </div>
@@ -136,77 +170,75 @@
   <h2>How it works</h2>
 
   <h3>1. The data</h3>
-  <p>Nothing on this page is stored except the plan catalogue. When you make a move, the page asks the world for
-    <code>BestMoves</code> in the new position. That view pins a <code>Position</code> by its FEN and follows
-    <code>HAS_CANDIDATE</code> to <code>CandidateMove</code> — a virtual type. Its rows come from the
-    <code>candidateLines</code> producer, which calls the realm's own handler, <code>chess.analysePosition</code>.
-    The handler runs <b>Stockfish 19</b> (the lite, single-threaded WebAssembly build) under Node in the appliance's
-    sandbox: five lines, depth 18. A position the world has not seen takes one to four seconds; a position seen in
-    the last seven days answers from cache, which also keeps the numbers and any explanation of them in step
-    — two searches of the same position can order close moves differently.</p>
-  <p>Each line is then <b>read for its plan by rules, not by a model</b>: which of the mover's pawns advance on
-    which wing, whether a pawn strikes an enemy pawn on the mover's initiative, when and where the king castles,
-    where both kings end up after ten plies, how many captures, and the material once exchanges settle. The first
-    rule that matches, in a fixed order, names the plan. <code>PlanMeaning</code> — seeded from the realm's
-    <code>reference/plans.yml</code> — says what each plan means, when it is right, what it concedes, and the rule
-    that detects it.</p>
+  <p>Nothing on this page is stored. For the position on the board the page asks the world four questions by
+    view name; each pins a <code>Position</code> by its FEN and follows one relationship to a virtual type whose
+    rows come from one of the realm's own verbs, running in the appliance's sandbox:</p>
+  <ul>
+    <li><b>Engine lines</b> — <code>HAS_CANDIDATE</code> → <code>CandidateMove</code>, from
+      <code>chess.analysePosition</code>: Stockfish 19 (lite, single-threaded WebAssembly) under Node, five lines at
+      depth 18. Each line also carries the imbalances it creates and removes once its exchanges settle. Cached for
+      seven days per position — a search is not repeatable, and the cache keeps the numbers steady.</li>
+    <li><b>Imbalances</b> — <code>HAS_IMBALANCES</code> → <code>PositionImbalances</code>, from
+      <code>chess.positionImbalances</code>: computed from the board, never judged. Material, bishop pair and
+      good/bad bishops, doubled, isolated, backward, passed and hanging pawns, majorities, locked chains and the wing
+      they point to, space, files, outposts, development, king safety. Also which named opening's pawn structure this
+      is, matched on the pawns alone against the opening book.</li>
+    <li><b>Opening</b> — <code>IN_OPENING</code> → <code>Opening</code>, from <code>chess.openingLookup</code>: the
+      Lichess opening book (3,815 named lines, CC0). Only book positions have a name.</li>
+    <li><b>Plans</b> — <code>HAS_PLAN</code> → <code>Plan</code>, from <code>chess.explainPlans</code>, only when you
+      press <i>Show the plans</i>: the three above go to <code>gateway.ai.complete</code> with the
+      <code>chess-plans</code> skill attached, and the model names up to three plans for each side, citing the
+      imbalances it uses by number. The facts are computed; the plans are its judgement. Cached for seven days.</li>
+  </ul>
 
   <h3>2. The questions</h3>
-  <p><b>BestMoves</b> — "which moves are within this much of the engine's best?" Parameters: <code>fen</code>
-    (the position), <code>withinCp</code> (default 50 centipawns; the selector above sets it), <code>maxLines</code>
-    (default 5). The best move is always included.</p>
+  <p><b>BestMoves</b> — <code>fen</code>, <code>withinCp</code> (default 50; the selector sets it),
+    <code>maxLines</code> (default 5). The best move is always included.</p>
 <pre>MATCH (p:Position {fen: $fen})-[:HAS_CANDIDATE]->(c:CandidateMove)
 WHERE toInteger(c.rank) = 1 OR (c.lossCp IS NOT NULL AND toInteger(c.lossCp) &lt;= $withinCp)
-OPTIONAL MATCH (m:PlanMeaning {name: c.plan})
 RETURN toInteger(c.rank) AS rank, c.san AS move, c.uci AS uci, c.side AS side,
        c.scoreCp AS scoreCp, c.mate AS mate, c.whiteCp AS whiteCp, c.lossCp AS lossCp,
-       c.plan AS plan, m.title AS planTitle, m.meaning AS planMeaning, c.planTags AS planTags,
-       c.pvSan AS line, c.pvUci AS lineUci, toInteger(c.depth) AS depth, c.facts AS facts
+       c.pvSan AS line, c.pvUci AS lineUci, toInteger(c.depth) AS depth,
+       c.creates AS creates, c.removes AS removes
 ORDER BY rank
 LIMIT $maxLines</pre>
-  <p>The page groups the rows it gets by <code>plan</code>, keeping the engine's order.</p>
-  <p><b>ExplainPlans</b> — "how do these plans differ?" Same <code>fen</code> and <code>withinCp</code>. It costs
-    one model call per new position and runs only when you press the button. The model is given, per move, the
-    rule-read facts, the plan's catalogue entry, and a verdict on its cost decided in the query — "a difference of
-    style, not strength" within 20 centipawns, "a real, if small, concession" beyond. It is told to write from
-    those facts only, never inventing a move or an evaluation.</p>
-<pre>MATCH (p:Position {fen: $fen})-[:HAS_CANDIDATE]->(c:CandidateMove)
-WHERE toInteger(c.rank) = 1 OR (c.lossCp IS NOT NULL AND toInteger(c.lossCp) &lt;= $withinCp)
-OPTIONAL MATCH (m:PlanMeaning {name: c.plan})
-WITH c, c.san + ' (' + CASE ... verdict on lossCp ... END + '): ' + c.facts
-        + '. Plan "' + m.title + '" means: ' + m.meaning + ' It concedes: ' + m.concedes AS evidence
-ORDER BY toInteger(c.rank)
-RETURN count(c) AS movesConsidered, collect(c.san) AS moves,
-       synthesize(evidence, 'Explain to a club player the choice between these candidate moves ...') AS explanation</pre>
-  <p>The full query and instruction are in the realm's <code>views/chess.yml</code>; the realm also ships
-    <code>PlansInPosition</code> (the same grouping, done in the query), <code>PlanCatalogue</code> and
-    <code>WhatPlanMeans</code>, which this page does not call.</p>
+  <p><b>ImbalancesOf</b> — <code>fen</code>.</p>
+<pre>MATCH (p:Position {fen: $fen})-[:HAS_IMBALANCES]->(i:PositionImbalances)
+RETURN i.sideToMove AS sideToMove, i.phase AS phase, i.facts AS facts, i.structure AS structure, ...</pre>
+  <p><b>OpeningOf</b> — <code>fen</code>.</p>
+<pre>MATCH (p:Position {fen: $fen})-[:IN_OPENING]->(o:Opening)
+RETURN o.eco AS eco, o.name AS name, o.pgn AS moves</pre>
+  <p><b>PlansInPosition</b> — <code>fen</code>. One engine search and one model call per new position.</p>
+<pre>MATCH (p:Position {fen: $fen})-[:HAS_PLAN]->(pl:Plan)
+RETURN pl.side AS side, toInteger(pl.priority) AS priority, pl.name AS plan, pl.idea AS idea,
+       pl.moves AS moves, pl.imbalances AS imbalances, pl.engineEvidence AS engineEvidence,
+       pl.summary AS summary, pl.structure AS structure, pl.opening AS opening
+ORDER BY side DESC, priority</pre>
+  <p>The same four views answer <code>kg_query</code>, the assistant, and REST; the full definitions are in the
+    realm's <code>views/chess.yml</code>, and the plan knowledge is its <code>skills/chess-plans/SKILL.md</code>.</p>
 
   <h3>3. When it looks wrong</h3>
   <ul>
-    <li><b>"The engine is thinking" for several seconds</b> — a position the world has not seen is searched from
-      scratch: one to four seconds, longer the first time after the appliance restarts.</li>
-    <li><b>No moves shown after a position loads</b> — checkmate or stalemate (the status says which), or the
-      engine did not answer; the error names the reason. A FEN the page rejects is not a legal position.</li>
-    <li><b>A plan label that seems off</b> — the label is a reading of the engine's line by fixed rules, not a
-      verdict on the position; read the line beneath the move. "Improve the pieces" and "Manoeuvring" mean the
-      rules found no pawn plan to name. Report a misreading with the FEN and the line.</li>
-    <li><b>The explanation contradicts the numbers</b> — it is written by the world's configured model from the
-      facts shown; the numbers beside each move are the engine's and are authoritative.</li>
-    <li><b>The same position gives different moves on another day</b> — cached lines expire after seven days, and
-      a fresh search can order close moves differently.</li>
+    <li><b>"The engine is thinking" for several seconds</b> — a new position is searched from scratch, one to four
+      seconds; longer the first time after the appliance restarts.</li>
+    <li><b>The plans take half a minute</b> — an engine search and a model call. The second time is instant.</li>
+    <li><b>No opening name</b> — the position is deeper than the book. The imbalances still say which book line's
+      pawn structure it has, when one is within two pawns.</li>
+    <li><b>A plan that seems wrong</b> — plans are a model's judgement, and the battery of test positions shipped with
+      the realm shows how often it matches theory. The imbalances and the engine's numbers are computed and
+      authoritative; a plan that contradicts them is the plan's fault. Report it with the FEN.</li>
+    <li><b>An imbalance that is wrong</b> — that is a bug in the realm's computation; report it with the FEN.</li>
+    <li><b>The plans fail to load</b> — they need an appliance whose <code>gateway.ai.complete</code> accepts
+      skills; the rest of the page works without it.</li>
   </ul>
 
   <h3>4. What made this possible</h3>
   <ul>
-    <li>The engine is a realm verb behind a producer, so "best moves in this position" is a query: the same
-      <code>MATCH (:Position {fen: $fen})-[:HAS_CANDIDATE]-&gt;(c) WHERE c.lossCp &lt;= 50</code> this page runs is
-      available to <code>kg_query</code>, to the assistant, and over REST — there is no chess backend to deploy.</li>
-    <li>The engine runs in the appliance's own sandbox as WebAssembly, and its answers are cached by the query
-      engine per position (section 1), so this page and an assistant asking about the same position read the
-      same lines.</li>
-    <li>The explanation is a <code>synthesize()</code> aggregation inside the query that fetched the lines
-      (section 2), over facts computed by rules — not a separate pipeline reading raw moves.</li>
+    <li>The engine, the imbalances and the opening book are realm verbs behind producers, so "the best moves in this
+      position" or "who has the bishop pair" is a query — the same <code>MATCH (:Position {fen: $fen})</code> this
+      page runs is open to <code>kg_query</code>, the assistant and REST. There is no chess backend to deploy.</li>
+    <li>The plan knowledge is a skill, not code: the model gets it through the framework's <code>Skills</code>, the
+      same way chat does, so improving the plans means editing <code>SKILL.md</code>.</li>
   </ul>
 </section>
 
@@ -221,9 +253,10 @@ import { Markers, MARKER_TYPE } from "https://cdn.jsdelivr.net/npm/cm-chessboard
 import { Chess } from "https://cdn.jsdelivr.net/npm/chess.js@1.4.0/dist/esm/chess.js";
 
 /*
- * The page holds the game; the world holds the engine. Every analysis is one call to the
- * BestMoves view for the current FEN, and the explanation one call to ExplainPlans — there is
- * no other traffic. A response for a position the board has already left is dropped, not shown.
+ * The page holds the game; the world holds everything else. For each position the page asks
+ * three views at once — BestMoves, ImbalancesOf, OpeningOf — and PlansInPosition only when
+ * asked, because that one costs a model call. An answer for a position the board has already
+ * left is dropped, not shown.
  */
 
 const $ = (id) => document.getElementById(id);
@@ -250,124 +283,122 @@ const rowsOf = (env) =>
   !env ? [] : Array.isArray(env.data) ? env.data : env.data && Array.isArray(env.data.rows) ? env.data.rows
   : Array.isArray(env.rows) ? env.rows : [];
 
-const fmt = (cp) => (cp > 0 ? "+" : cp < 0 ? "−" : "") + (Math.abs(cp) / 100).toFixed(2);
+const fmt = (cp) => (cp > 0 ? "+" : cp < 0 ? "\u2212" : "") + (Math.abs(cp) / 100).toFixed(2);
 const sideName = (c) => (c === "w" ? "White" : "Black");
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; };
+const lines = (s) => String(s || "").split("\n").map((x) => x.trim()).filter(Boolean);
 
 function renderMoves() {
   const hist = game.history();
-  const el = $("moves");
-  el.textContent = "";
+  const m = $("moves");
+  m.textContent = "";
   for (let i = 0; i < hist.length; i += 2) {
-    const n = document.createElement("b");
-    n.textContent = `${i / 2 + 1}.`;
-    el.append(n, ` ${hist[i]}${hist[i + 1] ? " " + hist[i + 1] : ""}  `);
+    m.append(el("b", null, `${i / 2 + 1}.`), ` ${hist[i]}${hist[i + 1] ? " " + hist[i + 1] : ""}  `);
   }
-  el.scrollTop = el.scrollHeight;
+  m.scrollTop = m.scrollHeight;
   $("fenInput").value = game.fen();
 }
 
 function statusLine() {
   const who = $("who");
-  if (game.isCheckmate()) return (who.textContent = `Checkmate — ${sideName(game.turn() === "w" ? "b" : "w")} wins`), true;
-  if (game.isStalemate()) return (who.textContent = "Stalemate — a draw"), true;
+  if (game.isCheckmate()) return (who.textContent = `Checkmate \u2014 ${sideName(game.turn() === "w" ? "b" : "w")} wins`), true;
+  if (game.isStalemate()) return (who.textContent = "Stalemate \u2014 a draw"), true;
   if (game.isDraw()) return (who.textContent = "Drawn position"), true;
   who.textContent = `${sideName(game.turn())} to move${game.inCheck() ? ", in check" : ""}`;
   return false;
 }
 
-function state(text, cls = "") {
-  const d = document.createElement("div");
-  d.className = "state " + cls;
-  d.textContent = text;
-  $("analysis").replaceChildren(d);
+function state(target, text, cls = "") {
+  $(target).replaceChildren(el("div", "state " + cls, text));
 }
+
+const failure = (e) => (e && e.message ? e.message : String(e));
 
 async function analyse() {
   const seq = ++analysisSeq;
   board.removeArrows();
-  $("explanation").textContent = "";
-  $("explainBtn").disabled = true;
+  $("plans").replaceChildren();
+  $("plansBtn").disabled = true;
   $("evalText").textContent = "";
+  $("opening").textContent = "";
   currentRows = [];
   if (statusLine()) {
-    state("No moves to analyse: the game is over.");
+    state("analysis", "No moves to analyse: the game is over.");
+    $("imbalances").replaceChildren();
     return;
   }
-  state("The engine is thinking — one to four seconds for a new position.");
+  state("analysis", "The engine is thinking \u2014 one to four seconds for a new position.");
+  state("imbalances", "Reading the position\u2026");
   const fen = game.fen();
-  let env;
-  try {
-    env = await embabel.views.invoke("BestMoves", { fen, withinCp: Number($("within").value), maxLines: 5 });
-  } catch (e) {
-    if (seq !== analysisSeq) return;
-    state(`The engine did not answer: ${e && e.message ? e.message : e}`, "error");
+  const within = Number($("within").value);
+  const [moves, imb, opening] = await Promise.allSettled([
+    embabel.views.invoke("BestMoves", { fen, withinCp: within, maxLines: 5 }),
+    embabel.views.invoke("ImbalancesOf", { fen }),
+    embabel.views.invoke("OpeningOf", { fen }),
+  ]);
+  if (seq !== analysisSeq) return;
+  renderOpening(opening, imb);
+  renderImbalances(imb);
+  if (moves.status === "rejected") {
+    state("analysis", `The engine did not answer: ${failure(moves.reason)}`, "error");
     return;
   }
-  if (seq !== analysisSeq) return;
-  const rows = rowsOf(env);
+  const rows = rowsOf(moves.value);
   currentRows = rows;
   if (rows.length === 0) {
-    const w = (env && env.warnings) || [];
-    state(w.length ? `No lines: ${w.map((x) => x.message || x).join("; ")}` : "The engine returned no lines for this position.", "error");
+    const w = (moves.value && moves.value.warnings) || [];
+    state("analysis", w.length ? `No lines: ${w.map((x) => x.message || x).join("; ")}` : "The engine returned no lines for this position.", "error");
     return;
   }
   const best = rows[0];
   $("evalText").textContent = best.mate != null
     ? `mate in ${Math.abs(best.mate)} for ${best.mate > 0 ? sideName(game.turn()) : sideName(game.turn() === "w" ? "b" : "w")}`
-    : `${fmt(best.whiteCp)} · depth ${best.depth}`;
-  renderPlans(rows);
-  $("explainBtn").disabled = false;
+    : `${fmt(best.whiteCp)} \u00b7 depth ${best.depth}`;
+  $("analysis").replaceChildren(...rows.map(candidate));
+  $("plansBtn").disabled = false;
   maybeEngineMove(seq);
 }
 
-function renderPlans(rows) {
-  const groups = new Map();
-  for (const r of rows) {
-    if (!groups.has(r.plan)) groups.set(r.plan, { title: r.planTitle || r.plan, meaning: r.planMeaning || "", rows: [] });
-    groups.get(r.plan).rows.push(r);
-  }
-  const out = [];
-  let first = true;
-  for (const g of groups.values()) {
-    const card = document.createElement("div");
-    card.className = "plan" + (first ? " best" : "");
-    first = false;
-    const h = document.createElement("h3");
-    h.textContent = g.title;
-    const m = document.createElement("div");
-    m.className = "meaning";
-    m.textContent = g.meaning;
-    card.append(h, m);
-    for (const r of g.rows) card.append(candidate(r));
-    out.push(card);
-  }
-  $("analysis").replaceChildren(...out);
+function renderOpening(opening, imb) {
+  const o = opening.status === "fulfilled" ? rowsOf(opening.value)[0] : null;
+  const i = imb.status === "fulfilled" ? rowsOf(imb.value)[0] : null;
+  const box = $("opening");
+  box.replaceChildren();
+  if (o) box.append(el("b", null, `${o.eco} ${o.name}`));
+  else if (i && i.structure) box.append(i.structure);
+  else box.append("Not a book position.");
+}
+
+function renderImbalances(imb) {
+  if (imb.status === "rejected") return state("imbalances", `The imbalances could not be read: ${failure(imb.reason)}`, "error");
+  const row = rowsOf(imb.value)[0];
+  if (!row) return state("imbalances", "No imbalances came back for this position.", "error");
+  const ul = el("ul", "facts");
+  for (const f of lines(row.facts)) if (!f.startsWith("Phase:")) ul.append(el("li", null, f));
+  $("imbalances").replaceChildren(ul);
 }
 
 function candidate(r) {
-  const row = document.createElement("div");
-  row.className = "cand";
-  const b = document.createElement("button");
-  b.className = "mv";
-  b.textContent = r.move;
+  const row = el("div", "cand");
+  row.dataset.move = r.move;
+  const b = el("button", "mv", r.move);
   b.title = `Play ${r.move}`;
   b.addEventListener("mouseenter", () => showArrow(r.uci));
   b.addEventListener("focus", () => showArrow(r.uci));
   b.addEventListener("mouseleave", () => board.removeArrows());
   b.addEventListener("click", () => playUci(r.uci));
-  const score = document.createElement("span");
-  score.className = "score";
-  score.textContent = r.mate != null ? `mate in ${Math.abs(r.mate)}` : fmt(r.whiteCp);
-  const loss = document.createElement("span");
+  const score = el("span", "score", r.mate != null ? `mate in ${Math.abs(r.mate)}` : fmt(r.whiteCp));
   const lc = r.lossCp == null ? null : Number(r.lossCp);
-  loss.className = "loss " + (Number(r.rank) === 1 ? "" : lc != null && lc <= 20 ? "style" : "cost");
-  loss.textContent = Number(r.rank) === 1 ? "engine's best"
-    : lc == null ? "not comparable with the mate"
-    : `${(lc / 100).toFixed(2)} worse${lc <= 20 ? " — style, not strength" : ""}`;
-  const line = document.createElement("div");
-  line.className = "line";
-  line.textContent = (r.line || "").split(" ").slice(0, 12).join(" ");
+  const loss = el("span", "loss " + (Number(r.rank) === 1 ? "" : lc != null && lc <= 20 ? "style" : "cost"),
+    Number(r.rank) === 1 ? "engine's best"
+      : lc == null ? "not comparable with the mate"
+      : `${(lc / 100).toFixed(2)} worse${lc <= 20 ? " \u2014 style, not strength" : ""}`);
+  const line = el("div", "line", (r.line || "").split(" ").slice(0, 12).join(" "));
+  const changes = el("div", "changes");
+  for (const c of lines(r.creates)) changes.append(el("span", "chip plus", c));
+  for (const c of lines(r.removes)) changes.append(el("span", "chip minus", c));
   row.append(b, score, loss, line);
+  if (changes.childElementCount) row.append(changes);
   return row;
 }
 
@@ -389,12 +420,39 @@ function playUci(uci) {
   after();
 }
 
-/* The engine answers for its side with the best line it just computed — the same rows the
+/* The engine answers for its side with the first line it just computed \u2014 the same rows the
  * panel shows, so what it plays is always the move listed first. */
 function maybeEngineMove(seq) {
   const side = $("engineSide").value;
   if (!side || side !== game.turn() || currentRows.length === 0) return;
   setTimeout(() => { if (seq === analysisSeq) playUci(currentRows[0].uci); }, 600);
+}
+
+function renderPlans(rows) {
+  const box = $("plans");
+  if (rows.length === 0) return state("plans", "No plans came back for this position.", "error");
+  const top = [];
+  if (rows[0].structure) top.push(el("div", "meta", `Structure: ${rows[0].structure}`));
+  if (rows[0].summary) top.push(el("p", "summary", rows[0].summary));
+  const grid = el("div", "plans");
+  for (const side of ["white", "black"]) {
+    const col = el("div", "side");
+    col.dataset.side = side;
+    col.append(el("h3", null, side === "white" ? "White's plans" : "Black's plans"));
+    const mine = rows.filter((r) => r.side === side).sort((a, b) => a.priority - b.priority);
+    mine.forEach((r, i) => {
+      const card = el("div", "plan" + (i === 0 ? " first" : ""));
+      card.append(el("h4", null, r.plan), el("p", null, r.idea));
+      if (r.moves) card.append(el("div", "meta", `Moves: ${r.moves}`));
+      const uses = lines(r.imbalances);
+      if (uses.length) card.append(el("div", "meta", `Uses: ${uses.join(" \u00b7 ")}`));
+      if (r.engineEvidence) card.append(el("div", "meta", `Engine: ${r.engineEvidence}`));
+      col.append(card);
+    });
+    if (mine.length === 0) col.append(el("div", "state", "None named."));
+    grid.append(col);
+  }
+  box.replaceChildren(...top, grid);
 }
 
 board.enableMoveInput((event) => {
@@ -442,30 +500,19 @@ $("loadFen").addEventListener("click", () => {
   after();
 });
 
-$("explainBtn").addEventListener("click", async () => {
+$("plansBtn").addEventListener("click", async () => {
   const seq = analysisSeq;
-  const out = $("explanation");
-  $("explainBtn").disabled = true;
-  out.textContent = "Writing the explanation — a few seconds.";
-  out.className = "explain note";
+  $("plansBtn").disabled = true;
+  state("plans", "Reading the plans \u2014 an engine search and a model call, up to half a minute the first time.", "note");
   try {
-    const env = await embabel.views.invoke("ExplainPlans", { fen: game.fen(), withinCp: Number($("within").value) });
+    const env = await embabel.views.invoke("PlansInPosition", { fen: game.fen() });
     if (seq !== analysisSeq) return;
-    const rows = rowsOf(env);
-    const text = rows[0] && rows[0].explanation;
-    out.className = "explain";
-    if (!text) { out.textContent = "No explanation came back for this position."; return; }
-    out.replaceChildren(...String(text).split(/\n\s*\n/).map((para) => {
-      const p = document.createElement("p");
-      p.textContent = para.trim();
-      return p;
-    }));
+    renderPlans(rowsOf(env));
   } catch (e) {
     if (seq !== analysisSeq) return;
-    out.className = "explain state error";
-    out.textContent = `The explanation failed: ${e && e.message ? e.message : e}`;
+    state("plans", `The plans could not be read: ${failure(e)}`, "error");
   } finally {
-    if (seq === analysisSeq) $("explainBtn").disabled = false;
+    if (seq === analysisSeq) $("plansBtn").disabled = false;
   }
 });
 

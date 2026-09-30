@@ -1,0 +1,233 @@
+# Common positions whose plans are settled theory, for testing what realm-chess says about them.
+#
+# Each position is its moves from the start (so the FEN is computed, never typed by hand), the
+# imbalances a player would name, and the plans theory gives each side. Several come in PAIRS
+# from one opening family where the plans differ completely — the King's Indian Classical and
+# Samisch, the Ruy Lopez Exchange and the closed Ba4 lines. A reader that gives both halves of a
+# pair the same plans has not read the position.
+#
+# `imbalances`: sentences (or distinctive parts of them) the imbalance facts must contain.
+# `plans`: for each side, the plans a strong player would name. `anyOf` are words at least one of
+#   which must appear in the returned plan for it to count as found; `not` are words that must
+#   NOT appear in any plan for that side (the plan of the OTHER half of a pair).
+
+- id: kid-classical-mar-del-plata
+  opening: "King's Indian Defence, Classical (Mar del Plata), 9.Ne1"
+  moves: "d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 Nf3 O-O Be2 e5 O-O Nc6 d5 Ne7 Ne1 Nd7"
+  source: "Standard theory: White attacks on the queenside with c5, Black on the kingside with ...f5-f4 and ...g5."
+  imbalances:
+    - "White's pawn chain d5/e4 is locked and points to the queenside"
+    - "Black's pawn chain e5/d6 is locked and points to the kingside"
+    - "White has more space"
+  plans:
+    white:
+      - plan: "Queenside expansion and the c4-c5 break, often with Nd3, b4 and Rc1"
+        anyOf: ["queenside", "c5", "b4"]
+    black:
+      - plan: "Kingside pawn storm with ...f5, ...f4, ...g5-g4 against the white king"
+        anyOf: ["kingside", "f5", "f4", "g5"]
+
+- id: kid-samisch
+  opening: "King's Indian Defence, Samisch Variation, Panno"
+  moves: "d4 Nf6 c4 g6 Nc3 Bg7 e4 d6 f3 O-O Be3 Nc6 Qd2 a6 Nge2 Rb8"
+  source: "Standard theory: White castles long and attacks with Bh6 and h4-h5; Black counters on the queenside with ...b5."
+  imbalances:
+    - "White has more space"
+  plans:
+    white:
+      - plan: "Kingside attack: Bh6 to trade the fianchettoed bishop, h4-h5, g4, often after O-O-O"
+        anyOf: ["kingside", "h4", "h5", "bh6", "o-o-o", "castle long", "castling queenside"]
+    black:
+      - plan: "Queenside counterplay with ...b5 (prepared by ...a6 and ...Rb8)"
+        anyOf: ["queenside", "b5"]
+
+- id: ruy-lopez-exchange
+  opening: "Ruy Lopez, Exchange Variation, queens off"
+  moves: "e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1"
+  source: "Standard theory: White plays for the endgame where the healthy kingside majority makes a passed pawn; Black relies on the bishop pair and activity."
+  imbalances:
+    - "Black has the bishop pair"
+    - "Black has doubled pawns on the c-file"
+    - "White has a kingside pawn majority"
+  plans:
+    white:
+      - plan: "Simplify toward the endgame and use the kingside majority (f4, e5) to create a passed pawn"
+        anyOf: ["majority", "endgame", "passed", "f4", "e5", "simplif", "trade"]
+    black:
+      - plan: "Use the bishop pair; keep pieces active; avoid pure pawn endgames"
+        anyOf: ["bishop pair", "bishops", "activity", "active"]
+
+- id: ruy-lopez-closed
+  opening: "Ruy Lopez, Closed, Chigorin"
+  moves: "e4 e5 Nf3 Nc6 Bb5 a6 Ba4 Nf6 O-O Be7 Re1 b5 Bb3 d6 c3 O-O h3 Na5 Bc2 c5 d4 Qc7 Nbd2"
+  source: "Standard theory: White regroups Nd2-f1-g3 toward the kingside, keeps the centre, may play d5; Black expands on the queenside and pressures d4."
+  imbalances:
+    - "White has outpost square on d5"
+  plans:
+    white:
+      - plan: "Regroup the knight Nf1-g3 (or e3) toward the kingside; maintain or close the centre with d5"
+        anyOf: ["nf1", "ng3", "kingside", "d5", "manoeuv", "maneuv", "regroup"]
+    black:
+      - plan: "Queenside expansion (...c4, ...Nc6, ...cxd4) and pressure on d4"
+        anyOf: ["queenside", "c4", "cxd4", "d4", "nc6"]
+
+- id: carlsbad
+  opening: "Queen's Gambit Declined, Exchange Variation (Carlsbad structure)"
+  moves: "d4 d5 c4 e6 Nc3 Nf6 cxd5 exd5 Bg5 Be7 e3 c6 Bd3 Nbd7 Qc2 O-O Nf3 Re8 O-O Nf8"
+  source: "Standard theory: White's minority attack b4-b5; Black's kingside play and the e4 square."
+  imbalances:
+    - "Black has a queenside pawn majority"
+    - "Half-open for White: the c-file"
+    - "Half-open for Black: the e-file"
+  plans:
+    white:
+      - plan: "Minority attack: Rab1, b4-b5 to leave Black a weak c-pawn"
+        anyOf: ["minority", "b4", "b5", "rab1"]
+    black:
+      - plan: "Kingside counterplay: ...Ne4, ...Nf8-g6, piece attack on the kingside"
+        anyOf: ["kingside", "ne4", "ng6", "e4"]
+
+- id: iqp-panov
+  opening: "Caro-Kann, Panov-Botvinnik Attack (isolated queen's pawn)"
+  moves: "e4 c6 d4 d5 exd5 cxd5 c4 Nf6 Nc3 e6 Nf3 Be7 cxd5 Nxd5 Bd3 Nc6 O-O O-O Re1"
+  source: "Standard theory: the side with the isolani attacks (d4-d5 break, kingside); the other blockades d5 and trades pieces."
+  imbalances:
+    - "White has an isolated queen's pawn (d4)"
+  plans:
+    white:
+      - plan: "Piece activity and a kingside attack; the d4-d5 break; Ne5"
+        anyOf: ["kingside", "attack", "d5", "ne5"]
+    black:
+      - plan: "Blockade d5, trade pieces, pressure the isolated pawn"
+        anyOf: ["blockade", "d5", "trade", "exchange", "isolat", "d4"]
+
+- id: french-advance
+  opening: "French Defence, Advance Variation"
+  moves: "e4 e6 d4 d5 e5 c5 c3 Nc6 Nf3 Qb6"
+  source: "Standard theory: White holds d4 and plays on the kingside; Black attacks the base of the chain, d4, and may break with ...f6."
+  imbalances:
+    - "White's pawn chain e5/d4 is locked and points to the kingside"
+    - "Black's pawn chain d5/e6 is locked and points to the queenside"
+  plans:
+    white:
+      - plan: "Hold d4, kingside space and attack"
+        anyOf: ["kingside", "d4", "space"]
+    black:
+      - plan: "Pressure d4, the base of the chain (...Qb6, ...Nge7-f5, ...cxd4); ...f6 break"
+        anyOf: ["d4", "base", "f6", "queenside", "nf5"]
+
+- id: najdorf-english-attack
+  opening: "Sicilian Najdorf, English Attack"
+  moves: "e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 a6 Be3 e5 Nb3 Be6 f3"
+  source: "Standard theory: White Qd2, O-O-O, g4-g5 kingside storm and control of d5; Black ...b5-b4 on the queenside and the ...d5 break."
+  imbalances:
+    - "Black has a backward pawn on d6"
+    - "White has outpost square on d5"
+  plans:
+    white:
+      - plan: "Qd2, O-O-O and the g4-g5 pawn storm; control of d5"
+        anyOf: ["g4", "g5", "kingside", "storm", "d5", "o-o-o"]
+    black:
+      - plan: "Queenside expansion ...b5-b4; the ...d5 break"
+        anyOf: ["b5", "b4", "queenside", "d5"]
+
+- id: yugoslav-attack
+  opening: "Sicilian Dragon, Yugoslav Attack"
+  moves: "e4 c5 Nf3 d6 d4 cxd4 Nxd4 Nf6 Nc3 g6 Be3 Bg7 f3 O-O Qd2 Nc6"
+  source: "Standard theory: White O-O-O and h4-h5 against the Dragon king; Black attacks down the c-file and with ...b5."
+  imbalances:
+    - "Half-open for Black: the c-file"
+  plans:
+    white:
+      - plan: "O-O-O then h4-h5 to open the h-file; Bh6 to trade the dragon bishop"
+        anyOf: ["h4", "h5", "kingside", "bh6", "o-o-o", "storm"]
+    black:
+      - plan: "Counterattack on the queenside and down the c-file (...Rc8, ...b5, ...d5 break)"
+        anyOf: ["c-file", "queenside", "b5", "rc8", "d5"]
+
+- id: maroczy-bind
+  opening: "Sicilian, Accelerated Dragon, Maroczy Bind"
+  moves: "e4 c5 Nf3 Nc6 d4 cxd4 Nxd4 g6 c4 Nf6 Nc3 d6 Be2 Nxd4 Qxd4 Bg7 Be3 O-O"
+  source: "Standard theory: White squeezes with the c4/e4 bind and prevents ...b5 and ...d5; Black seeks ...a5/...b5 or ...f5 breaks and trades."
+  imbalances:
+    - "White has more space"
+  plans:
+    white:
+      - plan: "Keep the bind, restrict ...b5 and ...d5, slow queenside/central squeeze"
+        anyOf: ["bind", "space", "squeeze", "restrict", "prevent", "b5", "d5"]
+    black:
+      - plan: "Break the bind with ...b5 or ...f5, trade pieces, dark-square play"
+        anyOf: ["b5", "f5", "a5", "trade", "exchange", "dark"]
+
+- id: modern-benoni
+  opening: "Modern Benoni"
+  moves: "d4 Nf6 c4 c5 d5 e6 Nc3 exd5 cxd5 d6 e4 g6 Nf3 Bg7 Be2 O-O O-O"
+  source: "Standard theory: White's central majority and the e4-e5 break; Black's queenside majority and ...b5."
+  imbalances:
+    - "Black has a queenside pawn majority"
+    - "White has a kingside pawn majority"
+  plans:
+    white:
+      - plan: "Central majority: prepare e4-e5 (f4, Re1)"
+        anyOf: ["e5", "f4", "centre", "center", "central"]
+    black:
+      - plan: "Queenside majority: ...a6, ...b5, ...Re8 pressure on e4"
+        anyOf: ["b5", "queenside", "a6", "e4"]
+
+- id: stonewall-dutch
+  opening: "Dutch Defence, Stonewall"
+  moves: "d4 f5 c4 Nf6 g3 e6 Bg2 d5 Nf3 c6 O-O Bd6 b3 Qe7 Bb2 O-O"
+  source: "Standard theory: White targets the e5 hole (Ne5, trade the dark-squared bishops with Ba3); Black attacks on the kingside with ...Ne4 and ...Qe8-h5."
+  imbalances:
+    - "Black's light-squared bishop on c8 is bad"
+    - "White has outpost square on e5"
+  plans:
+    white:
+      - plan: "Occupy e5, trade dark-squared bishops (Ba3), exploit the light-square weaknesses"
+        anyOf: ["e5", "ba3", "dark-squared", "dark squared", "hole", "outpost"]
+    black:
+      - plan: "Kingside attack: ...Ne4, ...Qe8-h5, ...g5"
+        anyOf: ["kingside", "ne4", "qh5", "g5", "attack"]
+
+- id: catalan-open
+  opening: "Catalan, Open"
+  moves: "d4 Nf6 c4 e6 g3 d5 Bg2 Be7 Nf3 O-O O-O dxc4 Qc2 a6 Qxc4 b5 Qc2 Bb7"
+  source: "Standard theory: White presses the long diagonal and the queenside (a4, Bf4, Rc1); Black frees himself with ...c5 and completes development."
+  imbalances:
+    - "White has outpost square on c5"
+    - "Half-open for White: the c-file"
+  plans:
+    white:
+      - plan: "Pressure on the long diagonal and the queenside: a4, Bf4/Bg5, Rc1"
+        anyOf: ["diagonal", "a4", "queenside", "rc1", "c-file", "c6"]
+    black:
+      - plan: "Free the position with ...c5 and develop ...Nbd7"
+        anyOf: ["c5", "nbd7", "develop", "free"]
+
+- id: rook-endgame-lucena
+  opening: "Rook endgame, Lucena position"
+  fen: "1K1k4/1P6/8/8/8/8/r7/2R5 w - - 0 1"
+  source: "The Lucena position: White builds a bridge (Rd1+, Rd4) to shelter the king and promote."
+  imbalances:
+    - "White has a passed pawn on b7"
+  plans:
+    white:
+      - plan: "Build a bridge: check the king away, bring the rook to the 4th rank, promote the b-pawn"
+        anyOf: ["bridge", "promot", "queen", "rd4", "b8", "passed"]
+    black:
+      - plan: "Keep checking from behind/side; stop the pawn"
+        anyOf: ["check", "stop", "draw", "defend"]
+
+- id: opposite-bishops-attack
+  opening: "Middlegame: opposite-coloured bishops with queens on"
+  fen: "r4rk1/pp2qppp/2p5/2b5/4P3/1B3Q2/PPP3PP/R4R1K w - - 0 1"
+  source: "With opposite-coloured bishops and heavy pieces on, the attacker is effectively a piece up: attack the king on the colour the defender's bishop cannot guard."
+  imbalances:
+    - "Bishops of opposite colours"
+  plans:
+    white:
+      - plan: "Attack f7/the light squares around the black king with queen, rook and the bishop"
+        anyOf: ["f7", "attack", "king", "light"]
+    black:
+      - plan: "Counter with the heavy pieces, trade queens, defend the light squares"
+        anyOf: ["trade", "exchange", "defend", "queen", "counter"]

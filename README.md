@@ -1,79 +1,92 @@
 # realm-chess
 
-A chessboard, a strong engine, and the plans behind its best moves.
+A chessboard, a strong engine, and the plans a position calls for.
 
-Play moves in the **Chesscalator** app and Stockfish 19 returns its best lines. Each line is read for
-the plan it pursues — a kingside pawn storm, a minority attack, a central break, a quiet
-regrouping — and moves that share a plan are grouped, so "g4, or Bb5 with h4 to follow" reads as
-one idea and "O-O-O first" as another. An explanation contrasts the plans in plain words, written
-from facts a player can check against the moves.
+The plans in a chess position come from its **imbalances** — Jeremy Silman's word for the
+differences between the two sides: the bishop pair, a weak pawn, a pawn chain pointing at one
+wing, more space. This realm computes those from the board, gets the engine's best lines, looks
+the position up in the opening book, and then has a model with the **chess-plans** skill decide
+the plans for both sides from those facts. The facts are computed and checkable; the plans are
+judged, and the knowledge behind the judgement is a skill anyone can read and improve.
 
-The engine is not a page feature. It is a realm verb behind a producer, so the same analysis is a
-Virtual Cypher query, a REST call, and something an assistant can reason with through the
-`chess-plans` skill.
+Everything is a Virtual Cypher hop from a position:
 
 ```cypher
-MATCH (p:Position {fen: $fen})-[:HAS_CANDIDATE]->(c:CandidateMove)
-WHERE toInteger(c.lossCp) <= 50
-RETURN c.san, c.whiteCp, c.plan, c.pvSan ORDER BY toInteger(c.rank)
+MATCH (p:Position {fen: $fen})
+OPTIONAL MATCH (p)-[:HAS_IMBALANCES]->(i:PositionImbalances)
+OPTIONAL MATCH (p)-[:IN_OPENING]->(o:Opening)
+OPTIONAL MATCH (p)-[:HAS_CANDIDATE]->(c:CandidateMove) WHERE toInteger(c.lossCp) <= 50
+RETURN i.facts, o.name, collect(c.san)
 ```
+
+and `(p)-[:HAS_PLAN]->(:Plan)` for the plans. The same answers are REST calls and are what the
+**Chesscalator** app shows.
 
 ## How it is put together
 
 | Piece | What it is |
 |---|---|
-| `src/api/chess.ts` | `chess.analysePosition({fens, multiPv, depth})` — the one verb. Runs the engine, reads each line. |
-| `src/lib/engine.ts` | Stockfish 19, lite single-threaded WebAssembly build, driven over UCI under Node. |
-| `src/lib/plans.ts` | The line reader: which plan a line pursues, by rules over the moves. |
-| `producers/engine.yml` | `candidateLines` — the verb as a producer, keyed by FEN, cached for a week. |
-| `types/chess.yml` | `Position` → `HAS_CANDIDATE` → `CandidateMove`; `PlanMeaning`. |
-| `reference/plans.yml` | The plan vocabulary: meaning, when it is right, what it concedes, the rule that detects it. |
-| `views/chess.yml` | `BestMoves`, `PlansInPosition`, `ExplainPlans`, `PlanCatalogue`, `WhatPlanMeans`. |
-| `apps/chesscalator.html` | The board. Calls `BestMoves` per move, `ExplainPlans` on request. |
-| `skills/chess-plans/` | How to turn engine lines into plans: reading the numbers, the vocabulary, pawn structures, wording. |
+| `src/lib/engine.ts` | Stockfish 19, lite single-threaded WebAssembly build, over UCI under Node. |
+| `src/lib/imbalances.ts` | Silman's imbalances from a FEN, as plain sentences; and what a line changes about them. |
+| `src/lib/lines.ts` | An engine line read for what it does — its moves, the imbalances it creates and removes — never for what it is for. |
+| `src/lib/openings.ts` | The Lichess opening book (CC0), by position and by pawn skeleton. |
+| `src/api/chess.ts` | The verbs: `analysePosition`, `positionImbalances`, `openingLookup`, `explainPlans`. |
+| `producers/engine.yml` | One producer per verb, keyed by FEN, cached per position. |
+| `types/chess.yml` | `Position` → `HAS_IMBALANCES` / `IN_OPENING` / `HAS_CANDIDATE` / `HAS_PLAN`. |
+| `views/chess.yml` | `BestMoves`, `ImbalancesOf`, `OpeningOf`, `PlansInPosition`. |
+| `skills/chess-plans/` | The plan knowledge: Silman's method, what each imbalance calls for, a table of pawn structures and their plans, how to use the engine. |
+| `apps/chesscalator.html` | The board. |
+| `tests/battery/positions.yml` | Fifteen common positions and the plans theory gives each side, including pairs from one opening family with opposite plans. |
 
-The realm is `host: docker`: the handler runs in the appliance's Node sandbox, which is seeded
-with `dist/` and nothing else. `npm run build` bundles each handler with its imports (chess.js)
-and copies the engine's `.js` and `.wasm` beside it.
+`explainPlans` sends the imbalances (numbered), the opening name or the book structure the pawns
+match, and the engine's candidate moves to `gateway.ai.complete` with `skills: ["chess-plans"]`.
+The model activates the skill through the framework's `Skills`, the way chat does, and cites
+imbalances by number, so a plan cannot cite one that is not there.
 
 ## Build, test, install
 
 ```bash
 npm install
-npm run check        # typecheck, line-reader tests, build, browser harness
+npm run check        # typecheck, unit tests, build, page harness
 ```
 
-Install by path from a checkout under the appliance's realms mount (`install_realm_from_path
-realm-chess`), then `realm_refresh` after each edit. `dist/` must be built before installing —
-a path install runs no build.
+`host: docker` — the handler runs in the appliance's Node sandbox, which is seeded with `dist/`
+and nothing else, so `npm run build` bundles the handler, copies the engine beside it and builds
+the opening book. Install by path from a checkout under the appliance's realms mount, then
+`realm_refresh` after each edit. Producer caches outlive a refresh: restart the appliance to see
+a handler or skill change in the views.
 
-`tests/plans.test.ts` pins the line reader against real engine lines captured as SAN.
-`tests/app.spec.mjs` drives the page's own bytes headless against envelopes captured from live
-view runs (`tests/fixtures/envelopes.json`) — no network. `tests/live/drive.mjs` drives the real
-page on a running appliance:
+- `tests/*.test.ts` — the imbalances of every battery position, and what lines change.
+- `tests/app.spec.mjs` — the page, headless, against envelopes captured from a live appliance
+  (`tests/fixtures/capture.mjs` recaptures them).
+- `tests/live/drive.mjs` — the real page on a running appliance.
+- `tests/battery/run.mjs` — every battery position through `explainPlans`, graded: whether each
+  expected plan is named at all, and whether it is the side's FIRST plan. Writes a readable report
+  to `tests/battery/results/`. The grading is by words, so read the report; the score is how you
+  notice a change between readings.
 
 ```bash
-APPLIANCE=http://127.0.0.1:11043 APPLIANCE_AUTH="Basic ..." node tests/live/drive.mjs
+APPLIANCE=http://127.0.0.1:11043 APPLIANCE_AUTH="Basic ..." node tests/battery/run.mjs
 ```
 
 ## Things to know
 
-- **Experimental.** The engine, the views, REST and the query surface work. The plan reader does
-  not work well yet: its rules name a plan only when the first ten plies make one unmistakable,
-  and they misread many real positions. Treat `plan` as a hint, and read the line.
+- **Experimental.** The engine, imbalances, opening book and query surface are sound. Plans are
+  a model's judgement: on the battery it names the plans theory expects almost always, and leads
+  with the right one most of the time — the report says which. Improving that is editing the skill.
+- **Plans need an appliance whose `gateway.ai.complete` accepts `skills`.** On an older one
+  `PlansInPosition` fails; everything else works.
 - **Scores are for the side to move.** `whiteCp` is for display; compare moves with `lossCp`.
-- **A search is not repeatable** — two runs can order close moves differently. The week-long cache
-  is what keeps an explanation consistent with the numbers beside it.
-- **A plan is a reading of one line, not a verdict on the position.** When a reading is wrong,
-  add the line as a failing case in `tests/plans.test.ts`, fix the rule, and update
-  `reference/plans.yml` and the skill's table in the same change.
-- **The explanation's quality is the world's model's.** The facts it is given are computed; the
-  prose is not. The numbers beside each move are authoritative.
+- **A search is not repeatable, and neither is a model's answer.** The per-position caches keep
+  the numbers and the plans shown together consistent.
+- **Room for master games:** a producer keyed by FEN over the Lichess masters explorer would add
+  `MASTERS_PLAYED` and `MASTER_GAME` hops; the skill already says how to weigh practice against
+  the engine. It needs a Lichess token.
 
 ## Licences
 
 Stockfish is GPL-3.0, and this realm, which ships it, is GPL-3.0 (`LICENSE`). The board is
 [cm-chessboard](https://github.com/shaack/cm-chessboard) (MIT), loaded from jsdelivr; its three
-SVG sprites are copied into `apps/` because an app can only serve flat same-origin files, and a
-sprite from another origin is refused by the browser. Moves are validated with
-[chess.js](https://github.com/jhlywa/chess.js) (BSD-2-Clause).
+SVG sprites are copied into `apps/` because an app serves only flat same-origin files. Moves are
+validated with [chess.js](https://github.com/jhlywa/chess.js) (BSD-2-Clause). The opening book is
+the [Lichess opening list](https://github.com/lichess-org/chess-openings) (CC0).

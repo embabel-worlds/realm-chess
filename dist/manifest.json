@@ -1,11 +1,11 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-30T02:01:16.073Z",
+  "generatedAt": "2026-09-30T17:05:50.799Z",
   "entries": [
     {
       "namespace": "chess",
       "name": "analysePosition",
-      "description": "The engine's best lines in each position, strongest first, each read for the plan it pursues. A position with no legal moves returns nothing: there is nothing to recommend in a checkmate or a stalemate, and the caller can tell which from the FEN.",
+      "description": "The engine's best lines in each position, strongest first, each with what it changes about the position's imbalances. A position with no legal moves returns nothing: there is nothing to recommend in a checkmate or a stalemate, and the FEN says which.",
       "inputSchema": {
         "type": "object",
         "properties": {
@@ -70,46 +70,10 @@
             "pvUci": {
               "type": "string"
             },
-            "plan": {
+            "creates": {
               "type": "string"
             },
-            "planTags": {
-              "type": "string"
-            },
-            "kingsidePawnMoves": {
-              "type": "string"
-            },
-            "centrePawnMoves": {
-              "type": "string"
-            },
-            "queensidePawnMoves": {
-              "type": "string"
-            },
-            "pawnBreaks": {
-              "type": "string"
-            },
-            "castles": {
-              "type": "string"
-            },
-            "ownKing": {
-              "type": "string"
-            },
-            "enemyKing": {
-              "type": "string"
-            },
-            "exchanges": {
-              "type": "number"
-            },
-            "materialDelta": {
-              "type": "number"
-            },
-            "queensTraded": {
-              "type": "boolean"
-            },
-            "pieceMoves": {
-              "type": "string"
-            },
-            "facts": {
+            "removes": {
               "type": "string"
             },
             "engine": {
@@ -129,22 +93,245 @@
             "depth",
             "pvSan",
             "pvUci",
-            "plan",
-            "planTags",
-            "kingsidePawnMoves",
-            "centrePawnMoves",
-            "queensidePawnMoves",
-            "pawnBreaks",
-            "castles",
-            "ownKing",
-            "enemyKing",
-            "exchanges",
-            "materialDelta",
-            "queensTraded",
-            "pieceMoves",
-            "facts",
+            "creates",
+            "removes",
             "engine",
             "elapsedMs"
+          ]
+        }
+      }
+    },
+    {
+      "namespace": "chess",
+      "name": "explainPlans",
+      "description": "The plans for both sides in each position, decided by a model with the chess-plans skill from the position's imbalances, its opening-book name and the engine's candidate moves. The facts are computed; the judgement is the model's.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "fens": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "withinCp": {
+            "type": "number"
+          },
+          "multiPv": {
+            "type": "number"
+          },
+          "depth": {
+            "type": "number"
+          },
+          "role": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fens"
+        ]
+      },
+      "outputSchema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "planId": {
+              "type": "string"
+            },
+            "fen": {
+              "type": "string"
+            },
+            "side": {
+              "type": "string"
+            },
+            "priority": {
+              "type": "number"
+            },
+            "name": {
+              "type": "string"
+            },
+            "idea": {
+              "type": "string"
+            },
+            "moves": {
+              "type": "string"
+            },
+            "imbalances": {
+              "type": "string"
+            },
+            "engineEvidence": {
+              "type": "string"
+            },
+            "summary": {
+              "type": "string"
+            },
+            "structure": {
+              "type": "string"
+            },
+            "opening": {
+              "type": "string"
+            },
+            "model": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "planId",
+            "fen",
+            "side",
+            "priority",
+            "name",
+            "idea",
+            "moves",
+            "imbalances",
+            "engineEvidence",
+            "summary",
+            "structure",
+            "opening",
+            "model"
+          ]
+        }
+      }
+    },
+    {
+      "namespace": "chess",
+      "name": "openingLookup",
+      "description": "The named opening each position is, from the Lichess opening book. A position the book does not name returns nothing.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "fens": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "fens"
+        ]
+      },
+      "outputSchema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "fen": {
+              "type": "string"
+            },
+            "eco": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "pgn": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "fen",
+            "eco",
+            "name",
+            "pgn"
+          ]
+        }
+      }
+    },
+    {
+      "namespace": "chess",
+      "name": "positionImbalances",
+      "description": "Jeremy Silman's imbalances for each position: material, minor pieces, pawn structure, space, files, key squares, development and king safety.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "fens": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "fens"
+        ]
+      },
+      "outputSchema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "fen": {
+              "type": "string"
+            },
+            "sideToMove": {
+              "type": "string"
+            },
+            "phase": {
+              "type": "string"
+            },
+            "facts": {
+              "type": "string"
+            },
+            "structure": {
+              "type": "string"
+            },
+            "materialWhite": {
+              "type": "number"
+            },
+            "materialBlack": {
+              "type": "number"
+            },
+            "bishopPairWhite": {
+              "type": "boolean"
+            },
+            "bishopPairBlack": {
+              "type": "boolean"
+            },
+            "isolatedQueenPawnWhite": {
+              "type": "boolean"
+            },
+            "isolatedQueenPawnBlack": {
+              "type": "boolean"
+            },
+            "passedWhite": {
+              "type": "string"
+            },
+            "passedBlack": {
+              "type": "string"
+            },
+            "openFiles": {
+              "type": "string"
+            },
+            "oppositeSideCastling": {
+              "type": "boolean"
+            },
+            "oppositeColouredBishops": {
+              "type": "boolean"
+            },
+            "detail": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "fen",
+            "sideToMove",
+            "phase",
+            "facts",
+            "structure",
+            "materialWhite",
+            "materialBlack",
+            "bishopPairWhite",
+            "bishopPairBlack",
+            "isolatedQueenPawnWhite",
+            "isolatedQueenPawnBlack",
+            "passedWhite",
+            "passedBlack",
+            "openFiles",
+            "oppositeSideCastling",
+            "oppositeColouredBishops",
+            "detail"
           ]
         }
       }

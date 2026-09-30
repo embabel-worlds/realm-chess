@@ -22,6 +22,7 @@
     "cm-chessboard": "^8.15.1",
     "esbuild": "^0.25.0",
     "typescript": "^5.4.0",
-    "vitest": "^3.2.7"
+    "vitest": "^3.2.7",
+    "yaml": "^2.9.1"
   }
 }

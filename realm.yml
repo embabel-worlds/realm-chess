@@ -1,25 +1,27 @@
 name: chess
 description: |
-  A chessboard, a strong engine, and the plans behind its best moves.
+  A chessboard, a strong engine, and the plans a position calls for.
 
-  Play moves on the board and Stockfish 19 — compiled to WebAssembly, running
-  in the appliance's own sandbox — returns its best lines. Each line is read
-  for the plan it pursues: a kingside pawn storm, a minority attack, a central
-  break, a quiet regrouping. Moves pursuing the same plan are grouped, so
-  "g4, h4 or O-O-O" reads as one idea and "a3 then b4" as another, and an
-  explanation contrasts them in plain words from facts a player can check.
+  Stockfish 19 — compiled to WebAssembly, running in the appliance's own
+  sandbox — gives the best lines. The position's imbalances, in Jeremy
+  Silman's sense, are computed from the board: material, the minor pieces,
+  pawn structure, space, files, outposts, development, king safety. The
+  Lichess opening book names it when it is a book position. A model with the
+  chess-plans skill then decides the plans for both sides from those facts —
+  the King's Indian Classical and Samisch, or the Exchange and closed Ruy
+  Lopez, call for opposite plans, and the skill knows which.
 
-  Because the engine is a realm verb behind a producer, the same analysis is a
-  Virtual Cypher query — `MATCH (:Position {fen: $fen})-[:HAS_CANDIDATE]->(c)
-  WHERE c.lossCp <= 50` — and a REST call, not only a page.
+  Everything is a Virtual Cypher hop from a pinned Position —
+  HAS_IMBALANCES, IN_OPENING, HAS_CANDIDATE, HAS_PLAN — so the analysis is a
+  query and a REST call, not only a page.
 
   No source system, no account, no key. The engine is GPL-3.0, and so is
   this realm.
-version: 0.1.0
+version: 0.2.0
 
-# The plan reader is a first cut: its rules name a pawn plan only when the first ten plies make
-# it unmistakable, and misread plenty of real positions. Explanations are only as good as the
-# world's configured model. The engine, the views and the query surface are sound.
+# Plans are a model's judgement with the chess-plans skill, and need an appliance whose
+# gateway.ai.complete accepts `skills`. On an older one PlansInPosition fails; the engine, the
+# imbalances and the opening book work anywhere.
 maturity: experimental
 url: https://github.com/embabel-worlds/realm-chess
 author: Rod Johnson
@@ -34,13 +36,14 @@ tags:
 exports:
   - chess
   - Position
+  - PositionImbalances
+  - Opening
   - CandidateMove
-  - PlanMeaning
+  - Plan
   - BestMoves
+  - ImbalancesOf
+  - OpeningOf
   - PlansInPosition
-  - ExplainPlans
-  - PlanCatalogue
-  - WhatPlanMeans
   # A realm with an exports list loads only the skills named in it; leave this out and the
   # skill is dropped at load with nothing but a debug line to say so.
   - chess-plans
