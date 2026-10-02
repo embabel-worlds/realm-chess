@@ -6,6 +6,8 @@
 <title>Chesscalator</title>
 <meta name="description" content="Play moves on a board; Stockfish gives its best lines, the position's imbalances are computed from the board, and on request a model with the chess-plans skill names the plans for both sides.">
 <link rel="stylesheet" href="/api/v1/apps-runtime/v1/theme.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,600..800&family=JetBrains+Mono:wght@500;600&display=swap">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/assets/chessboard.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/assets/extensions/arrows/arrows.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/assets/extensions/markers/markers.css">
@@ -20,7 +22,27 @@
   body{margin:0;padding:0 0 56px;background:var(--bg);color:var(--text);
        font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.5;}
   .wrap{max-width:1480px;margin:0 auto;padding:22px 16px 8px;}
-  header h1{margin:0;font-size:1.6rem;font-weight:300;letter-spacing:.1em;text-transform:uppercase;}
+  /* The banner: "Chess" in a characterful serif, "calator" in a calculator's monospace, a knight from
+   * the board's own piece set, and the board's teal checkerboard fading in behind. */
+  .banner{position:relative;display:flex;align-items:center;gap:18px;padding:16px 22px;border:1px solid var(--border);
+          border-radius:14px;overflow:hidden;background:linear-gradient(115deg,#121a20 0%,#0f171b 45%,#0b0d12 100%);}
+  .banner::after{content:"";position:absolute;inset:0 0 0 38%;pointer-events:none;
+                 background:conic-gradient(#5a9aa2 25%,transparent 0 50%,#5a9aa2 0 75%,transparent 0) 0 0/30px 30px;
+                 opacity:.16;-webkit-mask-image:linear-gradient(90deg,transparent,#000 70%);mask-image:linear-gradient(90deg,transparent,#000 70%);}
+  .banner .emblem{flex:none;width:58px;height:58px;border-radius:14px;background:linear-gradient(145deg,#6fb3bb,#4b8890);
+                  display:grid;place-items:center;box-shadow:0 6px 20px rgba(90,154,162,.25),inset 0 1px 0 rgba(255,255,255,.25);}
+  .banner .emblem svg{width:46px;height:46px;}
+  .banner h1{margin:0;line-height:1;display:flex;align-items:baseline;gap:1px;text-transform:none;letter-spacing:0;}
+  .banner h1 .chess{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:750;font-size:2.4rem;color:#f2f4f6;
+                    font-variation-settings:"opsz" 144;}
+  .banner h1 .calc{font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-weight:600;font-size:1.75rem;color:#63c0c9;
+                   letter-spacing:.02em;}
+  .banner .tagline{margin:6px 0 0;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.74rem;letter-spacing:.08em;
+                   color:var(--dim);text-transform:lowercase;}
+  .banner .tagline b{color:#9fd4da;font-weight:500;}
+  .banner details.about{position:relative;z-index:1;margin:0 0 0 auto;align-self:flex-start;max-width:46ch;text-align:right;}
+  .banner details.about[open]{text-align:left;}
+  @media (max-width:760px){.banner{flex-wrap:wrap;} .banner details.about{margin:6px 0 0;text-align:left;}}
   header p{margin:4px 0 0;color:var(--dim);font-size:.88rem;max-width:78ch;}
   /* Three columns: what is unbalanced, the board, and what to do about it. The first two stay in
    * view while the third scrolls. Narrower screens fold the imbalances under the board, then
@@ -160,6 +182,8 @@
   .games a{color:var(--cyan);text-decoration:none;font-size:.8rem;} .games{margin-top:6px;}
   .games div{margin:2px 0;color:var(--dim);font-size:.8rem;}
   form.player{display:flex;gap:6px;margin:4px 0;}
+  .unavailable{border:1px solid rgba(232,182,76,.35);background:rgba(232,182,76,.07);color:#e9d3a0;border-radius:8px;
+               padding:8px 12px;font-size:.82rem;margin:6px 0 8px;}
   form.player input{flex:1;max-width:260px;}
   details.theory{margin:8px 0 4px;border:1px solid var(--border);border-radius:8px;padding:8px 12px;background:var(--surface2);}
   details.theory summary{cursor:pointer;font-size:.86rem;font-weight:500;}
@@ -184,8 +208,12 @@
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1>Chesscalator</h1>
+  <header class="banner">
+    <div class="emblem" aria-hidden="true"><svg viewBox="0 0 40 40"><use href="chesscalator-pieces.svg#bn"/></svg></div>
+    <div>
+      <h1><span class="chess">Chess</span><span class="calc">calator</span></h1>
+      <p class="tagline"><b>engine</b> · imbalances · theory · <b>plans</b> · master practice</p>
+    </div>
     <details class="about">
       <summary>What this is, and how to read it</summary>
       <p>Play moves for either side. After each move you get the engine's best lines, the position's imbalances —
@@ -323,6 +351,11 @@
 
       <div class="tabpane" data-pane="player" hidden>
         <p class="note">What one Lichess player chose in this position, playing the side to move, across their whole Lichess history.</p>
+        <div class="unavailable" id="playerUnavailable">
+          <b>Not available yet.</b> Lichess answers player questions as a stream of updates, and this appliance cannot read
+          that kind of answer yet — so a look-up here would come back empty and wrongly say the player has no games. It
+          will work, unchanged, once the appliance reads streamed answers.
+        </div>
         <form class="player" id="playerForm">
           <input type="text" id="playerName" placeholder="Lichess username" aria-label="Lichess username" spellcheck="false" autocomplete="off">
           <button class="btn" type="submit">Look up</button>
@@ -1016,10 +1049,17 @@ function popChart(cols, colTitles, series) {
   return wrap;
 }
 
+/*
+ * Player look-ups are off until the appliance can read Lichess's streamed (NDJSON) answers: the
+ * failure comes back as an empty success, which this page would otherwise report as "no games" —
+ * a confident wrong answer. Flip this when that is fixed; nothing else changes.
+ */
+const PLAYER_LOOKUP_AVAILABLE = false;
+
 /* What one Lichess player chose here, playing the side to move. Remembered in this browser. */
 async function lookUpPlayer(seq = analysisSeq) {
   const player = $("playerName").value.trim();
-  if (!player) return;
+  if (!player || !PLAYER_LOOKUP_AVAILABLE) return;
   try { localStorage.setItem("chesscalator.player", player); } catch { /* no storage */ }
   const color = game.turn() === "w" ? "white" : "black";
   state("player", `Looking up ${player} as ${color}\u2026`, "note");
@@ -1203,6 +1243,8 @@ function showTab(name) {
 for (const b of document.querySelectorAll(".tabbar [data-tab]")) b.addEventListener("click", () => showTab(b.dataset.tab));
 try { const t = localStorage.getItem("chesscalator.tab"); if (t) showTab(t); } catch { /* no storage */ }
 $("playerForm").addEventListener("submit", (e) => { e.preventDefault(); lookUpPlayer(); });
+$("playerUnavailable").hidden = PLAYER_LOOKUP_AVAILABLE;
+for (const c of $("playerForm").elements) c.disabled = !PLAYER_LOOKUP_AVAILABLE;
 $("popAxis").addEventListener("change", popAxisChanged);
 $("popBtn").addEventListener("click", comparePopularity);
 
