@@ -84,7 +84,9 @@ async function open(page, overrides, delays, hash = "") {
   return errors;
 }
 
-const moves = (page) => page.locator(".cand button.mv");
+/* The engine's moves in the merged table: rows with an engine score (masters-only rows have none). */
+const moves = (page) => page.locator("tr.cand:has(td.eng:not(.absent)) button.mv");
+const tab = (page, name) => page.click(`.tabbar [data-tab=${name}]`);
 
 async function load(page, fen) {
   await page.fill("#fenInput", fen);
@@ -124,6 +126,7 @@ test("a line keeps its book name long after it leaves the book, and shows its th
   const o = rowsOf(key("OpeningOfLine", { moves: EXCHANGE }))[0];
   await expect(page.locator("#opening")).toContainText(`${o.eco} ${o.name}`);
   await expect(page.locator("#opening")).toContainText(`left the book ${o.pliesPast} plies ago`);
+  await tab(page, "theory");
   await expect(page.locator("#theoryBox")).toBeVisible();
   await expect(page.locator("#theory p").first()).toBeVisible();
   await expect(page.locator("#theoryCredit a").first()).toHaveAttribute("href", /en\.wikibooks\.org\/wiki\/Chess_Opening_Theory/);
@@ -171,6 +174,7 @@ test("stepping back to the engine's side does not make it move", async ({ page }
 test("plans for a game played here are asked for by line, and say what opening they were told", async ({ page }) => {
   await open(page, {}, {}, link(EXCHANGE, 17));
   await expect(moves(page).first()).toBeVisible();
+  await tab(page, "plans");
   await page.click("#plansBtn");
   const plans = rowsOf(key("PlansInLine", { moves: EXCHANGE, level: "intermediate" }));
   await expect(page.locator(".plans .plan")).toHaveCount(plans.length);
@@ -181,9 +185,12 @@ test("each move shows the imbalances its line creates and removes", async ({ pag
   await open(page);
   await load(page, RUY);
   const first = best(RUY)[0];
-  const card = page.locator(".cand").first();
-  await expect(card.locator(".chip.plus")).toHaveCount(first.creates.split("\n").filter(Boolean).length);
-  await expect(card.locator(".chip.minus")).toHaveCount(first.removes.split("\n").filter(Boolean).length);
+  const detail = page.locator("tr.detail").first();
+  await expect(detail).toBeHidden();
+  await page.locator("tr.cand button.more").first().click();
+  await expect(detail).toBeVisible();
+  await expect(detail.locator(".chip.plus")).toHaveCount(first.creates.split("\n").filter(Boolean).length);
+  await expect(detail.locator(".chip.minus")).toHaveCount(first.removes.split("\n").filter(Boolean).length);
 });
 
 test("the tolerance selector re-asks the view with the new withinCp", async ({ page }) => {
@@ -226,6 +233,7 @@ test("the plans render for both sides, with the summary and no citation numbers"
   await open(page);
   await load(page, RUY);
   await expect(moves(page).first()).toBeVisible();
+  await tab(page, "plans");
   await page.click("#plansBtn");
   const plans = rowsOf(key("PlansInPosition", { fen: RUY, level: "intermediate" }));
   for (const side of ["white", "black"]) {
@@ -275,6 +283,7 @@ test("failed plans say so, and leave the rest of the page alone", async ({ page 
   await open(page, { [k]: { status: "FAILED", error: { message: "no skill named 'chess-plans'" } } });
   await load(page, RUY);
   await expect(moves(page).first()).toBeVisible();
+  await tab(page, "plans");
   await page.click("#plansBtn");
   await expect(page.locator("#plans .state.error")).toContainText("The plans could not be read: no skill named 'chess-plans'");
   await expect(moves(page)).toHaveCount(best(RUY).length);
@@ -293,10 +302,13 @@ test("the board takes a move at once while the plans are still loading, and the 
   await open(page, {}, { [key("PlansInPosition", { fen: RUY, level: "intermediate" })]: 800 });
   await load(page, RUY);
   await expect(moves(page).first()).toBeVisible();
+  await tab(page, "plans");
   await page.click("#plansBtn");
+  await tab(page, "moves");
   await page.getByRole("button", { name: best(RUY)[0].move, exact: true }).click();
   await expect(page.locator("#moves")).toContainText(best(RUY)[0].move);
   await page.waitForTimeout(1000);
+  await tab(page, "plans");
   await expect(page.locator(".plans .plan")).toHaveCount(0);
 });
 
@@ -324,6 +336,7 @@ test("stepping quickly through a game asks only about the position you stop on",
 test("the plans are asked for at the reader's level, and the level is remembered", async ({ page }) => {
   await open(page, {}, {}, link(EXCHANGE, 17));
   await expect(moves(page).first()).toBeVisible();
+  await tab(page, "plans");
   await page.selectOption("#level", "beginner");
   await page.click("#plansBtn");
   const plans = rowsOf(key("PlansInLine", { moves: EXCHANGE, level: "beginner" }));
@@ -331,4 +344,34 @@ test("the plans are asked for at the reader's level, and the level is remembered
   expect(await page.evaluate(() => window.__calls.at(-1))).toContain('"level":"beginner"');
   await page.reload();
   await expect(page.locator("#level")).toHaveValue("beginner");
+});
+
+test("engine and masters answer in one table, merged by move", async ({ page }) => {
+  await open(page, {}, {}, link("e4", 1));
+  const masters = rowsOf(key("MastersAtPosition", { fen: E4 }));
+  const engine = best(E4);
+  await expect(moves(page)).toHaveText(engine.map((r) => r.move));
+  if (masters.length) {
+    const top = masters[0];
+    const row = page.locator(`tr.cand[data-move="${top.move}"]`);
+    await expect(row).toHaveCount(1);
+    await expect(row.locator("td").nth(3)).toContainText(Number(top.games).toLocaleString());
+  }
+  await expect(page.locator("#mastersNote")).toContainText("Masters:");
+});
+
+test("without the Lichess key, the table still shows the engine and says how to add masters", async ({ page }) => {
+  const k = key("MastersAtPosition", { fen: E4 });
+  await open(page, { [k]: { status: "FAILED", error: { message: "gateway.lichess is not a world tool" } } }, {}, link("e4", 1));
+  await expect(moves(page)).toHaveText(best(E4).map((r) => r.move));
+  await expect(page.locator("#mastersNote")).toContainText("Lichess token");
+});
+
+test("the tabs switch, and the chosen one is remembered", async ({ page }) => {
+  await open(page);
+  await tab(page, "theory");
+  await expect(page.locator('.tabpane[data-pane="theory"]')).toBeVisible();
+  await expect(page.locator('.tabpane[data-pane="moves"]')).toBeHidden();
+  await page.reload();
+  await expect(page.locator('.tabpane[data-pane="theory"]')).toBeVisible();
 });

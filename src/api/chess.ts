@@ -575,9 +575,19 @@ function moveRecords(fen: string, a: ExplorerAnswer, player = "", color = ""): E
   });
 }
 
+/* The explorer names the move a game played from the position in UCI; people read notation. */
+function sanOf(fen: string, uci: string | undefined): string {
+  if (!uci) return "";
+  try {
+    return new Chess(fen).move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] }).san;
+  } catch {
+    return uci;
+  }
+}
+
 function gameRecords(fen: string, games: ExplorerGame[] | undefined, url: (id: string) => string, player = "", color = ""): ExplorerGameRecord[] {
   return (games ?? []).map((g) => ({
-    gameId: `${fen}#${player}#${color}#${g.id}`, fen, uci: g.uci ?? "",
+    gameId: `${fen}#${player}#${color}#${g.id}`, fen, uci: sanOf(fen, g.uci),
     white: g.white?.name ?? "", whiteElo: g.white?.rating ?? null,
     black: g.black?.name ?? "", blackElo: g.black?.rating ?? null,
     result: g.winner === "white" ? "1-0" : g.winner === "black" ? "0-1" : "½-½",

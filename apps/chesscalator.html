@@ -19,11 +19,36 @@
   *{box-sizing:border-box;}
   body{margin:0;padding:0 0 56px;background:var(--bg);color:var(--text);
        font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.5;}
-  .wrap{max-width:1180px;margin:0 auto;padding:22px 16px 8px;}
+  .wrap{max-width:1480px;margin:0 auto;padding:22px 16px 8px;}
   header h1{margin:0;font-size:1.6rem;font-weight:300;letter-spacing:.1em;text-transform:uppercase;}
   header p{margin:4px 0 0;color:var(--dim);font-size:.88rem;max-width:78ch;}
-  .layout{display:grid;grid-template-columns:minmax(280px,540px) 1fr;gap:22px;margin-top:18px;align-items:start;}
-  @media (max-width:880px){.layout{grid-template-columns:1fr;}}
+  /* Three columns: what is unbalanced, the board, and what to do about it. The first two stay in
+   * view while the third scrolls. Narrower screens fold the imbalances under the board, then
+   * stack everything. */
+  .statusbar{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-top:14px;padding:10px 16px;
+             background:var(--surface);border:1px solid var(--border);border-radius:10px;}
+  .layout{display:grid;grid-template-columns:minmax(220px,300px) minmax(320px,520px) minmax(380px,1fr);
+          grid-template-areas:"imb board tabs";gap:16px;margin-top:12px;align-items:start;}
+  .imb-col{grid-area:imb;} .board-col{grid-area:board;} .tabs-col{grid-area:tabs;}
+  @media (min-width:1101px){.imb-col,.board-col{position:sticky;top:12px;max-height:calc(100vh - 70px);overflow:auto;}}
+  @media (max-width:1100px){.layout{grid-template-columns:minmax(320px,480px) 1fr;grid-template-areas:"board tabs" "imb tabs";}}
+  @media (max-width:760px){.layout{grid-template-columns:1fr;grid-template-areas:"board" "imb" "tabs";}}
+  .tabbar{display:flex;gap:2px;border-bottom:1px solid var(--border);margin:-4px -4px 10px;}
+  .tabbar button{background:transparent;border:0;border-bottom:2px solid transparent;color:var(--dim);padding:8px 14px;
+                 cursor:pointer;font-size:.86rem;font-family:inherit;}
+  .tabbar button[aria-selected="true"]{color:var(--text);border-bottom-color:var(--cyan);}
+  .tabbar button .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--cyan);margin-left:6px;vertical-align:middle;}
+  .tabpane[hidden]{display:none;}
+  table.movestab{width:100%;border-collapse:collapse;font-size:.84rem;font-variant-numeric:tabular-nums;}
+  table.movestab th{text-align:left;color:var(--dim);font-weight:500;font-size:.72rem;padding:4px 6px;border-bottom:1px solid var(--border);white-space:nowrap;}
+  table.movestab td{padding:5px 6px;border-bottom:1px dashed var(--border);vertical-align:middle;}
+  table.movestab tr.detail td{border-bottom:1px solid var(--border);padding:2px 6px 10px;}
+  table.movestab .eng{white-space:nowrap;}
+  table.movestab .best{color:var(--green);font-size:.74rem;} table.movestab .style{color:var(--green);font-size:.74rem;}
+  table.movestab .cost{color:var(--amber);font-size:.74rem;} table.movestab .absent{color:var(--dim);}
+  table.movestab button.more{background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--dim);cursor:pointer;font-size:.74rem;padding:1px 7px;white-space:nowrap;}
+  table.movestab button.more:hover{color:var(--cyan);}
+  .line{font-family:ui-monospace,Menlo,monospace;font-size:.76rem;color:var(--dim);margin-bottom:4px;}
   .panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
   #board{width:100%;aspect-ratio:1/1;}
   /* The board in Embabel's colours: the theme's teal accent for the dark squares, a cool pale grey
@@ -61,28 +86,19 @@
   .plan.best{border-left-color:var(--green);}
   .plan h3{margin:0;font-size:1rem;font-weight:500;}
   .plan .meaning{color:var(--dim);font-size:.82rem;margin:3px 0 8px;}
-  .cand{display:grid;grid-template-columns:auto auto 1fr;gap:4px 12px;align-items:baseline;padding:6px 0;border-top:1px dashed var(--border);}
-  .cand:first-of-type{border-top:0;}
   .cand button.mv{background:transparent;border:1px solid var(--cyan);color:var(--cyan);border-radius:5px;padding:2px 9px;
                   cursor:pointer;font-weight:600;font-family:ui-monospace,Menlo,monospace;}
   .cand button.mv:hover{background:var(--cyan);color:#06121c;}
-  .cand .score{font-variant-numeric:tabular-nums;font-size:.85rem;}
-  .cand .loss{font-size:.78rem;color:var(--dim);}
-  .cand .loss.style{color:var(--green);}
-  .cand .loss.cost{color:var(--amber);}
-  .cand .line{grid-column:1 / -1;font-family:ui-monospace,Menlo,monospace;font-size:.76rem;color:var(--dim);}
+
   .explain{margin-top:14px;}
   .explain p{margin:0 0 10px;font-size:.92rem;}
   .legend{margin-top:12px;font-size:.78rem;color:var(--dim);}
   /* The board column stays in view while the analysis scrolls: the imbalances sit above the board
    * so the position and what is unbalanced about it are always read together. */
-  @media (min-width:881px){.board-col{position:sticky;top:12px;max-height:calc(100vh - 70px);overflow:auto;}}
-  .imbalances-box{margin-bottom:10px;}
-  .imbalances-box h2.sec{margin-top:0;}
-  #imbalances{columns:2 250px;column-gap:18px;}
+  .imb-col h2.sec{margin-top:0;}
   .imb-group{break-inside:avoid;margin-bottom:6px;}
   .imb-name{font-size:.72rem;font-weight:600;letter-spacing:.04em;color:var(--cyan);text-transform:uppercase;}
-  .imbalances-box ul.facts{font-size:.78rem;margin:1px 0 0;padding-left:16px;}
+  .imb-col ul.facts{font-size:.8rem;margin:1px 0 0;padding-left:16px;}
   .chip b{font-weight:600;margin-right:2px;}
   .nav{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;}
   .nav .ply{min-width:9ch;text-align:center;color:var(--dim);font-size:.8rem;font-variant-numeric:tabular-nums;}
@@ -96,7 +112,7 @@
   .opening{color:var(--dim);font-size:.84rem;margin:2px 0 6px;min-height:1.2em;}
   .opening b{color:var(--text);font-weight:500;}
   h2.sec{font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin:16px 0 4px;}
-  .changes{grid-column:1 / -1;display:flex;flex-wrap:wrap;gap:4px;}
+  .changes{display:flex;flex-wrap:wrap;gap:4px;}
   .chip{font-size:.72rem;border-radius:999px;padding:1px 8px;border:1px solid var(--border);color:var(--dim);}
   .chip.plus{border-color:rgba(63,215,60,.45);color:#9ee89c;}
   .chip.minus{border-color:rgba(226,104,95,.45);color:#f0a39c;}
@@ -126,15 +142,15 @@
   details.theory{margin:8px 0 4px;border:1px solid var(--border);border-radius:8px;padding:8px 12px;background:var(--surface2);}
   details.theory summary{cursor:pointer;font-size:.86rem;font-weight:500;}
   details.theory summary .meta{font-weight:400;color:var(--dim);font-size:.78rem;}
-  #theory{max-height:280px;overflow:auto;padding-right:6px;}
+  #theory{padding-right:6px;}
   #theory p{font-size:.84rem;margin:6px 0;}
   #theory h5{font-size:.84rem;margin:8px 0 2px;font-weight:600;}
   .attribution{font-size:.72rem;color:var(--dim);margin-top:6px;}
   .attribution a{color:var(--dim);}
 
-  footer.how{max-width:1180px;margin:18px auto 0;padding:0 16px;font-size:.75rem;}
+  footer.how{max-width:1480px;margin:18px auto 0;padding:0 16px;font-size:.75rem;}
   footer.how a{color:var(--dim);text-decoration:none;} footer.how a:hover{color:var(--cyan);}
-  #how-it-works{display:none;max-width:1180px;margin:10px auto 0;padding:0 16px;}
+  #how-it-works{display:none;max-width:1480px;margin:10px auto 0;padding:0 16px;}
   #how-it-works:target{display:block;}
   #how-it-works h2{font-weight:300;letter-spacing:.06em;text-transform:uppercase;font-size:1.1rem;margin:22px 0 6px;}
   #how-it-works h3{font-size:.95rem;margin:16px 0 4px;}
@@ -161,12 +177,18 @@
     </details>
   </header>
 
+  <div class="statusbar">
+    <span class="status"><span class="who" id="who"></span><span class="eval" id="evalText"></span></span>
+    <span class="opening" id="opening"></span>
+  </div>
+
   <div class="layout">
+    <section class="panel imb-col" aria-label="Imbalances">
+      <h2 class="sec">Imbalances</h2>
+      <div id="imbalances"></div>
+    </section>
+
     <section class="panel board-col" aria-label="Board">
-      <div class="imbalances-box">
-        <h2 class="sec">Imbalances</h2>
-        <div id="imbalances"></div>
-      </div>
       <div id="board"></div>
       <div class="nav" aria-label="Step through the game">
         <button class="btn" id="first" title="Start of the game">&#x23EE;</button>
@@ -175,6 +197,7 @@
         <button class="btn" id="fwd" title="Forward one move (right arrow)">&#x25B6;</button>
         <button class="btn" id="last" title="Latest position">&#x23ED;</button>
       </div>
+      <div class="moves" id="moves" aria-label="Moves played"></div>
       <div class="controls">
         <button class="btn" id="new">New game</button>
         <button class="btn" id="flip">Flip board</button>
@@ -191,46 +214,65 @@
         <button class="btn" id="loadFen">Load FEN</button>
       </div>
       <div class="fen-error" id="fenError" role="alert"></div>
-      <div class="moves" id="moves" aria-label="Moves played"></div>
     </section>
 
-    <section class="panel" aria-label="Analysis">
-      <div class="status"><span class="who" id="who"></span><span class="eval" id="evalText"></span></div>
-      <div class="opening" id="opening"></div>
-      <div class="toolbar">
-        <label class="inline">Show moves within
-          <select id="within">
-            <option value="20">0.20 of best</option>
-            <option value="50" selected>0.50 of best</option>
-            <option value="100">1.00 of best</option>
-          </select>
-        </label>
-        <span class="spacer"></span>
-        <label class="inline">Explain for
-          <select id="level">
-            <option value="beginner">a beginner</option>
-            <option value="intermediate" selected>an intermediate player</option>
-            <option value="expert">an expert</option>
-          </select>
-        </label>
-        <button class="btn primary" id="plansBtn" disabled>Show the plans</button>
+    <section class="panel tabs-col" aria-label="Analysis">
+      <div class="tabbar" role="tablist">
+        <button role="tab" data-tab="moves" aria-selected="true">Moves</button>
+        <button role="tab" data-tab="plans" aria-selected="false">Plans</button>
+        <button role="tab" data-tab="theory" aria-selected="false">Theory<span class="dot" id="theoryDot" hidden></span></button>
+        <button role="tab" data-tab="player" aria-selected="false">Player</button>
       </div>
-      <details class="theory" id="theoryBox" open hidden>
-        <summary>Opening theory <span class="meta" id="theoryWhere"></span></summary>
-        <div id="theory"></div>
-        <div class="attribution" id="theoryCredit"></div>
-      </details>
-      <div id="plans"></div>
-      <h2 class="sec">The engine's moves</h2>
-      <div id="analysis"><div class="state">Make a move, or load a position.</div></div>
-      <h2 class="sec">What masters played here</h2>
-      <div id="masters"></div>
-      <h2 class="sec">What a Lichess player played here</h2>
-      <form class="player" id="playerForm">
-        <input type="text" id="playerName" placeholder="Lichess username" aria-label="Lichess username" spellcheck="false" autocomplete="off">
-        <button class="btn" type="submit">Look up</button>
-      </form>
-      <div id="player"></div>
+
+      <div class="tabpane" data-pane="moves">
+        <div class="toolbar">
+          <label class="inline">Engine moves within
+            <select id="within">
+              <option value="20">0.20 of best</option>
+              <option value="50" selected>0.50 of best</option>
+              <option value="100">1.00 of best</option>
+            </select>
+          </label>
+        </div>
+        <div id="analysis"><div class="state">Make a move, or load a position.</div></div>
+        <div class="note" id="mastersNote"></div>
+        <details class="games-box" id="gamesBox" hidden>
+          <summary class="note">Top master games from here</summary>
+          <div class="games" id="masterGames"></div>
+        </details>
+      </div>
+
+      <div class="tabpane" data-pane="plans" hidden>
+        <div class="toolbar">
+          <label class="inline">Explain for
+            <select id="level">
+              <option value="beginner">a beginner</option>
+              <option value="intermediate" selected>an intermediate player</option>
+              <option value="expert">an expert</option>
+            </select>
+          </label>
+          <button class="btn primary" id="plansBtn" disabled>Show the plans</button>
+        </div>
+        <div id="plans"><div class="state">The plans for both sides, written for the level you choose. An engine search and a model call — up to half a minute the first time for a position.</div></div>
+      </div>
+
+      <div class="tabpane" data-pane="theory" hidden>
+        <div id="theoryBox" hidden>
+          <div class="note" id="theoryWhere"></div>
+          <div id="theory"></div>
+          <div class="attribution" id="theoryCredit"></div>
+        </div>
+        <div class="state" id="theoryNone">No opening theory for this position: the wikibook has no page along this line, or the position was loaded from a FEN.</div>
+      </div>
+
+      <div class="tabpane" data-pane="player" hidden>
+        <p class="note">What one Lichess player chose in this position, playing the side to move, across their whole Lichess history.</p>
+        <form class="player" id="playerForm">
+          <input type="text" id="playerName" placeholder="Lichess username" aria-label="Lichess username" spellcheck="false" autocomplete="off">
+          <button class="btn" type="submit">Look up</button>
+        </form>
+        <div id="player"></div>
+      </div>
     </section>
   </div>
 </div>
@@ -263,6 +305,12 @@
       <code>chess.theoryOfGameLine</code>: the deepest page of the Chess Opening Theory wikibook the game's moves
       reach, read through the Wikibooks API, shown as an excerpt with its authors and licence (CC BY-SA 4.0).
       Cached for a week.</li>
+    <li><b>Master practice</b> — <code>MASTERS_PLAYED</code> → <code>MasterMove</code> and <code>MASTER_GAME</code> →
+      <code>MasterGame</code>, from the Lichess masters database (over-the-board, 2200+), through the realm's Lichess
+      key. Merged into the Moves table by move, beside the engine: what masters played here, how often, and how it
+      scored. Cached for 30 days.</li>
+    <li><b>A Lichess player</b> — <code>PLAYER_PLAYED</code> → <code>PlayerMove</code>, narrowed with
+      <code>WHERE m.player = … AND m.color = …</code>, which is pushed down to the explorer.</li>
     <li><b>Tactics</b> — also computed from the board and listed first: check, mate in one, a mate threat, a piece
       attacked and not defended, a piece attacked by a cheaper one. These are facts, not verdicts: whether taking a
       loose piece works is the engine's call. Material is counted once an exchange under way is finished, so straight
@@ -296,6 +344,15 @@ RETURN o.eco AS eco, o.name AS name, o.pgn AS bookMoves,
 <pre>MATCH (g:GameLine {moves: $moves})-[:HAS_THEORY]->(t:OpeningTheory)
 RETURN t.title AS page, t.url AS url, t.theory AS theory, toInteger(t.pliesCovered) AS pliesCovered,
        toInteger(t.pliesPast) AS pliesPast, t.licence AS licence</pre>
+  <p><b>MastersAtPosition</b> and <b>MasterGamesAtPosition</b> — <code>fen</code>.</p>
+<pre>MATCH (p:Position {fen: $fen})-[:MASTERS_PLAYED]->(m:MasterMove)
+RETURN m.san AS move, m.uci AS uci, toInteger(m.games) AS games, m.whiteWinPct AS whiteWinPct,
+       m.drawPct AS drawPct, m.blackWinPct AS blackWinPct, m.scoreForMover AS scoreForMover, ...
+ORDER BY games DESC</pre>
+  <p><b>PlayerAtPosition</b> — <code>fen</code>, <code>player</code>, <code>color</code>.</p>
+<pre>MATCH (p:Position {fen: $fen})-[:PLAYER_PLAYED]->(m:PlayerMove)
+WHERE m.player = $player AND m.color = $color
+RETURN m.san AS move, toInteger(m.games) AS games, m.scoreForMover AS scoreForPlayer, ...</pre>
   <p><b>OpeningOf</b> — <code>fen</code>, for a position loaded from a FEN.</p>
 <pre>MATCH (p:Position {fen: $fen})-[:IN_OPENING]->(o:Opening)
 RETURN o.eco AS eco, o.name AS name, o.pgn AS moves</pre>
@@ -325,6 +382,10 @@ ORDER BY side DESC, priority</pre>
     <li><b>A plan that seems wrong</b> — plans are a model's judgement, and the battery of test positions shipped with
       the realm shows how often it matches theory. The imbalances and the engine's numbers are computed and
       authoritative; a plan that contradicts them is the plan's fault. Report it with the FEN.</li>
+    <li><b>No master numbers</b> — the chess realm has no Lichess token yet (add one in its settings), or no master
+      game reached the position.</li>
+    <li><b>A player look-up fails</b> — Lichess answers player questions as a stream (NDJSON), which this appliance's
+      API client cannot read yet; the masters database is unaffected.</li>
     <li><b>No opening theory</b> — the wikibook has no page along this line, or the position was loaded from a FEN
       and has no moves behind it.</li>
     <li><b>An imbalance that is wrong</b> — that is a bug in the realm's computation; report it with the FEN.</li>
@@ -516,6 +577,10 @@ function analyse(userMove) {
   $("evalText").textContent = "";
   $("opening").textContent = "";
   $("theoryBox").hidden = true;
+  $("theoryNone").hidden = false;
+  $("theoryDot").hidden = true;
+  $("mastersNote").textContent = "";
+  $("gamesBox").hidden = true;
   currentRows = [];
   if (statusLine()) {
     state("analysis", "No moves to analyse: the game is over.");
@@ -537,17 +602,16 @@ async function ask(seq, userMove) {
     ? (cursor === 0 ? Promise.resolve(null) : embabel.views.invoke("OpeningOfLine", { moves: playedLine() }, opts))
     : embabel.views.invoke("OpeningOf", { fen }, opts);
   const theoryCall = fromStart() && cursor > 0 ? embabel.views.invoke("TheoryOfLine", { moves: playedLine() }, opts) : Promise.resolve(null);
-  // Master practice, alongside the engine. Both views read one explorer request, so the second is free.
-  Promise.allSettled([
-    embabel.views.invoke("MastersAtPosition", { fen }, opts),
-    embabel.views.invoke("MasterGamesAtPosition", { fen }, opts),
-  ]).then(([m, g]) => { if (seq === analysisSeq) renderMasters(m, g); });
   if ($("playerName").value.trim()) lookUpPlayer(seq);
-  const [moves, imb, opening, theory] = await Promise.allSettled([
+  // The engine and master practice answer one question — what to play here — so they arrive
+  // together and go in one table. Both master views read one explorer request.
+  const [moves, imb, opening, theory, masters, masterGames] = await Promise.allSettled([
     embabel.views.invoke("BestMoves", { fen, withinCp: within, maxLines: 5 }, opts),
     embabel.views.invoke("ImbalancesOf", { fen }, opts),
     openingCall,
     theoryCall,
+    embabel.views.invoke("MastersAtPosition", { fen }, opts),
+    embabel.views.invoke("MasterGamesAtPosition", { fen }, opts),
   ]);
   if (seq !== analysisSeq) return;
   renderOpening(opening, imb);
@@ -567,8 +631,8 @@ async function ask(seq, userMove) {
   const best = rows[0];
   $("evalText").textContent = best.mate != null
     ? `mate in ${Math.abs(best.mate)} for ${best.mate > 0 ? sideName(game.turn()) : sideName(game.turn() === "w" ? "b" : "w")}`
-    : `${fmt(best.whiteCp)} · depth ${best.depth}`;
-  $("analysis").replaceChildren(...rows.map(candidate));
+    : `${fmt(best.whiteCp)} \u00b7 depth ${best.depth}`;
+  renderMovesTable(rows, masters, masterGames);
   $("plansBtn").disabled = false;
   if (userMove) maybeEngineMove(seq);
 }
@@ -593,6 +657,8 @@ function renderOpening(opening, imb) {
 function renderTheory(theory) {
   const box = $("theoryBox");
   const t = theory.status === "fulfilled" && theory.value ? rowsOf(theory.value)[0] : null;
+  $("theoryNone").hidden = !!t;
+  $("theoryDot").hidden = !t;
   if (!t) { box.hidden = true; return; }
   const out = [];
   for (const para of String(t.theory).split(/\n+/)) {
@@ -603,8 +669,8 @@ function renderTheory(theory) {
   $("theory").replaceChildren(...out);
   const page = String(t.page).replace(/^Chess Opening Theory\//, "").split("/").join(" ");
   $("theoryWhere").textContent = Number(t.pliesPast) > 0
-    ? `\u2014 after ${page}, ${t.pliesPast} ${Number(t.pliesPast) === 1 ? "ply" : "plies"} back`
-    : `\u2014 for this position`;
+    ? `For ${page} \u2014 ${t.pliesPast} ${Number(t.pliesPast) === 1 ? "ply" : "plies"} before this position.`
+    : `For this position: ${page}.`;
   const credit = $("theoryCredit");
   const link = (href, text) => { const a = el("a", null, text); a.href = href; a.target = "_blank"; a.rel = "noopener noreferrer"; return a; };
   credit.replaceChildren("Excerpt from ", link(t.url, "Chess Opening Theory"), ", Wikibooks contributors, ",
@@ -642,27 +708,82 @@ function practiceTable(rows, scoreLabel) {
  * quietly rather than as an error — the rest of the page does not depend on it. */
 const needsKey = (reason) => /lichess|not a world tool|no (such )?api|401|token/i.test(failure(reason));
 
-function renderMasters(m, g) {
-  if (m.status === "rejected") {
-    return state("masters", needsKey(m.reason)
-      ? "Add a Lichess token in the chess realm's settings to see what masters play here."
-      : `The masters database could not be read: ${failure(m.reason)}`, needsKey(m.reason) ? "note" : "error");
+/*
+ * One table for what to play: the engine's moves (within the chosen tolerance of best) and the
+ * moves masters played here, merged by move. A move the engine likes that masters never played,
+ * or one masters play that is not in the engine's top five, shows as such. What an engine line
+ * changes about the imbalances opens under the row on request — always showing it buried the
+ * table.
+ */
+function renderMovesTable(engineRows, masters, masterGames) {
+  const mRows = masters && masters.status === "fulfilled" ? rowsOf(masters.value) : [];
+  const totalMaster = mRows.reduce((n, r) => n + Number(r.games || 0), 0);
+  const bySan = new Map(mRows.map((r) => [r.move, r]));
+  const rows = engineRows.map((e) => ({ san: e.move, uci: e.uci, engine: e, master: bySan.get(e.move) }));
+  for (const m of mRows) {
+    if (rows.some((r) => r.san === m.move)) continue;
+    if (totalMaster && Number(m.games) / totalMaster < 0.01) continue;   // a handful of games is not practice
+    rows.push({ san: m.move, uci: m.uci, engine: null, master: m });
   }
-  const rows = rowsOf(m.value);
-  if (rows.length === 0) return state("masters", "No master games reached this position.", "note");
-  const out = [practiceTable(rows, "Scored")];
-  const games = g.status === "fulfilled" ? rowsOf(g.value).slice(0, 5) : [];
-  if (games.length) {
-    const list = el("div", "games");
-    for (const x of games) {
-      const d = el("div");
-      const a = el("a", null, `${x.white} \u2013 ${x.black}`); a.href = x.url; a.target = "_blank"; a.rel = "noopener noreferrer";
-      d.append(a, ` ${x.result}, ${x.year ?? ""}${x.movePlayed ? ` \u00b7 played ${x.movePlayed}` : ""}`);
-      list.append(d);
+  const t = el("table", "movestab");
+  const head = el("tr");
+  for (const h of ["Move", "Engine", "", "Masters", "White \u00b7 draw \u00b7 Black", "Scored", ""]) head.append(el("th", null, h));
+  t.append(head);
+  for (const r of rows.slice(0, 9)) {
+    const tr = el("tr", "cand");
+    tr.dataset.move = r.san;
+    const b = el("button", "mv", r.san);
+    b.title = `Play ${r.san}`;
+    b.addEventListener("mouseenter", () => showArrow(r.uci));
+    b.addEventListener("focus", () => showArrow(r.uci));
+    b.addEventListener("mouseleave", () => board.removeArrows());
+    b.addEventListener("click", () => playUci(r.uci));
+    const moveCell = el("td"); moveCell.append(b);
+    const e = r.engine;
+    const lc = e && e.lossCp != null ? Number(e.lossCp) : null;
+    const engCell = el("td", "eng" + (e ? "" : " absent"), e ? (e.mate != null ? `mate in ${Math.abs(e.mate)}` : fmt(e.whiteCp)) : "\u2014");
+    if (!e) engCell.title = "Not among the engine's top five moves";
+    const vsBest = el("td", e ? (Number(e.rank) === 1 ? "best" : lc != null && lc <= 20 ? "style" : "cost") : "absent",
+      !e ? "" : Number(e.rank) === 1 ? "best" : lc == null ? "" : `\u2212${(lc / 100).toFixed(2)}`);
+    const m = r.master;
+    const mCell = el("td", m ? "" : "absent", m ? `${Number(m.games).toLocaleString()}${totalMaster ? ` (${Math.round((100 * m.games) / totalMaster)}%)` : ""}` : "\u2014");
+    const barCell = el("td"); if (m) barCell.append(resultBar(m.whiteWinPct, m.drawPct, m.blackWinPct));
+    const scored = el("td", null, m && m.scoreForMover != null ? `${Math.round(m.scoreForMover * 100)}%` : "");
+    const moreCell = el("td");
+    tr.append(moveCell, engCell, vsBest, mCell, barCell, scored, moreCell);
+    t.append(tr);
+    if (e) {
+      const more = el("button", "more", "line \u25B8");
+      more.title = "The engine's line, and what it changes";
+      const detail = el("tr", "detail"); detail.hidden = true;
+      const td = el("td"); td.colSpan = 7;
+      td.append(el("div", "line", (e.line || "").split(" ").slice(0, 14).join(" ")));
+      const changes = el("div", "changes");
+      const chip = (cls, f) => { const { category, text } = splitFact(f); const c = el("span", "chip " + cls); if (category) c.append(el("b", null, category), " "); c.append(text); return c; };
+      for (const f of lines(e.creates)) changes.append(chip("plus", f));
+      for (const f of lines(e.removes)) changes.append(chip("minus", f));
+      if (changes.childElementCount) td.append(changes);
+      detail.append(td);
+      more.addEventListener("click", () => { detail.hidden = !detail.hidden; more.textContent = detail.hidden ? "line \u25B8" : "line \u25BE"; });
+      moreCell.append(more);
+      t.append(detail);
     }
-    out.push(list);
   }
-  $("masters").replaceChildren(...out);
+  $("analysis").replaceChildren(t);
+  // Master practice: a quiet note when it is unavailable, and the top games behind a disclosure.
+  const note = $("mastersNote");
+  if (masters && masters.status === "rejected") note.textContent = needsKey(masters.reason)
+    ? "Master games need a Lichess token — add one in the chess realm's settings."
+    : `The masters database could not be read: ${failure(masters.reason)}`;
+  else note.textContent = mRows.length ? `Masters: ${totalMaster.toLocaleString()} games from this position.` : "No master games reached this position.";
+  const games = masterGames && masterGames.status === "fulfilled" ? rowsOf(masterGames.value).slice(0, 8) : [];
+  $("gamesBox").hidden = games.length === 0;
+  $("masterGames").replaceChildren(...games.map((x) => {
+    const d = el("div");
+    const a = el("a", null, `${x.white} \u2013 ${x.black}`); a.href = x.url; a.target = "_blank"; a.rel = "noopener noreferrer";
+    d.append(a, ` ${x.result}, ${x.year ?? ""}${x.movePlayed ? ` \u00b7 ${x.movePlayed}` : ""}`);
+    return d;
+  }));
 }
 
 /* What one Lichess player chose here, playing the side to move. Remembered in this browser. */
@@ -713,37 +834,6 @@ function renderImbalances(imb) {
     out.push(g);
   }
   $("imbalances").replaceChildren(...out);
-}
-
-function candidate(r) {
-  const row = el("div", "cand");
-  row.dataset.move = r.move;
-  const b = el("button", "mv", r.move);
-  b.title = `Play ${r.move}`;
-  b.addEventListener("mouseenter", () => showArrow(r.uci));
-  b.addEventListener("focus", () => showArrow(r.uci));
-  b.addEventListener("mouseleave", () => board.removeArrows());
-  b.addEventListener("click", () => playUci(r.uci));
-  const score = el("span", "score", r.mate != null ? `mate in ${Math.abs(r.mate)}` : fmt(r.whiteCp));
-  const lc = r.lossCp == null ? null : Number(r.lossCp);
-  const loss = el("span", "loss " + (Number(r.rank) === 1 ? "" : lc != null && lc <= 20 ? "style" : "cost"),
-    Number(r.rank) === 1 ? "engine's best"
-      : lc == null ? "not comparable with the mate"
-      : `${(lc / 100).toFixed(2)} worse${lc <= 20 ? " — style, not strength" : ""}`);
-  const lineEl = el("div", "line", (r.line || "").split(" ").slice(0, 12).join(" "));
-  const changes = el("div", "changes");
-  const chip = (cls, f) => {
-    const { category, text } = splitFact(f);
-    const c = el("span", "chip " + cls);
-    if (category) c.append(el("b", null, category), " ");
-    c.append(text);
-    return c;
-  };
-  for (const f of lines(r.creates)) changes.append(chip("plus", f));
-  for (const f of lines(r.removes)) changes.append(chip("minus", f));
-  row.append(b, score, loss, lineEl);
-  if (changes.childElementCount) row.append(changes);
-  return row;
 }
 
 function showArrow(uci) {
@@ -873,6 +963,15 @@ $("plansBtn").addEventListener("click", async () => {
 });
 
 try { const saved = localStorage.getItem("chesscalator.player"); if (saved) $("playerName").value = saved; } catch { /* no storage */ }
+
+/* The tabs. The chosen one is remembered in this browser. */
+function showTab(name) {
+  for (const b of document.querySelectorAll(".tabbar [data-tab]")) b.setAttribute("aria-selected", String(b.dataset.tab === name));
+  for (const p of document.querySelectorAll(".tabpane")) p.hidden = p.dataset.pane !== name;
+  try { localStorage.setItem("chesscalator.tab", name); } catch { /* no storage */ }
+}
+for (const b of document.querySelectorAll(".tabbar [data-tab]")) b.addEventListener("click", () => showTab(b.dataset.tab));
+try { const t = localStorage.getItem("chesscalator.tab"); if (t) showTab(t); } catch { /* no storage */ }
 $("playerForm").addEventListener("submit", (e) => { e.preventDefault(); lookUpPlayer(); });
 
 /* A link or a reload carries the game in its hash. An unreadable hash is ignored, not trusted. */

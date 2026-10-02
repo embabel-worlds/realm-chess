@@ -4500,11 +4500,19 @@ function moveRecords(fen, a, player = "", color = "") {
     };
   });
 }
+function sanOf(fen, uci) {
+  if (!uci) return "";
+  try {
+    return new import_chess5.Chess(fen).move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] }).san;
+  } catch {
+    return uci;
+  }
+}
 function gameRecords(fen, games, url, player = "", color = "") {
   return (games ?? []).map((g) => ({
     gameId: `${fen}#${player}#${color}#${g.id}`,
     fen,
-    uci: g.uci ?? "",
+    uci: sanOf(fen, g.uci),
     white: g.white?.name ?? "",
     whiteElo: g.white?.rating ?? null,
     black: g.black?.name ?? "",

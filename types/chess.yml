@@ -233,7 +233,7 @@
       metadata:
         identity: "true"
     fen: "The position the game passed through."
-    uci: "The move played from it in this game."
+    uci: "The move played from it in this game, in notation (e.g. Ba4)."
     white: "White's name."
     whiteElo: "White's rating."
     black: "Black's name."
@@ -292,7 +292,7 @@
     player: "The Lichess username asked about."
     color: "The colour the player had."
     fen: "The position the game passed through."
-    uci: "The move played from it in this game."
+    uci: "The move played from it in this game, in notation (e.g. Ba4)."
     white: "White's name."
     whiteElo: "White's rating."
     black: "Black's name."

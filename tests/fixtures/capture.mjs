@@ -30,10 +30,12 @@ const LINES = ["", "e4", "e4 e5", "e4 c5", EXCHANGE];
 const calls = [];
 for (const line of LINES) {
   const fen = fenAfter(line);
-  calls.push(["BestMoves", { fen, withinCp: 50, maxLines: 5 }], ["ImbalancesOf", { fen }]);
+  calls.push(["BestMoves", { fen, withinCp: 50, maxLines: 5 }], ["ImbalancesOf", { fen }],
+    ["MastersAtPosition", { fen }], ["MasterGamesAtPosition", { fen }]);
   if (line) calls.push(["OpeningOfLine", { moves: line }], ["TheoryOfLine", { moves: line }]);
 }
-calls.push(["BestMoves", { fen: RUY, withinCp: 50, maxLines: 5 }], ["ImbalancesOf", { fen: RUY }], ["OpeningOf", { fen: RUY }]);
+calls.push(["BestMoves", { fen: RUY, withinCp: 50, maxLines: 5 }], ["ImbalancesOf", { fen: RUY }], ["OpeningOf", { fen: RUY }],
+  ["MastersAtPosition", { fen: RUY }], ["MasterGamesAtPosition", { fen: RUY }]);
 for (const fen of [fenAfter(""), RUY]) for (const withinCp of [20, 100]) calls.push(["BestMoves", { fen, withinCp, maxLines: 5 }]);
 calls.push(["PlansInPosition", { fen: RUY, level: "intermediate" }], ["PlansInLine", { moves: EXCHANGE, level: "intermediate" }],
   ["PlansInLine", { moves: EXCHANGE, level: "beginner" }]);
