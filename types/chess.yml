@@ -19,7 +19,8 @@
 #            ──MASTER_GAME─────▶ MasterGame   the top master games through it
 #            ──PLAYER_PLAYED───▶ PlayerMove   what one Lichess player played here (WHERE m.player = …)
 #            ──PLAYER_GAME─────▶ PlayerGame   their recent games through it
-#   (the four from the Lichess opening explorer; they need the LICHESS_TOKEN key in keys.yml)
+#            ──PLAYED_AT_RATING▶ RatedMove   how often each move is played by rating band and time control
+#   (the five from the Lichess opening explorer; they need the LICHESS_TOKEN key in keys.yml)
 
 - name: Position
   description: "A chess position, identified by its FEN. Rarely stored: pin one with `MATCH (p:Position {fen: $fen})` and its imbalances, opening, engine lines and plans are computed on demand. The FEN must be complete — six fields — because who is to move changes every score."
@@ -302,3 +303,32 @@
     month: "Month played, YYYY-MM."
     speed: "Time control class, for a Lichess game."
     url: "The game on Lichess."
+
+- name: RatedMove
+  description: "How often a move is played from a position on Lichess, in one rating band and one time control, and how it scores — for comparing what players at different levels or speeds choose. Reached from Position via PLAYED_AT_RATING. Pin ONE dimension and the other is compared across: `WHERE m.speed = 'blitz'` returns every rating band in blitz; `WHERE m.band = '1600'` returns every time control at 1600; pin neither and every band over all time controls comes back (speed `all`). `share` is the move's percent of the games from the position in that band and time control — compare shares, not raw game counts, across bands."
+  virtualJoins:
+    - anchorLabel: Position
+      relationship: PLAYED_AT_RATING
+      keyField: fen
+      recordKeyField: fen
+      producer: ratedMoves
+      maxAnchors: 5
+      description: "Move popularity by rating band and time control — for 'what do 1600s play here', 'how does this change from blitz to classical'."
+  properties:
+    rowId:
+      description: "Position, band, time control and move. Identity."
+      metadata:
+        identity: "true"
+    fen: "The position."
+    band: "Rating band floor as Lichess names it: 0, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2500. Filter on it."
+    bandLabel: "The band as a person reads it: under 1000, 1000-1199, …, 2500+."
+    speed: "Time control: ultraBullet, bullet, blitz, rapid, classical, correspondence — or all. Filter on it."
+    san: "The move in notation."
+    uci: "The move in UCI."
+    games: "Games in which it was played, in this band and time control."
+    share: "Its percent of all games from the position in this band and time control."
+    whiteWinPct: "Percent won by White."
+    drawPct: "Percent drawn."
+    blackWinPct: "Percent won by Black."
+    scoreForMover: "Points per game for the side that played it."
+    bandGames: "All games from the position in this band and time control."

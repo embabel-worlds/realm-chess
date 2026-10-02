@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-10-02T16:18:41.657Z",
+  "generatedAt": "2026-10-02T16:54:36.227Z",
   "entries": [
     {
       "namespace": "chess",
@@ -759,6 +759,89 @@
             "oppositeSideCastling",
             "oppositeColouredBishops",
             "detail"
+          ]
+        }
+      }
+    },
+    {
+      "namespace": "chess",
+      "name": "ratedMoves",
+      "description": "How often each move is played from a position by rating band and time control on Lichess, and how it scores.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "fens": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "filters": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fens"
+        ]
+      },
+      "outputSchema": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "rowId": {
+              "type": "string"
+            },
+            "fen": {
+              "type": "string"
+            },
+            "band": {
+              "type": "string"
+            },
+            "bandLabel": {
+              "type": "string"
+            },
+            "speed": {
+              "type": "string"
+            },
+            "san": {
+              "type": "string"
+            },
+            "uci": {
+              "type": "string"
+            },
+            "games": {
+              "type": "number"
+            },
+            "share": {
+              "type": "number"
+            },
+            "whiteWinPct": {
+              "type": "number"
+            },
+            "drawPct": {
+              "type": "number"
+            },
+            "blackWinPct": {
+              "type": "number"
+            },
+            "scoreForMover": {
+              "type": "number"
+            },
+            "bandGames": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "rowId",
+            "fen",
+            "band",
+            "bandLabel",
+            "speed",
+            "san",
+            "uci",
+            "games",
+            "bandGames"
           ]
         }
       }

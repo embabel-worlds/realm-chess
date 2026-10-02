@@ -37,6 +37,7 @@ for (const line of LINES) {
 calls.push(["BestMoves", { fen: RUY, withinCp: 50, maxLines: 5 }], ["ImbalancesOf", { fen: RUY }], ["OpeningOf", { fen: RUY }],
   ["MastersAtPosition", { fen: RUY }], ["MasterGamesAtPosition", { fen: RUY }]);
 for (const fen of [fenAfter(""), RUY]) for (const withinCp of [20, 100]) calls.push(["BestMoves", { fen, withinCp, maxLines: 5 }]);
+calls.push(["MovesByRating", { fen: fenAfter("e4"), speed: "blitz", minShare: 3 }], ["MovesByTimeControl", { fen: fenAfter("e4"), band: "1600", minShare: 3 }]);
 calls.push(["PlansInPosition", { fen: RUY, level: "intermediate" }], ["PlansInLine", { moves: EXCHANGE, level: "intermediate" }],
   ["PlansInLine", { moves: EXCHANGE, level: "beginner" }]);
 

@@ -22,6 +22,23 @@ paths:
           content:
             application/json:
               schema: { type: object, additionalProperties: true }
+  /lichess:
+    get:
+      operationId: lichessExplorer
+      summary: What Lichess players played from a position, filtered by rating band and time control, and how each move scored.
+      parameters:
+        - { name: fen, in: query, required: true, schema: { type: string } }
+        - { name: ratings, in: query, required: false, schema: { type: string }, description: "Comma-separated band floors: 0,1000,1200,1400,1600,1800,2000,2200,2500" }
+        - { name: speeds, in: query, required: false, schema: { type: string }, description: "Comma-separated: ultraBullet,bullet,blitz,rapid,classical,correspondence" }
+        - { name: moves, in: query, required: false, schema: { type: integer } }
+        - { name: topGames, in: query, required: false, schema: { type: integer } }
+        - { name: recentGames, in: query, required: false, schema: { type: integer } }
+      responses:
+        "200":
+          description: Move statistics for the filtered games.
+          content:
+            application/json:
+              schema: { type: object, additionalProperties: true }
   /player:
     get:
       operationId: playerExplorer

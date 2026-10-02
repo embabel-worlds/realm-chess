@@ -52,6 +52,7 @@ exports:
   - MasterGame
   - PlayerMove
   - PlayerGame
+  - RatedMove
   - BestMoves
   - ImbalancesOf
   - OpeningOf
@@ -63,6 +64,8 @@ exports:
   - MasterGamesAtPosition
   - PlayerAtPosition
   - PlayerGamesAtPosition
+  - MovesByRating
+  - MovesByTimeControl
   # A realm with an exports list loads only the skills named in it; leave this out and the
   # skill is dropped at load with nothing but a debug line to say so.
   - chess-plans

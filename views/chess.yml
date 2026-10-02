@@ -191,3 +191,47 @@
     RETURN g.white AS white, toInteger(g.whiteElo) AS whiteElo, g.black AS black, toInteger(g.blackElo) AS blackElo,
            g.result AS result, g.speed AS speed, g.month AS month, g.uci AS movePlayed, g.url AS url
     ORDER BY month DESC
+
+- name: MovesByRating
+  description: "How the moves played from a position change with rating: for one time control, each move's share of games in every Lichess rating band, from under 1000 to 2500+, with how it scored. Answers 'what do 1600s play here compared with 2200s', 'is Bxc6 a club-player move'. `speed` is a time control, or `all`. Needs the Lichess key; a new position takes several seconds (one request per band), then it is cached."
+  params:
+    fen:
+      type: string
+      default: "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4"
+      description: "The position, as a complete FEN."
+    speed:
+      type: string
+      default: "blitz"
+      description: "ultraBullet, bullet, blitz, rapid, classical, correspondence — or all."
+    minShare:
+      type: int
+      default: 3
+      description: "Leave out moves under this percent of games in a band."
+  cypher: |
+    MATCH (p:Position {fen: $fen})-[:PLAYED_AT_RATING]->(m:RatedMove)
+    WHERE m.speed = $speed AND toFloat(m.share) >= $minShare
+    RETURN toInteger(m.band) AS band, m.bandLabel AS rating, m.san AS move, toFloat(m.share) AS pctOfGames,
+           toInteger(m.games) AS games, m.scoreForMover AS scored
+    ORDER BY band, pctOfGames DESC
+
+- name: MovesByTimeControl
+  description: "How the moves played from a position change with time control: for one Lichess rating band, each move's share of games in every time control from ultrabullet to correspondence, with how it scored. Answers 'do people play this differently in blitz and classical'. Needs the Lichess key."
+  params:
+    fen:
+      type: string
+      default: "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4"
+      description: "The position, as a complete FEN."
+    band:
+      type: string
+      default: "1600"
+      description: "The rating band's floor: 0, 1000, 1200, 1400, 1600, 1800, 2000, 2200 or 2500."
+    minShare:
+      type: int
+      default: 3
+      description: "Leave out moves under this percent of games in a time control."
+  cypher: |
+    MATCH (p:Position {fen: $fen})-[:PLAYED_AT_RATING]->(m:RatedMove)
+    WHERE m.band = $band AND toFloat(m.share) >= $minShare
+    RETURN m.speed AS timeControl, m.san AS move, toFloat(m.share) AS pctOfGames,
+           toInteger(m.games) AS games, m.scoreForMover AS scored
+    ORDER BY timeControl, pctOfGames DESC

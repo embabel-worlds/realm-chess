@@ -375,3 +375,23 @@ test("the tabs switch, and the chosen one is remembered", async ({ page }) => {
   await page.reload();
   await expect(page.locator('.tabpane[data-pane="theory"]')).toBeVisible();
 });
+
+test("popularity compares a move's share across rating bands, or across time controls", async ({ page }) => {
+  await open(page, {}, {}, link("e4", 1));
+  await expect(moves(page).first()).toBeVisible();
+  await tab(page, "popularity");
+  await expect(page.locator("#popBandLabel")).toBeHidden();
+  await page.selectOption("#popSpeed", "blitz");
+  await page.click("#popBtn");
+  const rows = rowsOf(key("MovesByRating", { fen: E4, speed: "blitz", minShare: 3 }));
+  const bands = new Set(rows.map((r) => r.rating));
+  await expect(page.locator("table.popgrid tr").first().locator("th")).toHaveCount(bands.size + 1);
+  const top = rows.reduce((a, b) => (b.pctOfGames > a.pctOfGames ? b : a));
+  await expect(page.locator(`table.popgrid tr[data-move="${top.move}"]`)).toContainText(`${Math.round(top.pctOfGames)}%`);
+  await page.selectOption("#popAxis", "speed");
+  await expect(page.locator("#popSpeedLabel")).toBeHidden();
+  await expect(page.locator("#popBandLabel")).toBeVisible();
+  await page.click("#popBtn");
+  const speeds = new Set(rowsOf(key("MovesByTimeControl", { fen: E4, band: "1600", minShare: 3 })).map((r) => r.timeControl));
+  await expect(page.locator("table.popgrid tr").first().locator("th")).toHaveCount(speeds.size + 1);
+});

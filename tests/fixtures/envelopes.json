@@ -1,6 +1,6 @@
 {
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\",\"maxLines\":5,\"withinCp\":50}": {
-  "executionId": "exec_37a53d8f-ee78-45fa-8051-a19e142eb237",
+  "executionId": "exec_49de63d8-8eb1-41e0-b810-05405be39101",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -86,13 +86,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 3171,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 22,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:ImbalancesOf:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\"}": {
-  "executionId": "exec_fb330353-0548-4818-8bac-6afeb3f81504",
+  "executionId": "exec_d19aab98-026b-4842-a232-cee722d2abd8",
   "operationId": "ImbalancesOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -118,13 +118,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1374,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 15,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:MastersAtPosition:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\"}": {
-  "executionId": "exec_bedd1ce9-5ab1-44ff-8e36-450857de83c9",
+  "executionId": "exec_8612c1cc-ae6c-475d-9cc3-8e83eedf7a45",
   "operationId": "MastersAtPosition",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -255,19 +255,39 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 2118,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 54,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:MasterGamesAtPosition:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\"}": {
-  "executionId": "exec_30f9f995-4960-460e-84f2-7c5bda744921",
+  "executionId": "exec_342ac477-c0e1-42c4-9ca3-65a36f20842d",
   "operationId": "MasterGamesAtPosition",
   "contractVersion": "1",
   "status": "SUCCEEDED",
   "outcome": "OK",
   "outputType": "rows",
   "data": [
+   {
+    "white": "Carlsen, Magnus",
+    "whiteElo": 2863,
+    "black": "Caruana, Fabiano",
+    "blackElo": 2835,
+    "result": "½-½",
+    "year": 2020,
+    "movePlayed": "d4",
+    "url": "https://lichess.org/3TYWndOb"
+   },
+   {
+    "white": "Carlsen, Magnus",
+    "whiteElo": 2863,
+    "black": "Caruana, Fabiano",
+    "blackElo": 2835,
+    "result": "½-½",
+    "year": 2020,
+    "movePlayed": "e4",
+    "url": "https://lichess.org/bbp4jgEb"
+   },
    {
     "white": "Caruana, Fabiano",
     "whiteElo": 2835,
@@ -285,8 +305,28 @@
     "blackElo": 2835,
     "result": "½-½",
     "year": 2020,
+    "movePlayed": "c4",
+    "url": "https://lichess.org/51EhMpIT"
+   },
+   {
+    "white": "Carlsen, Magnus",
+    "whiteElo": 2863,
+    "black": "Caruana, Fabiano",
+    "blackElo": 2835,
+    "result": "1-0",
+    "year": 2020,
     "movePlayed": "d4",
-    "url": "https://lichess.org/3TYWndOb"
+    "url": "https://lichess.org/x1LIXL4e"
+   },
+   {
+    "white": "Carlsen, Magnus",
+    "whiteElo": 2863,
+    "black": "Caruana, Fabiano",
+    "blackElo": 2835,
+    "result": "1-0",
+    "year": 2020,
+    "movePlayed": "d4",
+    "url": "https://lichess.org/1izZGjZm"
    },
    {
     "white": "Carlsen, Magnus",
@@ -313,30 +353,10 @@
     "whiteElo": 2863,
     "black": "Caruana, Fabiano",
     "blackElo": 2835,
-    "result": "½-½",
-    "year": 2020,
-    "movePlayed": "e4",
-    "url": "https://lichess.org/bbp4jgEb"
-   },
-   {
-    "white": "Carlsen, Magnus",
-    "whiteElo": 2863,
-    "black": "Caruana, Fabiano",
-    "blackElo": 2835,
     "result": "1-0",
     "year": 2020,
     "movePlayed": "c4",
     "url": "https://lichess.org/hhaSI6SI"
-   },
-   {
-    "white": "Carlsen, Magnus",
-    "whiteElo": 2863,
-    "black": "Caruana, Fabiano",
-    "blackElo": 2835,
-    "result": "1-0",
-    "year": 2020,
-    "movePlayed": "d4",
-    "url": "https://lichess.org/1izZGjZm"
    },
    {
     "white": "Caruana, Fabiano",
@@ -347,46 +367,6 @@
     "year": 2020,
     "movePlayed": "d4",
     "url": "https://lichess.org/cOKsoa1P"
-   },
-   {
-    "white": "Carlsen, Magnus",
-    "whiteElo": 2863,
-    "black": "Caruana, Fabiano",
-    "blackElo": 2835,
-    "result": "½-½",
-    "year": 2020,
-    "movePlayed": "c4",
-    "url": "https://lichess.org/51EhMpIT"
-   },
-   {
-    "white": "Carlsen, Magnus",
-    "whiteElo": 2863,
-    "black": "Caruana, Fabiano",
-    "blackElo": 2835,
-    "result": "1-0",
-    "year": 2020,
-    "movePlayed": "d4",
-    "url": "https://lichess.org/x1LIXL4e"
-   },
-   {
-    "white": "Carlsen, M.",
-    "whiteElo": 2882,
-    "black": "Caruana, F.",
-    "blackElo": 2818,
-    "result": "½-½",
-    "year": 2019,
-    "movePlayed": "e4",
-    "url": "https://lichess.org/jYSkjcuG"
-   },
-   {
-    "white": "Caruana, F.",
-    "whiteElo": 2818,
-    "black": "Carlsen, M.",
-    "blackElo": 2882,
-    "result": "1-0",
-    "year": 2019,
-    "movePlayed": "e4",
-    "url": "https://lichess.org/Sxov6E94"
    },
    {
     "white": "Caruana, F.",
@@ -409,6 +389,26 @@
     "url": "https://lichess.org/QR5UbqUY"
    },
    {
+    "white": "Carlsen, M.",
+    "whiteElo": 2882,
+    "black": "Caruana, F.",
+    "blackElo": 2818,
+    "result": "½-½",
+    "year": 2019,
+    "movePlayed": "e4",
+    "url": "https://lichess.org/jYSkjcuG"
+   },
+   {
+    "white": "Caruana, F.",
+    "whiteElo": 2818,
+    "black": "Carlsen, M.",
+    "blackElo": 2882,
+    "result": "1-0",
+    "year": 2019,
+    "movePlayed": "e4",
+    "url": "https://lichess.org/Sxov6E94"
+   },
+   {
     "white": "Aronian, L.",
     "whiteElo": 2826,
     "black": "Carlsen, M.",
@@ -422,13 +422,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1679,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 17,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1\",\"maxLines\":5,\"withinCp\":50}": {
-  "executionId": "exec_77e861cc-e099-45fd-b46f-87dbb87a3ff3",
+  "executionId": "exec_c1b3885d-d110-4f05-bed0-2a8ce4cf2dde",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -514,13 +514,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 3475,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 18,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:ImbalancesOf:{\"fen\":\"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1\"}": {
-  "executionId": "exec_2a145683-e0e5-4341-8177-d044df7c4dc5",
+  "executionId": "exec_aeb1bc59-3764-4a68-b76e-0ea9d901f381",
   "operationId": "ImbalancesOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -546,13 +546,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1628,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 17,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:MastersAtPosition:{\"fen\":\"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1\"}": {
-  "executionId": "exec_6650aea2-4384-456c-912b-4a392e85e4fc",
+  "executionId": "exec_00c48335-4cd9-4e8a-bcb2-490f46d42eef",
   "operationId": "MastersAtPosition",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -683,39 +683,19 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1904,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 17,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:MasterGamesAtPosition:{\"fen\":\"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1\"}": {
-  "executionId": "exec_f63777a1-cf34-40a7-b129-d2fdd7bb86d3",
+  "executionId": "exec_54603997-1226-45b7-a42a-c6d80c731dc6",
   "operationId": "MasterGamesAtPosition",
   "contractVersion": "1",
   "status": "SUCCEEDED",
   "outcome": "OK",
   "outputType": "rows",
   "data": [
-   {
-    "white": "Caruana, Fabiano",
-    "whiteElo": 2835,
-    "black": "Carlsen, Magnus",
-    "blackElo": 2863,
-    "result": "1-0",
-    "year": 2020,
-    "movePlayed": "c5",
-    "url": "https://lichess.org/dWxgnyeJ"
-   },
-   {
-    "white": "Caruana, Fabiano",
-    "whiteElo": 2835,
-    "black": "Carlsen, Magnus",
-    "blackElo": 2863,
-    "result": "1-0",
-    "year": 2020,
-    "movePlayed": "c5",
-    "url": "https://lichess.org/kMy4yNaa"
-   },
    {
     "white": "Carlsen, Magnus",
     "whiteElo": 2863,
@@ -733,8 +713,8 @@
     "blackElo": 2863,
     "result": "0-1",
     "year": 2020,
-    "movePlayed": "c5",
-    "url": "https://lichess.org/EKYBu9FE"
+    "movePlayed": "e5",
+    "url": "https://lichess.org/9fWPVa8k"
    },
    {
     "white": "Caruana, Fabiano",
@@ -744,37 +724,7 @@
     "result": "1-0",
     "year": 2020,
     "movePlayed": "c5",
-    "url": "https://lichess.org/zruFgG89"
-   },
-   {
-    "white": "Carlsen, Magnus",
-    "whiteElo": 2863,
-    "black": "Caruana, Fabiano",
-    "blackElo": 2835,
-    "result": "1-0",
-    "year": 2020,
-    "movePlayed": "e5",
-    "url": "https://lichess.org/e7d46fUY"
-   },
-   {
-    "white": "Carlsen, Magnus",
-    "whiteElo": 2863,
-    "black": "Caruana, Fabiano",
-    "blackElo": 2835,
-    "result": "½-½",
-    "year": 2020,
-    "movePlayed": "e5",
-    "url": "https://lichess.org/rH54IBK6"
-   },
-   {
-    "white": "Caruana, Fabiano",
-    "whiteElo": 2835,
-    "black": "Carlsen, Magnus",
-    "blackElo": 2863,
-    "result": "½-½",
-    "year": 2020,
-    "movePlayed": "e5",
-    "url": "https://lichess.org/RoHsVV05"
+    "url": "https://lichess.org/kMy4yNaa"
    },
    {
     "white": "Caruana, Fabiano",
@@ -785,6 +735,26 @@
     "year": 2020,
     "movePlayed": "e5",
     "url": "https://lichess.org/91pLjvXB"
+   },
+   {
+    "white": "Caruana, Fabiano",
+    "whiteElo": 2835,
+    "black": "Carlsen, Magnus",
+    "blackElo": 2863,
+    "result": "0-1",
+    "year": 2020,
+    "movePlayed": "c5",
+    "url": "https://lichess.org/EKYBu9FE"
+   },
+   {
+    "white": "Carlsen, Magnus",
+    "whiteElo": 2863,
+    "black": "Caruana, Fabiano",
+    "blackElo": 2835,
+    "result": "½-½",
+    "year": 2020,
+    "movePlayed": "e5",
+    "url": "https://lichess.org/rH54IBK6"
    },
    {
     "white": "Carlsen, Magnus",
@@ -804,6 +774,26 @@
     "result": "1-0",
     "year": 2020,
     "movePlayed": "c5",
+    "url": "https://lichess.org/dWxgnyeJ"
+   },
+   {
+    "white": "Caruana, Fabiano",
+    "whiteElo": 2835,
+    "black": "Carlsen, Magnus",
+    "blackElo": 2863,
+    "result": "1-0",
+    "year": 2020,
+    "movePlayed": "c5",
+    "url": "https://lichess.org/zruFgG89"
+   },
+   {
+    "white": "Caruana, Fabiano",
+    "whiteElo": 2835,
+    "black": "Carlsen, Magnus",
+    "blackElo": 2863,
+    "result": "1-0",
+    "year": 2020,
+    "movePlayed": "c5",
     "url": "https://lichess.org/bMJKX8YH"
    },
    {
@@ -811,10 +801,20 @@
     "whiteElo": 2835,
     "black": "Carlsen, Magnus",
     "blackElo": 2863,
-    "result": "0-1",
+    "result": "½-½",
     "year": 2020,
     "movePlayed": "e5",
-    "url": "https://lichess.org/9fWPVa8k"
+    "url": "https://lichess.org/RoHsVV05"
+   },
+   {
+    "white": "Carlsen, Magnus",
+    "whiteElo": 2863,
+    "black": "Caruana, Fabiano",
+    "blackElo": 2835,
+    "result": "1-0",
+    "year": 2020,
+    "movePlayed": "e5",
+    "url": "https://lichess.org/e7d46fUY"
    },
    {
     "white": "Caruana, F.",
@@ -827,16 +827,6 @@
     "url": "https://lichess.org/Sxov6E94"
    },
    {
-    "white": "Caruana, F.",
-    "whiteElo": 2818,
-    "black": "Carlsen, M.",
-    "blackElo": 2882,
-    "result": "1-0",
-    "year": 2019,
-    "movePlayed": "c5",
-    "url": "https://lichess.org/boLujJkB"
-   },
-   {
     "white": "Carlsen, M.",
     "whiteElo": 2882,
     "black": "Caruana, F.",
@@ -845,18 +835,28 @@
     "year": 2019,
     "movePlayed": "e5",
     "url": "https://lichess.org/jYSkjcuG"
+   },
+   {
+    "white": "Caruana, F.",
+    "whiteElo": 2818,
+    "black": "Carlsen, M.",
+    "blackElo": 2882,
+    "result": "1-0",
+    "year": 2019,
+    "movePlayed": "c5",
+    "url": "https://lichess.org/boLujJkB"
    }
   ],
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1747,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 13,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:OpeningOfLine:{\"moves\":\"e4\"}": {
-  "executionId": "exec_cd721062-b148-48ec-a305-dcd62e572934",
+  "executionId": "exec_73d22353-57ea-4756-aa9e-d88a0f22195e",
   "operationId": "OpeningOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -874,13 +874,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1744,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 37,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:TheoryOfLine:{\"moves\":\"e4\"}": {
-  "executionId": "exec_b5f22e49-8cf6-495e-9b15-5bc93f0a4bbe",
+  "executionId": "exec_fa03d0d9-7d5c-43a0-ab09-0b37a70976b2",
   "operationId": "TheoryOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -899,13 +899,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 2119,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 28,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\",\"maxLines\":5,\"withinCp\":50}": {
-  "executionId": "exec_406ca4be-add8-459d-80af-ec279a55c655",
+  "executionId": "exec_20cf77cf-b58c-45ce-8b17-c0477ebb7508",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -991,13 +991,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 4858,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 16,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:ImbalancesOf:{\"fen\":\"rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\"}": {
-  "executionId": "exec_bf4e8aed-383c-4a38-9e88-03a54683d6fc",
+  "executionId": "exec_aa0fe85f-a870-43a9-a558-1b933a8d9f34",
   "operationId": "ImbalancesOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1023,13 +1023,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1563,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 11,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:MastersAtPosition:{\"fen\":\"rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\"}": {
-  "executionId": "exec_b221b177-758d-41b1-9602-7c4d8a7a1a0b",
+  "executionId": "exec_61f09499-cba8-4126-a5f4-0416721eb6f3",
   "operationId": "MastersAtPosition",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1160,13 +1160,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1845,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 16,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:MasterGamesAtPosition:{\"fen\":\"rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\"}": {
-  "executionId": "exec_50b37ce7-d2a3-420f-9687-a8868ef8491b",
+  "executionId": "exec_e9a2a4b9-84bf-4248-9417-143fed81dd2c",
   "operationId": "MasterGamesAtPosition",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1174,34 +1174,14 @@
   "outputType": "rows",
   "data": [
    {
-    "white": "Caruana, Fabiano",
-    "whiteElo": 2835,
-    "black": "Carlsen, Magnus",
-    "blackElo": 2863,
-    "result": "½-½",
-    "year": 2020,
-    "movePlayed": "Nf3",
-    "url": "https://lichess.org/91pLjvXB"
-   },
-   {
-    "white": "Caruana, Fabiano",
-    "whiteElo": 2835,
-    "black": "Carlsen, Magnus",
-    "blackElo": 2863,
-    "result": "½-½",
-    "year": 2020,
-    "movePlayed": "Nf3",
-    "url": "https://lichess.org/RoHsVV05"
-   },
-   {
     "white": "Carlsen, Magnus",
     "whiteElo": 2863,
     "black": "Caruana, Fabiano",
     "blackElo": 2835,
-    "result": "½-½",
+    "result": "1-0",
     "year": 2020,
     "movePlayed": "Nf3",
-    "url": "https://lichess.org/rH54IBK6"
+    "url": "https://lichess.org/e7d46fUY"
    },
    {
     "white": "Caruana, Fabiano",
@@ -1218,10 +1198,20 @@
     "whiteElo": 2863,
     "black": "Caruana, Fabiano",
     "blackElo": 2835,
-    "result": "1-0",
+    "result": "½-½",
     "year": 2020,
     "movePlayed": "Nf3",
-    "url": "https://lichess.org/aGwGgxqM"
+    "url": "https://lichess.org/rH54IBK6"
+   },
+   {
+    "white": "Caruana, Fabiano",
+    "whiteElo": 2835,
+    "black": "Carlsen, Magnus",
+    "blackElo": 2863,
+    "result": "½-½",
+    "year": 2020,
+    "movePlayed": "Nf3",
+    "url": "https://lichess.org/91pLjvXB"
    },
    {
     "white": "Carlsen, Magnus",
@@ -1231,7 +1221,17 @@
     "result": "1-0",
     "year": 2020,
     "movePlayed": "Nf3",
-    "url": "https://lichess.org/e7d46fUY"
+    "url": "https://lichess.org/aGwGgxqM"
+   },
+   {
+    "white": "Caruana, Fabiano",
+    "whiteElo": 2835,
+    "black": "Carlsen, Magnus",
+    "blackElo": 2863,
+    "result": "½-½",
+    "year": 2020,
+    "movePlayed": "Nf3",
+    "url": "https://lichess.org/RoHsVV05"
    },
    {
     "white": "Carlsen, M.",
@@ -1242,26 +1242,6 @@
     "year": 2019,
     "movePlayed": "Nf3",
     "url": "https://lichess.org/ezRQfr7f"
-   },
-   {
-    "white": "Caruana, F.",
-    "whiteElo": 2819,
-    "black": "Carlsen, M.",
-    "blackElo": 2875,
-    "result": "½-½",
-    "year": 2019,
-    "movePlayed": "Nf3",
-    "url": "https://lichess.org/hFigNtet"
-   },
-   {
-    "white": "Caruana, F.",
-    "whiteElo": 2818,
-    "black": "Carlsen, M.",
-    "blackElo": 2882,
-    "result": "1-0",
-    "year": 2019,
-    "movePlayed": "Nf3",
-    "url": "https://lichess.org/Sxov6E94"
    },
    {
     "white": "Carlsen, M.",
@@ -1284,6 +1264,26 @@
     "url": "https://lichess.org/jYSkjcuG"
    },
    {
+    "white": "Caruana, F.",
+    "whiteElo": 2819,
+    "black": "Carlsen, M.",
+    "blackElo": 2875,
+    "result": "½-½",
+    "year": 2019,
+    "movePlayed": "Nf3",
+    "url": "https://lichess.org/hFigNtet"
+   },
+   {
+    "white": "Caruana, F.",
+    "whiteElo": 2818,
+    "black": "Carlsen, M.",
+    "blackElo": 2882,
+    "result": "1-0",
+    "year": 2019,
+    "movePlayed": "Nf3",
+    "url": "https://lichess.org/Sxov6E94"
+   },
+   {
     "white": "Anand, V.",
     "whiteElo": 2804,
     "black": "Carlsen, M.",
@@ -1294,16 +1294,6 @@
     "url": "https://lichess.org/dq0gohtF"
    },
    {
-    "white": "Caruana, F.",
-    "whiteElo": 2805,
-    "black": "Carlsen, M.",
-    "blackElo": 2876,
-    "result": "1-0",
-    "year": 2015,
-    "movePlayed": "Nf3",
-    "url": "https://lichess.org/LSVO85Cp"
-   },
-   {
     "white": "Anand, V.",
     "whiteElo": 2804,
     "black": "Carlsen, M.",
@@ -1312,6 +1302,16 @@
     "year": 2015,
     "movePlayed": "Nf3",
     "url": "https://lichess.org/d72HWRCs"
+   },
+   {
+    "white": "Caruana, F.",
+    "whiteElo": 2805,
+    "black": "Carlsen, M.",
+    "blackElo": 2876,
+    "result": "1-0",
+    "year": 2015,
+    "movePlayed": "Nf3",
+    "url": "https://lichess.org/LSVO85Cp"
    },
    {
     "white": "Carlsen, M.",
@@ -1327,13 +1327,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1793,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 16,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:OpeningOfLine:{\"moves\":\"e4 e5\"}": {
-  "executionId": "exec_900f6555-68d4-4a62-a922-4a485c010582",
+  "executionId": "exec_ab1afaa6-3149-446d-9b6c-32d7121935ed",
   "operationId": "OpeningOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1351,13 +1351,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1554,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 14,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:TheoryOfLine:{\"moves\":\"e4 e5\"}": {
-  "executionId": "exec_41179539-411b-46a8-86c7-089f00065934",
+  "executionId": "exec_944522c6-f2cc-4718-896f-c5ac8beb051a",
   "operationId": "TheoryOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1376,13 +1376,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1761,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 14,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\",\"maxLines\":5,\"withinCp\":50}": {
-  "executionId": "exec_d74d10e5-d67f-4a10-ab70-bd90b1ce422e",
+  "executionId": "exec_c0fa5911-b7aa-4601-8a3f-3242f7cd6a71",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1468,13 +1468,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 4561,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 17,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:ImbalancesOf:{\"fen\":\"rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\"}": {
-  "executionId": "exec_a8820440-302e-4ffc-b61a-9f3bc00733d8",
+  "executionId": "exec_7104dbce-5c09-46b1-a1fb-e0df5436d546",
   "operationId": "ImbalancesOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1500,13 +1500,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1675,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 13,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:MastersAtPosition:{\"fen\":\"rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\"}": {
-  "executionId": "exec_a92311d3-976d-4190-8ac6-72bc08237768",
+  "executionId": "exec_78c9eb37-2d63-4bd6-9aa8-c2b1d3c6541c",
   "operationId": "MastersAtPosition",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1637,39 +1637,19 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 2036,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 16,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:MasterGamesAtPosition:{\"fen\":\"rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\"}": {
-  "executionId": "exec_452667ac-5b76-4f6f-bb45-ed95b0bb8ef8",
+  "executionId": "exec_5190782d-1b09-4ec2-94da-c0f1a4a4ef6c",
   "operationId": "MasterGamesAtPosition",
   "contractVersion": "1",
   "status": "SUCCEEDED",
   "outcome": "OK",
   "outputType": "rows",
   "data": [
-   {
-    "white": "Caruana, Fabiano",
-    "whiteElo": 2835,
-    "black": "Carlsen, Magnus",
-    "blackElo": 2863,
-    "result": "1-0",
-    "year": 2020,
-    "movePlayed": "Nf3",
-    "url": "https://lichess.org/dWxgnyeJ"
-   },
-   {
-    "white": "Caruana, Fabiano",
-    "whiteElo": 2835,
-    "black": "Carlsen, Magnus",
-    "blackElo": 2863,
-    "result": "0-1",
-    "year": 2020,
-    "movePlayed": "Nf3",
-    "url": "https://lichess.org/EKYBu9FE"
-   },
    {
     "white": "Caruana, Fabiano",
     "whiteElo": 2835,
@@ -1692,16 +1672,6 @@
    },
    {
     "white": "Caruana, Fabiano",
-    "whiteElo": 2835,
-    "black": "Carlsen, Magnus",
-    "blackElo": 2863,
-    "result": "1-0",
-    "year": 2020,
-    "movePlayed": "Nf3",
-    "url": "https://lichess.org/kMy4yNaa"
-   },
-   {
-    "white": "Caruana, Fabiano",
     "whiteElo": 2828,
     "black": "Carlsen, Magnus",
     "blackElo": 2863,
@@ -1709,6 +1679,16 @@
     "year": 2020,
     "movePlayed": "Nf3",
     "url": "https://lichess.org/7K23Cm3D"
+   },
+   {
+    "white": "Caruana, Fabiano",
+    "whiteElo": 2835,
+    "black": "Carlsen, Magnus",
+    "blackElo": 2863,
+    "result": "0-1",
+    "year": 2020,
+    "movePlayed": "Nf3",
+    "url": "https://lichess.org/EKYBu9FE"
    },
    {
     "white": "Carlsen, Magnus",
@@ -1719,6 +1699,26 @@
     "year": 2020,
     "movePlayed": "Nf3",
     "url": "https://lichess.org/bbp4jgEb"
+   },
+   {
+    "white": "Caruana, Fabiano",
+    "whiteElo": 2835,
+    "black": "Carlsen, Magnus",
+    "blackElo": 2863,
+    "result": "1-0",
+    "year": 2020,
+    "movePlayed": "Nf3",
+    "url": "https://lichess.org/kMy4yNaa"
+   },
+   {
+    "white": "Caruana, Fabiano",
+    "whiteElo": 2835,
+    "black": "Carlsen, Magnus",
+    "blackElo": 2863,
+    "result": "1-0",
+    "year": 2020,
+    "movePlayed": "Nf3",
+    "url": "https://lichess.org/dWxgnyeJ"
    },
    {
     "white": "Caruana, F.",
@@ -1771,16 +1771,6 @@
     "url": "https://lichess.org/9hRmnVXz"
    },
    {
-    "white": "Caruana, F.",
-    "whiteElo": 2820,
-    "black": "Carlsen, M.",
-    "blackElo": 2862,
-    "result": "0-1",
-    "year": 2015,
-    "movePlayed": "Nf3",
-    "url": "https://lichess.org/XAwc5zJ8"
-   },
-   {
     "white": "Carlsen, M.",
     "whiteElo": 2853,
     "black": "Topalov, V.",
@@ -1789,6 +1779,16 @@
     "year": 2015,
     "movePlayed": "Nf3",
     "url": "https://lichess.org/CA4oVUCt"
+   },
+   {
+    "white": "Caruana, F.",
+    "whiteElo": 2820,
+    "black": "Carlsen, M.",
+    "blackElo": 2862,
+    "result": "0-1",
+    "year": 2015,
+    "movePlayed": "Nf3",
+    "url": "https://lichess.org/XAwc5zJ8"
    },
    {
     "white": "Caruana, F.",
@@ -1804,13 +1804,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1851,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 17,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:OpeningOfLine:{\"moves\":\"e4 c5\"}": {
-  "executionId": "exec_204b7d66-9020-4383-a0dd-014f5fab5963",
+  "executionId": "exec_57b36f77-a7a7-45e4-8e01-1c43f3fd26f7",
   "operationId": "OpeningOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1828,13 +1828,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1491,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 15,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:TheoryOfLine:{\"moves\":\"e4 c5\"}": {
-  "executionId": "exec_f19cbc4d-5d41-490a-977a-a118b52b5bc1",
+  "executionId": "exec_c0b11592-1c43-41ae-9600-09d52f8cdbe5",
   "operationId": "TheoryOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1853,13 +1853,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 2019,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 18,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"maxLines\":5,\"withinCp\":50}": {
-  "executionId": "exec_1aca030d-15da-4a69-91cd-fe9e543a1787",
+  "executionId": "exec_12d38b97-ec3b-4357-85ed-050ba56c5773",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1945,13 +1945,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 33,
+   "durationMs": 16,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:ImbalancesOf:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\"}": {
-  "executionId": "exec_b369321b-ac85-4d48-bfca-8681a83fb2b7",
+  "executionId": "exec_dc0d0395-007c-4e7c-8144-9f927d9d0fa4",
   "operationId": "ImbalancesOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -1977,13 +1977,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 22,
+   "durationMs": 16,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:MastersAtPosition:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\"}": {
-  "executionId": "exec_51512a8a-5335-4ded-9be8-8f73b50327bc",
+  "executionId": "exec_7d156c14-0f51-45a2-9b35-55e3f3086328",
   "operationId": "MastersAtPosition",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -2051,16 +2051,6 @@
     "averageRating": 2405
    },
    {
-    "move": "Be7",
-    "uci": "f8e7",
-    "games": 1,
-    "whiteWinPct": 100,
-    "drawPct": 0,
-    "blackWinPct": 0,
-    "scoreForMover": 0,
-    "averageRating": 2345
-   },
-   {
     "move": "b6",
     "uci": "b7b6",
     "games": 1,
@@ -2069,18 +2059,28 @@
     "blackWinPct": 0,
     "scoreForMover": 0,
     "averageRating": 2702
+   },
+   {
+    "move": "Be7",
+    "uci": "f8e7",
+    "games": 1,
+    "whiteWinPct": 100,
+    "drawPct": 0,
+    "blackWinPct": 0,
+    "scoreForMover": 0,
+    "averageRating": 2345
    }
   ],
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 25,
+   "durationMs": 17,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:MasterGamesAtPosition:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\"}": {
-  "executionId": "exec_0c519a4a-b846-48ae-b6ac-f25fed618ab3",
+  "executionId": "exec_0fae51c6-fca2-4f3d-9d36-f564f38574f7",
   "operationId": "MasterGamesAtPosition",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -2241,13 +2241,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 26,
+   "durationMs": 15,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:OpeningOfLine:{\"moves\":\"e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1\"}": {
-  "executionId": "exec_e9d4af43-2fd2-4e37-b551-68871eb634b1",
+  "executionId": "exec_ae527cdf-b1a1-41f9-9686-35cb0796b90e",
   "operationId": "OpeningOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -2265,13 +2265,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1426,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 11,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:TheoryOfLine:{\"moves\":\"e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1\"}": {
-  "executionId": "exec_2662ab42-b1a4-4572-904e-ecb811f35982",
+  "executionId": "exec_110c5ff9-d553-48a8-a7f2-3b4a4c3eac76",
   "operationId": "TheoryOfLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -2290,13 +2290,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1768,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 15,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:OpeningOf:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\"}": {
-  "executionId": "exec_1c73560e-15b3-4830-93a2-8bde9401e550",
+  "executionId": "exec_64efb16d-38c5-4f36-8d84-6c6068da648f",
   "operationId": "OpeningOf",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -2306,13 +2306,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 1582,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 19,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\",\"maxLines\":5,\"withinCp\":20}": {
-  "executionId": "exec_39b6c4d0-71fd-4941-8c10-6f3c057cfb0e",
+  "executionId": "exec_71d36ed8-41f7-4b6c-83df-3b8459467814",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -2398,13 +2398,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 46,
+   "durationMs": 18,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\",\"maxLines\":5,\"withinCp\":100}": {
-  "executionId": "exec_d52fb93c-d6e3-4b6a-900f-384f76ca4d7d",
+  "executionId": "exec_e80e4295-3f78-40dd-8eaa-4bc346a0c953",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -2490,13 +2490,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 37,
+   "durationMs": 17,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"maxLines\":5,\"withinCp\":20}": {
-  "executionId": "exec_edc0c9a5-9702-4ea8-b895-b6c105e51980",
+  "executionId": "exec_3217d3e3-4434-4e3f-9e93-2fe383affa0a",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -2552,13 +2552,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 44,
+   "durationMs": 14,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
  "view:BestMoves:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"maxLines\":5,\"withinCp\":100}": {
-  "executionId": "exec_e8fd2eb7-79f8-4448-90a1-f74e59924e41",
+  "executionId": "exec_cde369a2-c2aa-4cd4-9260-b242855614c7",
   "operationId": "BestMoves",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -2644,13 +2644,799 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 43,
+   "durationMs": 23,
    "externalCalls": 0,
    "cacheHit": true
   }
  },
+ "view:MovesByRating:{\"fen\":\"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1\",\"minShare\":3,\"speed\":\"blitz\"}": {
+  "executionId": "exec_3feb3b71-9362-4962-bb81-ef3c5c4a366f",
+  "operationId": "MovesByRating",
+  "contractVersion": "1",
+  "status": "SUCCEEDED",
+  "outcome": "OK",
+  "outputType": "rows",
+  "data": [
+   {
+    "band": 0,
+    "rating": "under 1000",
+    "move": "e5",
+    "pctOfGames": 60.4,
+    "games": 66685896,
+    "scored": 0.471
+   },
+   {
+    "band": 0,
+    "rating": "under 1000",
+    "move": "d5",
+    "pctOfGames": 12.1,
+    "games": 13381269,
+    "scored": 0.487
+   },
+   {
+    "band": 0,
+    "rating": "under 1000",
+    "move": "e6",
+    "pctOfGames": 5.9,
+    "games": 6559855,
+    "scored": 0.493
+   },
+   {
+    "band": 0,
+    "rating": "under 1000",
+    "move": "c5",
+    "pctOfGames": 5.5,
+    "games": 6098119,
+    "scored": 0.505
+   },
+   {
+    "band": 0,
+    "rating": "under 1000",
+    "move": "c6",
+    "pctOfGames": 3.6,
+    "games": 3941104,
+    "scored": 0.504
+   },
+   {
+    "band": 1000,
+    "rating": "1000-1199",
+    "move": "e5",
+    "pctOfGames": 58.3,
+    "games": 121438807,
+    "scored": 0.472
+   },
+   {
+    "band": 1000,
+    "rating": "1000-1199",
+    "move": "d5",
+    "pctOfGames": 11.1,
+    "games": 23086881,
+    "scored": 0.48
+   },
+   {
+    "band": 1000,
+    "rating": "1000-1199",
+    "move": "c5",
+    "pctOfGames": 8.6,
+    "games": 17886178,
+    "scored": 0.506
+   },
+   {
+    "band": 1000,
+    "rating": "1000-1199",
+    "move": "e6",
+    "pctOfGames": 6.7,
+    "games": 14001330,
+    "scored": 0.496
+   },
+   {
+    "band": 1000,
+    "rating": "1000-1199",
+    "move": "c6",
+    "pctOfGames": 4.5,
+    "games": 9323426,
+    "scored": 0.503
+   },
+   {
+    "band": 1200,
+    "rating": "1200-1399",
+    "move": "e5",
+    "pctOfGames": 54.4,
+    "games": 179301388,
+    "scored": 0.472
+   },
+   {
+    "band": 1200,
+    "rating": "1200-1399",
+    "move": "c5",
+    "pctOfGames": 11.9,
+    "games": 39209753,
+    "scored": 0.506
+   },
+   {
+    "band": 1200,
+    "rating": "1200-1399",
+    "move": "d5",
+    "pctOfGames": 9.8,
+    "games": 32205677,
+    "scored": 0.484
+   },
+   {
+    "band": 1200,
+    "rating": "1200-1399",
+    "move": "e6",
+    "pctOfGames": 7.9,
+    "games": 25898833,
+    "scored": 0.5
+   },
+   {
+    "band": 1200,
+    "rating": "1200-1399",
+    "move": "c6",
+    "pctOfGames": 5.3,
+    "games": 17519998,
+    "scored": 0.507
+   },
+   {
+    "band": 1400,
+    "rating": "1400-1599",
+    "move": "e5",
+    "pctOfGames": 47.8,
+    "games": 208491397,
+    "scored": 0.471
+   },
+   {
+    "band": 1400,
+    "rating": "1400-1599",
+    "move": "c5",
+    "pctOfGames": 15.6,
+    "games": 68132850,
+    "scored": 0.506
+   },
+   {
+    "band": 1400,
+    "rating": "1400-1599",
+    "move": "d5",
+    "pctOfGames": 9.5,
+    "games": 41389251,
+    "scored": 0.492
+   },
+   {
+    "band": 1400,
+    "rating": "1400-1599",
+    "move": "e6",
+    "pctOfGames": 9.2,
+    "games": 40225739,
+    "scored": 0.503
+   },
+   {
+    "band": 1400,
+    "rating": "1400-1599",
+    "move": "c6",
+    "pctOfGames": 6.2,
+    "games": 27199702,
+    "scored": 0.51
+   },
+   {
+    "band": 1400,
+    "rating": "1400-1599",
+    "move": "g6",
+    "pctOfGames": 3,
+    "games": 12942818,
+    "scored": 0.494
+   },
+   {
+    "band": 1400,
+    "rating": "1400-1599",
+    "move": "d6",
+    "pctOfGames": 3,
+    "games": 12956721,
+    "scored": 0.485
+   },
+   {
+    "band": 1600,
+    "rating": "1600-1799",
+    "move": "e5",
+    "pctOfGames": 39.4,
+    "games": 188029850,
+    "scored": 0.469
+   },
+   {
+    "band": 1600,
+    "rating": "1600-1799",
+    "move": "c5",
+    "pctOfGames": 20.2,
+    "games": 96652957,
+    "scored": 0.502
+   },
+   {
+    "band": 1600,
+    "rating": "1600-1799",
+    "move": "e6",
+    "pctOfGames": 10.7,
+    "games": 51009371,
+    "scored": 0.501
+   },
+   {
+    "band": 1600,
+    "rating": "1600-1799",
+    "move": "d5",
+    "pctOfGames": 9.7,
+    "games": 46514786,
+    "scored": 0.496
+   },
+   {
+    "band": 1600,
+    "rating": "1600-1799",
+    "move": "c6",
+    "pctOfGames": 7.4,
+    "games": 35324138,
+    "scored": 0.508
+   },
+   {
+    "band": 1600,
+    "rating": "1600-1799",
+    "move": "d6",
+    "pctOfGames": 3.4,
+    "games": 16132028,
+    "scored": 0.49
+   },
+   {
+    "band": 1600,
+    "rating": "1600-1799",
+    "move": "g6",
+    "pctOfGames": 3.4,
+    "games": 16105216,
+    "scored": 0.488
+   },
+   {
+    "band": 1800,
+    "rating": "1800-1999",
+    "move": "e5",
+    "pctOfGames": 30.6,
+    "games": 124459374,
+    "scored": 0.471
+   },
+   {
+    "band": 1800,
+    "rating": "1800-1999",
+    "move": "c5",
+    "pctOfGames": 25.1,
+    "games": 101923953,
+    "scored": 0.497
+   },
+   {
+    "band": 1800,
+    "rating": "1800-1999",
+    "move": "e6",
+    "pctOfGames": 12.1,
+    "games": 49107436,
+    "scored": 0.497
+   },
+   {
+    "band": 1800,
+    "rating": "1800-1999",
+    "move": "d5",
+    "pctOfGames": 9.7,
+    "games": 39469307,
+    "scored": 0.496
+   },
+   {
+    "band": 1800,
+    "rating": "1800-1999",
+    "move": "c6",
+    "pctOfGames": 8.8,
+    "games": 35870115,
+    "scored": 0.503
+   },
+   {
+    "band": 1800,
+    "rating": "1800-1999",
+    "move": "d6",
+    "pctOfGames": 4.2,
+    "games": 16985988,
+    "scored": 0.493
+   },
+   {
+    "band": 1800,
+    "rating": "1800-1999",
+    "move": "g6",
+    "pctOfGames": 3.4,
+    "games": 13728389,
+    "scored": 0.486
+   },
+   {
+    "band": 2000,
+    "rating": "2000-2199",
+    "move": "c5",
+    "pctOfGames": 30,
+    "games": 64869144,
+    "scored": 0.493
+   },
+   {
+    "band": 2000,
+    "rating": "2000-2199",
+    "move": "e5",
+    "pctOfGames": 23.2,
+    "games": 50150830,
+    "scored": 0.477
+   },
+   {
+    "band": 2000,
+    "rating": "2000-2199",
+    "move": "e6",
+    "pctOfGames": 12.9,
+    "games": 27819919,
+    "scored": 0.488
+   },
+   {
+    "band": 2000,
+    "rating": "2000-2199",
+    "move": "c6",
+    "pctOfGames": 10.4,
+    "games": 22576361,
+    "scored": 0.494
+   },
+   {
+    "band": 2000,
+    "rating": "2000-2199",
+    "move": "d5",
+    "pctOfGames": 8.3,
+    "games": 18034994,
+    "scored": 0.492
+   },
+   {
+    "band": 2000,
+    "rating": "2000-2199",
+    "move": "d6",
+    "pctOfGames": 5.2,
+    "games": 11204776,
+    "scored": 0.491
+   },
+   {
+    "band": 2000,
+    "rating": "2000-2199",
+    "move": "g6",
+    "pctOfGames": 3.2,
+    "games": 6973997,
+    "scored": 0.489
+   },
+   {
+    "band": 2000,
+    "rating": "2000-2199",
+    "move": "Nf6",
+    "pctOfGames": 3.1,
+    "games": 6655812,
+    "scored": 0.511
+   },
+   {
+    "band": 2200,
+    "rating": "2200-2499",
+    "move": "c5",
+    "pctOfGames": 35.7,
+    "games": 27563318,
+    "scored": 0.484
+   },
+   {
+    "band": 2200,
+    "rating": "2200-2499",
+    "move": "e5",
+    "pctOfGames": 18.6,
+    "games": 14386614,
+    "scored": 0.481
+   },
+   {
+    "band": 2200,
+    "rating": "2200-2499",
+    "move": "e6",
+    "pctOfGames": 12.7,
+    "games": 9789454,
+    "scored": 0.481
+   },
+   {
+    "band": 2200,
+    "rating": "2200-2499",
+    "move": "c6",
+    "pctOfGames": 11.7,
+    "games": 9013192,
+    "scored": 0.481
+   },
+   {
+    "band": 2200,
+    "rating": "2200-2499",
+    "move": "d5",
+    "pctOfGames": 6.1,
+    "games": 4700626,
+    "scored": 0.489
+   },
+   {
+    "band": 2200,
+    "rating": "2200-2499",
+    "move": "d6",
+    "pctOfGames": 5.4,
+    "games": 4178774,
+    "scored": 0.482
+   },
+   {
+    "band": 2200,
+    "rating": "2200-2499",
+    "move": "g6",
+    "pctOfGames": 3.5,
+    "games": 2667165,
+    "scored": 0.496
+   },
+   {
+    "band": 2200,
+    "rating": "2200-2499",
+    "move": "Nf6",
+    "pctOfGames": 3.4,
+    "games": 2650397,
+    "scored": 0.495
+   },
+   {
+    "band": 2500,
+    "rating": "2500+",
+    "move": "c5",
+    "pctOfGames": 38.1,
+    "games": 2323701,
+    "scored": 0.474
+   },
+   {
+    "band": 2500,
+    "rating": "2500+",
+    "move": "e5",
+    "pctOfGames": 19.3,
+    "games": 1176673,
+    "scored": 0.479
+   },
+   {
+    "band": 2500,
+    "rating": "2500+",
+    "move": "c6",
+    "pctOfGames": 12.6,
+    "games": 769164,
+    "scored": 0.475
+   },
+   {
+    "band": 2500,
+    "rating": "2500+",
+    "move": "e6",
+    "pctOfGames": 12,
+    "games": 730413,
+    "scored": 0.476
+   },
+   {
+    "band": 2500,
+    "rating": "2500+",
+    "move": "d6",
+    "pctOfGames": 4.7,
+    "games": 287407,
+    "scored": 0.475
+   },
+   {
+    "band": 2500,
+    "rating": "2500+",
+    "move": "d5",
+    "pctOfGames": 4.4,
+    "games": 266982,
+    "scored": 0.491
+   },
+   {
+    "band": 2500,
+    "rating": "2500+",
+    "move": "g6",
+    "pctOfGames": 3.6,
+    "games": 220543,
+    "scored": 0.483
+   }
+  ],
+  "warnings": [],
+  "error": null,
+  "metrics": {
+   "durationMs": 11831,
+   "externalCalls": 1,
+   "cacheHit": null
+  }
+ },
+ "view:MovesByTimeControl:{\"band\":\"1600\",\"fen\":\"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1\",\"minShare\":3}": {
+  "executionId": "exec_86e3367b-ed8f-4995-884a-d446ce235ca0",
+  "operationId": "MovesByTimeControl",
+  "contractVersion": "1",
+  "status": "SUCCEEDED",
+  "outcome": "OK",
+  "outputType": "rows",
+  "data": [
+   {
+    "timeControl": "blitz",
+    "move": "e5",
+    "pctOfGames": 39.4,
+    "games": 188029850,
+    "scored": 0.469
+   },
+   {
+    "timeControl": "blitz",
+    "move": "c5",
+    "pctOfGames": 20.2,
+    "games": 96652957,
+    "scored": 0.502
+   },
+   {
+    "timeControl": "blitz",
+    "move": "e6",
+    "pctOfGames": 10.7,
+    "games": 51009371,
+    "scored": 0.501
+   },
+   {
+    "timeControl": "blitz",
+    "move": "d5",
+    "pctOfGames": 9.7,
+    "games": 46514786,
+    "scored": 0.496
+   },
+   {
+    "timeControl": "blitz",
+    "move": "c6",
+    "pctOfGames": 7.4,
+    "games": 35324138,
+    "scored": 0.508
+   },
+   {
+    "timeControl": "blitz",
+    "move": "g6",
+    "pctOfGames": 3.4,
+    "games": 16105216,
+    "scored": 0.488
+   },
+   {
+    "timeControl": "blitz",
+    "move": "d6",
+    "pctOfGames": 3.4,
+    "games": 16132028,
+    "scored": 0.49
+   },
+   {
+    "timeControl": "bullet",
+    "move": "e5",
+    "pctOfGames": 27.9,
+    "games": 79855931,
+    "scored": 0.475
+   },
+   {
+    "timeControl": "bullet",
+    "move": "c5",
+    "pctOfGames": 18.5,
+    "games": 52975625,
+    "scored": 0.501
+   },
+   {
+    "timeControl": "bullet",
+    "move": "d5",
+    "pctOfGames": 14.7,
+    "games": 42095201,
+    "scored": 0.504
+   },
+   {
+    "timeControl": "bullet",
+    "move": "e6",
+    "pctOfGames": 12.5,
+    "games": 35720537,
+    "scored": 0.505
+   },
+   {
+    "timeControl": "bullet",
+    "move": "c6",
+    "pctOfGames": 8.4,
+    "games": 24078366,
+    "scored": 0.509
+   },
+   {
+    "timeControl": "bullet",
+    "move": "g6",
+    "pctOfGames": 5.4,
+    "games": 15604645,
+    "scored": 0.497
+   },
+   {
+    "timeControl": "bullet",
+    "move": "d6",
+    "pctOfGames": 4.5,
+    "games": 12983531,
+    "scored": 0.497
+   },
+   {
+    "timeControl": "bullet",
+    "move": "b6",
+    "pctOfGames": 3.2,
+    "games": 9177441,
+    "scored": 0.489
+   },
+   {
+    "timeControl": "classical",
+    "move": "e5",
+    "pctOfGames": 50.5,
+    "games": 6565852,
+    "scored": 0.461
+   },
+   {
+    "timeControl": "classical",
+    "move": "c5",
+    "pctOfGames": 19.6,
+    "games": 2555230,
+    "scored": 0.524
+   },
+   {
+    "timeControl": "classical",
+    "move": "e6",
+    "pctOfGames": 9.3,
+    "games": 1203482,
+    "scored": 0.508
+   },
+   {
+    "timeControl": "classical",
+    "move": "d5",
+    "pctOfGames": 5.9,
+    "games": 769608,
+    "scored": 0.471
+   },
+   {
+    "timeControl": "classical",
+    "move": "c6",
+    "pctOfGames": 5.7,
+    "games": 745486,
+    "scored": 0.527
+   },
+   {
+    "timeControl": "correspondence",
+    "move": "e5",
+    "pctOfGames": 52,
+    "games": 798299,
+    "scored": 0.459
+   },
+   {
+    "timeControl": "correspondence",
+    "move": "c5",
+    "pctOfGames": 16.5,
+    "games": 253554,
+    "scored": 0.552
+   },
+   {
+    "timeControl": "correspondence",
+    "move": "e6",
+    "pctOfGames": 7.6,
+    "games": 116025,
+    "scored": 0.52
+   },
+   {
+    "timeControl": "correspondence",
+    "move": "d5",
+    "pctOfGames": 7.3,
+    "games": 112715,
+    "scored": 0.455
+   },
+   {
+    "timeControl": "correspondence",
+    "move": "c6",
+    "pctOfGames": 5.8,
+    "games": 89398,
+    "scored": 0.556
+   },
+   {
+    "timeControl": "rapid",
+    "move": "e5",
+    "pctOfGames": 50.1,
+    "games": 81987729,
+    "scored": 0.467
+   },
+   {
+    "timeControl": "rapid",
+    "move": "c5",
+    "pctOfGames": 17.4,
+    "games": 28425488,
+    "scored": 0.512
+   },
+   {
+    "timeControl": "rapid",
+    "move": "e6",
+    "pctOfGames": 9.1,
+    "games": 14918863,
+    "scored": 0.503
+   },
+   {
+    "timeControl": "rapid",
+    "move": "d5",
+    "pctOfGames": 7.1,
+    "games": 11587364,
+    "scored": 0.484
+   },
+   {
+    "timeControl": "rapid",
+    "move": "c6",
+    "pctOfGames": 6.4,
+    "games": 10548382,
+    "scored": 0.511
+   },
+   {
+    "timeControl": "rapid",
+    "move": "d6",
+    "pctOfGames": 3,
+    "games": 4834856,
+    "scored": 0.484
+   },
+   {
+    "timeControl": "ultraBullet",
+    "move": "d5",
+    "pctOfGames": 19.9,
+    "games": 1398162,
+    "scored": 0.558
+   },
+   {
+    "timeControl": "ultraBullet",
+    "move": "e6",
+    "pctOfGames": 17.7,
+    "games": 1241135,
+    "scored": 0.535
+   },
+   {
+    "timeControl": "ultraBullet",
+    "move": "e5",
+    "pctOfGames": 13.8,
+    "games": 965682,
+    "scored": 0.444
+   },
+   {
+    "timeControl": "ultraBullet",
+    "move": "Nf6",
+    "pctOfGames": 9.3,
+    "games": 649947,
+    "scored": 0.577
+   },
+   {
+    "timeControl": "ultraBullet",
+    "move": "c6",
+    "pctOfGames": 8.7,
+    "games": 610038,
+    "scored": 0.581
+   },
+   {
+    "timeControl": "ultraBullet",
+    "move": "g6",
+    "pctOfGames": 8.1,
+    "games": 568580,
+    "scored": 0.552
+   },
+   {
+    "timeControl": "ultraBullet",
+    "move": "d6",
+    "pctOfGames": 7.1,
+    "games": 495694,
+    "scored": 0.534
+   },
+   {
+    "timeControl": "ultraBullet",
+    "move": "c5",
+    "pctOfGames": 6.2,
+    "games": 433749,
+    "scored": 0.51
+   },
+   {
+    "timeControl": "ultraBullet",
+    "move": "Nc6",
+    "pctOfGames": 3.4,
+    "games": 236913,
+    "scored": 0.528
+   }
+  ],
+  "warnings": [],
+  "error": null,
+  "metrics": {
+   "durationMs": 8018,
+   "externalCalls": 1,
+   "cacheHit": null
+  }
+ },
  "view:PlansInPosition:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"level\":\"intermediate\"}": {
-  "executionId": "exec_cc08bbfe-af3f-4cf0-b76f-3aecb83f50f7",
+  "executionId": "exec_e427a8e8-fbab-44f8-bca4-5f346e196b20",
   "operationId": "PlansInPosition",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -2739,13 +3525,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 12548,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 68,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:PlansInLine:{\"level\":\"intermediate\",\"moves\":\"e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1\"}": {
-  "executionId": "exec_ac2606c5-7199-414f-9433-b51a68498378",
+  "executionId": "exec_f6cbda7b-f486-46b2-ba03-ec5ff267280c",
   "operationId": "PlansInLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -2834,13 +3620,13 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 13095,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 58,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  },
  "view:PlansInLine:{\"level\":\"beginner\",\"moves\":\"e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1\"}": {
-  "executionId": "exec_a273cd79-a444-4198-9972-092284ddaf66",
+  "executionId": "exec_61168a49-cf9c-45c0-b7f0-7a9a0c4d3f4a",
   "operationId": "PlansInLine",
   "contractVersion": "1",
   "status": "SUCCEEDED",
@@ -2903,9 +3689,9 @@
   "warnings": [],
   "error": null,
   "metrics": {
-   "durationMs": 10313,
-   "externalCalls": 1,
-   "cacheHit": null
+   "durationMs": 29,
+   "externalCalls": 0,
+   "cacheHit": true
   }
  }
 }

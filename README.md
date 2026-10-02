@@ -22,7 +22,18 @@ RETURN i.facts, o.name, collect(c.san)
 
 and `(p)-[:HAS_PLAN]->(:Plan)` for the plans. A game played from the start is also a
 `GameLine` — its moves — with `IN_OPENING` (the deepest name along it, kept past the book),
-`HAS_THEORY` (the wikibook's page for it) and `HAS_PLAN` (plans told that name and theory). The same answers are REST calls and are what the
+`HAS_THEORY` (the wikibook's page for it) and `HAS_PLAN` (plans told that name and theory).
+
+With a Lichess token (declared in `keys.yml`; the console asks for it) a position also has
+`MASTERS_PLAYED` / `MASTER_GAME` (master practice), `PLAYER_PLAYED` / `PLAYER_GAME` (one Lichess
+player's choices) and `PLAYED_AT_RATING` (each move's share of games by rating band and time
+control). Comparing moves across rating bands in blitz is one query:
+
+```cypher
+MATCH (:Position {fen: $fen})-[:PLAYED_AT_RATING]->(m:RatedMove)
+WHERE m.speed = 'blitz' AND toFloat(m.share) >= 5
+RETURN m.bandLabel, m.san, m.share, m.scoreForMover ORDER BY toInteger(m.band), m.share DESC
+``` The same answers are REST calls and are what the
 **Chesscalator** app shows.
 
 ## How it is put together

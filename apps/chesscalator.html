@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/assets/extensions/markers/markers.css">
 <script src="/api/v1/apps-runtime/v1/embabel.js"></script>
 <script type="application/embabel-app+json">
-{"version":1,"name":"chesscalator","requires":{"lenses":[],"views":["BestMoves","ImbalancesOf","OpeningOf","OpeningOfLine","TheoryOfLine","PlansInPosition","PlansInLine","MastersAtPosition","MasterGamesAtPosition","PlayerAtPosition"],"realms":["chess"],"namespaces":[]}}
+{"version":1,"name":"chesscalator","requires":{"lenses":[],"views":["BestMoves","ImbalancesOf","OpeningOf","OpeningOfLine","TheoryOfLine","PlansInPosition","PlansInLine","MastersAtPosition","MasterGamesAtPosition","PlayerAtPosition","MovesByRating","MovesByTimeControl"],"realms":["chess"],"namespaces":[]}}
 </script>
 <style>
   :root{--bg:#0a0a0f;--surface:#13131a;--surface2:#191922;--border:#1e1e2e;--cyan:#63c0f5;--purple:#9f77cd;
@@ -39,6 +39,8 @@
   .tabbar button[aria-selected="true"]{color:var(--text);border-bottom-color:var(--cyan);}
   .tabbar button .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--cyan);margin-left:6px;vertical-align:middle;}
   .tabpane[hidden]{display:none;}
+  /* `hidden` must win over the flex display labels and boxes are given. */
+  [hidden]{display:none !important;}
   table.movestab{width:100%;border-collapse:collapse;font-size:.84rem;font-variant-numeric:tabular-nums;}
   table.movestab th{text-align:left;color:var(--dim);font-weight:500;font-size:.72rem;padding:4px 6px;border-bottom:1px solid var(--border);white-space:nowrap;}
   table.movestab td{padding:5px 6px;border-bottom:1px dashed var(--border);vertical-align:middle;}
@@ -49,6 +51,12 @@
   table.movestab button.more{background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--dim);cursor:pointer;font-size:.74rem;padding:1px 7px;white-space:nowrap;}
   table.movestab button.more:hover{color:var(--cyan);}
   .line{font-family:ui-monospace,Menlo,monospace;font-size:.76rem;color:var(--dim);margin-bottom:4px;}
+  .popwrap{overflow-x:auto;}
+  table.popgrid{border-collapse:collapse;font-size:.8rem;font-variant-numeric:tabular-nums;margin-top:6px;}
+  table.popgrid th{color:var(--dim);font-weight:500;font-size:.7rem;padding:3px 6px;text-align:center;white-space:nowrap;}
+  table.popgrid th.mv{text-align:left;}
+  table.popgrid td{padding:4px 5px;text-align:center;border:1px solid var(--bg);min-width:38px;}
+  table.popgrid td.mv{text-align:left;font-family:ui-monospace,Menlo,monospace;color:var(--cyan);border:0;}
   .panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
   #board{width:100%;aspect-ratio:1/1;}
   /* The board in Embabel's colours: the theme's teal accent for the dark squares, a cool pale grey
@@ -219,6 +227,7 @@
     <section class="panel tabs-col" aria-label="Analysis">
       <div class="tabbar" role="tablist">
         <button role="tab" data-tab="moves" aria-selected="true">Moves</button>
+        <button role="tab" data-tab="popularity" aria-selected="false">Popularity</button>
         <button role="tab" data-tab="plans" aria-selected="false">Plans</button>
         <button role="tab" data-tab="theory" aria-selected="false">Theory<span class="dot" id="theoryDot" hidden></span></button>
         <button role="tab" data-tab="player" aria-selected="false">Player</button>
@@ -240,6 +249,39 @@
           <summary class="note">Top master games from here</summary>
           <div class="games" id="masterGames"></div>
         </details>
+      </div>
+
+      <div class="tabpane" data-pane="popularity" hidden>
+        <p class="note">How often each move is chosen here on Lichess, by rating band or by time control — the share of games
+          in each column, and how it scored on hover. A new position takes about ten seconds (one request to Lichess per
+          column), then it is instant.</p>
+        <div class="toolbar">
+          <label class="inline">Compare across
+            <select id="popAxis">
+              <option value="rating" selected>rating bands</option>
+              <option value="speed">time controls</option>
+            </select>
+          </label>
+          <label class="inline" id="popSpeedLabel">in
+            <select id="popSpeed">
+              <option value="all">all time controls</option>
+              <option value="bullet">bullet</option>
+              <option value="blitz" selected>blitz</option>
+              <option value="rapid">rapid</option>
+              <option value="classical">classical</option>
+              <option value="correspondence">correspondence</option>
+            </select>
+          </label>
+          <label class="inline" id="popBandLabel" hidden>at
+            <select id="popBand">
+              <option value="0">under 1000</option><option value="1000">1000-1199</option><option value="1200">1200-1399</option>
+              <option value="1400">1400-1599</option><option value="1600" selected>1600-1799</option><option value="1800">1800-1999</option>
+              <option value="2000">2000-2199</option><option value="2200">2200-2499</option><option value="2500">2500+</option>
+            </select>
+          </label>
+          <button class="btn primary" id="popBtn" disabled>Compare</button>
+        </div>
+        <div id="popularity"></div>
       </div>
 
       <div class="tabpane" data-pane="plans" hidden>
@@ -309,6 +351,11 @@
       <code>MasterGame</code>, from the Lichess masters database (over-the-board, 2200+), through the realm's Lichess
       key. Merged into the Moves table by move, beside the engine: what masters played here, how often, and how it
       scored. Cached for 30 days.</li>
+    <li><b>Popularity</b> — <code>PLAYED_AT_RATING</code> → <code>RatedMove</code>: each move's share of Lichess
+      games from the position in each rating band (or time control). The query pins one dimension —
+      <code>WHERE m.speed = 'blitz'</code> or <code>WHERE m.band = '1600'</code> — which is pushed down to the verb; the
+      other is fetched one Lichess request per column, a second apart, so a new position takes about ten seconds.
+      Cached for 30 days.</li>
     <li><b>A Lichess player</b> — <code>PLAYER_PLAYED</code> → <code>PlayerMove</code>, narrowed with
       <code>WHERE m.player = … AND m.color = …</code>, which is pushed down to the explorer.</li>
     <li><b>Tactics</b> — also computed from the board and listed first: check, mate in one, a mate threat, a piece
@@ -349,6 +396,13 @@ RETURN t.title AS page, t.url AS url, t.theory AS theory, toInteger(t.pliesCover
 RETURN m.san AS move, m.uci AS uci, toInteger(m.games) AS games, m.whiteWinPct AS whiteWinPct,
        m.drawPct AS drawPct, m.blackWinPct AS blackWinPct, m.scoreForMover AS scoreForMover, ...
 ORDER BY games DESC</pre>
+  <p><b>MovesByRating</b> — <code>fen</code>, <code>speed</code>, <code>minShare</code>; <b>MovesByTimeControl</b> —
+    <code>fen</code>, <code>band</code>, <code>minShare</code>.</p>
+<pre>MATCH (p:Position {fen: $fen})-[:PLAYED_AT_RATING]->(m:RatedMove)
+WHERE m.speed = $speed AND toFloat(m.share) >= $minShare
+RETURN toInteger(m.band) AS band, m.bandLabel AS rating, m.san AS move, toFloat(m.share) AS pctOfGames,
+       toInteger(m.games) AS games, m.scoreForMover AS scored
+ORDER BY band, pctOfGames DESC</pre>
   <p><b>PlayerAtPosition</b> — <code>fen</code>, <code>player</code>, <code>color</code>.</p>
 <pre>MATCH (p:Position {fen: $fen})-[:PLAYER_PLAYED]->(m:PlayerMove)
 WHERE m.player = $player AND m.color = $color
@@ -382,6 +436,8 @@ ORDER BY side DESC, priority</pre>
     <li><b>A plan that seems wrong</b> — plans are a model's judgement, and the battery of test positions shipped with
       the realm shows how often it matches theory. The imbalances and the engine's numbers are computed and
       authoritative; a plan that contradicts them is the plan's fault. Report it with the FEN.</li>
+    <li><b>"Lichess is rate-limiting"</b> — too many new positions asked too quickly; Lichess asks for a minute's
+      quiet. Answers already fetched are unaffected.</li>
     <li><b>No master numbers</b> — the chess realm has no Lichess token yet (add one in its settings), or no master
       game reached the position.</li>
     <li><b>A player look-up fails</b> — Lichess answers player questions as a stream (NDJSON), which this appliance's
@@ -581,6 +637,8 @@ function analyse(userMove) {
   $("theoryDot").hidden = true;
   $("mastersNote").textContent = "";
   $("gamesBox").hidden = true;
+  $("popularity").replaceChildren();
+  $("popBtn").disabled = true;
   currentRows = [];
   if (statusLine()) {
     state("analysis", "No moves to analyse: the game is over.");
@@ -634,6 +692,7 @@ async function ask(seq, userMove) {
     : `${fmt(best.whiteCp)} \u00b7 depth ${best.depth}`;
   renderMovesTable(rows, masters, masterGames);
   $("plansBtn").disabled = false;
+  $("popBtn").disabled = false;
   if (userMove) maybeEngineMove(seq);
 }
 
@@ -784,6 +843,71 @@ function renderMovesTable(engineRows, masters, masterGames) {
     d.append(a, ` ${x.result}, ${x.year ?? ""}${x.movePlayed ? ` \u00b7 ${x.movePlayed}` : ""}`);
     return d;
   }));
+}
+
+/*
+ * Popularity: moves down the side, rating bands (or time controls) across, each cell the move's
+ * share of that column's games, shaded by it. Asked for on request only — a new position costs
+ * one Lichess request per column.
+ */
+const SPEED_ORDER = ["ultraBullet", "bullet", "blitz", "rapid", "classical", "correspondence"];
+function popAxisChanged() {
+  const byRating = $("popAxis").value === "rating";
+  $("popSpeedLabel").hidden = !byRating;
+  $("popBandLabel").hidden = byRating;
+  $("popularity").replaceChildren();
+}
+
+async function comparePopularity() {
+  const seq = analysisSeq;
+  const byRating = $("popAxis").value === "rating";
+  $("popBtn").disabled = true;
+  state("popularity", "Asking Lichess, one column at a time \u2014 about ten seconds for a new position.", "note");
+  try {
+    const env = byRating
+      ? await embabel.views.invoke("MovesByRating", { fen: game.fen(), speed: $("popSpeed").value, minShare: 3 }, inFlight ? { signal: inFlight.signal } : {})
+      : await embabel.views.invoke("MovesByTimeControl", { fen: game.fen(), band: $("popBand").value, minShare: 3 }, inFlight ? { signal: inFlight.signal } : {});
+    if (seq !== analysisSeq) return;
+    const rows = rowsOf(env);
+    if (rows.length === 0) return state("popularity", "No Lichess games from this position in that selection.", "note");
+    const colKey = (r) => (byRating ? r.rating : r.timeControl);
+    const cols = [...new Set(rows.map(colKey))];
+    if (byRating) cols.sort((a, b) => rows.find((r) => r.rating === a).band - rows.find((r) => r.rating === b).band);
+    else cols.sort((a, b) => SPEED_ORDER.indexOf(a) - SPEED_ORDER.indexOf(b));
+    const moves = [...new Set(rows.map((r) => r.move))]
+      .map((m) => ({ m, peak: Math.max(...rows.filter((r) => r.move === m).map((r) => r.pctOfGames)) }))
+      .sort((a, b) => b.peak - a.peak).slice(0, 8).map((x) => x.m);
+    const t = el("table", "popgrid");
+    const head = el("tr"); head.append(el("th", "mv", "Move"));
+    // Short headers ("1600", "<1000", "2500+") keep nine columns inside the panel; the range is the hover.
+    const short = (c) => (byRating ? (c === "under 1000" ? "<1000" : c.replace(/-\d+$/, "")) : c);
+    for (const c of cols) { const th = el("th", null, short(c)); th.title = c; head.append(th); }
+    t.append(head);
+    for (const m of moves) {
+      const tr = el("tr"); tr.dataset.move = m;
+      const mv = el("td", "mv", m);
+      tr.append(mv);
+      for (const c of cols) {
+        const r = rows.find((x) => x.move === m && colKey(x) === c);
+        const td = el("td", null, r ? `${Math.round(r.pctOfGames)}%` : "");
+        if (r) {
+          td.style.background = `rgba(99,192,201,${Math.min(0.85, r.pctOfGames / 100 + 0.05)})`;
+          td.style.color = r.pctOfGames > 55 ? "#06121c" : "";
+          td.title = `${m} in ${c}: ${r.games.toLocaleString()} games, scored ${Math.round((r.scored ?? 0) * 100)}% for the side that played it`;
+        }
+        tr.append(td);
+      }
+      t.append(tr);
+    }
+    const what = byRating ? `by rating, ${$("popSpeed").selectedOptions[0].textContent}` : `by time control, rated ${$("popBand").selectedOptions[0].textContent}`;
+    const wrap = el("div", "popwrap"); wrap.append(t);
+    $("popularity").replaceChildren(el("div", "note", `Share of Lichess games from this position, ${what}.`), wrap);
+  } catch (e) {
+    if (seq !== analysisSeq) return;
+    state("popularity", needsKey(e) ? "Popularity needs a Lichess token \u2014 add one in the chess realm's settings." : `Lichess could not be asked: ${failure(e)}`, needsKey(e) ? "note" : "error");
+  } finally {
+    if (seq === analysisSeq) $("popBtn").disabled = false;
+  }
 }
 
 /* What one Lichess player chose here, playing the side to move. Remembered in this browser. */
@@ -973,6 +1097,8 @@ function showTab(name) {
 for (const b of document.querySelectorAll(".tabbar [data-tab]")) b.addEventListener("click", () => showTab(b.dataset.tab));
 try { const t = localStorage.getItem("chesscalator.tab"); if (t) showTab(t); } catch { /* no storage */ }
 $("playerForm").addEventListener("submit", (e) => { e.preventDefault(); lookUpPlayer(); });
+$("popAxis").addEventListener("change", popAxisChanged);
+$("popBtn").addEventListener("click", comparePopularity);
 
 /* A link or a reload carries the game in its hash. An unreadable hash is ignored, not trusted. */
 function fromHash() {

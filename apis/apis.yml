@@ -21,4 +21,5 @@
     User-Agent: "embabel-realm-chess/0.4 (https://github.com/embabel-worlds/realm-chess)"
   operation-ids:
     - mastersExplorer
+    - lichessExplorer
     - playerExplorer

@@ -32,3 +32,20 @@ describe("the player filter pushed down from the query", () => {
     expect(playerFilter(undefined)).toBeNull();
   });
 });
+
+describe("which rating bands and time controls a query asks for", async () => {
+  const { ratedGrid } = await import("../src/api/chess");
+  it("a pinned time control compares every rating band", () => {
+    const g = ratedGrid("speed=blitz");
+    expect(g).toHaveLength(9);
+    expect(new Set(g.map((c) => c.speed))).toEqual(new Set(["blitz"]));
+  });
+  it("a pinned band compares every time control", () => {
+    expect(ratedGrid("band=1600").map((c) => c.speed)).toEqual(["ultraBullet", "bullet", "blitz", "rapid", "classical", "correspondence"]);
+  });
+  it("both pinned is one cell; neither is every band over all time controls", () => {
+    expect(ratedGrid("band=2200 speed=classical")).toEqual([{ band: "2200", speed: "classical" }]);
+    expect(ratedGrid("{filters}").every((c) => c.speed === "all")).toBe(true);
+    expect(ratedGrid("speed=all")).toHaveLength(9);
+  });
+});

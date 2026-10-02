@@ -609,7 +609,7 @@ export async function mastersAtPosition(
   for (const raw of args.fens ?? []) {
     const fen = raw.trim();
     legal(fen);
-    const a = explorerAnswer(await lichess.mastersExplorer({ fen, moves: 12, topGames: 15 }));
+    const a = explorerAnswer(await lichess.mastersExplorer({ fen, moves: 12, topGames: 15 }).catch((e) => { throw lichessRefusal(e); }));
     out.moves.push(...moveRecords(fen, a));
     out.games.push(...gameRecords(fen, a.topGames, (id) => `https://lichess.org/${id}`));
   }
@@ -644,9 +644,107 @@ export async function playerAtPosition(
   for (const raw of args.fens ?? []) {
     const fen = raw.trim();
     legal(fen);
-    const a = explorerAnswer(await lichess.playerExplorer({ player: who.player, color: who.color, fen, recentGames: 8 }));
+    const a = explorerAnswer(await lichess.playerExplorer({ player: who.player, color: who.color, fen, recentGames: 8 }).catch((e) => { throw lichessRefusal(e); }));
     out.moves.push(...moveRecords(fen, a, who.player, who.color));
     out.games.push(...gameRecords(fen, a.recentGames, (id) => `https://lichess.org/${id}`, who.player, who.color));
+  }
+  return out;
+}
+
+/* ── Popularity by rating band and time control, from the Lichess explorer's own games ── */
+
+export const BANDS = ["0", "1000", "1200", "1400", "1600", "1800", "2000", "2200", "2500"] as const;
+export const SPEEDS = ["ultraBullet", "bullet", "blitz", "rapid", "classical", "correspondence"] as const;
+const bandLabel = (b: string) => {
+  const i = BANDS.indexOf(b as (typeof BANDS)[number]);
+  if (b === "0") return "under 1000";
+  if (b === "2500") return "2500+";
+  return i >= 0 && i + 1 < BANDS.length ? `${b}-${Number(BANDS[i + 1]) - 1}` : b;
+};
+
+export interface RatedMoveRecord {
+  rowId: string; fen: string;
+  /** The band's floor as Lichess names it (0, 1000, …, 2500), and as a person reads it. */
+  band: string; bandLabel: string;
+  /** The time control, or `all` when the query did not pin one. */
+  speed: string;
+  san: string; uci: string; games: number;
+  /** This move's percent of all games from the position in this band and time control. */
+  share: number | null;
+  whiteWinPct: number | null; drawPct: number | null; blackWinPct: number | null;
+  scoreForMover: number | null;
+  /** Games from the position in this band and time control, all moves together. */
+  bandGames: number;
+}
+
+type ExplorerGatewayWithLichess = { lichess: { lichessExplorer(a: Record<string, unknown>): Promise<unknown> } };
+
+/*
+ * The band and time control arrive the way the plan level does — `WHERE m.band = '1600'` and
+ * `WHERE m.speed = 'blitz'` pushed down into `{filters}` as "band=1600 speed=blitz". Whichever is
+ * NOT pinned is the one compared across: pin the speed and every band is fetched; pin the band
+ * and every time control is; pin neither and every band is, over all time controls. One request
+ * per cell, one at a time — Lichess asks for no parallel requests on a token.
+ */
+export function ratedGrid(filters: string | undefined): { band: string; speed: string }[] {
+  const f = filters ?? "";
+  const band = f.match(/band=(\d{1,4})/)?.[1];
+  const speedRaw = f.match(/speed=([A-Za-z]+)/)?.[1];
+  const speed = speedRaw && speedRaw !== "all" ? speedRaw : undefined;
+  if (band && speed) return [{ band, speed }];
+  if (band) return SPEEDS.map((s) => ({ band, speed: s }));
+  return BANDS.map((b) => ({ band: b, speed: speed ?? "all" }));
+}
+
+/*
+ * Lichess answers one request at a time per token, and a burst draws HTTP 429 — after which it
+ * asks for a full minute's quiet. So the cells are fetched about a second apart, and a 429 stops
+ * the whole fetch with a plain message instead of pressing on into a longer ban.
+ */
+const LICHESS_SPACING_MS = 1100;
+const pause = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+function lichessRefusal(e: unknown): Error {
+  const m = (e as Error)?.message ?? String(e);
+  return /\b429\b/.test(m)
+    ? new Error("Lichess is rate-limiting this token (HTTP 429): wait a minute, then ask again.")
+    : (e as Error);
+}
+
+/** How often each move is played from a position by rating band and time control on Lichess, and how it scores. */
+export async function ratedMoves(
+  ctx: GenericGatewayContext,
+  args: { fens: string[]; filters?: string },
+): Promise<RatedMoveRecord[]> {
+  const lichess = (ctx as unknown as ExplorerGatewayWithLichess).lichess;
+  const out: RatedMoveRecord[] = [];
+  for (const raw of args.fens ?? []) {
+    const fen = raw.trim();
+    const mover = legal(fen).turn();
+    const cells = ratedGrid(args.filters);
+    for (const [i, cell] of cells.entries()) {
+      if (i > 0) await pause(LICHESS_SPACING_MS);
+      let a: ExplorerAnswer;
+      try {
+        a = explorerAnswer(await lichess.lichessExplorer({
+          fen, ratings: cell.band, ...(cell.speed !== "all" ? { speeds: cell.speed } : {}), moves: 12, topGames: 0, recentGames: 0,
+        }));
+      } catch (e) {
+        throw lichessRefusal(e);
+      }
+      const total = (a.white ?? 0) + (a.draws ?? 0) + (a.black ?? 0);
+      for (const m of a.moves ?? []) {
+        const games = m.white + m.draws + m.black;
+        const wins = mover === "w" ? m.white : m.black;
+        out.push({
+          rowId: `${fen}#${cell.band}#${cell.speed}#${m.uci}`, fen, band: cell.band, bandLabel: bandLabel(cell.band), speed: cell.speed,
+          san: m.san, uci: m.uci, games, share: share(games, total),
+          whiteWinPct: share(m.white, games), drawPct: share(m.draws, games), blackWinPct: share(m.black, games),
+          scoreForMover: games ? Math.round(((wins + m.draws / 2) / games) * 1000) / 1000 : null,
+          bandGames: total,
+        });
+      }
+    }
   }
   return out;
 }

@@ -3575,7 +3575,9 @@ var require_chess = __commonJS({
 // src/api/chess.ts
 var chess_exports = {};
 __export(chess_exports, {
+  BANDS: () => BANDS,
   LEVELS: () => LEVELS,
+  SPEEDS: () => SPEEDS,
   analysePosition: () => analysePosition,
   explainLinePlans: () => explainLinePlans,
   explainPlans: () => explainPlans,
@@ -3586,6 +3588,8 @@ __export(chess_exports, {
   playerAtPosition: () => playerAtPosition,
   playerFilter: () => playerFilter,
   positionImbalances: () => positionImbalances,
+  ratedGrid: () => ratedGrid,
+  ratedMoves: () => ratedMoves,
   theoryOfGameLine: () => theoryOfGameLine
 });
 module.exports = __toCommonJS(chess_exports);
@@ -4532,7 +4536,9 @@ async function mastersAtPosition(ctx, args) {
   for (const raw of args.fens ?? []) {
     const fen = raw.trim();
     legal(fen);
-    const a = explorerAnswer(await lichess.mastersExplorer({ fen, moves: 12, topGames: 15 }));
+    const a = explorerAnswer(await lichess.mastersExplorer({ fen, moves: 12, topGames: 15 }).catch((e) => {
+      throw lichessRefusal(e);
+    }));
     out.moves.push(...moveRecords(fen, a));
     out.games.push(...gameRecords(fen, a.topGames, (id) => `https://lichess.org/${id}`));
   }
@@ -4552,15 +4558,89 @@ async function playerAtPosition(ctx, args) {
   for (const raw of args.fens ?? []) {
     const fen = raw.trim();
     legal(fen);
-    const a = explorerAnswer(await lichess.playerExplorer({ player: who.player, color: who.color, fen, recentGames: 8 }));
+    const a = explorerAnswer(await lichess.playerExplorer({ player: who.player, color: who.color, fen, recentGames: 8 }).catch((e) => {
+      throw lichessRefusal(e);
+    }));
     out.moves.push(...moveRecords(fen, a, who.player, who.color));
     out.games.push(...gameRecords(fen, a.recentGames, (id) => `https://lichess.org/${id}`, who.player, who.color));
   }
   return out;
 }
+var BANDS = ["0", "1000", "1200", "1400", "1600", "1800", "2000", "2200", "2500"];
+var SPEEDS = ["ultraBullet", "bullet", "blitz", "rapid", "classical", "correspondence"];
+var bandLabel = (b) => {
+  const i = BANDS.indexOf(b);
+  if (b === "0") return "under 1000";
+  if (b === "2500") return "2500+";
+  return i >= 0 && i + 1 < BANDS.length ? `${b}-${Number(BANDS[i + 1]) - 1}` : b;
+};
+function ratedGrid(filters) {
+  const f = filters ?? "";
+  const band = f.match(/band=(\d{1,4})/)?.[1];
+  const speedRaw = f.match(/speed=([A-Za-z]+)/)?.[1];
+  const speed = speedRaw && speedRaw !== "all" ? speedRaw : void 0;
+  if (band && speed) return [{ band, speed }];
+  if (band) return SPEEDS.map((s) => ({ band, speed: s }));
+  return BANDS.map((b) => ({ band: b, speed: speed ?? "all" }));
+}
+var LICHESS_SPACING_MS = 1100;
+var pause = (ms) => new Promise((r) => setTimeout(r, ms));
+function lichessRefusal(e) {
+  const m = e?.message ?? String(e);
+  return /\b429\b/.test(m) ? new Error("Lichess is rate-limiting this token (HTTP 429): wait a minute, then ask again.") : e;
+}
+async function ratedMoves(ctx, args) {
+  const lichess = ctx.lichess;
+  const out = [];
+  for (const raw of args.fens ?? []) {
+    const fen = raw.trim();
+    const mover = legal(fen).turn();
+    const cells = ratedGrid(args.filters);
+    for (const [i, cell] of cells.entries()) {
+      if (i > 0) await pause(LICHESS_SPACING_MS);
+      let a;
+      try {
+        a = explorerAnswer(await lichess.lichessExplorer({
+          fen,
+          ratings: cell.band,
+          ...cell.speed !== "all" ? { speeds: cell.speed } : {},
+          moves: 12,
+          topGames: 0,
+          recentGames: 0
+        }));
+      } catch (e) {
+        throw lichessRefusal(e);
+      }
+      const total = (a.white ?? 0) + (a.draws ?? 0) + (a.black ?? 0);
+      for (const m of a.moves ?? []) {
+        const games = m.white + m.draws + m.black;
+        const wins = mover === "w" ? m.white : m.black;
+        out.push({
+          rowId: `${fen}#${cell.band}#${cell.speed}#${m.uci}`,
+          fen,
+          band: cell.band,
+          bandLabel: bandLabel(cell.band),
+          speed: cell.speed,
+          san: m.san,
+          uci: m.uci,
+          games,
+          share: share(games, total),
+          whiteWinPct: share(m.white, games),
+          drawPct: share(m.draws, games),
+          blackWinPct: share(m.black, games),
+          scoreForMover: games ? Math.round((wins + m.draws / 2) / games * 1e3) / 1e3 : null,
+          bandGames: total
+        });
+      }
+    }
+  }
+  return out;
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
+  BANDS,
   LEVELS,
+  SPEEDS,
   analysePosition,
   explainLinePlans,
   explainPlans,
@@ -4571,6 +4651,8 @@ async function playerAtPosition(ctx, args) {
   playerAtPosition,
   playerFilter,
   positionImbalances,
+  ratedGrid,
+  ratedMoves,
   theoryOfGameLine
 });
 /*! Bundled license information:

@@ -94,7 +94,11 @@
       valuePattern: "^(beginner|intermediate|expert)$"
   cache: { kind: ttl, seconds: 604800 }
 
-# The Lichess explorer. One request per position feeds both master hops — the same call, so its
+# The Lichess explorer. No Lichess producer caches an EMPTY answer: a failed fetch (a 429 rate
+# limit, say) reaches the cache as no rows, and a negative TTL would then serve "nothing here"
+# for that long. An empty answer from Lichess is rare, so caching only real answers costs little.
+#
+# One request per position feeds both master hops — the same call, so its
 # result is fetched once — and both player hops likewise. Master games change slowly; a player
 # keeps playing, so their answers are kept for a day.
 - name: masterMoves
@@ -102,14 +106,20 @@
   operation: mastersAtPosition
   keyArg: fens
   records: "$.moves[*]"
-  cache: { kind: ttl, seconds: 2592000, negativeTtlSeconds: 86400 }
+  # One Lichess token, one request at a time: every Lichess producer shares this bucket, so a
+  # page asking several questions at once queues them instead of drawing a 429.
+  cost: { bucket: lichess, rate: "1/sec" }
+  cache: { kind: ttl, seconds: 2592000 }
 
 - name: masterGames
   kind: remote
   operation: mastersAtPosition
   keyArg: fens
   records: "$.games[*]"
-  cache: { kind: ttl, seconds: 2592000, negativeTtlSeconds: 86400 }
+  # One Lichess token, one request at a time: every Lichess producer shares this bucket, so a
+  # page asking several questions at once queues them instead of drawing a 429.
+  cost: { bucket: lichess, rate: "1/sec" }
+  cache: { kind: ttl, seconds: 2592000 }
 
 - name: playerMoves
   kind: remote
@@ -128,6 +138,9 @@
       op: EQUALS
       qualifier: "color={value}"
       valuePattern: "^(white|black)$"
+  # One Lichess token, one request at a time: every Lichess producer shares this bucket, so a
+  # page asking several questions at once queues them instead of drawing a 429.
+  cost: { bucket: lichess, rate: "1/sec" }
   cache: { kind: ttl, seconds: 86400 }
 
 - name: playerGames
@@ -146,4 +159,31 @@
       op: EQUALS
       qualifier: "color={value}"
       valuePattern: "^(white|black)$"
+  # One Lichess token, one request at a time: every Lichess producer shares this bucket, so a
+  # page asking several questions at once queues them instead of drawing a 429.
+  cost: { bucket: lichess, rate: "1/sec" }
   cache: { kind: ttl, seconds: 86400 }
+
+# Popularity by rating band and time control. The pinned dimension is pushed down; the other is
+# fetched cell by cell (up to nine requests for a new position), so each combination is cached
+# for a month.
+- name: ratedMoves
+  kind: remote
+  operation: ratedMoves
+  keyArg: fens
+  records: "$[*]"
+  args:
+    filters: "{filters}"
+  pushdown:
+    - property: band
+      op: EQUALS
+      qualifier: "band={value}"
+      valuePattern: "^(0|1000|1200|1400|1600|1800|2000|2200|2500)$"
+    - property: speed
+      op: EQUALS
+      qualifier: "speed={value}"
+      valuePattern: "^(ultraBullet|bullet|blitz|rapid|classical|correspondence|all)$"
+  # One Lichess token, one request at a time: every Lichess producer shares this bucket, so a
+  # page asking several questions at once queues them instead of drawing a 429.
+  cost: { bucket: lichess, rate: "1/sec" }
+  cache: { kind: ttl, seconds: 2592000 }
