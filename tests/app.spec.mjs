@@ -74,6 +74,9 @@ async function open(page, overrides, delays, hash = "") {
       const file = url.pathname.replace("/apps/chess/", "");
       return route.fulfill({ path: join(root, "apps", file) });
     }
+    // The banner's web fonts: an empty stylesheet, so the page falls back to its listed fonts as it
+    // would if the font host were unreachable. The harness stays offline.
+    if (url.host === "fonts.googleapis.com") return route.fulfill({ contentType: "text/css", body: "" });
     if (url.host === "cdn.jsdelivr.net") {
       const m = url.pathname.match(/^\/npm\/(cm-chessboard|chess\.js)@[^/]+\/(.*)$/);
       if (m) return route.fulfill({ path: join(root, "node_modules", m[1], m[2]) });
