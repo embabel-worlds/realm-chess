@@ -512,3 +512,131 @@ export async function explainLinePlans(
   }
   return out;
 }
+
+/* ── The Lichess opening explorer: master games, and one player's games, by position ── */
+
+interface ExplorerMove { uci: string; san: string; white: number; draws: number; black: number; averageRating?: number; averageOpponentRating?: number; performance?: number }
+interface ExplorerGame {
+  id: string; uci?: string; winner?: "white" | "black" | null; speed?: string; year?: number; month?: string;
+  white?: { name?: string; rating?: number }; black?: { name?: string; rating?: number };
+}
+interface ExplorerAnswer { white?: number; draws?: number; black?: number; moves?: ExplorerMove[]; topGames?: ExplorerGame[]; recentGames?: ExplorerGame[] }
+type LichessGateway = { lichess: {
+  mastersExplorer(a: Record<string, unknown>): Promise<unknown>;
+  playerExplorer(a: Record<string, unknown>): Promise<unknown>;
+} };
+
+/*
+ * The explorer answers JSON, except the player database, which streams newline-delimited JSON —
+ * each line a more complete version of the last. A JSON-only reader keeps the first line, the
+ * least complete; this keeps the LAST line that parses. Whatever the gateway hands back — a
+ * parsed object, or the raw text — is read the same way.
+ */
+export function explorerAnswer(raw: unknown): ExplorerAnswer {
+  if (raw && typeof raw === "object") return raw as ExplorerAnswer;
+  const lines = String(raw ?? "").split("\n").map((l) => l.trim()).filter(Boolean);
+  for (let i = lines.length - 1; i >= 0; i--) {
+    try { return JSON.parse(lines[i]); } catch { /* an incomplete line: try the one before */ }
+  }
+  throw new Error(`The Lichess explorer answered with nothing readable: ${String(raw).slice(0, 200)}`);
+}
+
+const share = (n: number, of: number) => (of > 0 ? Math.round((1000 * n) / of) / 10 : null);
+
+export interface ExplorerMoveRecord {
+  moveId: string; fen: string; uci: string; san: string; games: number;
+  white: number; draws: number; black: number;
+  /** Percent of games won by White, drawn, won by Black. */
+  whiteWinPct: number | null; drawPct: number | null; blackWinPct: number | null;
+  /** Points per game for the side that played the move: 1 a win, 0.5 a draw. */
+  scoreForMover: number | null;
+  averageRating: number | null;
+  player: string; color: string;
+}
+
+export interface ExplorerGameRecord {
+  gameId: string; fen: string; uci: string; white: string; whiteElo: number | null; black: string; blackElo: number | null;
+  result: string; year: number | null; month: string; speed: string; url: string; player: string; color: string;
+}
+
+function moveRecords(fen: string, a: ExplorerAnswer, player = "", color = ""): ExplorerMoveRecord[] {
+  const mover = new Chess(fen).turn();
+  return (a.moves ?? []).map((m) => {
+    const games = (m.white ?? 0) + (m.draws ?? 0) + (m.black ?? 0);
+    const wins = mover === "w" ? m.white : m.black;
+    return {
+      moveId: `${fen}#${player}#${color}#${m.uci}`, fen, uci: m.uci, san: m.san, games,
+      white: m.white, draws: m.draws, black: m.black,
+      whiteWinPct: share(m.white, games), drawPct: share(m.draws, games), blackWinPct: share(m.black, games),
+      scoreForMover: games ? Math.round(((wins + m.draws / 2) / games) * 1000) / 1000 : null,
+      averageRating: m.averageRating ?? m.averageOpponentRating ?? null,
+      player, color,
+    };
+  });
+}
+
+function gameRecords(fen: string, games: ExplorerGame[] | undefined, url: (id: string) => string, player = "", color = ""): ExplorerGameRecord[] {
+  return (games ?? []).map((g) => ({
+    gameId: `${fen}#${player}#${color}#${g.id}`, fen, uci: g.uci ?? "",
+    white: g.white?.name ?? "", whiteElo: g.white?.rating ?? null,
+    black: g.black?.name ?? "", blackElo: g.black?.rating ?? null,
+    result: g.winner === "white" ? "1-0" : g.winner === "black" ? "0-1" : "½-½",
+    year: g.year ?? null, month: g.month ?? "", speed: g.speed ?? "", url: url(g.id), player, color,
+  }));
+}
+
+/**
+ * What masters played from each position — every move with its game count and results — and the
+ * top master games through it. One request per position feeds both: the moves (MASTERS_PLAYED)
+ * and the games (MASTER_GAME). Needs the Lichess token.
+ */
+export async function mastersAtPosition(
+  ctx: GenericGatewayContext,
+  args: { fens: string[] },
+): Promise<{ moves: ExplorerMoveRecord[]; games: ExplorerGameRecord[] }> {
+  const lichess = (ctx as unknown as LichessGateway).lichess;
+  const out = { moves: [] as ExplorerMoveRecord[], games: [] as ExplorerGameRecord[] };
+  for (const raw of args.fens ?? []) {
+    const fen = raw.trim();
+    legal(fen);
+    const a = explorerAnswer(await lichess.mastersExplorer({ fen, moves: 12, topGames: 15 }));
+    out.moves.push(...moveRecords(fen, a));
+    out.games.push(...gameRecords(fen, a.topGames, (id) => `https://lichess.org/${id}`));
+  }
+  return out;
+}
+
+/*
+ * The player and colour arrive the way the plan level does: a query's
+ * `WHERE m.player = 'DrNykterstein' AND m.color = 'white'` is pushed down into the `{filters}`
+ * slot as "player=DrNykterstein color=white". Without a player there is nothing to ask.
+ */
+export function playerFilter(filters: string | undefined): { player: string; color: "white" | "black" } | null {
+  const f = filters ?? "";
+  const player = f.match(/player=([A-Za-z0-9_-]{2,30})/)?.[1];
+  const color = f.match(/color=(white|black)/)?.[1] as "white" | "black" | undefined;
+  return player ? { player, color: color ?? "white" } : null;
+}
+
+/**
+ * What one Lichess player played from each position, as one colour — every move with its results
+ * — and their recent games through it (PLAYER_PLAYED, PLAYER_GAME). Covers the player's whole
+ * Lichess history in one request. Needs the Lichess token.
+ */
+export async function playerAtPosition(
+  ctx: GenericGatewayContext,
+  args: { fens: string[]; filters?: string },
+): Promise<{ moves: ExplorerMoveRecord[]; games: ExplorerGameRecord[] }> {
+  const lichess = (ctx as unknown as LichessGateway).lichess;
+  const out = { moves: [] as ExplorerMoveRecord[], games: [] as ExplorerGameRecord[] };
+  const who = playerFilter(args.filters);
+  if (!who) return out;
+  for (const raw of args.fens ?? []) {
+    const fen = raw.trim();
+    legal(fen);
+    const a = explorerAnswer(await lichess.playerExplorer({ player: who.player, color: who.color, fen, recentGames: 8 }));
+    out.moves.push(...moveRecords(fen, a, who.player, who.color));
+    out.games.push(...gameRecords(fen, a.recentGames, (id) => `https://lichess.org/${id}`, who.player, who.color));
+  }
+  return out;
+}

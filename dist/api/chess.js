@@ -3579,8 +3579,12 @@ __export(chess_exports, {
   analysePosition: () => analysePosition,
   explainLinePlans: () => explainLinePlans,
   explainPlans: () => explainPlans,
+  explorerAnswer: () => explorerAnswer,
+  mastersAtPosition: () => mastersAtPosition,
   openingLookup: () => openingLookup,
   openingOfGameLine: () => openingOfGameLine,
+  playerAtPosition: () => playerAtPosition,
+  playerFilter: () => playerFilter,
   positionImbalances: () => positionImbalances,
   theoryOfGameLine: () => theoryOfGameLine
 });
@@ -4460,14 +4464,104 @@ async function explainLinePlans(ctx, args) {
   }
   return out;
 }
+function explorerAnswer(raw) {
+  if (raw && typeof raw === "object") return raw;
+  const lines = String(raw ?? "").split("\n").map((l) => l.trim()).filter(Boolean);
+  for (let i = lines.length - 1; i >= 0; i--) {
+    try {
+      return JSON.parse(lines[i]);
+    } catch {
+    }
+  }
+  throw new Error(`The Lichess explorer answered with nothing readable: ${String(raw).slice(0, 200)}`);
+}
+var share = (n, of) => of > 0 ? Math.round(1e3 * n / of) / 10 : null;
+function moveRecords(fen, a, player = "", color = "") {
+  const mover = new import_chess5.Chess(fen).turn();
+  return (a.moves ?? []).map((m) => {
+    const games = (m.white ?? 0) + (m.draws ?? 0) + (m.black ?? 0);
+    const wins = mover === "w" ? m.white : m.black;
+    return {
+      moveId: `${fen}#${player}#${color}#${m.uci}`,
+      fen,
+      uci: m.uci,
+      san: m.san,
+      games,
+      white: m.white,
+      draws: m.draws,
+      black: m.black,
+      whiteWinPct: share(m.white, games),
+      drawPct: share(m.draws, games),
+      blackWinPct: share(m.black, games),
+      scoreForMover: games ? Math.round((wins + m.draws / 2) / games * 1e3) / 1e3 : null,
+      averageRating: m.averageRating ?? m.averageOpponentRating ?? null,
+      player,
+      color
+    };
+  });
+}
+function gameRecords(fen, games, url, player = "", color = "") {
+  return (games ?? []).map((g) => ({
+    gameId: `${fen}#${player}#${color}#${g.id}`,
+    fen,
+    uci: g.uci ?? "",
+    white: g.white?.name ?? "",
+    whiteElo: g.white?.rating ?? null,
+    black: g.black?.name ?? "",
+    blackElo: g.black?.rating ?? null,
+    result: g.winner === "white" ? "1-0" : g.winner === "black" ? "0-1" : "\xBD-\xBD",
+    year: g.year ?? null,
+    month: g.month ?? "",
+    speed: g.speed ?? "",
+    url: url(g.id),
+    player,
+    color
+  }));
+}
+async function mastersAtPosition(ctx, args) {
+  const lichess = ctx.lichess;
+  const out = { moves: [], games: [] };
+  for (const raw of args.fens ?? []) {
+    const fen = raw.trim();
+    legal(fen);
+    const a = explorerAnswer(await lichess.mastersExplorer({ fen, moves: 12, topGames: 15 }));
+    out.moves.push(...moveRecords(fen, a));
+    out.games.push(...gameRecords(fen, a.topGames, (id) => `https://lichess.org/${id}`));
+  }
+  return out;
+}
+function playerFilter(filters) {
+  const f = filters ?? "";
+  const player = f.match(/player=([A-Za-z0-9_-]{2,30})/)?.[1];
+  const color = f.match(/color=(white|black)/)?.[1];
+  return player ? { player, color: color ?? "white" } : null;
+}
+async function playerAtPosition(ctx, args) {
+  const lichess = ctx.lichess;
+  const out = { moves: [], games: [] };
+  const who = playerFilter(args.filters);
+  if (!who) return out;
+  for (const raw of args.fens ?? []) {
+    const fen = raw.trim();
+    legal(fen);
+    const a = explorerAnswer(await lichess.playerExplorer({ player: who.player, color: who.color, fen, recentGames: 8 }));
+    out.moves.push(...moveRecords(fen, a, who.player, who.color));
+    out.games.push(...gameRecords(fen, a.recentGames, (id) => `https://lichess.org/${id}`, who.player, who.color));
+  }
+  return out;
+}
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   LEVELS,
   analysePosition,
   explainLinePlans,
   explainPlans,
+  explorerAnswer,
+  mastersAtPosition,
   openingLookup,
   openingOfGameLine,
+  playerAtPosition,
+  playerFilter,
   positionImbalances,
   theoryOfGameLine
 });

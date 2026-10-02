@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-30T20:08:16.652Z",
+  "generatedAt": "2026-10-02T16:06:57.771Z",
   "entries": [
     {
       "namespace": "chess",
@@ -251,6 +251,162 @@
     },
     {
       "namespace": "chess",
+      "name": "mastersAtPosition",
+      "description": "What masters played from each position — every move with its game count and results — and the top master games through it. One request per position feeds both: the moves (MASTERS_PLAYED) and the games (MASTER_GAME). Needs the Lichess token.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "fens": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "fens"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "moves": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "moveId": {
+                  "type": "string"
+                },
+                "fen": {
+                  "type": "string"
+                },
+                "uci": {
+                  "type": "string"
+                },
+                "san": {
+                  "type": "string"
+                },
+                "games": {
+                  "type": "number"
+                },
+                "white": {
+                  "type": "number"
+                },
+                "draws": {
+                  "type": "number"
+                },
+                "black": {
+                  "type": "number"
+                },
+                "whiteWinPct": {
+                  "type": "number"
+                },
+                "drawPct": {
+                  "type": "number"
+                },
+                "blackWinPct": {
+                  "type": "number"
+                },
+                "scoreForMover": {
+                  "type": "number"
+                },
+                "averageRating": {
+                  "type": "number"
+                },
+                "player": {
+                  "type": "string"
+                },
+                "color": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "moveId",
+                "fen",
+                "uci",
+                "san",
+                "games",
+                "white",
+                "draws",
+                "black",
+                "player",
+                "color"
+              ]
+            }
+          },
+          "games": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "gameId": {
+                  "type": "string"
+                },
+                "fen": {
+                  "type": "string"
+                },
+                "uci": {
+                  "type": "string"
+                },
+                "white": {
+                  "type": "string"
+                },
+                "whiteElo": {
+                  "type": "number"
+                },
+                "black": {
+                  "type": "string"
+                },
+                "blackElo": {
+                  "type": "number"
+                },
+                "result": {
+                  "type": "string"
+                },
+                "year": {
+                  "type": "number"
+                },
+                "month": {
+                  "type": "string"
+                },
+                "speed": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "player": {
+                  "type": "string"
+                },
+                "color": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "gameId",
+                "fen",
+                "uci",
+                "white",
+                "black",
+                "result",
+                "month",
+                "speed",
+                "url",
+                "player",
+                "color"
+              ]
+            }
+          }
+        },
+        "required": [
+          "moves",
+          "games"
+        ]
+      }
+    },
+    {
+      "namespace": "chess",
       "name": "openingLookup",
       "description": "The named opening each position is, from the Lichess opening book. A position the book does not name returns nothing.",
       "inputSchema": {
@@ -349,6 +505,165 @@
             "pgn"
           ]
         }
+      }
+    },
+    {
+      "namespace": "chess",
+      "name": "playerAtPosition",
+      "description": "What one Lichess player played from each position, as one colour — every move with its results — and their recent games through it (PLAYER_PLAYED, PLAYER_GAME). Covers the player's whole Lichess history in one request. Needs the Lichess token.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "fens": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "filters": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fens"
+        ]
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "moves": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "moveId": {
+                  "type": "string"
+                },
+                "fen": {
+                  "type": "string"
+                },
+                "uci": {
+                  "type": "string"
+                },
+                "san": {
+                  "type": "string"
+                },
+                "games": {
+                  "type": "number"
+                },
+                "white": {
+                  "type": "number"
+                },
+                "draws": {
+                  "type": "number"
+                },
+                "black": {
+                  "type": "number"
+                },
+                "whiteWinPct": {
+                  "type": "number"
+                },
+                "drawPct": {
+                  "type": "number"
+                },
+                "blackWinPct": {
+                  "type": "number"
+                },
+                "scoreForMover": {
+                  "type": "number"
+                },
+                "averageRating": {
+                  "type": "number"
+                },
+                "player": {
+                  "type": "string"
+                },
+                "color": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "moveId",
+                "fen",
+                "uci",
+                "san",
+                "games",
+                "white",
+                "draws",
+                "black",
+                "player",
+                "color"
+              ]
+            }
+          },
+          "games": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "gameId": {
+                  "type": "string"
+                },
+                "fen": {
+                  "type": "string"
+                },
+                "uci": {
+                  "type": "string"
+                },
+                "white": {
+                  "type": "string"
+                },
+                "whiteElo": {
+                  "type": "number"
+                },
+                "black": {
+                  "type": "string"
+                },
+                "blackElo": {
+                  "type": "number"
+                },
+                "result": {
+                  "type": "string"
+                },
+                "year": {
+                  "type": "number"
+                },
+                "month": {
+                  "type": "string"
+                },
+                "speed": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "player": {
+                  "type": "string"
+                },
+                "color": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "gameId",
+                "fen",
+                "uci",
+                "white",
+                "black",
+                "result",
+                "month",
+                "speed",
+                "url",
+                "player",
+                "color"
+              ]
+            }
+          }
+        },
+        "required": [
+          "moves",
+          "games"
+        ]
       }
     },
     {

@@ -15,10 +15,11 @@
 #
 # The facts (imbalances, lines, opening) are computed and checkable. The plans are judged.
 #
-# Room for master games: a producer keyed by FEN over the Lichess masters explorer would add
-# Position ──MASTERS_PLAYED──▶ MasterMove (move, games, white/draw/black) and ──MASTER_GAME──▶
-# MasterGame, and the skill already says how to weigh practice against the engine. It needs a
-# Lichess token, so it is not declared yet.
+#   Position ──MASTERS_PLAYED──▶ MasterMove   what masters played here, and how it scored
+#            ──MASTER_GAME─────▶ MasterGame   the top master games through it
+#            ──PLAYER_PLAYED───▶ PlayerMove   what one Lichess player played here (WHERE m.player = …)
+#            ──PLAYER_GAME─────▶ PlayerGame   their recent games through it
+#   (the four from the Lichess opening explorer; they need the LICHESS_TOKEN key in keys.yml)
 
 - name: Position
   description: "A chess position, identified by its FEN. Rarely stored: pin one with `MATCH (p:Position {fen: $fen})` and its imbalances, opening, engine lines and plans are computed on demand. The FEN must be complete — six fields — because who is to move changes every score."
@@ -187,3 +188,117 @@
     pliesPast: "How many plies the line has gone past the page."
     theory: "The page's theory as plain text, up to about 3,000 characters."
     licence: "Attribution and licence to show with the text."
+
+- name: MasterMove
+  description: "A move masters played from a position, with how often and how it scored — from the Lichess masters database (over-the-board games, players rated 2200+). Reached from Position via MASTERS_PLAYED. `scoreForMover` is the side-that-played-it's points per game. This is practice, not analysis: compare it with the engine's CandidateMove lines, and where they disagree, both are worth saying."
+  virtualJoins:
+    - anchorLabel: Position
+      relationship: MASTERS_PLAYED
+      keyField: fen
+      recordKeyField: fen
+      producer: masterMoves
+      maxAnchors: 10
+      description: "What masters played here — for 'what do masters play in this position', 'how does Bxc6 score'."
+  properties:
+    moveId:
+      description: "The position and the move. Identity."
+      metadata:
+        identity: "true"
+    fen: "The position."
+    uci: "The move in UCI."
+    san: "The move in notation."
+    games: "Games in which it was played here."
+    white: "Of those, won by White."
+    draws: "Drawn."
+    black: "Won by Black."
+    whiteWinPct: "Percent won by White."
+    drawPct: "Percent drawn."
+    blackWinPct: "Percent won by Black."
+    scoreForMover: "Points per game for the side that played the move (1 a win, 0.5 a draw): how the move has scored for whoever chose it."
+    averageRating: "Average rating of the players (masters), or of the opponents (a player's games)."
+
+- name: MasterGame
+  description: "A top master game through a position, from the Lichess masters database: who played it, when, the result, and the move played from the position. Reached from Position via MASTER_GAME."
+  virtualJoins:
+    - anchorLabel: Position
+      relationship: MASTER_GAME
+      keyField: fen
+      recordKeyField: fen
+      producer: masterGames
+      maxAnchors: 10
+      description: "Master games that reached this position — for 'show me master games from here'."
+  properties:
+    gameId:
+      description: "The position and the Lichess game id. Identity."
+      metadata:
+        identity: "true"
+    fen: "The position the game passed through."
+    uci: "The move played from it in this game."
+    white: "White's name."
+    whiteElo: "White's rating."
+    black: "Black's name."
+    blackElo: "Black's rating."
+    result: "1-0, 0-1 or ½-½."
+    year: "Year played."
+    month: "Month played, YYYY-MM."
+    speed: "Time control class, for a Lichess game."
+    url: "The game on Lichess."
+
+- name: PlayerMove
+  description: "A move one Lichess player chose from a position, as one colour, with how it scored for them — from the Lichess player explorer, across their whole Lichess history. Reached from Position via PLAYER_PLAYED, and ALWAYS asked with the player and colour: `WHERE m.player = 'DrNykterstein' AND m.color = 'white'`. Without a player the hop returns nothing."
+  virtualJoins:
+    - anchorLabel: Position
+      relationship: PLAYER_PLAYED
+      keyField: fen
+      recordKeyField: fen
+      producer: playerMoves
+      maxAnchors: 10
+      description: "What a given Lichess player played here — for 'what does X play in this position'."
+  properties:
+    moveId:
+      description: "The position, player, colour and move. Identity."
+      metadata:
+        identity: "true"
+    player: "The Lichess username asked about. Filter on it."
+    color: "`white` or `black`: the colour the player had. Filter on it."
+    fen: "The position."
+    uci: "The move in UCI."
+    san: "The move in notation."
+    games: "Games in which it was played here."
+    white: "Of those, won by White."
+    draws: "Drawn."
+    black: "Won by Black."
+    whiteWinPct: "Percent won by White."
+    drawPct: "Percent drawn."
+    blackWinPct: "Percent won by Black."
+    scoreForMover: "Points per game for the side that played the move (1 a win, 0.5 a draw): how the move has scored for whoever chose it."
+    averageRating: "Average rating of the players (masters), or of the opponents (a player's games)."
+
+- name: PlayerGame
+  description: "A recent game of one Lichess player through a position, as one colour. Reached from Position via PLAYER_GAME; asked with the player and colour, like PlayerMove."
+  virtualJoins:
+    - anchorLabel: Position
+      relationship: PLAYER_GAME
+      keyField: fen
+      recordKeyField: fen
+      producer: playerGames
+      maxAnchors: 10
+      description: "A player's own games from this position."
+  properties:
+    gameId:
+      description: "The position, player, colour and game id. Identity."
+      metadata:
+        identity: "true"
+    player: "The Lichess username asked about."
+    color: "The colour the player had."
+    fen: "The position the game passed through."
+    uci: "The move played from it in this game."
+    white: "White's name."
+    whiteElo: "White's rating."
+    black: "Black's name."
+    blackElo: "Black's rating."
+    result: "1-0, 0-1 or ½-½."
+    year: "Year played."
+    month: "Month played, YYYY-MM."
+    speed: "Time control class, for a Lichess game."
+    url: "The game on Lichess."

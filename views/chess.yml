@@ -119,3 +119,75 @@
     MATCH (g:GameLine {moves: $moves})-[:HAS_THEORY]->(t:OpeningTheory)
     RETURN t.title AS page, t.url AS url, t.theory AS theory, toInteger(t.pliesCovered) AS pliesCovered,
            toInteger(t.pliesPast) AS pliesPast, t.licence AS licence
+
+- name: MastersAtPosition
+  description: "What masters played from a position — each move with its number of games, how often White won, drew and lost, and how it scored for the side that chose it — from the Lichess masters database (over-the-board, 2200+). Answers 'what do masters play here', 'what's the most popular move', 'how does this move score'. Needs the Lichess key."
+  params:
+    fen:
+      type: string
+      default: "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4"
+      description: "The position, as a complete FEN."
+  cypher: |
+    MATCH (p:Position {fen: $fen})-[:MASTERS_PLAYED]->(m:MasterMove)
+    RETURN m.san AS move, m.uci AS uci, toInteger(m.games) AS games, m.whiteWinPct AS whiteWinPct,
+           m.drawPct AS drawPct, m.blackWinPct AS blackWinPct, m.scoreForMover AS scoreForMover,
+           toInteger(m.averageRating) AS averageRating
+    ORDER BY games DESC
+
+- name: MasterGamesAtPosition
+  description: "Top master games that reached a position: players, ratings, year, result, the move played from the position, and a link. Answers 'show me master games from here', 'who has played this'. Needs the Lichess key."
+  params:
+    fen:
+      type: string
+      default: "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4"
+      description: "The position, as a complete FEN."
+  cypher: |
+    MATCH (p:Position {fen: $fen})-[:MASTER_GAME]->(g:MasterGame)
+    RETURN g.white AS white, toInteger(g.whiteElo) AS whiteElo, g.black AS black, toInteger(g.blackElo) AS blackElo,
+           g.result AS result, toInteger(g.year) AS year, g.uci AS movePlayed, g.url AS url
+    ORDER BY year DESC
+
+- name: PlayerAtPosition
+  description: "What one Lichess player chose from a position, as White or as Black, across their whole Lichess history — each move with games played and how it scored for them. Answers 'what does DrNykterstein play here', 'what does X play against the Sicilian as White'. Needs the Lichess key."
+  params:
+    fen:
+      type: string
+      default: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+      description: "The position, as a complete FEN."
+    player:
+      type: string
+      default: "DrNykterstein"
+      description: "The Lichess username."
+    color:
+      type: string
+      default: "white"
+      description: "`white` or `black`: the colour the player had."
+  cypher: |
+    MATCH (p:Position {fen: $fen})-[:PLAYER_PLAYED]->(m:PlayerMove)
+    WHERE m.player = $player AND m.color = $color
+    RETURN m.san AS move, toInteger(m.games) AS games, m.scoreForMover AS scoreForPlayer,
+           m.whiteWinPct AS whiteWinPct, m.drawPct AS drawPct, m.blackWinPct AS blackWinPct,
+           toInteger(m.averageRating) AS averageOpponentRating
+    ORDER BY games DESC
+
+- name: PlayerGamesAtPosition
+  description: "A Lichess player's recent games through a position, as White or as Black: opponent, ratings, result, speed and a link. Needs the Lichess key."
+  params:
+    fen:
+      type: string
+      default: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+      description: "The position, as a complete FEN."
+    player:
+      type: string
+      default: "DrNykterstein"
+      description: "The Lichess username."
+    color:
+      type: string
+      default: "white"
+      description: "`white` or `black`."
+  cypher: |
+    MATCH (p:Position {fen: $fen})-[:PLAYER_GAME]->(g:PlayerGame)
+    WHERE g.player = $player AND g.color = $color
+    RETURN g.white AS white, toInteger(g.whiteElo) AS whiteElo, g.black AS black, toInteger(g.blackElo) AS blackElo,
+           g.result AS result, g.speed AS speed, g.month AS month, g.uci AS movePlayed, g.url AS url
+    ORDER BY month DESC

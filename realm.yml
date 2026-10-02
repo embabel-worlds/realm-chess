@@ -17,9 +17,11 @@ description: |
   IN_OPENING, HAS_CANDIDATE, HAS_PLAN) or GameLine (IN_OPENING, HAS_THEORY,
   HAS_PLAN), so the analysis is a query and a REST call, not only a page.
 
-  No account, no key: the wikibook is read through its public API. The engine is GPL-3.0, and so is
+  No key needed for any of that. With a Lichess token — which the realm asks
+  for, and can do without — it also shows what masters played in a position,
+  and what any Lichess player has chosen there, with results. The engine is GPL-3.0, and so is
   this realm.
-version: 0.3.0
+version: 0.4.0
 
 # Plans are a model's judgement with the chess-plans skill, and need an appliance whose
 # gateway.ai.complete accepts `skills`. On an older one PlansInPosition fails; the engine, the
@@ -38,6 +40,7 @@ tags:
 exports:
   - chess
   - wikibooks
+  - lichess
   - Position
   - GameLine
   - PositionImbalances
@@ -45,6 +48,10 @@ exports:
   - CandidateMove
   - Plan
   - OpeningTheory
+  - MasterMove
+  - MasterGame
+  - PlayerMove
+  - PlayerGame
   - BestMoves
   - ImbalancesOf
   - OpeningOf
@@ -52,6 +59,10 @@ exports:
   - OpeningOfLine
   - PlansInLine
   - TheoryOfLine
+  - MastersAtPosition
+  - MasterGamesAtPosition
+  - PlayerAtPosition
+  - PlayerGamesAtPosition
   # A realm with an exports list loads only the skills named in it; leave this out and the
   # skill is dropped at load with nothing but a debug line to say so.
   - chess-plans

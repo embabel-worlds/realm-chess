@@ -93,3 +93,57 @@
       qualifier: "{value}"
       valuePattern: "^(beginner|intermediate|expert)$"
   cache: { kind: ttl, seconds: 604800 }
+
+# The Lichess explorer. One request per position feeds both master hops — the same call, so its
+# result is fetched once — and both player hops likewise. Master games change slowly; a player
+# keeps playing, so their answers are kept for a day.
+- name: masterMoves
+  kind: remote
+  operation: mastersAtPosition
+  keyArg: fens
+  records: "$.moves[*]"
+  cache: { kind: ttl, seconds: 2592000, negativeTtlSeconds: 86400 }
+
+- name: masterGames
+  kind: remote
+  operation: mastersAtPosition
+  keyArg: fens
+  records: "$.games[*]"
+  cache: { kind: ttl, seconds: 2592000, negativeTtlSeconds: 86400 }
+
+- name: playerMoves
+  kind: remote
+  operation: playerAtPosition
+  keyArg: fens
+  records: "$.moves[*]"
+  args:
+    # The player and colour, from the query: `WHERE m.player = … AND m.color = …`.
+    filters: "{filters}"
+  pushdown:
+    - property: player
+      op: EQUALS
+      qualifier: "player={value}"
+      valuePattern: "^([A-Za-z0-9_-]{2,30})$"
+    - property: color
+      op: EQUALS
+      qualifier: "color={value}"
+      valuePattern: "^(white|black)$"
+  cache: { kind: ttl, seconds: 86400 }
+
+- name: playerGames
+  kind: remote
+  operation: playerAtPosition
+  keyArg: fens
+  records: "$.games[*]"
+  args:
+    filters: "{filters}"
+  pushdown:
+    - property: player
+      op: EQUALS
+      qualifier: "player={value}"
+      valuePattern: "^([A-Za-z0-9_-]{2,30})$"
+    - property: color
+      op: EQUALS
+      qualifier: "color={value}"
+      valuePattern: "^(white|black)$"
+  cache: { kind: ttl, seconds: 86400 }

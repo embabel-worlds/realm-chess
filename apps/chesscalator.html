@@ -11,7 +11,7 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/assets/extensions/markers/markers.css">
 <script src="/api/v1/apps-runtime/v1/embabel.js"></script>
 <script type="application/embabel-app+json">
-{"version":1,"name":"chesscalator","requires":{"lenses":[],"views":["BestMoves","ImbalancesOf","OpeningOf","OpeningOfLine","TheoryOfLine","PlansInPosition","PlansInLine"],"realms":["chess"],"namespaces":[]}}
+{"version":1,"name":"chesscalator","requires":{"lenses":[],"views":["BestMoves","ImbalancesOf","OpeningOf","OpeningOfLine","TheoryOfLine","PlansInPosition","PlansInLine","MastersAtPosition","MasterGamesAtPosition","PlayerAtPosition"],"realms":["chess"],"namespaces":[]}}
 </script>
 <style>
   :root{--bg:#0a0a0f;--surface:#13131a;--surface2:#191922;--border:#1e1e2e;--cyan:#63c0f5;--purple:#9f77cd;
@@ -112,6 +112,17 @@
   .plan .meta{font-size:.76rem;color:var(--dim);}
   .summary{font-size:.9rem;margin:8px 0 4px;}
   #plans > .meta{font-size:.8rem;color:var(--dim);}
+  table.practice{width:100%;border-collapse:collapse;font-size:.82rem;font-variant-numeric:tabular-nums;margin-top:4px;}
+  table.practice th{text-align:left;color:var(--dim);font-weight:500;font-size:.74rem;padding:3px 6px;border-bottom:1px solid var(--border);}
+  table.practice td{padding:3px 6px;border-bottom:1px dashed var(--border);}
+  table.practice td.mv{font-family:ui-monospace,Menlo,monospace;color:var(--cyan);cursor:pointer;}
+  .bar{display:flex;height:8px;border-radius:4px;overflow:hidden;min-width:90px;}
+  .bar span{display:block;height:100%;}
+  .bar .w{background:#e8eaed;} .bar .d{background:#8a8f98;} .bar .b{background:#2a2f38;}
+  .games a{color:var(--cyan);text-decoration:none;font-size:.8rem;} .games{margin-top:6px;}
+  .games div{margin:2px 0;color:var(--dim);font-size:.8rem;}
+  form.player{display:flex;gap:6px;margin:4px 0;}
+  form.player input{flex:1;max-width:260px;}
   details.theory{margin:8px 0 4px;border:1px solid var(--border);border-radius:8px;padding:8px 12px;background:var(--surface2);}
   details.theory summary{cursor:pointer;font-size:.86rem;font-weight:500;}
   details.theory summary .meta{font-weight:400;color:var(--dim);font-size:.78rem;}
@@ -212,6 +223,14 @@
       <div id="plans"></div>
       <h2 class="sec">The engine's moves</h2>
       <div id="analysis"><div class="state">Make a move, or load a position.</div></div>
+      <h2 class="sec">What masters played here</h2>
+      <div id="masters"></div>
+      <h2 class="sec">What a Lichess player played here</h2>
+      <form class="player" id="playerForm">
+        <input type="text" id="playerName" placeholder="Lichess username" aria-label="Lichess username" spellcheck="false" autocomplete="off">
+        <button class="btn" type="submit">Look up</button>
+      </form>
+      <div id="player"></div>
     </section>
   </div>
 </div>
@@ -518,6 +537,12 @@ async function ask(seq, userMove) {
     ? (cursor === 0 ? Promise.resolve(null) : embabel.views.invoke("OpeningOfLine", { moves: playedLine() }, opts))
     : embabel.views.invoke("OpeningOf", { fen }, opts);
   const theoryCall = fromStart() && cursor > 0 ? embabel.views.invoke("TheoryOfLine", { moves: playedLine() }, opts) : Promise.resolve(null);
+  // Master practice, alongside the engine. Both views read one explorer request, so the second is free.
+  Promise.allSettled([
+    embabel.views.invoke("MastersAtPosition", { fen }, opts),
+    embabel.views.invoke("MasterGamesAtPosition", { fen }, opts),
+  ]).then(([m, g]) => { if (seq === analysisSeq) renderMasters(m, g); });
+  if ($("playerName").value.trim()) lookUpPlayer(seq);
   const [moves, imb, opening, theory] = await Promise.allSettled([
     embabel.views.invoke("BestMoves", { fen, withinCp: within, maxLines: 5 }, opts),
     embabel.views.invoke("ImbalancesOf", { fen }, opts),
@@ -585,6 +610,78 @@ function renderTheory(theory) {
   credit.replaceChildren("Excerpt from ", link(t.url, "Chess Opening Theory"), ", Wikibooks contributors, ",
     link("https://creativecommons.org/licenses/by-sa/4.0/", "CC BY-SA 4.0"), "; references and tables omitted.");
   box.hidden = false;
+}
+
+/* White wins / draws / Black wins as one bar, so a column of moves reads at a glance. */
+function resultBar(w, d, b) {
+  const bar = el("div", "bar");
+  bar.title = `White ${w}% \u00b7 draws ${d}% \u00b7 Black ${b}%`;
+  for (const [cls, pct] of [["w", w], ["d", d], ["b", b]]) { const s = el("span", cls); s.style.width = `${pct || 0}%`; bar.append(s); }
+  return bar;
+}
+
+function practiceTable(rows, scoreLabel) {
+  const t = el("table", "practice");
+  const head = el("tr");
+  for (const h of ["Move", "Games", "White \u00b7 draw \u00b7 Black", scoreLabel]) head.append(el("th", null, h));
+  t.append(head);
+  for (const r of rows.slice(0, 8)) {
+    const tr = el("tr");
+    const mv = el("td", "mv", r.move);
+    mv.title = `Play ${r.move}`;
+    mv.addEventListener("click", () => { try { const m = new Chess(game.fen()).move(r.move); play(m.san); } catch { /* not legal here */ } });
+    const score = r.scoreForMover ?? r.scoreForPlayer;
+    const barCell = el("td"); barCell.append(resultBar(r.whiteWinPct, r.drawPct, r.blackWinPct));
+    tr.append(mv, el("td", null, String(r.games)), barCell, el("td", null, score == null ? "" : `${Math.round(score * 100)}%`));
+    t.append(tr);
+  }
+  return t;
+}
+
+/* The explorer needs the realm's Lichess key; without it the views fail, and that is said
+ * quietly rather than as an error — the rest of the page does not depend on it. */
+const needsKey = (reason) => /lichess|not a world tool|no (such )?api|401|token/i.test(failure(reason));
+
+function renderMasters(m, g) {
+  if (m.status === "rejected") {
+    return state("masters", needsKey(m.reason)
+      ? "Add a Lichess token in the chess realm's settings to see what masters play here."
+      : `The masters database could not be read: ${failure(m.reason)}`, needsKey(m.reason) ? "note" : "error");
+  }
+  const rows = rowsOf(m.value);
+  if (rows.length === 0) return state("masters", "No master games reached this position.", "note");
+  const out = [practiceTable(rows, "Scored")];
+  const games = g.status === "fulfilled" ? rowsOf(g.value).slice(0, 5) : [];
+  if (games.length) {
+    const list = el("div", "games");
+    for (const x of games) {
+      const d = el("div");
+      const a = el("a", null, `${x.white} \u2013 ${x.black}`); a.href = x.url; a.target = "_blank"; a.rel = "noopener noreferrer";
+      d.append(a, ` ${x.result}, ${x.year ?? ""}${x.movePlayed ? ` \u00b7 played ${x.movePlayed}` : ""}`);
+      list.append(d);
+    }
+    out.push(list);
+  }
+  $("masters").replaceChildren(...out);
+}
+
+/* What one Lichess player chose here, playing the side to move. Remembered in this browser. */
+async function lookUpPlayer(seq = analysisSeq) {
+  const player = $("playerName").value.trim();
+  if (!player) return;
+  try { localStorage.setItem("chesscalator.player", player); } catch { /* no storage */ }
+  const color = game.turn() === "w" ? "white" : "black";
+  state("player", `Looking up ${player} as ${color}\u2026`, "note");
+  try {
+    const env = await embabel.views.invoke("PlayerAtPosition", { fen: game.fen(), player, color }, inFlight ? { signal: inFlight.signal } : {});
+    if (seq !== analysisSeq) return;
+    const rows = rowsOf(env);
+    if (rows.length === 0) return state("player", `${player} has no Lichess games from this position as ${color}.`, "note");
+    $("player").replaceChildren(el("div", "meta", `${player} as ${color}`), practiceTable(rows, `For ${player}`));
+  } catch (e) {
+    if (seq !== analysisSeq) return;
+    state("player", needsKey(e) ? "Add a Lichess token in the chess realm's settings to look up players." : `The player could not be looked up: ${failure(e)}`, needsKey(e) ? "note" : "error");
+  }
 }
 
 /* "King safety: White's king …" — the imbalance's name, then what it says. */
@@ -774,6 +871,9 @@ $("plansBtn").addEventListener("click", async () => {
     if (seq === analysisSeq) $("plansBtn").disabled = false;
   }
 });
+
+try { const saved = localStorage.getItem("chesscalator.player"); if (saved) $("playerName").value = saved; } catch { /* no storage */ }
+$("playerForm").addEventListener("submit", (e) => { e.preventDefault(); lookUpPlayer(); });
 
 /* A link or a reload carries the game in its hash. An unreadable hash is ignored, not trusted. */
 function fromHash() {
