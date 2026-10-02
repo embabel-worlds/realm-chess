@@ -388,6 +388,13 @@ test("popularity compares a move's share across rating bands, or across time con
   await expect(page.locator("table.popgrid tr").first().locator("th")).toHaveCount(bands.size + 1);
   const top = rows.reduce((a, b) => (b.pctOfGames > a.pctOfGames ? b : a));
   await expect(page.locator(`table.popgrid tr[data-move="${top.move}"]`)).toContainText(`${Math.round(top.pctOfGames)}%`);
+  // The chart: one line per move (at most five), a legend naming each, and a readout on hover.
+  const charted = Math.min(5, new Set(rows.map((r) => r.move)).size);
+  await expect(page.locator(".popchart svg path")).toHaveCount(charted);
+  await expect(page.locator(".popchart .legend span")).toHaveCount(charted);
+  await page.locator(".popchart svg rect").nth(2).hover();
+  await expect(page.locator(".popchart .tip")).toBeVisible();
+  await expect(page.locator(".popchart .tip b")).toContainText("Rated");
   await page.selectOption("#popAxis", "speed");
   await expect(page.locator("#popSpeedLabel")).toBeHidden();
   await expect(page.locator("#popBandLabel")).toBeVisible();
