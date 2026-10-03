@@ -37,9 +37,9 @@ export interface Query {
   limit?: Expr;
 }
 
-const MATCH = /^MATCH \((\w+):(\w+)(?: \{(\w+): \$(\w+)\})?\)-\[:(\w+)\]->\((\w+):(\w+)\)$/;
+const MATCH_HOP = /^MATCH \((\w+):(\w+)(?: \{(\w+): \$(\w+)\})?\)-\[:(\w+)\]->\((\w+):(\w+)\)$/;
 
-function tokens(text: string): string[] {
+function cypherTokens(text: string): string[] {
   const out: string[] = [];
   const re = /\s*(<=|>=|<>|[(),.=<>]|\$\w+|\d+(?:\.\d+)?|\w+)/y;
   let at = 0;
@@ -54,8 +54,8 @@ function tokens(text: string): string[] {
   return out;
 }
 
-function expression(text: string): Expr {
-  const t = tokens(text);
+function cypherExpression(text: string): Expr {
+  const t = cypherTokens(text);
   let i = 0;
   const peek = (s?: string) => (s === undefined ? t[i] : t[i]?.toUpperCase() === s.toUpperCase());
   const take = (s?: string) => {
@@ -115,7 +115,7 @@ function expression(text: string): Expr {
 }
 
 /** Splits on commas that are not inside parentheses. */
-function list(text: string): string[] {
+function topLevelParts(text: string): string[] {
   const out: string[] = [];
   let depth = 0;
   let start = 0;
@@ -129,24 +129,24 @@ function list(text: string): string[] {
   return out.filter(Boolean);
 }
 
-const parsed = new Map<string, Query>();
+const parsedViews = new Map<string, Query>();
 
 /** The view's Cypher, read once. */
 export function parseView(cypher: string): Query {
-  const hit = parsed.get(cypher);
+  const hit = parsedViews.get(cypher);
   if (hit) return hit;
   const text = cypher.replace(/\s+/g, " ").trim();
   const m = text.match(/^(MATCH .*?\)) (?:WHERE (.*?) )?RETURN (.*?)(?: ORDER BY (.*?))?(?: LIMIT (\S+))?$/);
   if (!m) throw new Error(`Cannot read the view: ${text}`);
-  const match = m[1].match(MATCH);
+  const match = m[1].match(MATCH_HOP);
   if (!match) throw new Error(`Cannot read the view's MATCH: ${m[1]}`);
-  const columns = list(m[3]).map((c) => {
+  const columns = topLevelParts(m[3]).map((c) => {
     const a = c.match(/^(.*) AS (\w+)$/);
     if (!a) throw new Error(`A view column needs an alias: ${c}`);
-    return { alias: a[2], expr: expression(a[1]) };
+    return { alias: a[2], expr: cypherExpression(a[1]) };
   });
   const order = m[4]
-    ? list(m[4]).map((o) => {
+    ? topLevelParts(m[4]).map((o) => {
       const a = o.match(/^(\w+)( DESC| ASC)?$/i);
       if (!a || !columns.some((c) => c.alias === a[1])) throw new Error(`A view orders by a column it returns: ${o}`);
       return { alias: a[1], desc: /desc/i.test(a[2] ?? "") };
@@ -156,23 +156,23 @@ export function parseView(cypher: string): Query {
     anchor: { label: match[2], key: match[3], param: match[4] },
     relationship: match[5],
     target: { variable: match[6], label: match[7] },
-    where: m[2] ? expression(m[2]) : undefined,
+    where: m[2] ? cypherExpression(m[2]) : undefined,
     columns,
     order,
-    limit: m[5] ? expression(m[5]) : undefined,
+    limit: m[5] ? cypherExpression(m[5]) : undefined,
   };
-  parsed.set(cypher, q);
+  parsedViews.set(cypher, q);
   return q;
 }
 
-function toNumber(v: unknown, integer: boolean): Value {
+function cypherNumber(v: unknown, integer: boolean): Value {
   if (v === null || v === undefined || typeof v === "boolean") return null;
   const n = typeof v === "number" ? v : typeof v === "string" && v.trim() !== "" ? Number(v) : NaN;
   if (!Number.isFinite(n)) return null;
   return integer ? Math.trunc(n) : n;
 }
 
-function compare(a: unknown, b: unknown): number | null {
+function cypherCompare(a: unknown, b: unknown): number | null {
   if (a === null || a === undefined || b === null || b === undefined) return null;
   if (typeof a === "number" && typeof b === "number") return a < b ? -1 : a > b ? 1 : 0;
   if (typeof a === "string" && typeof b === "string") return a < b ? -1 : a > b ? 1 : 0;
@@ -180,7 +180,7 @@ function compare(a: unknown, b: unknown): number | null {
   return null;
 }
 
-function evaluate(e: Expr, row: Row, variable: string, params: Record<string, unknown>): unknown {
+function cypherEvaluate(e: Expr, row: Row, variable: string, params: Record<string, unknown>): unknown {
   switch (e.k) {
     case "prop":
       if (e.v !== variable) throw new Error(`The view reads ${e.v}, which is not its target`);
@@ -191,42 +191,42 @@ function evaluate(e: Expr, row: Row, variable: string, params: Record<string, un
     case "num":
       return e.n;
     case "fn":
-      return toNumber(evaluate(e.a, row, variable, params), e.f === "toInteger");
+      return cypherNumber(cypherEvaluate(e.a, row, variable, params), e.f === "toInteger");
     case "null": {
-      const v = evaluate(e.a, row, variable, params);
+      const v = cypherEvaluate(e.a, row, variable, params);
       return e.not ? v !== null : v === null;
     }
     case "cmp": {
-      const l = evaluate(e.l, row, variable, params);
-      const r = evaluate(e.r, row, variable, params);
+      const l = cypherEvaluate(e.l, row, variable, params);
+      const r = cypherEvaluate(e.r, row, variable, params);
       if (l === null || r === null) return null;
       if (e.op === "=" || e.op === "<>") {
         const same = typeof l === typeof r && l === r;
         return e.op === "=" ? same : !same;
       }
-      const c = compare(l, r);
+      const c = cypherCompare(l, r);
       if (c === null) return null;
       return e.op === "<" ? c < 0 : e.op === "<=" ? c <= 0 : e.op === ">" ? c > 0 : c >= 0;
     }
     case "and": {
-      const l = evaluate(e.l, row, variable, params);
-      const r = evaluate(e.r, row, variable, params);
+      const l = cypherEvaluate(e.l, row, variable, params);
+      const r = cypherEvaluate(e.r, row, variable, params);
       return l === false || r === false ? false : l === true && r === true ? true : null;
     }
     case "or": {
-      const l = evaluate(e.l, row, variable, params);
-      const r = evaluate(e.r, row, variable, params);
+      const l = cypherEvaluate(e.l, row, variable, params);
+      const r = cypherEvaluate(e.r, row, variable, params);
       return l === true || r === true ? true : l === false && r === false ? false : null;
     }
   }
 }
 
 /** Ascending order with nulls last; a descending column is the exact reverse, nulls first. */
-function order(a: unknown, b: unknown): number {
+function cypherOrder(a: unknown, b: unknown): number {
   const an = a === null || a === undefined;
   const bn = b === null || b === undefined;
   if (an || bn) return an && bn ? 0 : an ? 1 : -1;
-  return compare(a, b) ?? 0;
+  return cypherCompare(a, b) ?? 0;
 }
 
 /** The view's parameters: its declared defaults, then what the caller gave. */
@@ -241,17 +241,18 @@ export function paramsOf(view: ViewSpec, given: Record<string, unknown> = {}): R
  * The rows the view returns, given the rows its relationship produced for the pinned anchor.
  * The caller hands over only the anchor's rows, as the graph would join them.
  */
-export function runView(view: ViewSpec, given: Record<string, unknown>, rows: Row[]): Row[] {
+export function runView(view: ViewSpec, given: Record<string, unknown>, records: readonly object[]): Row[] {
+  const rows = records as Row[];
   const q = parseView(view.cypher);
   const params = paramsOf(view, given);
   const v = q.target.variable;
-  const kept = q.where ? rows.filter((r) => evaluate(q.where!, r, v, params) === true) : rows;
-  const out = kept.map((r) => Object.fromEntries(q.columns.map((c) => [c.alias, evaluate(c.expr, r, v, params) ?? null])));
+  const kept = q.where ? rows.filter((r) => cypherEvaluate(q.where!, r, v, params) === true) : rows;
+  const out = kept.map((r) => Object.fromEntries(q.columns.map((c) => [c.alias, cypherEvaluate(c.expr, r, v, params) ?? null])));
   if (q.order.length) {
     const indexed = out.map((r, i) => ({ r, i }));
     indexed.sort((x, y) => {
       for (const o of q.order) {
-        const c = order(x.r[o.alias], y.r[o.alias]);
+        const c = cypherOrder(x.r[o.alias], y.r[o.alias]);
         if (c !== 0) return o.desc ? -c : c;
       }
       return x.i - y.i;
@@ -259,7 +260,7 @@ export function runView(view: ViewSpec, given: Record<string, unknown>, rows: Ro
     out.splice(0, out.length, ...indexed.map((x) => x.r));
   }
   if (q.limit) {
-    const n = toNumber(evaluate(q.limit, {}, v, params), true);
+    const n = cypherNumber(cypherEvaluate(q.limit, {}, v, params), true);
     if (typeof n === "number") return out.slice(0, Math.max(0, n));
   }
   return out;

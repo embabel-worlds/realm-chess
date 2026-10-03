@@ -1,0 +1,189 @@
+/* Chesscalator's own styles. The board's come first, in board.css. */
+:root{--bg:#0a0a0f;--surface:#13131a;--surface2:#191922;--border:#1e1e2e;--cyan:#63c0f5;--purple:#9f77cd;
+      --green:#3fd73c;--dim:#8a8f98;--text:#e5e7eb;--amber:#e8b64c;--red:#e2685f;}
+*{box-sizing:border-box;}
+body{margin:0;padding:0 0 56px;background:var(--bg);color:var(--text);
+     font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.5;}
+.wrap{max-width:1480px;margin:0 auto;padding:22px 16px 8px;}
+/* The banner: "Chess" in a characterful serif, "calator" in a calculator's monospace, a knight from
+ * the board's own piece set, and the board's teal checkerboard fading in behind. */
+.banner{position:relative;display:flex;align-items:center;gap:18px;padding:16px 22px;border:1px solid var(--border);
+        border-radius:14px;overflow:hidden;background:linear-gradient(115deg,#121a20 0%,#0f171b 45%,#0b0d12 100%);}
+.banner::after{content:"";position:absolute;inset:0 0 0 38%;pointer-events:none;
+               background:conic-gradient(#5a9aa2 25%,transparent 0 50%,#5a9aa2 0 75%,transparent 0) 0 0/30px 30px;
+               opacity:.16;-webkit-mask-image:linear-gradient(90deg,transparent,#000 70%);mask-image:linear-gradient(90deg,transparent,#000 70%);}
+.banner .emblem{flex:none;width:58px;height:58px;border-radius:14px;background:linear-gradient(145deg,#6fb3bb,#4b8890);
+                display:grid;place-items:center;box-shadow:0 6px 20px rgba(90,154,162,.25),inset 0 1px 0 rgba(255,255,255,.25);}
+.banner .emblem svg{width:46px;height:46px;}
+.banner h1{margin:0;line-height:1;display:flex;align-items:baseline;gap:1px;text-transform:none;letter-spacing:0;}
+.banner h1 .chess{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:750;font-size:2.4rem;color:#f2f4f6;
+                  font-variation-settings:"opsz" 144;}
+.banner h1 .calc{font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-weight:600;font-size:1.75rem;color:#63c0c9;
+                 letter-spacing:.02em;}
+.banner .tagline{margin:6px 0 0;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.74rem;letter-spacing:.08em;
+                 color:var(--dim);text-transform:lowercase;}
+.banner .tagline b{color:#9fd4da;font-weight:500;}
+.banner details.about{position:relative;z-index:1;margin:0 0 0 auto;align-self:flex-start;max-width:46ch;text-align:right;}
+.banner details.about[open]{text-align:left;}
+@media (max-width:760px){.banner{flex-wrap:wrap;} .banner details.about{margin:6px 0 0;text-align:left;}}
+header p{margin:4px 0 0;color:var(--dim);font-size:.88rem;max-width:78ch;}
+/* Three columns: what is unbalanced, the board, and what to do about it. The first two stay in
+ * view while the third scrolls. Narrower screens fold the imbalances under the board, then
+ * stack everything. */
+.statusbar{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-top:14px;padding:10px 16px;
+           background:var(--surface);border:1px solid var(--border);border-radius:10px;}
+.layout{display:grid;grid-template-columns:minmax(220px,300px) minmax(320px,520px) minmax(380px,1fr);
+        grid-template-areas:"imb board tabs";gap:16px;margin-top:12px;align-items:start;}
+.imb-col{grid-area:imb;} .board-col{grid-area:board;} .tabs-col{grid-area:tabs;}
+@media (min-width:1101px){.imb-col,.board-col{position:sticky;top:12px;max-height:calc(100vh - 70px);overflow:auto;}}
+@media (max-width:1100px){.layout{grid-template-columns:minmax(320px,480px) 1fr;grid-template-areas:"board tabs" "imb tabs";}}
+@media (max-width:760px){.layout{grid-template-columns:1fr;grid-template-areas:"board" "imb" "tabs";}}
+.tabbar{display:flex;gap:2px;border-bottom:1px solid var(--border);margin:-4px -4px 10px;}
+.tabbar button{background:transparent;border:0;border-bottom:2px solid transparent;color:var(--dim);padding:8px 14px;
+               cursor:pointer;font-size:.86rem;font-family:inherit;}
+.tabbar button[aria-selected="true"]{color:var(--text);border-bottom-color:var(--cyan);}
+.tabbar button .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--cyan);margin-left:6px;vertical-align:middle;}
+.tabpane[hidden]{display:none;}
+/* `hidden` must win over the flex display labels and boxes are given. */
+[hidden]{display:none !important;}
+table.movestab{width:100%;border-collapse:collapse;font-size:.84rem;font-variant-numeric:tabular-nums;}
+table.movestab th{text-align:left;color:var(--dim);font-weight:500;font-size:.72rem;padding:4px 6px;border-bottom:1px solid var(--border);white-space:nowrap;}
+table.movestab td{padding:5px 6px;border-bottom:1px dashed var(--border);vertical-align:middle;}
+table.movestab tr.detail td{border-bottom:1px solid var(--border);padding:2px 6px 10px;}
+table.movestab .eng{white-space:nowrap;}
+table.movestab .best{color:var(--green);font-size:.74rem;} table.movestab .style{color:var(--green);font-size:.74rem;}
+table.movestab .cost{color:var(--amber);font-size:.74rem;} table.movestab .absent{color:var(--dim);}
+table.movestab button.more{background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--dim);cursor:pointer;font-size:.74rem;padding:1px 7px;white-space:nowrap;}
+table.movestab button.more:hover{color:var(--cyan);}
+.line{font-family:ui-monospace,Menlo,monospace;font-size:.76rem;color:var(--dim);margin-bottom:4px;}
+.popwrap{overflow-x:auto;}
+/* The popularity chart. Series colours are the reference categorical palette's dark steps,
+ * validated on this panel's surface (#13131a): every check passes, worst adjacent CVD ΔE 8.4.
+ * Colour is never the only cue — each line is labelled at its end and in the legend. */
+.popchart{--s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--grid:#262634;--axis:#8a8f98;
+          position:relative;margin-top:8px;}
+.popchart svg{width:100%;height:auto;display:block;overflow:visible;}
+.popchart .legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.78rem;color:var(--text);margin-bottom:4px;}
+.popchart .legend span{display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,Menlo,monospace;}
+.popchart .legend i{display:inline-block;width:14px;height:2px;border-radius:1px;}
+.popchart .tip{position:absolute;z-index:2;margin-top:2px;pointer-events:none;background:#1c1c26;border:1px solid var(--border);border-radius:6px;
+               padding:6px 9px;font-size:.76rem;line-height:1.5;color:var(--text);white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.4);}
+.popchart .tip b{font-weight:600;} .popchart .tip .sw{display:inline-block;width:10px;height:2px;margin-right:6px;vertical-align:middle;}
+.popchart .tip .muted{color:var(--dim);}
+details.poptable{margin-top:8px;} details.poptable summary{cursor:pointer;}
+table.popgrid{border-collapse:collapse;font-size:.8rem;font-variant-numeric:tabular-nums;margin-top:6px;}
+table.popgrid th{color:var(--dim);font-weight:500;font-size:.7rem;padding:3px 6px;text-align:center;white-space:nowrap;}
+table.popgrid th.mv{text-align:left;}
+table.popgrid td{padding:4px 5px;text-align:center;border:1px solid var(--bg);min-width:38px;}
+table.popgrid td.mv{text-align:left;font-family:ui-monospace,Menlo,monospace;color:var(--cyan);border:0;}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+#board{width:100%;aspect-ratio:1/1;}
+/* The board in Embabel's colours: the theme's teal accent for the dark squares, a cool pale grey
+ * for the light ones — contrast enough for both piece colours — in place of the default wood. */
+:root{--board-light:#dde8ea;--board-dark:#5a9aa2;}
+.cm-chessboard.default .board .square.white{fill:var(--board-light);}
+.cm-chessboard.default .board .square.black{fill:var(--board-dark);}
+.cm-chessboard.default.border-type-none .board .border{stroke:var(--board-dark);fill:var(--board-dark);}
+.cm-chessboard.default .coordinates .coordinate.white{fill:var(--board-dark);}
+.cm-chessboard.default .coordinates .coordinate.black{fill:var(--board-light);}
+.cm-chessboard .markers .marker.marker-square{fill:#63c0c9;opacity:.35;}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center;}
+button,select,input{font-family:inherit;font-size:.84rem;}
+.btn{background:transparent;border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;}
+.btn:hover{border-color:var(--cyan);}
+.btn.primary{background:var(--cyan);border-color:var(--cyan);color:#06121c;}
+.btn:disabled{opacity:.45;cursor:default;}
+select,input[type=text]{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:6px;}
+label.inline{color:var(--dim);font-size:.8rem;display:flex;align-items:center;gap:6px;}
+.fen{display:flex;gap:6px;margin-top:10px;}
+.fen input{flex:1;min-width:0;font-family:ui-monospace,Menlo,monospace;font-size:.76rem;}
+.fen-error{color:var(--red);font-size:.8rem;margin-top:4px;min-height:1em;}
+.moves{margin-top:12px;font-family:ui-monospace,Menlo,monospace;font-size:.82rem;color:var(--dim);
+       max-height:120px;overflow:auto;word-break:break-word;}
+.moves b{color:var(--text);font-weight:500;}
+.status{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
+.status .who{font-size:1.1rem;font-weight:500;}
+.status .eval{font-variant-numeric:tabular-nums;color:var(--dim);font-size:.9rem;}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0 4px;}
+.toolbar .spacer{flex:1;}
+.note{color:var(--dim);font-size:.8rem;}
+.state{padding:18px 4px;color:var(--dim);font-size:.9rem;}
+.state.error{color:var(--red);}
+.plan{border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:8px;padding:12px 14px;margin-top:10px;background:var(--surface2);}
+.plan.best{border-left-color:var(--green);}
+.plan h3{margin:0;font-size:1rem;font-weight:500;}
+.plan .meaning{color:var(--dim);font-size:.82rem;margin:3px 0 8px;}
+.cand button.mv{background:transparent;border:1px solid var(--cyan);color:var(--cyan);border-radius:5px;padding:2px 9px;
+                cursor:pointer;font-weight:600;font-family:ui-monospace,Menlo,monospace;}
+.cand button.mv:hover{background:var(--cyan);color:#06121c;}
+
+.explain{margin-top:14px;}
+.explain p{margin:0 0 10px;font-size:.92rem;}
+.legend{margin-top:12px;font-size:.78rem;color:var(--dim);}
+/* The board column stays in view while the analysis scrolls: the imbalances sit above the board
+ * so the position and what is unbalanced about it are always read together. */
+.imb-col h2.sec{margin-top:0;}
+.imb-group{break-inside:avoid;margin-bottom:6px;}
+.imb-name{font-size:.72rem;font-weight:600;letter-spacing:.04em;color:var(--cyan);text-transform:uppercase;}
+.imb-col ul.facts{font-size:.8rem;margin:1px 0 0;padding-left:16px;}
+.chip b{font-weight:600;margin-right:2px;}
+.nav{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;}
+.nav .ply{min-width:9ch;text-align:center;color:var(--dim);font-size:.8rem;font-variant-numeric:tabular-nums;}
+.moves span.mv{cursor:pointer;padding:0 2px;border-radius:3px;}
+.moves span.mv:hover{color:var(--cyan);}
+.moves span.mv.at{background:var(--cyan);color:#06121c;}
+.moves span.mv.after{opacity:.55;}
+details.about{margin-top:4px;color:var(--dim);font-size:.86rem;max-width:80ch;}
+details.about summary{cursor:pointer;font-size:.82rem;}
+details.about p{margin:6px 0;}
+.opening{color:var(--dim);font-size:.84rem;margin:2px 0 6px;min-height:1.2em;}
+.opening b{color:var(--text);font-weight:500;}
+h2.sec{font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin:16px 0 4px;}
+.changes{display:flex;flex-wrap:wrap;gap:4px;}
+.chip{font-size:.72rem;border-radius:999px;padding:1px 8px;border:1px solid var(--border);color:var(--dim);}
+.chip.plus{border-color:rgba(63,215,60,.45);color:#9ee89c;}
+.chip.minus{border-color:rgba(226,104,95,.45);color:#f0a39c;}
+ul.facts{margin:4px 0 0;padding-left:18px;font-size:.84rem;}
+ul.facts li{margin:2px 0;}
+.plans{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;}
+@media (max-width:640px){.plans{grid-template-columns:1fr;}}
+.side h3{margin:0 0 6px;font-size:.95rem;font-weight:500;}
+.plan{border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:8px;padding:10px 12px;margin-bottom:8px;background:var(--surface2);}
+.plan.first{border-left-color:var(--green);}
+.plan h4{margin:0;font-size:.92rem;font-weight:500;}
+.plan p{margin:4px 0;font-size:.84rem;}
+.plan .meta{font-size:.76rem;color:var(--dim);}
+.summary{font-size:.9rem;margin:8px 0 4px;}
+#plans > .meta{font-size:.8rem;color:var(--dim);}
+table.practice{width:100%;border-collapse:collapse;font-size:.82rem;font-variant-numeric:tabular-nums;margin-top:4px;}
+table.practice th{text-align:left;color:var(--dim);font-weight:500;font-size:.74rem;padding:3px 6px;border-bottom:1px solid var(--border);}
+table.practice td{padding:3px 6px;border-bottom:1px dashed var(--border);}
+table.practice td.mv{font-family:ui-monospace,Menlo,monospace;color:var(--cyan);cursor:pointer;}
+.bar{display:flex;height:8px;border-radius:4px;overflow:hidden;min-width:90px;}
+.bar span{display:block;height:100%;}
+.bar .w{background:#e8eaed;} .bar .d{background:#8a8f98;} .bar .b{background:#2a2f38;}
+.games a{color:var(--cyan);text-decoration:none;font-size:.8rem;} .games{margin-top:6px;}
+.games div{margin:2px 0;color:var(--dim);font-size:.8rem;}
+form.player{display:flex;gap:6px;margin:4px 0;}
+.unavailable{border:1px solid rgba(232,182,76,.35);background:rgba(232,182,76,.07);color:#e9d3a0;border-radius:8px;
+             padding:8px 12px;font-size:.82rem;margin:6px 0 8px;}
+form.player input{flex:1;max-width:260px;}
+details.theory{margin:8px 0 4px;border:1px solid var(--border);border-radius:8px;padding:8px 12px;background:var(--surface2);}
+details.theory summary{cursor:pointer;font-size:.86rem;font-weight:500;}
+details.theory summary .meta{font-weight:400;color:var(--dim);font-size:.78rem;}
+#theory{padding-right:6px;}
+#theory p{font-size:.84rem;margin:6px 0;}
+#theory h5{font-size:.84rem;margin:8px 0 2px;font-weight:600;}
+.attribution{font-size:.72rem;color:var(--dim);margin-top:6px;}
+.attribution a{color:var(--dim);}
+
+footer.how{max-width:1480px;margin:18px auto 0;padding:0 16px;font-size:.75rem;}
+footer.how a{color:var(--dim);text-decoration:none;} footer.how a:hover{color:var(--cyan);}
+#how-it-works{display:none;max-width:1480px;margin:10px auto 0;padding:0 16px;}
+#how-it-works:target{display:block;}
+#how-it-works h2{font-weight:300;letter-spacing:.06em;text-transform:uppercase;font-size:1.1rem;margin:22px 0 6px;}
+#how-it-works h3{font-size:.95rem;margin:16px 0 4px;}
+#how-it-works p,#how-it-works li{font-size:.86rem;color:#c9cdd4;max-width:90ch;}
+#how-it-works pre{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;
+                  overflow-x:auto;font-size:.75rem;line-height:1.45;}
+#how-it-works code{font-size:.82rem;}

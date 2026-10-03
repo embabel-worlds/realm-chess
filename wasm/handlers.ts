@@ -3,6 +3,8 @@ import { Chess } from "./lib/chess.js";
 import { fits, spent } from "./lib/clock.ts";
 import { ANALYSIS_TTL_MS, API_CALL_MS, LICHESS_SPACING_MS, MASTERS_TTL_MS, MAX_KEYS, MODEL_CALL_MS, MODEL_OUTPUT_TOKENS, PLANS_TTL_MS, PLAYER_TTL_MS, RATED_TTL_MS, SEARCH_MS, SEARCH_UNTIL, THEORY_TTL_MS, YIELD_AT } from "./lib/config.ts";
 import { BAND, COLOR, gameRecords, gameUrl, LEVEL, moveRecords, PLAYER, playerCells, playerFilter, pinned, ratedCells, ratedGrid, ratedRecords, ratedRequest, SPEED } from "./lib/explorer.ts";
+import { runView } from "./lib/cypher.ts";
+import { VIEWS } from "./lib/views.ts";
 import type { ExplorerGameRecord, ExplorerMoveRecord, RatedMoveRecord } from "./lib/explorer.ts";
 import { explorerAnswerFor, LichessRefused, lichessSession, recordLichess } from "./lib/lichess.ts";
 import type { ExplorerOperation, LichessGateway, LichessSession } from "./lib/lichess.ts";
@@ -654,4 +656,191 @@ export const rowsLinePlans = async (input: { lines?: unknown; level?: unknown; c
     const theory = await lineTheory(ctx, moves);
     return plansFor(ctx, m, { kind: "line", fen, line }, await lineOpening(ctx.deps.db, moves), { ...PRODUCER_PLAN_ARGS, level }, theory, true);
   });
+};
+
+/* ── Chesscalator ── */
+
+/*
+ * The app's three calls. The frame it runs in has one serialized realm.call and no views, so
+ * each call answers the views the page shows for one moment of use, under the views' names:
+ * the rows come from the same code as the producers' and go through the views' own Cypher
+ * (wasm/lib/cypher.ts), so a column, an order or a limit is the view's.
+ *
+ * Each view answers on its own: one that fails carries its error and the rest still answer. A
+ * step that would not fit in the dispatch is not started and its view says `skipped`. Every
+ * reply carries ChessStatus, which is how the page explains an empty column.
+ */
+
+export interface ViewAnswer {
+  rows: Record<string, unknown>[];
+  /** Why there are no rows, when the realm could not get them. */
+  error?: string;
+  /** Set when the step was not started because the dispatch had no time left for it. */
+  skipped?: "time";
+}
+
+export interface AppReply {
+  fen: string;
+  views: Record<string, ViewAnswer>;
+  status: Awaited<ReturnType<typeof readStatus>>;
+}
+
+const viewNamed = (name: string) => {
+  const v = VIEWS.find((x) => x.name === name);
+  if (!v) throw new Error(`No view named ${name}`);
+  return v;
+};
+
+async function answer(name: string, params: Record<string, unknown>, rows: () => Promise<readonly object[] | "later">): Promise<ViewAnswer> {
+  try {
+    const r = await rows();
+    return r === "later" ? { rows: [], skipped: "time" } : { rows: runView(viewNamed(name), params, r) };
+  } catch (e) {
+    return { rows: [], error: (e as Error).message };
+  }
+}
+
+/** The position, and the line that reached it when there is one. A line must reach the position. */
+function appTarget(input: { fen?: unknown; moves?: unknown }): { fen: string; moves: string[] | null } {
+  if (typeof input.fen !== "string") throw new Error("The app sends a FEN");
+  const fen = input.fen.trim();
+  legal(fen);
+  if (input.moves === undefined || input.moves === null || input.moves === "") return { fen, moves: null };
+  if (typeof input.moves !== "string") throw new Error("The moves are SAN from the start, space-separated");
+  const moves = splitLine(input.moves);
+  if (positionAfter(moves) !== fen) throw new Error("The moves do not reach that position");
+  return { fen, moves };
+}
+
+/**
+ * Everything the page shows on every step: the imbalances, the opening (along the line when the
+ * game was played from the start, else by position), the theory for the line, and the engine's
+ * lines within `withinCp` of the best. The engine's lines are searched at full, as the graph's are.
+ */
+export const appPosition = async (input: { fen?: unknown; moves?: unknown; withinCp?: unknown }, ctx: Ctx): Promise<AppReply> => {
+  const { fen, moves } = appTarget(input);
+  const db = ctx.deps.db;
+  const withinCp = clamp(typeof input.withinCp === "number" ? input.withinCp : undefined, 50, 0, 1000);
+  const views: Record<string, ViewAnswer> = {};
+  views.ImbalancesOf = await answer("ImbalancesOf", { fen }, () => imbalanceRecords(db, [fen]));
+  if (moves) {
+    const line = moves.join(" ");
+    views.OpeningOfLine = await answer("OpeningOfLine", { moves: line }, () => lineOpeningRecords(db, [line]));
+  } else {
+    views.OpeningOf = await answer("OpeningOf", { fen }, () => openingRecords(db, [fen]));
+  }
+  views.BestMoves = await answer("BestMoves", { fen, withinCp, maxLines: 5 }, async () =>
+    linesFor(ctx, fen, FULL, (await keptAnalyses(db, configKey(FULL), [fen])).get(fen)));
+  if (moves) {
+    views.TheoryOfLine = await answer("TheoryOfLine", { moves: moves.join(" ") }, async () => {
+      const t = await theoryFor(db, ctx.gateway, moves, THEORY_TTL_MS, () => fits(API_CALL_MS));
+      return t === "later" ? "later" : t ? [t] : [];
+    });
+  }
+  return { fen, views, status: await readStatus(db) };
+};
+
+/** What the page may ask of Lichess at once: masters on every step, the rest on request. */
+interface PracticeFilters {
+  masters?: boolean;
+  player?: string;
+  color?: string;
+  speed?: string;
+  band?: string;
+  minShare?: number;
+}
+
+/**
+ * Lichess practice at a position: what masters played and their games (`masters`), what one
+ * player chose (`player`, with `color`, white when absent), and how the moves change with
+ * rating at one time control (`speed`) or with time control in one band (`band`). Each grid
+ * cell is one request, spaced as the producers space them; cells that do not fit are left for
+ * the next call, which finds the kept ones, and the view says `skipped`.
+ */
+export const appPractice = async (input: { fen?: unknown; filters?: unknown }, ctx: Ctx): Promise<AppReply> => {
+  const { fen } = appTarget({ fen: input.fen });
+  const f = (input.filters ?? {}) as PracticeFilters;
+  if (typeof f !== "object" || Array.isArray(f)) throw new Error("The filters are an object");
+  const one = (v: unknown, name: string, pattern: RegExp) => (v === undefined || v === null || v === "" ? undefined : pinned([v], name, pattern)![0]);
+  const player = one(f.player, "player", PLAYER);
+  const color = one(f.color, "color", COLOR) ?? "white";
+  const speed = one(f.speed, "speed", SPEED);
+  const band = one(f.band, "band", BAND);
+  const minShare = clamp(typeof f.minShare === "number" ? f.minShare : undefined, 3, 0, 100);
+  const s = lichessSession(ctx.deps.db, ctx.gateway);
+  let first = true;
+  const mayFetch = () => {
+    const ok = first || fits(LICHESS_SPACING_MS + API_CALL_MS);
+    first = false;
+    return ok;
+  };
+  /* A refused Lichess call reaches the guest without its cause, so the page is told it was Lichess. */
+  const ask = async (op: ExplorerOperation, req: Record<string, unknown>, ttl: number) => {
+    try {
+      return await explorerAnswerFor(s, op, req, ttl, mayFetch);
+    } catch (e) {
+      throw e instanceof LichessRefused ? new Error(`Lichess refused the request: ${e.message}`) : e;
+    }
+  };
+  const views: Record<string, ViewAnswer> = {};
+  const both = async (moveView: string, gameView: string, params: Record<string, unknown>, op: ExplorerOperation, req: Record<string, unknown>, ttl: number, who?: { player: string; color: string }) => {
+    let a: Awaited<ReturnType<typeof explorerAnswerFor>>;
+    views[moveView] = await answer(moveView, params, async () => {
+      a = await ask(op, req, ttl);
+      return a ? (moveRecords(fen, a, who?.player, who?.color)) : "later";
+    });
+    views[gameView] = views[moveView].error || views[moveView].skipped
+      ? { ...views[moveView] }
+      : await answer(gameView, params, async () => gameRecords(fen, op === "playerExplorer" ? a!.recentGames : a!.topGames, gameUrl, who?.player, who?.color));
+  };
+  if (f.masters) await both("MastersAtPosition", "MasterGamesAtPosition", { fen }, "mastersExplorer", mastersParams(fen), MASTERS_TTL_MS);
+  if (player) {
+    const who = { player, color: color as "white" | "black" };
+    await both("PlayerAtPosition", "PlayerGamesAtPosition", { fen, player, color }, "playerExplorer", playerParams(fen, who), PLAYER_TTL_MS, who);
+  }
+  const grid = async (name: string, params: Record<string, unknown>, cells: { band: string; speed: string }[]) => {
+    let skipped = false;
+    views[name] = await answer(name, params, async () => {
+      const rows: RatedMoveRecord[] = [];
+      for (const cell of cells) {
+        const a = await ask("lichessExplorer", ratedRequest(fen, cell), RATED_TTL_MS);
+        if (!a) {
+          skipped = true;
+          break;
+        }
+        rows.push(...ratedRecords(fen, cell, a));
+      }
+      return rows;
+    });
+    if (skipped) views[name].skipped = "time";
+  };
+  if (speed) await grid("MovesByRating", { fen, speed, minShare }, ratedCells(undefined, [speed]));
+  if (band) await grid("MovesByTimeControl", { fen, band, minShare }, ratedCells([band], undefined));
+  await recordLichess(s);
+  return { fen, views, status: await readStatus(ctx.deps.db) };
+};
+
+/**
+ * The plans for both sides, asked for only when the reader presses the button. Along the line
+ * when the game was played from the start (PlansInLine), else for the position (PlansInPosition),
+ * with the producers' arguments, so the app and the views share kept plans.
+ */
+export const appPlans = async (input: { fen?: unknown; moves?: unknown; level?: unknown }, ctx: Ctx): Promise<AppReply> => {
+  const { fen, moves } = appTarget(input);
+  const level = levelsOf(input.level === undefined || input.level === null ? undefined : [input.level])[0];
+  const m: ModelSession = { asked: false };
+  const views: Record<string, ViewAnswer> = {};
+  const plans = (r: Served<PlanRow>) => (r === "stop" ? [] : r === "later" ? "later" : (r));
+  if (moves) {
+    const line = moves.join(" ");
+    views.PlansInLine = await answer("PlansInLine", { moves: line, level }, async () => {
+      const theory = await lineTheory(ctx, moves);
+      return plans(await plansFor(ctx, m, { kind: "line", fen, line }, await lineOpening(ctx.deps.db, moves), { ...PRODUCER_PLAN_ARGS, level }, theory, true));
+    });
+  } else {
+    views.PlansInPosition = await answer("PlansInPosition", { fen, level }, async () =>
+      plans(await plansFor(ctx, m, { kind: "position", fen }, await positionOpening(ctx.deps.db, fen), { ...PRODUCER_PLAN_ARGS, level }, null, true)));
+  }
+  await recordModel(ctx.deps.db, m);
+  return { fen, views, status: await readStatus(ctx.deps.db) };
 };

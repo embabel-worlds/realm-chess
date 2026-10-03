@@ -1,0 +1,2344 @@
+{
+ "call:chess.appPosition:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\",\"withinCp\":50}": {
+  "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+  "views": {
+   "ImbalancesOf": {
+    "rows": [
+     {
+      "sideToMove": "white",
+      "phase": "opening",
+      "facts": "Phase: opening. White to move.\nMaterial: the sides are level.\nDevelopment: White still has Nb1, Ng1, Bc1 and Bf1 undeveloped.\nKing safety: White's king is still in the centre, on e1.\nDevelopment: Black still has Nb8, Ng8, Bc8 and Bf8 undeveloped.\nKing safety: Black's king is still in the centre, on e8.",
+      "structure": "",
+      "materialWhite": 39,
+      "materialBlack": 39,
+      "bishopPairWhite": true,
+      "bishopPairBlack": true,
+      "passedWhite": "",
+      "passedBlack": "",
+      "openFiles": "",
+      "oppositeSideCastling": false,
+      "oppositeColouredBishops": false
+     }
+    ]
+   },
+   "OpeningOf": {
+    "rows": []
+   },
+   "BestMoves": {
+    "rows": [
+     {
+      "rank": 1,
+      "move": "e4",
+      "uci": "e2e4",
+      "side": "white",
+      "scoreCp": 32,
+      "mate": null,
+      "whiteCp": 32,
+      "lossCp": 0,
+      "line": "e4 e5 Nf3 Nc6 d4 exd4 Nxd4 Nf6 Nxc6 bxc6 Bd3 d5 e5 Nd7 O-O Nc5 f4 g6 Be3 Nxd3 cxd3 c5 Nc3",
+      "lineUci": "e2e4 e7e5 g1f3 b8c6 d2d4 e5d4 f3d4 g8f6 d4c6 b7c6 f1d3 d7d5 e4e5 f6d7 e1g1 d7c5 f2f4 g7g6 c1e3 c5d3 c2d3 c6c5 b1c3",
+      "depth": 18,
+      "creates": "Tactics: White's pawn on e4 is attacked and not defended.\nPawn structure: Black has isolated pawn on a7.\nPawn structure: Black has doubled pawns on the c-file.\nPawn structure: pawn islands, White 2, Black 3.\nPawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).\nPawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).\nFiles: the d-file is half-open for White.\nFiles: the b and e-files are half-open for Black.",
+      "removes": ""
+     },
+     {
+      "rank": 2,
+      "move": "d4",
+      "uci": "d2d4",
+      "side": "white",
+      "scoreCp": 23,
+      "mate": null,
+      "whiteCp": 23,
+      "lossCp": 9,
+      "line": "d4 Nf6 c4 e6 Nf3 d5 Bg5 Be7 Nc3 h6 Bxf6 Bxf6 e3 c6 Bd3 dxc4 Bxc4",
+      "lineUci": "d2d4 g8f6 c2c4 e7e6 g1f3 d7d5 c1g5 f8e7 b1c3 h7h6 g5f6 e7f6 e2e3 c7c6 f1d3 d5c4 d3c4",
+      "depth": 18,
+      "creates": "Tactics: White's pawn on c4 is attacked and not defended.\nMinor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.",
+      "removes": ""
+     },
+     {
+      "rank": 3,
+      "move": "Nf3",
+      "uci": "g1f3",
+      "side": "white",
+      "scoreCp": 22,
+      "mate": null,
+      "whiteCp": 22,
+      "lossCp": 10,
+      "line": "Nf3 Nf6 c4 e6 d4 d5 Bg5 Be7 Nc3 h6 Bxf6 Bxf6 e3 c6 Bd3 Nd7 O-O Be7",
+      "lineUci": "g1f3 g8f6 c2c4 e7e6 d2d4 d7d5 c1g5 f8e7 b1c3 h7h6 g5f6 e7f6 e2e3 c7c6 f1d3 b8d7 e1g1 f6e7",
+      "depth": 18,
+      "creates": "Tactics: White's pawn on c4 is attacked and not defended.\nMinor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.",
+      "removes": ""
+     },
+     {
+      "rank": 4,
+      "move": "e3",
+      "uci": "e2e3",
+      "side": "white",
+      "scoreCp": 13,
+      "mate": null,
+      "whiteCp": 13,
+      "lossCp": 19,
+      "line": "e3 Nf6 d4 e6 Nf3 Be7 c4 d5 b3 c5 Be2 cxd4 exd4 Bb4+ Nbd2",
+      "lineUci": "e2e3 g8f6 d2d4 e7e6 g1f3 f8e7 c2c4 d7d5 b2b3 c7c5 f1e2 c5d4 e3d4 e7b4 b1d2",
+      "depth": 18,
+      "creates": "Minor pieces: Black's light-squared bishop on c8 is bad: 5 of 8 black pawns stand on its colour.",
+      "removes": ""
+     },
+     {
+      "rank": 5,
+      "move": "c4",
+      "uci": "c2c4",
+      "side": "white",
+      "scoreCp": 12,
+      "mate": null,
+      "whiteCp": 12,
+      "lossCp": 20,
+      "line": "c4 e5 Nc3 Nf6 Nf3 Nc6 g3 d5 cxd5 Nxd5 Bg2 Nb6 O-O Be7 d3 O-O Be3 Be6 Rc1 Nd5 Nxd5 Bxd5 a3 a5 Bc5 h6 Bxe7 Qxe7",
+      "lineUci": "c2c4 e7e5 b1c3 g8f6 g1f3 b8c6 g2g3 d7d5 c4d5 f6d5 f1g2 d5b6 e1g1 f8e7 d2d3 e8g8 c1e3 c8e6 a1c1 b6d5 c3d5 e6d5 a2a3 a7a5 e3c5 h7h6 c5e7 d8e7",
+      "depth": 18,
+      "creates": "Minor pieces: White's dark-squared bishop on c1 is bad: 5 of 7 white pawns stand on its colour.\nMinor pieces: White's light-squared bishop on f1 is good: 2 of 7 white pawns stand on its colour.\nFiles: the c-file is half-open for White.\nFiles: the d-file is half-open for Black.",
+      "removes": ""
+     }
+    ]
+   }
+  },
+  "status": {
+   "lichess": "unknown",
+   "model": "unknown",
+   "lastRefusal": "",
+   "at": ""
+  }
+ },
+ "call:chess.appPractice:{\"fen\":\"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1\",\"filters\":{\"masters\":true}}": {
+  "fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+  "views": {
+   "MastersAtPosition": {
+    "rows": [
+     {
+      "move": "b4",
+      "uci": "b2b4",
+      "games": 3279,
+      "whiteWinPct": 51.3,
+      "drawPct": 25.4,
+      "blackWinPct": 23.3,
+      "scoreForMover": 0.64,
+      "averageRating": null
+     },
+     {
+      "move": "b3",
+      "uci": "b2b3",
+      "games": 3207,
+      "whiteWinPct": 47.7,
+      "drawPct": 29,
+      "blackWinPct": 23.4,
+      "scoreForMover": 0.622,
+      "averageRating": null
+     },
+     {
+      "move": "a3",
+      "uci": "a2a3",
+      "games": 2832,
+      "whiteWinPct": 43.9,
+      "drawPct": 29.8,
+      "blackWinPct": 26.3,
+      "scoreForMover": 0.588,
+      "averageRating": null
+     },
+     {
+      "move": "c4",
+      "uci": "c2c4",
+      "games": 2758,
+      "whiteWinPct": 52.1,
+      "drawPct": 24.9,
+      "blackWinPct": 23.1,
+      "scoreForMover": 0.645,
+      "averageRating": null
+     },
+     {
+      "move": "c3",
+      "uci": "c2c3",
+      "games": 2688,
+      "whiteWinPct": 45.2,
+      "drawPct": 26.6,
+      "blackWinPct": 28.1,
+      "scoreForMover": 0.586,
+      "averageRating": null
+     },
+     {
+      "move": "a4",
+      "uci": "a2a4",
+      "games": 2606,
+      "whiteWinPct": 43.4,
+      "drawPct": 30,
+      "blackWinPct": 26.6,
+      "scoreForMover": 0.584,
+      "averageRating": null
+     }
+    ]
+   },
+   "MasterGamesAtPosition": {
+    "rows": [
+     {
+      "white": "Carlsen, Magnus",
+      "whiteElo": 2721,
+      "black": "Caruana, Fabiano",
+      "blackElo": 2705,
+      "result": "1-0",
+      "year": 2013,
+      "movePlayed": "b4",
+      "url": "https://lichess.org/QqRrSsTt"
+     },
+     {
+      "white": "Fischer, Robert James",
+      "whiteElo": 2714,
+      "black": "Spassky, Boris V.",
+      "blackElo": 2700,
+      "result": "½-½",
+      "year": 2012,
+      "movePlayed": "b3",
+      "url": "https://lichess.org/k2L3m4N5"
+     },
+     {
+      "white": "Kasparov, Garry",
+      "whiteElo": 2707,
+      "black": "Karpov, Anatoly",
+      "blackElo": 2695,
+      "result": "0-1",
+      "year": 2011,
+      "movePlayed": "a4",
+      "url": "https://lichess.org/zY9xW8vU"
+     },
+     {
+      "white": "Carlsen, Magnus",
+      "whiteElo": 2700,
+      "black": "Caruana, Fabiano",
+      "blackElo": 2690,
+      "result": "1-0",
+      "year": 2010,
+      "movePlayed": "a3",
+      "url": "https://lichess.org/Ab3dE5gH"
+     }
+    ]
+   }
+  },
+  "status": {
+   "lichess": "ok",
+   "model": "unknown",
+   "lastRefusal": "",
+   "at": "2026-10-03T09:00:00.045Z"
+  }
+ },
+ "call:chess.appPosition:{\"fen\":\"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1\",\"moves\":\"e4\",\"withinCp\":50}": {
+  "fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+  "views": {
+   "ImbalancesOf": {
+    "rows": [
+     {
+      "sideToMove": "black",
+      "phase": "opening",
+      "facts": "Phase: opening. Black to move.\nMaterial: the sides are level.\nDevelopment: White still has Nb1, Ng1, Bc1 and Bf1 undeveloped.\nKing safety: White's king is still in the centre, on e1.\nDevelopment: Black still has Nb8, Ng8, Bc8 and Bf8 undeveloped.\nKing safety: Black's king is still in the centre, on e8.\nPiece activity: White has the freer pieces: 30 legal moves against 20.",
+      "structure": "",
+      "materialWhite": 39,
+      "materialBlack": 39,
+      "bishopPairWhite": true,
+      "bishopPairBlack": true,
+      "passedWhite": "",
+      "passedBlack": "",
+      "openFiles": "",
+      "oppositeSideCastling": false,
+      "oppositeColouredBishops": false
+     }
+    ]
+   },
+   "OpeningOfLine": {
+    "rows": [
+     {
+      "eco": "B00",
+      "name": "King's Pawn Game",
+      "bookMoves": "1. e4",
+      "namedAtPly": 1,
+      "pliesPast": 0
+     }
+    ]
+   },
+   "BestMoves": {
+    "rows": [
+     {
+      "rank": 1,
+      "move": "e5",
+      "uci": "e7e5",
+      "side": "black",
+      "scoreCp": -34,
+      "mate": null,
+      "whiteCp": 34,
+      "lossCp": 0,
+      "line": "e5 Nf3 Nf6 Nxe5 Nxe4 Qe2 d5 Nc3 Nxc3 dxc3 Be7 Bf4 O-O O-O-O c6 Qh5 Nd7 Nxd7 Qxd7 Bd3 g6 Qh6",
+      "lineUci": "e7e5 g1f3 g8f6 f3e5 f6e4 d1e2 d7d5 b1c3 e4c3 d2c3 f8e7 c1f4 e8g8 e1c1 c7c6 e2h5 b8d7 e5d7 d8d7 f1d3 g7g6 h5h6",
+      "depth": 18,
+      "creates": "Pawn structure: White has doubled pawns on the c-file.\nFiles: the e-file is open.\nFiles: the d-file is half-open for White.\nFiles: White holds an open file with the queen e2.",
+      "removes": ""
+     },
+     {
+      "rank": 2,
+      "move": "e6",
+      "uci": "e7e6",
+      "side": "black",
+      "scoreCp": -34,
+      "mate": null,
+      "whiteCp": 34,
+      "lossCp": 0,
+      "line": "e6 Nc3 d5 d4 Nf6 e5 Nfd7 f4 c5 Nf3 Nc6 Be3 a6 a3 cxd4 Nxd4 Nxd4 Bxd4 Bc5 Bxc5 Nxc5 Qd4 Qc7 O-O-O O-O h4",
+      "lineUci": "e7e6 b1c3 d7d5 d2d4 g8f6 e4e5 f6d7 f2f4 c7c5 g1f3 b8c6 c1e3 a7a6 a2a3 c5d4 f3d4 c6d4 e3d4 f8c5 d4c5 d7c5 d1d4 d8c7 e1c1 e8g8 h2h4",
+      "depth": 18,
+      "creates": "Minor pieces: White's dark-squared bishop on c1 is bad: 5 of 8 white pawns stand on its colour.\nMinor pieces: Black's light-squared bishop on c8 is bad: 5 of 8 black pawns stand on its colour.\nPawn structure: White's pawn chain e5/d4 is locked and points to the kingside.\nPawn structure: Black's pawn chain d5/e6 is locked and points to the queenside.\nKey squares: White has outpost square on d6 (guarded by a pawn, beyond the reach of enemy pawns).\nKey squares: Black has outpost square on e4 (guarded by a pawn, beyond the reach of enemy pawns).",
+      "removes": ""
+     },
+     {
+      "rank": 3,
+      "move": "Nc6",
+      "uci": "b8c6",
+      "side": "black",
+      "scoreCp": -35,
+      "mate": null,
+      "whiteCp": 35,
+      "lossCp": 1,
+      "line": "Nc6 d4 d5 exd5 Qxd5 Nf3 e5 Nc3 Bb4 Bd2 Bxc3 Bxc3 e4 Ne5 Nxe5 dxe5 Qd8",
+      "lineUci": "b8c6 d2d4 d7d5 e4d5 d8d5 g1f3 e7e5 b1c3 f8b4 c1d2 b4c3 d2c3 e5e4 f3e5 c6e5 d4e5 d5d8",
+      "depth": 18,
+      "creates": "Minor pieces: White has the bishop pair.\nMinor pieces: White has 2 bishops and 1 knight, Black 1 bishop and 2 knights.\nPawn structure: White has a queenside pawn majority (4 against 3, counting the a-d files).\nPawn structure: Black has a kingside pawn majority (4 against 3, counting the e-h files).\nFiles: the e-file is half-open for White.\nFiles: the d-file is half-open for Black.",
+      "removes": ""
+     },
+     {
+      "rank": 4,
+      "move": "c5",
+      "uci": "c7c5",
+      "side": "black",
+      "scoreCp": -38,
+      "mate": null,
+      "whiteCp": 38,
+      "lossCp": 4,
+      "line": "c5 Nf3 Nc6 d4 cxd4 Nxd4 e5 Nb5 d6 c4 Be7 Be2 Nf6 N5c3 Nd4 b3 Nxe2 Qxe2",
+      "lineUci": "c7c5 g1f3 b8c6 d2d4 c5d4 f3d4 e7e5 d4b5 d7d6 c2c4 f8e7 f1e2 g8f6 b5c3 c6d4 b2b3 d4e2 d1e2",
+      "depth": 18,
+      "creates": "Pawn structure: Black has a backward pawn on d6.\nFiles: the d-file is half-open for White.\nKey squares: White has outpost square on d5 (guarded by a pawn, beyond the reach of enemy pawns).\nFiles: the c-file is half-open for Black.\nKey squares: Black has outpost square on d4 (guarded by a pawn, beyond the reach of enemy pawns).",
+      "removes": ""
+     },
+     {
+      "rank": 5,
+      "move": "c6",
+      "uci": "c7c6",
+      "side": "black",
+      "scoreCp": -44,
+      "mate": null,
+      "whiteCp": 44,
+      "lossCp": 10,
+      "line": "c6 d4 d5 e5 Bf5 h4 h5 c4 e6 Nc3 Be7 Nf3 Nh6 Bxh6 Rxh6 Bd3 dxc4 Bxf5 exf5",
+      "lineUci": "c7c6 d2d4 d7d5 e4e5 c8f5 h2h4 h7h5 c2c4 e7e6 b1c3 f8e7 g1f3 g8h6 c1h6 h8h6 f1d3 d5c4 d3f5 e6f5",
+      "depth": 18,
+      "creates": "Minor pieces: White's dark-squared bishop on c1 is bad: 5 of 8 white pawns stand on its colour.\nMinor pieces: Black's dark-squared bishop on f8 is good: 2 of 8 black pawns stand on its colour.\nMinor pieces: Black's light-squared bishop on f5 is bad but active: 6 of 8 black pawns stand on its colour.\nPawn structure: White's pawn chain e5/d4 is locked and points to the kingside.\nPawn structure: Black's pawn chain d5/e6 is locked and points to the queenside.\nSpace: White has more space (8 against 3 by pawn control of the opponent's half).\nKey squares: White has outpost square on d6 (guarded by a pawn, beyond the reach of enemy pawns).",
+      "removes": ""
+     }
+    ]
+   },
+   "TheoryOfLine": {
+    "rows": [
+     {
+      "page": "Chess Opening Theory/1. e4",
+      "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4",
+      "theory": "The Exchange Variation gives up the bishop pair for a pawn structure White can use in the endgame.\n\nWhite's plan is to trade queens and use the kingside pawn majority; Black's is the bishop pair and quick development.",
+      "pliesCovered": 1,
+      "pliesPast": 0,
+      "licence": "Excerpt from the Chess Opening Theory wikibook, by Wikibooks contributors, CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/); references and tables omitted."
+     }
+    ]
+   }
+  },
+  "status": {
+   "lichess": "ok",
+   "model": "unknown",
+   "lastRefusal": "",
+   "at": "2026-10-03T09:00:00.045Z"
+  }
+ },
+ "call:chess.appPractice:{\"fen\":\"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1\",\"filters\":{\"masters\":true}}": {
+  "fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+  "views": {
+   "MastersAtPosition": {
+    "rows": [
+     {
+      "move": "Na6",
+      "uci": "b8a6",
+      "games": 3302,
+      "whiteWinPct": 53.4,
+      "drawPct": 24.7,
+      "blackWinPct": 21.9,
+      "scoreForMover": 0.343,
+      "averageRating": null
+     },
+     {
+      "move": "Nc6",
+      "uci": "b8c6",
+      "games": 3136,
+      "whiteWinPct": 48.2,
+      "drawPct": 25.9,
+      "blackWinPct": 25.9,
+      "scoreForMover": 0.388,
+      "averageRating": null
+     },
+     {
+      "move": "a6",
+      "uci": "a7a6",
+      "games": 3100,
+      "whiteWinPct": 45.8,
+      "drawPct": 29.7,
+      "blackWinPct": 24.5,
+      "scoreForMover": 0.394,
+      "averageRating": null
+     },
+     {
+      "move": "Nh6",
+      "uci": "g8h6",
+      "games": 2861,
+      "whiteWinPct": 47.1,
+      "drawPct": 26.1,
+      "blackWinPct": 26.8,
+      "scoreForMover": 0.399,
+      "averageRating": null
+     },
+     {
+      "move": "Nf6",
+      "uci": "g8f6",
+      "games": 2709,
+      "whiteWinPct": 40.3,
+      "drawPct": 31.1,
+      "blackWinPct": 28.5,
+      "scoreForMover": 0.441,
+      "averageRating": null
+     },
+     {
+      "move": "a5",
+      "uci": "a7a5",
+      "games": 2570,
+      "whiteWinPct": 40.5,
+      "drawPct": 34.6,
+      "blackWinPct": 24.9,
+      "scoreForMover": 0.422,
+      "averageRating": null
+     }
+    ]
+   },
+   "MasterGamesAtPosition": {
+    "rows": [
+     {
+      "white": "Carlsen, Magnus",
+      "whiteElo": 2721,
+      "black": "Caruana, Fabiano",
+      "blackElo": 2705,
+      "result": "1-0",
+      "year": 2013,
+      "movePlayed": "Nf6",
+      "url": "https://lichess.org/QqRrSsTt"
+     },
+     {
+      "white": "Fischer, Robert James",
+      "whiteElo": 2714,
+      "black": "Spassky, Boris V.",
+      "blackElo": 2700,
+      "result": "½-½",
+      "year": 2012,
+      "movePlayed": "Nh6",
+      "url": "https://lichess.org/k2L3m4N5"
+     },
+     {
+      "white": "Kasparov, Garry",
+      "whiteElo": 2707,
+      "black": "Karpov, Anatoly",
+      "blackElo": 2695,
+      "result": "0-1",
+      "year": 2011,
+      "movePlayed": "Na6",
+      "url": "https://lichess.org/zY9xW8vU"
+     },
+     {
+      "white": "Carlsen, Magnus",
+      "whiteElo": 2700,
+      "black": "Caruana, Fabiano",
+      "blackElo": 2690,
+      "result": "1-0",
+      "year": 2010,
+      "movePlayed": "Nc6",
+      "url": "https://lichess.org/Ab3dE5gH"
+     }
+    ]
+   }
+  },
+  "status": {
+   "lichess": "ok",
+   "model": "unknown",
+   "lastRefusal": "",
+   "at": "2026-10-03T09:00:01.150Z"
+  }
+ },
+ "call:chess.appPosition:{\"fen\":\"rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\",\"moves\":\"e4 e5\",\"withinCp\":50}": {
+  "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+  "views": {
+   "ImbalancesOf": {
+    "rows": [
+     {
+      "sideToMove": "white",
+      "phase": "opening",
+      "facts": "Phase: opening. White to move.\nMaterial: the sides are level.\nDevelopment: White still has Nb1, Ng1, Bc1 and Bf1 undeveloped.\nKing safety: White's king is still in the centre, on e1.\nDevelopment: Black still has Nb8, Ng8, Bc8 and Bf8 undeveloped.\nKing safety: Black's king is still in the centre, on e8.",
+      "structure": "",
+      "materialWhite": 39,
+      "materialBlack": 39,
+      "bishopPairWhite": true,
+      "bishopPairBlack": true,
+      "passedWhite": "",
+      "passedBlack": "",
+      "openFiles": "",
+      "oppositeSideCastling": false,
+      "oppositeColouredBishops": false
+     }
+    ]
+   },
+   "OpeningOfLine": {
+    "rows": [
+     {
+      "eco": "C20",
+      "name": "King's Pawn Game",
+      "bookMoves": "1. e4 e5",
+      "namedAtPly": 2,
+      "pliesPast": 0
+     }
+    ]
+   },
+   "BestMoves": {
+    "rows": [
+     {
+      "rank": 1,
+      "move": "Nc3",
+      "uci": "b1c3",
+      "side": "white",
+      "scoreCp": 24,
+      "mate": null,
+      "whiteCp": 24,
+      "lossCp": 0,
+      "line": "Nc3 Nc6 Nf3 Nf6 Bb5 Bd6 d4 exd4 Nxd4 O-O Bg5 Be5",
+      "lineUci": "b1c3 b8c6 g1f3 g8f6 f1b5 f8d6 d2d4 e5d4 f3d4 e8g8 c1g5 d6e5",
+      "depth": 18,
+      "creates": "Pawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).\nPawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).\nFiles: the d-file is half-open for White.\nFiles: the e-file is half-open for Black.",
+      "removes": "King safety: Black's king is still in the centre, on e8."
+     },
+     {
+      "rank": 2,
+      "move": "Nf3",
+      "uci": "g1f3",
+      "side": "white",
+      "scoreCp": 22,
+      "mate": null,
+      "whiteCp": 22,
+      "lossCp": 2,
+      "line": "Nf3 Nc6 d4 exd4 Nxd4 Nf6 Nxc6 bxc6 e5 Qe7 Qe2 Nd5 c4 Ba6 Qe4 Nb4 Nc3 Qe6 Be2",
+      "lineUci": "g1f3 b8c6 d2d4 e5d4 f3d4 g8f6 d4c6 b7c6 e4e5 d8e7 d1e2 f6d5 c2c4 c8a6 e2e4 d5b4 b1c3 e7e6 f1e2",
+      "depth": 18,
+      "creates": "Tactics: White's pawn on e5 is attacked and not defended.\nTactics: Black's knight on f6 is attacked by a pawn.\nPawn structure: Black has isolated pawn on a7.\nPawn structure: Black has doubled pawns on the c-file.\nPawn structure: pawn islands, White 2, Black 3.\nPawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).\nPawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).\nSpace: White has more space (3 against 0 by pawn control of the opponent's half).\nFiles: the d-file is half-open for White.\nFiles: the b and e-files are half-open for Black.",
+      "removes": ""
+     },
+     {
+      "rank": 3,
+      "move": "Bc4",
+      "uci": "f1c4",
+      "side": "white",
+      "scoreCp": 4,
+      "mate": null,
+      "whiteCp": 4,
+      "lossCp": 20,
+      "line": "Bc4 Nf6 d3 c6 Nf3 d5 Bb3 a5 a4 Bb4+ c3 Bd6 O-O O-O Bg5 dxe4 dxe4 h6 Bh4 Na6 Nbd2 Nc5 Bc2 Be6",
+      "lineUci": "f1c4 g8f6 d2d3 c7c6 g1f3 d7d5 c4b3 a7a5 a2a4 f8b4 c2c3 b4d6 e1g1 e8g8 c1g5 d5e4 d3e4 h7h6 g5h4 b8a6 b1d2 a6c5 b3c2 c8e6",
+      "depth": 18,
+      "creates": "Tactics: White is in check.\nTactics: Black's pawn on e5 is attacked and not defended.\nMinor pieces: White's light-squared bishop on b3 is bad: 5 of 8 white pawns stand on its colour.\nMinor pieces: Black's light-squared bishop on c8 is bad: 5 of 8 black pawns stand on its colour.",
+      "removes": ""
+     },
+     {
+      "rank": 4,
+      "move": "a3",
+      "uci": "a2a3",
+      "side": "white",
+      "scoreCp": -3,
+      "mate": null,
+      "whiteCp": -3,
+      "lossCp": 27,
+      "line": "a3 Nf6 Nc3 Nc6 Nf3 d5 Bb5 Nxe4 Qe2 Nxc3 Qxe5+ Be7 Qxc3 O-O d4 Qd6 O-O Bf5 Re1 Be4 Bxc6 Qxc6 Qxc6 bxc6 Ne5 c5 dxc5 Bxc5",
+      "lineUci": "a2a3 g8f6 b1c3 b8c6 g1f3 d7d5 f1b5 f6e4 d1e2 e4c3 e2e5 f8e7 e5c3 e8g8 d2d4 d8d6 e1g1 c8f5 f1e1 f5e4 b5c6 d6c6 c3c6 b7c6 f3e5 c6c5 d4c5 e7c5",
+      "depth": 18,
+      "creates": "Tactics: Black is in check.\nTactics: White's bishop on b5 is attacked and not defended.\nTactics: White's queen on e5 is attacked by a knight.\nTactics: Black's knight on c3 is attacked and not defended.\nMaterial: Black is 3 points up (pawn 1, minor piece 3, rook 5, queen 9).\nMinor pieces: White's light-squared bishop on b5 is good: 2 of 7 white pawns stand on its colour.\nMinor pieces: White's dark-squared bishop on c1 is bad: 5 of 7 white pawns stand on its colour.\nFiles: the e-file is open.\nFiles: White holds an open file with the queen e5.",
+      "removes": "Material: the sides are level."
+     },
+     {
+      "rank": 5,
+      "move": "d4",
+      "uci": "d2d4",
+      "side": "white",
+      "scoreCp": -3,
+      "mate": null,
+      "whiteCp": -3,
+      "lossCp": 27,
+      "line": "d4 exd4 Nf3 Bb4+ Nbd2 Nc6 Bd3 d6 O-O Nf6 Nb3 Bg4 h3 Bxf3 Qxf3 O-O Qe2 Re8 a3 Bc5 Bg5 h6 Bh4 g5 Bg3 Bb6",
+      "lineUci": "d2d4 e5d4 g1f3 f8b4 b1d2 b8c6 f1d3 d7d6 e1g1 g8f6 d2b3 c8g4 h2h3 g4f3 d1f3 e8g8 f3e2 f8e8 a2a3 b4c5 c1g5 h7h6 g5h4 g7g5 h4g3 c5b6",
+      "depth": 18,
+      "creates": "Material: Black is a pawn up.\nMinor pieces: Black's dark-squared bishop on b4 is bad but active: 5 of 8 black pawns stand on its colour.\nPawn structure: Black has doubled pawns on the d-file.\nPawn structure: Black has a queenside pawn majority (5 against 3, counting the a-d files).\nPawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).\nFiles: the d-file is half-open for White.\nFiles: the e-file is half-open for Black.",
+      "removes": "Material: the sides are level.\nKing safety: White's king is still in the centre, on e1."
+     }
+    ]
+   },
+   "TheoryOfLine": {
+    "rows": [
+     {
+      "page": "Chess Opening Theory/1. e4/1...e5",
+      "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5",
+      "theory": "The Exchange Variation gives up the bishop pair for a pawn structure White can use in the endgame.\n\nWhite's plan is to trade queens and use the kingside pawn majority; Black's is the bishop pair and quick development.",
+      "pliesCovered": 2,
+      "pliesPast": 0,
+      "licence": "Excerpt from the Chess Opening Theory wikibook, by Wikibooks contributors, CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/); references and tables omitted."
+     }
+    ]
+   }
+  },
+  "status": {
+   "lichess": "ok",
+   "model": "unknown",
+   "lastRefusal": "",
+   "at": "2026-10-03T09:00:01.150Z"
+  }
+ },
+ "call:chess.appPractice:{\"fen\":\"rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\",\"filters\":{\"masters\":true}}": {
+  "fen": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+  "views": {
+   "MastersAtPosition": {
+    "rows": [
+     {
+      "move": "a3",
+      "uci": "a2a3",
+      "games": 3808,
+      "whiteWinPct": 56.1,
+      "drawPct": 22,
+      "blackWinPct": 22,
+      "scoreForMover": 0.671,
+      "averageRating": null
+     },
+     {
+      "move": "a4",
+      "uci": "a2a4",
+      "games": 3738,
+      "whiteWinPct": 55.5,
+      "drawPct": 22.1,
+      "blackWinPct": 22.4,
+      "scoreForMover": 0.666,
+      "averageRating": null
+     },
+     {
+      "move": "b3",
+      "uci": "b2b3",
+      "games": 3623,
+      "whiteWinPct": 55.2,
+      "drawPct": 22.1,
+      "blackWinPct": 22.7,
+      "scoreForMover": 0.663,
+      "averageRating": null
+     },
+     {
+      "move": "b4",
+      "uci": "b2b4",
+      "games": 2990,
+      "whiteWinPct": 47.5,
+      "drawPct": 29.1,
+      "blackWinPct": 23.4,
+      "scoreForMover": 0.62,
+      "averageRating": null
+     },
+     {
+      "move": "c3",
+      "uci": "c2c3",
+      "games": 2595,
+      "whiteWinPct": 41.8,
+      "drawPct": 34.1,
+      "blackWinPct": 24.1,
+      "scoreForMover": 0.589,
+      "averageRating": null
+     },
+     {
+      "move": "c4",
+      "uci": "c2c4",
+      "games": 2266,
+      "whiteWinPct": 38.5,
+      "drawPct": 31.9,
+      "blackWinPct": 29.7,
+      "scoreForMover": 0.544,
+      "averageRating": null
+     }
+    ]
+   },
+   "MasterGamesAtPosition": {
+    "rows": [
+     {
+      "white": "Carlsen, Magnus",
+      "whiteElo": 2721,
+      "black": "Caruana, Fabiano",
+      "blackElo": 2705,
+      "result": "1-0",
+      "year": 2013,
+      "movePlayed": "b4",
+      "url": "https://lichess.org/QqRrSsTt"
+     },
+     {
+      "white": "Fischer, Robert James",
+      "whiteElo": 2714,
+      "black": "Spassky, Boris V.",
+      "blackElo": 2700,
+      "result": "½-½",
+      "year": 2012,
+      "movePlayed": "b3",
+      "url": "https://lichess.org/k2L3m4N5"
+     },
+     {
+      "white": "Kasparov, Garry",
+      "whiteElo": 2707,
+      "black": "Karpov, Anatoly",
+      "blackElo": 2695,
+      "result": "0-1",
+      "year": 2011,
+      "movePlayed": "a4",
+      "url": "https://lichess.org/zY9xW8vU"
+     },
+     {
+      "white": "Carlsen, Magnus",
+      "whiteElo": 2700,
+      "black": "Caruana, Fabiano",
+      "blackElo": 2690,
+      "result": "1-0",
+      "year": 2010,
+      "movePlayed": "a3",
+      "url": "https://lichess.org/Ab3dE5gH"
+     }
+    ]
+   }
+  },
+  "status": {
+   "lichess": "ok",
+   "model": "unknown",
+   "lastRefusal": "",
+   "at": "2026-10-03T09:00:02.255Z"
+  }
+ },
+ "call:chess.appPosition:{\"fen\":\"rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\",\"moves\":\"e4 c5\",\"withinCp\":50}": {
+  "fen": "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+  "views": {
+   "ImbalancesOf": {
+    "rows": [
+     {
+      "sideToMove": "white",
+      "phase": "opening",
+      "facts": "Phase: opening. White to move.\nMaterial: the sides are level.\nDevelopment: White still has Nb1, Ng1, Bc1 and Bf1 undeveloped.\nKing safety: White's king is still in the centre, on e1.\nDevelopment: Black still has Nb8, Ng8, Bc8 and Bf8 undeveloped.\nKing safety: Black's king is still in the centre, on e8.\nPiece activity: White has the freer pieces: 30 legal moves against 22.",
+      "structure": "The pawn structure is the one reached in: Sicilian Defense (B20); Sicilian Defense: Closed (B23); Sicilian Defense: Old Sicilian (B30).",
+      "materialWhite": 39,
+      "materialBlack": 39,
+      "bishopPairWhite": true,
+      "bishopPairBlack": true,
+      "passedWhite": "",
+      "passedBlack": "",
+      "openFiles": "",
+      "oppositeSideCastling": false,
+      "oppositeColouredBishops": false
+     }
+    ]
+   },
+   "OpeningOfLine": {
+    "rows": [
+     {
+      "eco": "B20",
+      "name": "Sicilian Defense",
+      "bookMoves": "1. e4 c5",
+      "namedAtPly": 2,
+      "pliesPast": 0
+     }
+    ]
+   },
+   "BestMoves": {
+    "rows": [
+     {
+      "rank": 1,
+      "move": "Nf3",
+      "uci": "g1f3",
+      "side": "white",
+      "scoreCp": 38,
+      "mate": null,
+      "whiteCp": 38,
+      "lossCp": 0,
+      "line": "Nf3 Nc6 d4 cxd4 Nxd4 g6 Nc3 Bg7 Be3 Nf6 Nxc6 bxc6 e5 Ng8 f4 Rb8 Bd3 Rxb2 Qd2",
+      "lineUci": "g1f3 b8c6 d2d4 c5d4 f3d4 g7g6 b1c3 f8g7 c1e3 g8f6 d4c6 b7c6 e4e5 f6g8 f2f4 a8b8 f1d3 b8b2 d1d2",
+      "depth": 18,
+      "creates": "Minor pieces: Black's light-squared bishop on c8 is bad: 5 of 7 black pawns stand on its colour.\nMinor pieces: Black's dark-squared bishop on g7 is good: 2 of 7 black pawns stand on its colour.\nPawn structure: Black has isolated pawn on a7.\nFiles: the d-file is half-open for White.\nFiles: the b-file is half-open for Black.",
+      "removes": ""
+     },
+     {
+      "rank": 2,
+      "move": "Nc3",
+      "uci": "b1c3",
+      "side": "white",
+      "scoreCp": 30,
+      "mate": null,
+      "whiteCp": 30,
+      "lossCp": 8,
+      "line": "Nc3 Nc6 Nf3 e5 Bc4 Be7 d3 d6 O-O a6 a4 Nf6 Ng5 O-O f4 exf4 Bxf4 h6",
+      "lineUci": "b1c3 b8c6 g1f3 e7e5 f1c4 f8e7 d2d3 d7d6 e1g1 a7a6 a2a4 g8f6 f3g5 e8g8 f2f4 e5f4 c1f4 h7h6",
+      "depth": 18,
+      "creates": "Minor pieces: White's light-squared bishop on c4 is bad but active: 5 of 8 white pawns stand on its colour.\nPawn structure: Black has a backward pawn on d6.\nKey squares: White has outpost square on d5 (guarded by a pawn, beyond the reach of enemy pawns).",
+      "removes": "King safety: White's king is still in the centre, on e1."
+     },
+     {
+      "rank": 3,
+      "move": "Ne2",
+      "uci": "g1e2",
+      "side": "white",
+      "scoreCp": 28,
+      "mate": null,
+      "whiteCp": 28,
+      "lossCp": 10,
+      "line": "Ne2 Nf6 Nbc3 e5 Ng3 h5 Bc4 h4 Nf5 h3 g4 Nc6 d3 g6 Ne3 Bh6 Rg1",
+      "lineUci": "g1e2 g8f6 b1c3 e7e5 e2g3 h7h5 f1c4 h5h4 g3f5 h4h3 g2g4 b8c6 d2d3 g7g6 f5e3 f8h6 h1g1",
+      "depth": 18,
+      "creates": "Tactics: White's pawn on g2 is attacked and not defended.\nSpace: Black has more space (5 against 2 by pawn control of the opponent's half).\nKey squares: White has outpost square on d5 (guarded by a pawn, beyond the reach of enemy pawns).",
+      "removes": ""
+     },
+     {
+      "rank": 4,
+      "move": "c3",
+      "uci": "c2c3",
+      "side": "white",
+      "scoreCp": 17,
+      "mate": null,
+      "whiteCp": 17,
+      "lossCp": 21,
+      "line": "c3 Nf6 e5 Nd5 d4 cxd4 Nf3 e6 cxd4 d6 Nc3 Nc6 Bb5 dxe5 dxe5 Be7 O-O Nxc3",
+      "lineUci": "c2c3 g8f6 e4e5 f6d5 d2d4 c5d4 g1f3 e7e6 c3d4 d7d6 b1c3 b8c6 f1b5 d6e5 d4e5 f8e7 e1g1 d5c3",
+      "depth": 18,
+      "creates": "Minor pieces: White's dark-squared bishop on c1 is bad: 5 of 7 white pawns stand on its colour.\nMinor pieces: White's light-squared bishop on f1 is good: 2 of 7 white pawns stand on its colour.\nPawn structure: White has a backward pawn on d4.\nSpace: White has more space (5 against 0 by pawn control of the opponent's half).\nFiles: the c-file is open.\nKey squares: Black's knight on d5 stands on an outpost no pawn can challenge.",
+      "removes": ""
+     },
+     {
+      "rank": 5,
+      "move": "d4",
+      "uci": "d2d4",
+      "side": "white",
+      "scoreCp": 12,
+      "mate": null,
+      "whiteCp": 12,
+      "lossCp": 26,
+      "line": "d4 cxd4 Nf3 e5 c3 Nc6 cxd4 exd4 Nxd4 Nf6 Nc3 Bb4 Bc4 Nxe4 O-O Bxc3 bxc3 d5 Bb5 O-O Nxc6 bxc6 Bxc6 Ba6 Bxa8",
+      "lineUci": "d2d4 c5d4 g1f3 e7e5 c2c3 b8c6 c3d4 e5d4 f3d4 g8f6 b1c3 f8b4 f1c4 f6e4 e1g1 b4c3 b2c3 d7d5 c4b5 e8g8 d4c6 b7c6 b5c6 c8a6 c6a8",
+      "depth": 18,
+      "creates": "Tactics: White's pawn on e4 is attacked and not defended.\nMinor pieces: Black's light-squared bishop on c8 is bad: 4 of 6 black pawns stand on its colour.\nMinor pieces: Black's dark-squared bishop on f8 is good: 2 of 6 black pawns stand on its colour.\nPawn structure: Black has an isolated queen's pawn (d7).\nPawn structure: pawn islands, White 2, Black 3.\nPawn structure: Black has a queenside pawn majority (3 against 2, counting the a-d files).\nPawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).\nFiles: the c-file is open.\nFiles: the d-file is half-open for White.\nKey squares: White has outpost square on d5 (guarded by a pawn, beyond the reach of enemy pawns).\nFiles: the e-file is half-open for Black.",
+      "removes": ""
+     }
+    ]
+   },
+   "TheoryOfLine": {
+    "rows": [
+     {
+      "page": "Chess Opening Theory/1. e4",
+      "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4",
+      "theory": "The Exchange Variation gives up the bishop pair for a pawn structure White can use in the endgame.\n\nWhite's plan is to trade queens and use the kingside pawn majority; Black's is the bishop pair and quick development.",
+      "pliesCovered": 1,
+      "pliesPast": 1,
+      "licence": "Excerpt from the Chess Opening Theory wikibook, by Wikibooks contributors, CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/); references and tables omitted."
+     }
+    ]
+   }
+  },
+  "status": {
+   "lichess": "ok",
+   "model": "unknown",
+   "lastRefusal": "",
+   "at": "2026-10-03T09:00:02.255Z"
+  }
+ },
+ "call:chess.appPractice:{\"fen\":\"rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2\",\"filters\":{\"masters\":true}}": {
+  "fen": "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2",
+  "views": {
+   "MastersAtPosition": {
+    "rows": [
+     {
+      "move": "a3",
+      "uci": "a2a3",
+      "games": 3509,
+      "whiteWinPct": 52.2,
+      "drawPct": 25.2,
+      "blackWinPct": 22.6,
+      "scoreForMover": 0.648,
+      "averageRating": null
+     },
+     {
+      "move": "e5",
+      "uci": "e4e5",
+      "games": 3350,
+      "whiteWinPct": 49.3,
+      "drawPct": 28.4,
+      "blackWinPct": 22.4,
+      "scoreForMover": 0.634,
+      "averageRating": null
+     },
+     {
+      "move": "a4",
+      "uci": "a2a4",
+      "games": 2963,
+      "whiteWinPct": 46.6,
+      "drawPct": 26.4,
+      "blackWinPct": 27,
+      "scoreForMover": 0.598,
+      "averageRating": null
+     },
+     {
+      "move": "c3",
+      "uci": "c2c3",
+      "games": 2829,
+      "whiteWinPct": 45.7,
+      "drawPct": 29.8,
+      "blackWinPct": 24.5,
+      "scoreForMover": 0.606,
+      "averageRating": null
+     },
+     {
+      "move": "b3",
+      "uci": "b2b3",
+      "games": 2760,
+      "whiteWinPct": 40.2,
+      "drawPct": 31.2,
+      "blackWinPct": 28.6,
+      "scoreForMover": 0.558,
+      "averageRating": null
+     },
+     {
+      "move": "b4",
+      "uci": "b2b4",
+      "games": 2330,
+      "whiteWinPct": 39.9,
+      "drawPct": 31.3,
+      "blackWinPct": 28.8,
+      "scoreForMover": 0.556,
+      "averageRating": null
+     }
+    ]
+   },
+   "MasterGamesAtPosition": {
+    "rows": [
+     {
+      "white": "Carlsen, Magnus",
+      "whiteElo": 2721,
+      "black": "Caruana, Fabiano",
+      "blackElo": 2705,
+      "result": "1-0",
+      "year": 2013,
+      "movePlayed": "b3",
+      "url": "https://lichess.org/QqRrSsTt"
+     },
+     {
+      "white": "Fischer, Robert James",
+      "whiteElo": 2714,
+      "black": "Spassky, Boris V.",
+      "blackElo": 2700,
+      "result": "½-½",
+      "year": 2012,
+      "movePlayed": "a4",
+      "url": "https://lichess.org/k2L3m4N5"
+     },
+     {
+      "white": "Kasparov, Garry",
+      "whiteElo": 2707,
+      "black": "Karpov, Anatoly",
+      "blackElo": 2695,
+      "result": "0-1",
+      "year": 2011,
+      "movePlayed": "a3",
+      "url": "https://lichess.org/zY9xW8vU"
+     },
+     {
+      "white": "Carlsen, Magnus",
+      "whiteElo": 2700,
+      "black": "Caruana, Fabiano",
+      "blackElo": 2690,
+      "result": "1-0",
+      "year": 2010,
+      "movePlayed": "e5",
+      "url": "https://lichess.org/Ab3dE5gH"
+     }
+    ]
+   }
+  },
+  "status": {
+   "lichess": "ok",
+   "model": "unknown",
+   "lastRefusal": "",
+   "at": "2026-10-03T09:00:03.360Z"
+  }
+ },
+ "call:chess.appPosition:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"moves\":\"e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1\",\"withinCp\":50}": {
+  "fen": "r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9",
+  "views": {
+   "ImbalancesOf": {
+    "rows": [
+     {
+      "sideToMove": "black",
+      "phase": "opening",
+      "facts": "Phase: opening. Black to move.\nMaterial: the sides are level.\nMinor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nPawn structure: Black has doubled pawns on the c-file.\nPawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).\nPawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).\nFiles: the d-file is open.\nFiles: White holds an open file with the rook d1.\nFiles: the e-file is half-open for Black.\nDevelopment: White still has Nb1 and Bc1 undeveloped.\nDevelopment: Black still has Ng8, Bc8 and Bf8 undeveloped.\nKing safety: Black's king is still in the centre, on e8.\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
+      "structure": "The pawn structure is close to the one reached in: Ruy Lopez: Exchange, Alekhine Variation (C68); Ruy Lopez: Exchange Variation, Alekhine Variation (C68) — 2 pawns different.",
+      "materialWhite": 26,
+      "materialBlack": 26,
+      "bishopPairWhite": false,
+      "bishopPairBlack": true,
+      "passedWhite": "",
+      "passedBlack": "",
+      "openFiles": "d",
+      "oppositeSideCastling": false,
+      "oppositeColouredBishops": false
+     }
+    ]
+   },
+   "OpeningOfLine": {
+    "rows": [
+     {
+      "eco": "C69",
+      "name": "Ruy Lopez: Exchange Variation, Gligoric Variation",
+      "bookMoves": "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6",
+      "namedAtPly": 10,
+      "pliesPast": 7
+     }
+    ]
+   },
+   "BestMoves": {
+    "rows": [
+     {
+      "rank": 1,
+      "move": "Be6",
+      "uci": "c8e6",
+      "side": "black",
+      "scoreCp": -2,
+      "mate": null,
+      "whiteCp": 2,
+      "lossCp": 0,
+      "line": "Be6 Nc3 Bd6 Na4 Bxb3 axb3 O-O-O Be3 b6 Nc3 Kb7 Bf4 Ne7 Bxd6 Rxd6 Rxd6 cxd6 f3 Rd8 Rd1 Kc6",
+      "lineUci": "c8e6 b1c3 f8d6 c3a4 e6b3 a2b3 e8c8 c1e3 b7b6 a4c3 c8b7 e3f4 g8e7 f4d6 d8d6 d1d6 c7d6 f2f3 h8d8 a1d1 b7c6",
+      "depth": 18,
+      "creates": "Tactics: Black's pawn on a6 is attacked and not defended.\nPawn structure: White has doubled pawns on the b-file.\nMinor pieces: Black's dark-squared bishop on d6 is bad: 5 of 7 black pawns stand on its colour.\nFiles: the a-file is half-open for White.\nFiles: Black holds an open file with the rook d8.\nKing safety: The kings are on opposite wings (White kingside, Black queenside): pawn storms cost the attacker nothing in king safety.",
+      "removes": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nKing safety: Black's king is still in the centre, on e8."
+     },
+     {
+      "rank": 2,
+      "move": "Bg4",
+      "uci": "c8g4",
+      "side": "black",
+      "scoreCp": -6,
+      "mate": null,
+      "whiteCp": 6,
+      "lossCp": 4,
+      "line": "Bg4 f3 Be6 Bf4 c4 Nd4 O-O-O Nc3 Bf7 Be3 Bb4 a3 Bxc3 bxc3 Ne7 g4 h5",
+      "lineUci": "c8g4 f2f3 g4e6 c1f4 c5c4 b3d4 e8c8 b1c3 e6f7 f4e3 f8b4 a2a3 b4c3 b2c3 g8e7 g2g4 h7h5",
+      "depth": 18,
+      "creates": "Minor pieces: White's dark-squared bishop on e3 is good: 2 of 7 white pawns stand on its colour.\nFiles: Black holds an open file with the rook d8.\nKing safety: The kings are on opposite wings (White kingside, Black queenside): pawn storms cost the attacker nothing in king safety.",
+      "removes": "King safety: Black's king is still in the centre, on e8."
+     },
+     {
+      "rank": 3,
+      "move": "Bd7",
+      "uci": "c8d7",
+      "side": "black",
+      "scoreCp": -18,
+      "mate": null,
+      "whiteCp": 18,
+      "lossCp": 16,
+      "line": "Bd7 Bf4 O-O-O Nc3 Be6 Rxd8+ Kxd8 Be3 b6 a4 a5 Nb5 Kc8 Rd1 g5 f4 h6 f5",
+      "lineUci": "c8d7 c1f4 e8c8 b1c3 d7e6 d1d8 c8d8 f4e3 b7b6 a2a4 a6a5 c3b5 d8c8 a1d1 g7g5 f2f4 h7h6 f4f5",
+      "depth": 18,
+      "creates": "Minor pieces: Black's dark-squared bishop on f8 is bad: 5 of 7 black pawns stand on its colour.\nMinor pieces: Black's light-squared bishop on e6 is good: 2 of 7 black pawns stand on its colour.\nKing safety: Black's king is still in the centre, on d8.",
+      "removes": "Files: White holds an open file with the rook d1.\nKing safety: Black's king is still in the centre, on e8."
+     },
+     {
+      "rank": 4,
+      "move": "g5",
+      "uci": "g7g5",
+      "side": "black",
+      "scoreCp": -40,
+      "mate": null,
+      "whiteCp": 40,
+      "lossCp": 38,
+      "line": "g5 Nc3 Be6 f4 Bg4 Rf1 c4 h3 cxb3 hxg4 bxc2 fxg5 Bc5+ Kh1 fxg5 Bxg5",
+      "lineUci": "g7g5 b1c3 c8e6 f2f4 e6g4 d1f1 c5c4 h2h3 c4b3 h3g4 b3c2 f4g5 f8c5 g1h1 f6g5 c1g5",
+      "depth": 18,
+      "creates": "Minor pieces: White's dark-squared bishop on c1 is good: 2 of 6 white pawns stand on its colour.\nPawn structure: White has isolated pawns on g5, e4, g4 and g2.\nPawn structure: White has doubled pawns on the g-file.\nMinor pieces: Black's dark-squared bishop on f8 is good: 2 of 6 black pawns stand on its colour.\nPawn structure: Black has isolated pawns on h7 and f6.\nPawn structure: Black has a passed pawn on c2.\nSpace: White has more space (6 against 3 by pawn control of the opponent's half).\nFiles: the c, f and h-files are half-open for White.\nKey squares: White has outpost square on f5 (guarded by a pawn, beyond the reach of enemy pawns).\nFiles: the e and g-files are half-open for Black.\nKey squares: Black has outpost square on e5 (guarded by a pawn, beyond the reach of enemy pawns).\nKing safety: White's king on g1 is exposed: 1 shield pawn, open or half-open f and h-file nearby, 0 enemy pieces bearing on it.",
+      "removes": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nFiles: White holds an open file with the rook d1.\nFiles: the e-file is half-open for Black."
+     },
+     {
+      "rank": 5,
+      "move": "Bd6",
+      "uci": "f8d6",
+      "side": "black",
+      "scoreCp": -45,
+      "mate": null,
+      "whiteCp": 45,
+      "lossCp": 43,
+      "line": "Bd6 Na5 b6 Nc4 Be7 Bf4 Bd8 Nc3 Ne7 Ne3 Be6 h4 O-O a4 h5 Rd2 Nc6 Ncd5 Rf7 c3 Rd7 Rad1",
+      "lineUci": "f8d6 b3a5 b7b6 a5c4 d6e7 c1f4 e7d8 b1c3 g8e7 c4e3 c8e6 h2h4 e8g8 a2a4 h7h5 d1d2 e7c6 c3d5 f8f7 c2c3 f7d7 a1d1",
+      "depth": 18,
+      "creates": "Minor pieces: Black's light-squared bishop on c8 is good: 2 of 7 black pawns stand on its colour.\nMinor pieces: Black's dark-squared bishop on d8 is bad: 5 of 7 black pawns stand on its colour.",
+      "removes": ""
+     }
+    ]
+   },
+   "TheoryOfLine": {
+    "rows": [
+     {
+      "page": "Chess Opening Theory/1. e4/1...e5/2. Nf3/2...Nc6/3. Bb5/3...a6/4. Bxc6",
+      "url": "https://en.wikibooks.org/wiki/Chess_Opening_Theory/1._e4/1...e5/2._Nf3/2...Nc6/3._Bb5/3...a6/4._Bxc6",
+      "theory": "The Exchange Variation gives up the bishop pair for a pawn structure White can use in the endgame.\n\nWhite's plan is to trade queens and use the kingside pawn majority; Black's is the bishop pair and quick development.",
+      "pliesCovered": 7,
+      "pliesPast": 10,
+      "licence": "Excerpt from the Chess Opening Theory wikibook, by Wikibooks contributors, CC BY-SA 4.0 (https://creativecommons.org/licenses/by-sa/4.0/); references and tables omitted."
+     }
+    ]
+   }
+  },
+  "status": {
+   "lichess": "ok",
+   "model": "unknown",
+   "lastRefusal": "",
+   "at": "2026-10-03T09:00:03.360Z"
+  }
+ },
+ "call:chess.appPractice:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"filters\":{\"masters\":true}}": {
+  "fen": "r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9",
+  "views": {
+   "MastersAtPosition": {
+    "rows": [
+     {
+      "move": "Ra7",
+      "uci": "a8a7",
+      "games": 3146,
+      "whiteWinPct": 54.4,
+      "drawPct": 24.2,
+      "blackWinPct": 21.4,
+      "scoreForMover": 0.335,
+      "averageRating": null
+     },
+     {
+      "move": "Bf5",
+      "uci": "c8f5",
+      "games": 3129,
+      "whiteWinPct": 53.1,
+      "drawPct": 27.6,
+      "blackWinPct": 19.3,
+      "scoreForMover": 0.331,
+      "averageRating": null
+     },
+     {
+      "move": "Rb8",
+      "uci": "a8b8",
+      "games": 3124,
+      "whiteWinPct": 45.1,
+      "drawPct": 32.3,
+      "blackWinPct": 22.7,
+      "scoreForMover": 0.388,
+      "averageRating": null
+     },
+     {
+      "move": "Be6",
+      "uci": "c8e6",
+      "games": 2967,
+      "whiteWinPct": 53.2,
+      "drawPct": 24.6,
+      "blackWinPct": 22.2,
+      "scoreForMover": 0.345,
+      "averageRating": null
+     },
+     {
+      "move": "Bg4",
+      "uci": "c8g4",
+      "games": 2930,
+      "whiteWinPct": 56.7,
+      "drawPct": 20.8,
+      "blackWinPct": 22.5,
+      "scoreForMover": 0.329,
+      "averageRating": null
+     },
+     {
+      "move": "Bd7",
+      "uci": "c8d7",
+      "games": 2783,
+      "whiteWinPct": 47.5,
+      "drawPct": 25.9,
+      "blackWinPct": 26.6,
+      "scoreForMover": 0.396,
+      "averageRating": null
+     }
+    ]
+   },
+   "MasterGamesAtPosition": {
+    "rows": [
+     {
+      "white": "Carlsen, Magnus",
+      "whiteElo": 2721,
+      "black": "Caruana, Fabiano",
+      "blackElo": 2705,
+      "result": "1-0",
+      "year": 2013,
+      "movePlayed": "Be6",
+      "url": "https://lichess.org/QqRrSsTt"
+     },
+     {
+      "white": "Fischer, Robert James",
+      "whiteElo": 2714,
+      "black": "Spassky, Boris V.",
+      "blackElo": 2700,
+      "result": "½-½",
+      "year": 2012,
+      "movePlayed": "Bd7",
+      "url": "https://lichess.org/k2L3m4N5"
+     },
+     {
+      "white": "Kasparov, Garry",
+      "whiteElo": 2707,
+      "black": "Karpov, Anatoly",
+      "blackElo": 2695,
+      "result": "0-1",
+      "year": 2011,
+      "movePlayed": "Ra7",
+      "url": "https://lichess.org/zY9xW8vU"
+     },
+     {
+      "white": "Carlsen, Magnus",
+      "whiteElo": 2700,
+      "black": "Caruana, Fabiano",
+      "blackElo": 2690,
+      "result": "1-0",
+      "year": 2010,
+      "movePlayed": "Rb8",
+      "url": "https://lichess.org/Ab3dE5gH"
+     }
+    ]
+   }
+  },
+  "status": {
+   "lichess": "ok",
+   "model": "unknown",
+   "lastRefusal": "",
+   "at": "2026-10-03T09:00:04.465Z"
+  }
+ },
+ "call:chess.appPosition:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"withinCp\":50}": {
+  "fen": "r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9",
+  "views": {
+   "ImbalancesOf": {
+    "rows": [
+     {
+      "sideToMove": "black",
+      "phase": "opening",
+      "facts": "Phase: opening. Black to move.\nMaterial: the sides are level.\nMinor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nPawn structure: Black has doubled pawns on the c-file.\nPawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).\nPawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).\nFiles: the d-file is open.\nFiles: White holds an open file with the rook d1.\nFiles: the e-file is half-open for Black.\nDevelopment: White still has Nb1 and Bc1 undeveloped.\nDevelopment: Black still has Ng8, Bc8 and Bf8 undeveloped.\nKing safety: Black's king is still in the centre, on e8.\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
+      "structure": "The pawn structure is close to the one reached in: Ruy Lopez: Exchange, Alekhine Variation (C68); Ruy Lopez: Exchange Variation, Alekhine Variation (C68) — 2 pawns different.",
+      "materialWhite": 26,
+      "materialBlack": 26,
+      "bishopPairWhite": false,
+      "bishopPairBlack": true,
+      "passedWhite": "",
+      "passedBlack": "",
+      "openFiles": "d",
+      "oppositeSideCastling": false,
+      "oppositeColouredBishops": false
+     }
+    ]
+   },
+   "OpeningOf": {
+    "rows": []
+   },
+   "BestMoves": {
+    "rows": [
+     {
+      "rank": 1,
+      "move": "Be6",
+      "uci": "c8e6",
+      "side": "black",
+      "scoreCp": -2,
+      "mate": null,
+      "whiteCp": 2,
+      "lossCp": 0,
+      "line": "Be6 Nc3 Bd6 Na4 Bxb3 axb3 O-O-O Be3 b6 Nc3 Kb7 Bf4 Ne7 Bxd6 Rxd6 Rxd6 cxd6 f3 Rd8 Rd1 Kc6",
+      "lineUci": "c8e6 b1c3 f8d6 c3a4 e6b3 a2b3 e8c8 c1e3 b7b6 a4c3 c8b7 e3f4 g8e7 f4d6 d8d6 d1d6 c7d6 f2f3 h8d8 a1d1 b7c6",
+      "depth": 18,
+      "creates": "Tactics: Black's pawn on a6 is attacked and not defended.\nPawn structure: White has doubled pawns on the b-file.\nMinor pieces: Black's dark-squared bishop on d6 is bad: 5 of 7 black pawns stand on its colour.\nFiles: the a-file is half-open for White.\nFiles: Black holds an open file with the rook d8.\nKing safety: The kings are on opposite wings (White kingside, Black queenside): pawn storms cost the attacker nothing in king safety.",
+      "removes": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nKing safety: Black's king is still in the centre, on e8."
+     },
+     {
+      "rank": 2,
+      "move": "Bg4",
+      "uci": "c8g4",
+      "side": "black",
+      "scoreCp": -6,
+      "mate": null,
+      "whiteCp": 6,
+      "lossCp": 4,
+      "line": "Bg4 f3 Be6 Bf4 c4 Nd4 O-O-O Nc3 Bf7 Be3 Bb4 a3 Bxc3 bxc3 Ne7 g4 h5",
+      "lineUci": "c8g4 f2f3 g4e6 c1f4 c5c4 b3d4 e8c8 b1c3 e6f7 f4e3 f8b4 a2a3 b4c3 b2c3 g8e7 g2g4 h7h5",
+      "depth": 18,
+      "creates": "Minor pieces: White's dark-squared bishop on e3 is good: 2 of 7 white pawns stand on its colour.\nFiles: Black holds an open file with the rook d8.\nKing safety: The kings are on opposite wings (White kingside, Black queenside): pawn storms cost the attacker nothing in king safety.",
+      "removes": "King safety: Black's king is still in the centre, on e8."
+     },
+     {
+      "rank": 3,
+      "move": "Bd7",
+      "uci": "c8d7",
+      "side": "black",
+      "scoreCp": -18,
+      "mate": null,
+      "whiteCp": 18,
+      "lossCp": 16,
+      "line": "Bd7 Bf4 O-O-O Nc3 Be6 Rxd8+ Kxd8 Be3 b6 a4 a5 Nb5 Kc8 Rd1 g5 f4 h6 f5",
+      "lineUci": "c8d7 c1f4 e8c8 b1c3 d7e6 d1d8 c8d8 f4e3 b7b6 a2a4 a6a5 c3b5 d8c8 a1d1 g7g5 f2f4 h7h6 f4f5",
+      "depth": 18,
+      "creates": "Minor pieces: Black's dark-squared bishop on f8 is bad: 5 of 7 black pawns stand on its colour.\nMinor pieces: Black's light-squared bishop on e6 is good: 2 of 7 black pawns stand on its colour.\nKing safety: Black's king is still in the centre, on d8.",
+      "removes": "Files: White holds an open file with the rook d1.\nKing safety: Black's king is still in the centre, on e8."
+     },
+     {
+      "rank": 4,
+      "move": "g5",
+      "uci": "g7g5",
+      "side": "black",
+      "scoreCp": -40,
+      "mate": null,
+      "whiteCp": 40,
+      "lossCp": 38,
+      "line": "g5 Nc3 Be6 f4 Bg4 Rf1 c4 h3 cxb3 hxg4 bxc2 fxg5 Bc5+ Kh1 fxg5 Bxg5",
+      "lineUci": "g7g5 b1c3 c8e6 f2f4 e6g4 d1f1 c5c4 h2h3 c4b3 h3g4 b3c2 f4g5 f8c5 g1h1 f6g5 c1g5",
+      "depth": 18,
+      "creates": "Minor pieces: White's dark-squared bishop on c1 is good: 2 of 6 white pawns stand on its colour.\nPawn structure: White has isolated pawns on g5, e4, g4 and g2.\nPawn structure: White has doubled pawns on the g-file.\nMinor pieces: Black's dark-squared bishop on f8 is good: 2 of 6 black pawns stand on its colour.\nPawn structure: Black has isolated pawns on h7 and f6.\nPawn structure: Black has a passed pawn on c2.\nSpace: White has more space (6 against 3 by pawn control of the opponent's half).\nFiles: the c, f and h-files are half-open for White.\nKey squares: White has outpost square on f5 (guarded by a pawn, beyond the reach of enemy pawns).\nFiles: the e and g-files are half-open for Black.\nKey squares: Black has outpost square on e5 (guarded by a pawn, beyond the reach of enemy pawns).\nKing safety: White's king on g1 is exposed: 1 shield pawn, open or half-open f and h-file nearby, 0 enemy pieces bearing on it.",
+      "removes": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nFiles: White holds an open file with the rook d1.\nFiles: the e-file is half-open for Black."
+     },
+     {
+      "rank": 5,
+      "move": "Bd6",
+      "uci": "f8d6",
+      "side": "black",
+      "scoreCp": -45,
+      "mate": null,
+      "whiteCp": 45,
+      "lossCp": 43,
+      "line": "Bd6 Na5 b6 Nc4 Be7 Bf4 Bd8 Nc3 Ne7 Ne3 Be6 h4 O-O a4 h5 Rd2 Nc6 Ncd5 Rf7 c3 Rd7 Rad1",
+      "lineUci": "f8d6 b3a5 b7b6 a5c4 d6e7 c1f4 e7d8 b1c3 g8e7 c4e3 c8e6 h2h4 e8g8 a2a4 h7h5 d1d2 e7c6 c3d5 f8f7 c2c3 f7d7 a1d1",
+      "depth": 18,
+      "creates": "Minor pieces: Black's light-squared bishop on c8 is good: 2 of 7 black pawns stand on its colour.\nMinor pieces: Black's dark-squared bishop on d8 is bad: 5 of 7 black pawns stand on its colour.",
+      "removes": ""
+     }
+    ]
+   }
+  },
+  "status": {
+   "lichess": "ok",
+   "model": "unknown",
+   "lastRefusal": "",
+   "at": "2026-10-03T09:00:04.465Z"
+  }
+ },
+ "call:chess.appPosition:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"withinCp\":20}": {
+  "fen": "r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9",
+  "views": {
+   "ImbalancesOf": {
+    "rows": [
+     {
+      "sideToMove": "black",
+      "phase": "opening",
+      "facts": "Phase: opening. Black to move.\nMaterial: the sides are level.\nMinor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nPawn structure: Black has doubled pawns on the c-file.\nPawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).\nPawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).\nFiles: the d-file is open.\nFiles: White holds an open file with the rook d1.\nFiles: the e-file is half-open for Black.\nDevelopment: White still has Nb1 and Bc1 undeveloped.\nDevelopment: Black still has Ng8, Bc8 and Bf8 undeveloped.\nKing safety: Black's king is still in the centre, on e8.\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
+      "structure": "The pawn structure is close to the one reached in: Ruy Lopez: Exchange, Alekhine Variation (C68); Ruy Lopez: Exchange Variation, Alekhine Variation (C68) — 2 pawns different.",
+      "materialWhite": 26,
+      "materialBlack": 26,
+      "bishopPairWhite": false,
+      "bishopPairBlack": true,
+      "passedWhite": "",
+      "passedBlack": "",
+      "openFiles": "d",
+      "oppositeSideCastling": false,
+      "oppositeColouredBishops": false
+     }
+    ]
+   },
+   "OpeningOf": {
+    "rows": []
+   },
+   "BestMoves": {
+    "rows": [
+     {
+      "rank": 1,
+      "move": "Be6",
+      "uci": "c8e6",
+      "side": "black",
+      "scoreCp": -2,
+      "mate": null,
+      "whiteCp": 2,
+      "lossCp": 0,
+      "line": "Be6 Nc3 Bd6 Na4 Bxb3 axb3 O-O-O Be3 b6 Nc3 Kb7 Bf4 Ne7 Bxd6 Rxd6 Rxd6 cxd6 f3 Rd8 Rd1 Kc6",
+      "lineUci": "c8e6 b1c3 f8d6 c3a4 e6b3 a2b3 e8c8 c1e3 b7b6 a4c3 c8b7 e3f4 g8e7 f4d6 d8d6 d1d6 c7d6 f2f3 h8d8 a1d1 b7c6",
+      "depth": 18,
+      "creates": "Tactics: Black's pawn on a6 is attacked and not defended.\nPawn structure: White has doubled pawns on the b-file.\nMinor pieces: Black's dark-squared bishop on d6 is bad: 5 of 7 black pawns stand on its colour.\nFiles: the a-file is half-open for White.\nFiles: Black holds an open file with the rook d8.\nKing safety: The kings are on opposite wings (White kingside, Black queenside): pawn storms cost the attacker nothing in king safety.",
+      "removes": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nKing safety: Black's king is still in the centre, on e8."
+     },
+     {
+      "rank": 2,
+      "move": "Bg4",
+      "uci": "c8g4",
+      "side": "black",
+      "scoreCp": -6,
+      "mate": null,
+      "whiteCp": 6,
+      "lossCp": 4,
+      "line": "Bg4 f3 Be6 Bf4 c4 Nd4 O-O-O Nc3 Bf7 Be3 Bb4 a3 Bxc3 bxc3 Ne7 g4 h5",
+      "lineUci": "c8g4 f2f3 g4e6 c1f4 c5c4 b3d4 e8c8 b1c3 e6f7 f4e3 f8b4 a2a3 b4c3 b2c3 g8e7 g2g4 h7h5",
+      "depth": 18,
+      "creates": "Minor pieces: White's dark-squared bishop on e3 is good: 2 of 7 white pawns stand on its colour.\nFiles: Black holds an open file with the rook d8.\nKing safety: The kings are on opposite wings (White kingside, Black queenside): pawn storms cost the attacker nothing in king safety.",
+      "removes": "King safety: Black's king is still in the centre, on e8."
+     },
+     {
+      "rank": 3,
+      "move": "Bd7",
+      "uci": "c8d7",
+      "side": "black",
+      "scoreCp": -18,
+      "mate": null,
+      "whiteCp": 18,
+      "lossCp": 16,
+      "line": "Bd7 Bf4 O-O-O Nc3 Be6 Rxd8+ Kxd8 Be3 b6 a4 a5 Nb5 Kc8 Rd1 g5 f4 h6 f5",
+      "lineUci": "c8d7 c1f4 e8c8 b1c3 d7e6 d1d8 c8d8 f4e3 b7b6 a2a4 a6a5 c3b5 d8c8 a1d1 g7g5 f2f4 h7h6 f4f5",
+      "depth": 18,
+      "creates": "Minor pieces: Black's dark-squared bishop on f8 is bad: 5 of 7 black pawns stand on its colour.\nMinor pieces: Black's light-squared bishop on e6 is good: 2 of 7 black pawns stand on its colour.\nKing safety: Black's king is still in the centre, on d8.",
+      "removes": "Files: White holds an open file with the rook d1.\nKing safety: Black's king is still in the centre, on e8."
+     }
+    ]
+   }
+  },
+  "status": {
+   "lichess": "ok",
+   "model": "unknown",
+   "lastRefusal": "",
+   "at": "2026-10-03T09:00:04.465Z"
+  }
+ },
+ "call:chess.appPosition:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"withinCp\":100}": {
+  "fen": "r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9",
+  "views": {
+   "ImbalancesOf": {
+    "rows": [
+     {
+      "sideToMove": "black",
+      "phase": "opening",
+      "facts": "Phase: opening. Black to move.\nMaterial: the sides are level.\nMinor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nPawn structure: Black has doubled pawns on the c-file.\nPawn structure: Black has a queenside pawn majority (4 against 3, counting the a-d files).\nPawn structure: White has a kingside pawn majority (4 against 3, counting the e-h files).\nFiles: the d-file is open.\nFiles: White holds an open file with the rook d1.\nFiles: the e-file is half-open for Black.\nDevelopment: White still has Nb1 and Bc1 undeveloped.\nDevelopment: Black still has Ng8, Bc8 and Bf8 undeveloped.\nKing safety: Black's king is still in the centre, on e8.\nPiece activity: White has the freer pieces: 34 legal moves against 23.",
+      "structure": "The pawn structure is close to the one reached in: Ruy Lopez: Exchange, Alekhine Variation (C68); Ruy Lopez: Exchange Variation, Alekhine Variation (C68) — 2 pawns different.",
+      "materialWhite": 26,
+      "materialBlack": 26,
+      "bishopPairWhite": false,
+      "bishopPairBlack": true,
+      "passedWhite": "",
+      "passedBlack": "",
+      "openFiles": "d",
+      "oppositeSideCastling": false,
+      "oppositeColouredBishops": false
+     }
+    ]
+   },
+   "OpeningOf": {
+    "rows": []
+   },
+   "BestMoves": {
+    "rows": [
+     {
+      "rank": 1,
+      "move": "Be6",
+      "uci": "c8e6",
+      "side": "black",
+      "scoreCp": -2,
+      "mate": null,
+      "whiteCp": 2,
+      "lossCp": 0,
+      "line": "Be6 Nc3 Bd6 Na4 Bxb3 axb3 O-O-O Be3 b6 Nc3 Kb7 Bf4 Ne7 Bxd6 Rxd6 Rxd6 cxd6 f3 Rd8 Rd1 Kc6",
+      "lineUci": "c8e6 b1c3 f8d6 c3a4 e6b3 a2b3 e8c8 c1e3 b7b6 a4c3 c8b7 e3f4 g8e7 f4d6 d8d6 d1d6 c7d6 f2f3 h8d8 a1d1 b7c6",
+      "depth": 18,
+      "creates": "Tactics: Black's pawn on a6 is attacked and not defended.\nPawn structure: White has doubled pawns on the b-file.\nMinor pieces: Black's dark-squared bishop on d6 is bad: 5 of 7 black pawns stand on its colour.\nFiles: the a-file is half-open for White.\nFiles: Black holds an open file with the rook d8.\nKing safety: The kings are on opposite wings (White kingside, Black queenside): pawn storms cost the attacker nothing in king safety.",
+      "removes": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nKing safety: Black's king is still in the centre, on e8."
+     },
+     {
+      "rank": 2,
+      "move": "Bg4",
+      "uci": "c8g4",
+      "side": "black",
+      "scoreCp": -6,
+      "mate": null,
+      "whiteCp": 6,
+      "lossCp": 4,
+      "line": "Bg4 f3 Be6 Bf4 c4 Nd4 O-O-O Nc3 Bf7 Be3 Bb4 a3 Bxc3 bxc3 Ne7 g4 h5",
+      "lineUci": "c8g4 f2f3 g4e6 c1f4 c5c4 b3d4 e8c8 b1c3 e6f7 f4e3 f8b4 a2a3 b4c3 b2c3 g8e7 g2g4 h7h5",
+      "depth": 18,
+      "creates": "Minor pieces: White's dark-squared bishop on e3 is good: 2 of 7 white pawns stand on its colour.\nFiles: Black holds an open file with the rook d8.\nKing safety: The kings are on opposite wings (White kingside, Black queenside): pawn storms cost the attacker nothing in king safety.",
+      "removes": "King safety: Black's king is still in the centre, on e8."
+     },
+     {
+      "rank": 3,
+      "move": "Bd7",
+      "uci": "c8d7",
+      "side": "black",
+      "scoreCp": -18,
+      "mate": null,
+      "whiteCp": 18,
+      "lossCp": 16,
+      "line": "Bd7 Bf4 O-O-O Nc3 Be6 Rxd8+ Kxd8 Be3 b6 a4 a5 Nb5 Kc8 Rd1 g5 f4 h6 f5",
+      "lineUci": "c8d7 c1f4 e8c8 b1c3 d7e6 d1d8 c8d8 f4e3 b7b6 a2a4 a6a5 c3b5 d8c8 a1d1 g7g5 f2f4 h7h6 f4f5",
+      "depth": 18,
+      "creates": "Minor pieces: Black's dark-squared bishop on f8 is bad: 5 of 7 black pawns stand on its colour.\nMinor pieces: Black's light-squared bishop on e6 is good: 2 of 7 black pawns stand on its colour.\nKing safety: Black's king is still in the centre, on d8.",
+      "removes": "Files: White holds an open file with the rook d1.\nKing safety: Black's king is still in the centre, on e8."
+     },
+     {
+      "rank": 4,
+      "move": "g5",
+      "uci": "g7g5",
+      "side": "black",
+      "scoreCp": -40,
+      "mate": null,
+      "whiteCp": 40,
+      "lossCp": 38,
+      "line": "g5 Nc3 Be6 f4 Bg4 Rf1 c4 h3 cxb3 hxg4 bxc2 fxg5 Bc5+ Kh1 fxg5 Bxg5",
+      "lineUci": "g7g5 b1c3 c8e6 f2f4 e6g4 d1f1 c5c4 h2h3 c4b3 h3g4 b3c2 f4g5 f8c5 g1h1 f6g5 c1g5",
+      "depth": 18,
+      "creates": "Minor pieces: White's dark-squared bishop on c1 is good: 2 of 6 white pawns stand on its colour.\nPawn structure: White has isolated pawns on g5, e4, g4 and g2.\nPawn structure: White has doubled pawns on the g-file.\nMinor pieces: Black's dark-squared bishop on f8 is good: 2 of 6 black pawns stand on its colour.\nPawn structure: Black has isolated pawns on h7 and f6.\nPawn structure: Black has a passed pawn on c2.\nSpace: White has more space (6 against 3 by pawn control of the opponent's half).\nFiles: the c, f and h-files are half-open for White.\nKey squares: White has outpost square on f5 (guarded by a pawn, beyond the reach of enemy pawns).\nFiles: the e and g-files are half-open for Black.\nKey squares: Black has outpost square on e5 (guarded by a pawn, beyond the reach of enemy pawns).\nKing safety: White's king on g1 is exposed: 1 shield pawn, open or half-open f and h-file nearby, 0 enemy pieces bearing on it.",
+      "removes": "Minor pieces: Black has the bishop pair.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.\nFiles: White holds an open file with the rook d1.\nFiles: the e-file is half-open for Black."
+     },
+     {
+      "rank": 5,
+      "move": "Bd6",
+      "uci": "f8d6",
+      "side": "black",
+      "scoreCp": -45,
+      "mate": null,
+      "whiteCp": 45,
+      "lossCp": 43,
+      "line": "Bd6 Na5 b6 Nc4 Be7 Bf4 Bd8 Nc3 Ne7 Ne3 Be6 h4 O-O a4 h5 Rd2 Nc6 Ncd5 Rf7 c3 Rd7 Rad1",
+      "lineUci": "f8d6 b3a5 b7b6 a5c4 d6e7 c1f4 e7d8 b1c3 g8e7 c4e3 c8e6 h2h4 e8g8 a2a4 h7h5 d1d2 e7c6 c3d5 f8f7 c2c3 f7d7 a1d1",
+      "depth": 18,
+      "creates": "Minor pieces: Black's light-squared bishop on c8 is good: 2 of 7 black pawns stand on its colour.\nMinor pieces: Black's dark-squared bishop on d8 is bad: 5 of 7 black pawns stand on its colour.",
+      "removes": ""
+     }
+    ]
+   }
+  },
+  "status": {
+   "lichess": "ok",
+   "model": "unknown",
+   "lastRefusal": "",
+   "at": "2026-10-03T09:00:04.465Z"
+  }
+ },
+ "call:chess.appPractice:{\"fen\":\"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1\",\"filters\":{\"speed\":\"blitz\",\"minShare\":3}}": {
+  "fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+  "views": {
+   "MovesByRating": {
+    "rows": [
+     {
+      "band": 0,
+      "rating": "under 1000",
+      "move": "Na6",
+      "pctOfGames": 22.3,
+      "games": 3647,
+      "scored": 0.357
+     },
+     {
+      "band": 0,
+      "rating": "under 1000",
+      "move": "Nh6",
+      "pctOfGames": 22.2,
+      "games": 3629,
+      "scored": 0.337
+     },
+     {
+      "band": 0,
+      "rating": "under 1000",
+      "move": "Nc6",
+      "pctOfGames": 22.1,
+      "games": 3626,
+      "scored": 0.376
+     },
+     {
+      "band": 0,
+      "rating": "under 1000",
+      "move": "Nf6",
+      "pctOfGames": 17.4,
+      "games": 2843,
+      "scored": 0.373
+     },
+     {
+      "band": 0,
+      "rating": "under 1000",
+      "move": "a6",
+      "pctOfGames": 15.4,
+      "games": 2520,
+      "scored": 0.409
+     },
+     {
+      "band": 1000,
+      "rating": "1000-1199",
+      "move": "Nc6",
+      "pctOfGames": 23.1,
+      "games": 2832,
+      "scored": 0.412
+     },
+     {
+      "band": 1000,
+      "rating": "1000-1199",
+      "move": "Na6",
+      "pctOfGames": 21.3,
+      "games": 2606,
+      "scored": 0.416
+     },
+     {
+      "band": 1000,
+      "rating": "1000-1199",
+      "move": "Nh6",
+      "pctOfGames": 19.7,
+      "games": 2413,
+      "scored": 0.421
+     },
+     {
+      "band": 1000,
+      "rating": "1000-1199",
+      "move": "Nf6",
+      "pctOfGames": 18.2,
+      "games": 2235,
+      "scored": 0.428
+     },
+     {
+      "band": 1000,
+      "rating": "1000-1199",
+      "move": "a6",
+      "pctOfGames": 16.8,
+      "games": 2066,
+      "scored": 0.437
+     },
+     {
+      "band": 1200,
+      "rating": "1200-1399",
+      "move": "Nc6",
+      "pctOfGames": 24,
+      "games": 3678,
+      "scored": 0.35
+     },
+     {
+      "band": 1200,
+      "rating": "1200-1399",
+      "move": "Na6",
+      "pctOfGames": 20.4,
+      "games": 3129,
+      "scored": 0.398
+     },
+     {
+      "band": 1200,
+      "rating": "1200-1399",
+      "move": "a6",
+      "pctOfGames": 19.5,
+      "games": 2989,
+      "scored": 0.39
+     },
+     {
+      "band": 1200,
+      "rating": "1200-1399",
+      "move": "Nh6",
+      "pctOfGames": 19.1,
+      "games": 2923,
+      "scored": 0.435
+     },
+     {
+      "band": 1200,
+      "rating": "1200-1399",
+      "move": "Nf6",
+      "pctOfGames": 16.3,
+      "games": 2490,
+      "scored": 0.436
+     },
+     {
+      "band": 1400,
+      "rating": "1400-1599",
+      "move": "Na6",
+      "pctOfGames": 23.3,
+      "games": 3452,
+      "scored": 0.349
+     },
+     {
+      "band": 1400,
+      "rating": "1400-1599",
+      "move": "Nc6",
+      "pctOfGames": 21.8,
+      "games": 3233,
+      "scored": 0.361
+     },
+     {
+      "band": 1400,
+      "rating": "1400-1599",
+      "move": "Nh6",
+      "pctOfGames": 19.8,
+      "games": 2936,
+      "scored": 0.401
+     },
+     {
+      "band": 1400,
+      "rating": "1400-1599",
+      "move": "Nf6",
+      "pctOfGames": 18.6,
+      "games": 2748,
+      "scored": 0.442
+     },
+     {
+      "band": 1400,
+      "rating": "1400-1599",
+      "move": "a6",
+      "pctOfGames": 15.7,
+      "games": 2324,
+      "scored": 0.444
+     },
+     {
+      "band": 1600,
+      "rating": "1600-1799",
+      "move": "Nh6",
+      "pctOfGames": 22.3,
+      "games": 3246,
+      "scored": 0.38
+     },
+     {
+      "band": 1600,
+      "rating": "1600-1799",
+      "move": "Nc6",
+      "pctOfGames": 20.5,
+      "games": 2988,
+      "scored": 0.416
+     },
+     {
+      "band": 1600,
+      "rating": "1600-1799",
+      "move": "Nf6",
+      "pctOfGames": 19.2,
+      "games": 2803,
+      "scored": 0.407
+     },
+     {
+      "band": 1600,
+      "rating": "1600-1799",
+      "move": "a6",
+      "pctOfGames": 18.8,
+      "games": 2747,
+      "scored": 0.343
+     },
+     {
+      "band": 1600,
+      "rating": "1600-1799",
+      "move": "Na6",
+      "pctOfGames": 18.4,
+      "games": 2684,
+      "scored": 0.418
+     },
+     {
+      "band": 1800,
+      "rating": "1800-1999",
+      "move": "Nc6",
+      "pctOfGames": 24.3,
+      "games": 3834,
+      "scored": 0.357
+     },
+     {
+      "band": 1800,
+      "rating": "1800-1999",
+      "move": "Nh6",
+      "pctOfGames": 20.7,
+      "games": 3259,
+      "scored": 0.35
+     },
+     {
+      "band": 1800,
+      "rating": "1800-1999",
+      "move": "Na6",
+      "pctOfGames": 20.4,
+      "games": 3207,
+      "scored": 0.4
+     },
+     {
+      "band": 1800,
+      "rating": "1800-1999",
+      "move": "Nf6",
+      "pctOfGames": 17.5,
+      "games": 2758,
+      "scored": 0.406
+     },
+     {
+      "band": 1800,
+      "rating": "1800-1999",
+      "move": "a6",
+      "pctOfGames": 16.4,
+      "games": 2579,
+      "scored": 0.45
+     },
+     {
+      "band": 2000,
+      "rating": "2000-2199",
+      "move": "Nh6",
+      "pctOfGames": 20.8,
+      "games": 3389,
+      "scored": 0.326
+     },
+     {
+      "band": 2000,
+      "rating": "2000-2199",
+      "move": "Nf6",
+      "pctOfGames": 19.8,
+      "games": 3220,
+      "scored": 0.326
+     },
+     {
+      "band": 2000,
+      "rating": "2000-2199",
+      "move": "a6",
+      "pctOfGames": 19.7,
+      "games": 3204,
+      "scored": 0.335
+     },
+     {
+      "band": 2000,
+      "rating": "2000-2199",
+      "move": "Nc6",
+      "pctOfGames": 19.5,
+      "games": 3172,
+      "scored": 0.39
+     },
+     {
+      "band": 2000,
+      "rating": "2000-2199",
+      "move": "Na6",
+      "pctOfGames": 19.5,
+      "games": 3170,
+      "scored": 0.336
+     },
+     {
+      "band": 2200,
+      "rating": "2200-2499",
+      "move": "Nc6",
+      "pctOfGames": 21.3,
+      "games": 3718,
+      "scored": 0.325
+     },
+     {
+      "band": 2200,
+      "rating": "2200-2499",
+      "move": "Na6",
+      "pctOfGames": 21.2,
+      "games": 3693,
+      "scored": 0.332
+     },
+     {
+      "band": 2200,
+      "rating": "2200-2499",
+      "move": "Nh6",
+      "pctOfGames": 20.7,
+      "games": 3602,
+      "scored": 0.336
+     },
+     {
+      "band": 2200,
+      "rating": "2200-2499",
+      "move": "Nf6",
+      "pctOfGames": 19.9,
+      "games": 3475,
+      "scored": 0.339
+     },
+     {
+      "band": 2200,
+      "rating": "2200-2499",
+      "move": "a6",
+      "pctOfGames": 16.3,
+      "games": 2836,
+      "scored": 0.384
+     },
+     {
+      "band": 2500,
+      "rating": "2500+",
+      "move": "Nc6",
+      "pctOfGames": 21.5,
+      "games": 3254,
+      "scored": 0.362
+     },
+     {
+      "band": 2500,
+      "rating": "2500+",
+      "move": "Nf6",
+      "pctOfGames": 21.3,
+      "games": 3220,
+      "scored": 0.326
+     },
+     {
+      "band": 2500,
+      "rating": "2500+",
+      "move": "Nh6",
+      "pctOfGames": 19.8,
+      "games": 2989,
+      "scored": 0.336
+     },
+     {
+      "band": 2500,
+      "rating": "2500+",
+      "move": "Na6",
+      "pctOfGames": 19.6,
+      "games": 2967,
+      "scored": 0.392
+     },
+     {
+      "band": 2500,
+      "rating": "2500+",
+      "move": "a6",
+      "pctOfGames": 17,
+      "games": 2560,
+      "scored": 0.371
+     }
+    ]
+   }
+  },
+  "status": {
+   "lichess": "ok",
+   "model": "unknown",
+   "lastRefusal": "",
+   "at": "2026-10-03T09:00:14.410Z"
+  }
+ },
+ "call:chess.appPractice:{\"fen\":\"rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1\",\"filters\":{\"band\":\"1600\",\"minShare\":3}}": {
+  "fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+  "views": {
+   "MovesByTimeControl": {
+    "rows": [
+     {
+      "timeControl": "blitz",
+      "move": "Nh6",
+      "pctOfGames": 22.3,
+      "games": 3246,
+      "scored": 0.38
+     },
+     {
+      "timeControl": "blitz",
+      "move": "Nc6",
+      "pctOfGames": 20.5,
+      "games": 2988,
+      "scored": 0.416
+     },
+     {
+      "timeControl": "blitz",
+      "move": "Nf6",
+      "pctOfGames": 19.2,
+      "games": 2803,
+      "scored": 0.407
+     },
+     {
+      "timeControl": "blitz",
+      "move": "a6",
+      "pctOfGames": 18.8,
+      "games": 2747,
+      "scored": 0.343
+     },
+     {
+      "timeControl": "blitz",
+      "move": "Na6",
+      "pctOfGames": 18.4,
+      "games": 2684,
+      "scored": 0.418
+     },
+     {
+      "timeControl": "bullet",
+      "move": "Nc6",
+      "pctOfGames": 21.8,
+      "games": 3722,
+      "scored": 0.379
+     },
+     {
+      "timeControl": "bullet",
+      "move": "Na6",
+      "pctOfGames": 21.7,
+      "games": 3695,
+      "scored": 0.359
+     },
+     {
+      "timeControl": "bullet",
+      "move": "Nh6",
+      "pctOfGames": 21.4,
+      "games": 3653,
+      "scored": 0.338
+     },
+     {
+      "timeControl": "bullet",
+      "move": "a6",
+      "pctOfGames": 17.7,
+      "games": 3023,
+      "scored": 0.358
+     },
+     {
+      "timeControl": "bullet",
+      "move": "Nf6",
+      "pctOfGames": 16.7,
+      "games": 2855,
+      "scored": 0.374
+     },
+     {
+      "timeControl": "classical",
+      "move": "Nc6",
+      "pctOfGames": 22.5,
+      "games": 3368,
+      "scored": 0.366
+     },
+     {
+      "timeControl": "classical",
+      "move": "Na6",
+      "pctOfGames": 20.2,
+      "games": 3024,
+      "scored": 0.394
+     },
+     {
+      "timeControl": "classical",
+      "move": "Nh6",
+      "pctOfGames": 20.1,
+      "games": 3016,
+      "scored": 0.338
+     },
+     {
+      "timeControl": "classical",
+      "move": "a6",
+      "pctOfGames": 18.8,
+      "games": 2813,
+      "scored": 0.347
+     },
+     {
+      "timeControl": "classical",
+      "move": "Nf6",
+      "pctOfGames": 17.6,
+      "games": 2638,
+      "scored": 0.401
+     },
+     {
+      "timeControl": "correspondence",
+      "move": "Nc6",
+      "pctOfGames": 24.1,
+      "games": 3885,
+      "scored": 0.358
+     },
+     {
+      "timeControl": "correspondence",
+      "move": "Nh6",
+      "pctOfGames": 20.3,
+      "games": 3271,
+      "scored": 0.35
+     },
+     {
+      "timeControl": "correspondence",
+      "move": "Na6",
+      "pctOfGames": 20,
+      "games": 3231,
+      "scored": 0.401
+     },
+     {
+      "timeControl": "correspondence",
+      "move": "a6",
+      "pctOfGames": 17.8,
+      "games": 2876,
+      "scored": 0.35
+     },
+     {
+      "timeControl": "correspondence",
+      "move": "Nf6",
+      "pctOfGames": 17.1,
+      "games": 2764,
+      "scored": 0.406
+     },
+     {
+      "timeControl": "rapid",
+      "move": "Nc6",
+      "pctOfGames": 23,
+      "games": 3767,
+      "scored": 0.381
+     },
+     {
+      "timeControl": "rapid",
+      "move": "Nf6",
+      "pctOfGames": 19.8,
+      "games": 3236,
+      "scored": 0.389
+     },
+     {
+      "timeControl": "rapid",
+      "move": "Na6",
+      "pctOfGames": 19.7,
+      "games": 3222,
+      "scored": 0.401
+     },
+     {
+      "timeControl": "rapid",
+      "move": "a6",
+      "pctOfGames": 19.6,
+      "games": 3212,
+      "scored": 0.366
+     },
+     {
+      "timeControl": "rapid",
+      "move": "Nh6",
+      "pctOfGames": 17.2,
+      "games": 2821,
+      "scored": 0.433
+     },
+     {
+      "timeControl": "ultraBullet",
+      "move": "Na6",
+      "pctOfGames": 21.3,
+      "games": 3401,
+      "scored": 0.347
+     },
+     {
+      "timeControl": "ultraBullet",
+      "move": "Nc6",
+      "pctOfGames": 20.9,
+      "games": 3334,
+      "scored": 0.395
+     },
+     {
+      "timeControl": "ultraBullet",
+      "move": "a6",
+      "pctOfGames": 19.8,
+      "games": 3159,
+      "scored": 0.332
+     },
+     {
+      "timeControl": "ultraBullet",
+      "move": "Nf6",
+      "pctOfGames": 19,
+      "games": 3030,
+      "scored": 0.348
+     },
+     {
+      "timeControl": "ultraBullet",
+      "move": "Nh6",
+      "pctOfGames": 18.2,
+      "games": 2909,
+      "scored": 0.4
+     }
+    ]
+   }
+  },
+  "status": {
+   "lichess": "ok",
+   "model": "unknown",
+   "lastRefusal": "",
+   "at": "2026-10-03T09:00:19.935Z"
+  }
+ },
+ "call:chess.appPlans:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"level\":\"intermediate\"}": {
+  "fen": "r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9",
+  "views": {
+   "PlansInPosition": {
+    "rows": [
+     {
+      "side": "white",
+      "priority": 1,
+      "plan": "Trade into the ending",
+      "idea": "Exchange pieces and use the kingside majority.",
+      "moves": "Be3 f4",
+      "imbalances": "Material: the sides are level.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.",
+      "engineEvidence": "the best move",
+      "summary": "White has the better structure for the endgame; Black has the bishops.",
+      "structure": "Ruy Lopez (Exchange)",
+      "opening": "",
+      "level": "intermediate"
+     },
+     {
+      "side": "white",
+      "priority": 2,
+      "plan": "Hold the light squares",
+      "idea": "Keep a knight on d5.",
+      "moves": "Nc3 Nd5",
+      "imbalances": "Minor pieces: Black has the bishop pair.",
+      "engineEvidence": "",
+      "summary": "White has the better structure for the endgame; Black has the bishops.",
+      "structure": "Ruy Lopez (Exchange)",
+      "opening": "",
+      "level": "intermediate"
+     },
+     {
+      "side": "black",
+      "priority": 1,
+      "plan": "Use the bishop pair",
+      "idea": "Open the position for the bishops.",
+      "moves": "Bd6 Be6",
+      "imbalances": "Minor pieces: Black has the bishop pair.",
+      "engineEvidence": "",
+      "summary": "White has the better structure for the endgame; Black has the bishops.",
+      "structure": "Ruy Lopez (Exchange)",
+      "opening": "",
+      "level": "intermediate"
+     },
+     {
+      "side": "black",
+      "priority": 2,
+      "plan": "Queenside expansion",
+      "idea": "b6 and c4.",
+      "moves": "b6",
+      "imbalances": "",
+      "engineEvidence": "",
+      "summary": "White has the better structure for the endgame; Black has the bishops.",
+      "structure": "Ruy Lopez (Exchange)",
+      "opening": "",
+      "level": "intermediate"
+     }
+    ]
+   }
+  },
+  "status": {
+   "lichess": "ok",
+   "model": "ok",
+   "lastRefusal": "",
+   "at": "2026-10-03T09:00:19.960Z"
+  }
+ },
+ "call:chess.appPlans:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"level\":\"intermediate\",\"moves\":\"e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1\"}": {
+  "fen": "r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9",
+  "views": {
+   "PlansInLine": {
+    "rows": [
+     {
+      "side": "white",
+      "priority": 1,
+      "plan": "Trade into the ending",
+      "idea": "Exchange pieces and use the kingside majority.",
+      "moves": "Be3 f4",
+      "imbalances": "Material: the sides are level.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.",
+      "engineEvidence": "the best move",
+      "summary": "White has the better structure for the endgame; Black has the bishops.",
+      "structure": "Ruy Lopez (Exchange)",
+      "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago",
+      "level": "intermediate"
+     },
+     {
+      "side": "white",
+      "priority": 2,
+      "plan": "Hold the light squares",
+      "idea": "Keep a knight on d5.",
+      "moves": "Nc3 Nd5",
+      "imbalances": "Minor pieces: Black has the bishop pair.",
+      "engineEvidence": "",
+      "summary": "White has the better structure for the endgame; Black has the bishops.",
+      "structure": "Ruy Lopez (Exchange)",
+      "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago",
+      "level": "intermediate"
+     },
+     {
+      "side": "black",
+      "priority": 1,
+      "plan": "Use the bishop pair",
+      "idea": "Open the position for the bishops.",
+      "moves": "Bd6 Be6",
+      "imbalances": "Minor pieces: Black has the bishop pair.",
+      "engineEvidence": "",
+      "summary": "White has the better structure for the endgame; Black has the bishops.",
+      "structure": "Ruy Lopez (Exchange)",
+      "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago",
+      "level": "intermediate"
+     },
+     {
+      "side": "black",
+      "priority": 2,
+      "plan": "Queenside expansion",
+      "idea": "b6 and c4.",
+      "moves": "b6",
+      "imbalances": "",
+      "engineEvidence": "",
+      "summary": "White has the better structure for the endgame; Black has the bishops.",
+      "structure": "Ruy Lopez (Exchange)",
+      "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago",
+      "level": "intermediate"
+     }
+    ]
+   }
+  },
+  "status": {
+   "lichess": "ok",
+   "model": "ok",
+   "lastRefusal": "",
+   "at": "2026-10-03T09:00:19.990Z"
+  }
+ },
+ "call:chess.appPlans:{\"fen\":\"r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9\",\"level\":\"beginner\",\"moves\":\"e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1\"}": {
+  "fen": "r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9",
+  "views": {
+   "PlansInLine": {
+    "rows": [
+     {
+      "side": "white",
+      "priority": 1,
+      "plan": "Trade into the ending",
+      "idea": "Exchange pieces and use the kingside majority.",
+      "moves": "Be3 f4",
+      "imbalances": "Material: the sides are level.\nMinor pieces: White has 1 bishop and 2 knights, Black 2 bishops and 1 knight.",
+      "engineEvidence": "the best move",
+      "summary": "White has the better structure for the endgame; Black has the bishops.",
+      "structure": "Ruy Lopez (Exchange)",
+      "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago",
+      "level": "beginner"
+     },
+     {
+      "side": "white",
+      "priority": 2,
+      "plan": "Hold the light squares",
+      "idea": "Keep a knight on d5.",
+      "moves": "Nc3 Nd5",
+      "imbalances": "Minor pieces: Black has the bishop pair.",
+      "engineEvidence": "",
+      "summary": "White has the better structure for the endgame; Black has the bishops.",
+      "structure": "Ruy Lopez (Exchange)",
+      "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago",
+      "level": "beginner"
+     },
+     {
+      "side": "black",
+      "priority": 1,
+      "plan": "Use the bishop pair",
+      "idea": "Open the position for the bishops.",
+      "moves": "Bd6 Be6",
+      "imbalances": "Minor pieces: Black has the bishop pair.",
+      "engineEvidence": "",
+      "summary": "White has the better structure for the endgame; Black has the bishops.",
+      "structure": "Ruy Lopez (Exchange)",
+      "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago",
+      "level": "beginner"
+     },
+     {
+      "side": "black",
+      "priority": 2,
+      "plan": "Queenside expansion",
+      "idea": "b6 and c4.",
+      "moves": "b6",
+      "imbalances": "",
+      "engineEvidence": "",
+      "summary": "White has the better structure for the endgame; Black has the bishops.",
+      "structure": "Ruy Lopez (Exchange)",
+      "opening": "C69 Ruy Lopez: Exchange Variation, Gligoric Variation (1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6), left the book 7 plies ago",
+      "level": "beginner"
+     }
+    ]
+   }
+  },
+  "status": {
+   "lichess": "ok",
+   "model": "ok",
+   "lastRefusal": "",
+   "at": "2026-10-03T09:00:20.020Z"
+  }
+ }
+}

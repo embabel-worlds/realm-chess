@@ -1,4 +1,5 @@
 import { defineRealm } from "@embabel/realm-types";
+import { appHandlers } from "./realm/app-handlers.ts";
 import { producerHandlers } from "./realm/handlers.ts";
 import { producers } from "./realm/producers.ts";
 import { rodHandlers } from "./realm/rod-handlers.ts";
@@ -66,7 +67,18 @@ page. The engine is GPL-3.0, and so is this realm.`,
     "ChessStatus",
   ],
 
-  handlers: { ...rodHandlers, ...producerHandlers },
+  handlers: { ...rodHandlers, ...producerHandlers, ...appHandlers },
+
+  apps: {
+    "chesscalator.html": {
+      handlers: ["chess.appPosition", "chess.appPractice", "chess.appPlans"],
+      resources: [
+        "apps/chesscalator.html.assets/board.css",
+        "apps/chesscalator.html.assets/chesscalator.css",
+        "apps/chesscalator.html.assets/board.js",
+      ],
+    },
+  },
 
   types: {
     ...rodTypes,

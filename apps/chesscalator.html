@@ -5,211 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chesscalator</title>
 <meta name="description" content="Play moves on a board; Stockfish gives its best lines, the position's imbalances are computed from the board, and on request a model with the chess-plans skill names the plans for both sides.">
-<link rel="stylesheet" href="/api/v1/apps-runtime/v1/theme.css">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@1,9..144,600..800&family=JetBrains+Mono:wght@500;600&display=swap">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/assets/chessboard.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/assets/extensions/arrows/arrows.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/assets/extensions/markers/markers.css">
-<script src="/api/v1/apps-runtime/v1/embabel.js"></script>
-<script type="application/embabel-app+json">
-{"version":1,"name":"chesscalator","requires":{"lenses":[],"views":["BestMoves","ImbalancesOf","OpeningOf","OpeningOfLine","TheoryOfLine","PlansInPosition","PlansInLine","MastersAtPosition","MasterGamesAtPosition","PlayerAtPosition","MovesByRating","MovesByTimeControl"],"realms":["chess"],"namespaces":[]}}
-</script>
-<style>
-  :root{--bg:#0a0a0f;--surface:#13131a;--surface2:#191922;--border:#1e1e2e;--cyan:#63c0f5;--purple:#9f77cd;
-        --green:#3fd73c;--dim:#8a8f98;--text:#e5e7eb;--amber:#e8b64c;--red:#e2685f;}
-  *{box-sizing:border-box;}
-  body{margin:0;padding:0 0 56px;background:var(--bg);color:var(--text);
-       font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.5;}
-  .wrap{max-width:1480px;margin:0 auto;padding:22px 16px 8px;}
-  /* The banner: "Chess" in a characterful serif, "calator" in a calculator's monospace, a knight from
-   * the board's own piece set, and the board's teal checkerboard fading in behind. */
-  .banner{position:relative;display:flex;align-items:center;gap:18px;padding:16px 22px;border:1px solid var(--border);
-          border-radius:14px;overflow:hidden;background:linear-gradient(115deg,#121a20 0%,#0f171b 45%,#0b0d12 100%);}
-  .banner::after{content:"";position:absolute;inset:0 0 0 38%;pointer-events:none;
-                 background:conic-gradient(#5a9aa2 25%,transparent 0 50%,#5a9aa2 0 75%,transparent 0) 0 0/30px 30px;
-                 opacity:.16;-webkit-mask-image:linear-gradient(90deg,transparent,#000 70%);mask-image:linear-gradient(90deg,transparent,#000 70%);}
-  .banner .emblem{flex:none;width:58px;height:58px;border-radius:14px;background:linear-gradient(145deg,#6fb3bb,#4b8890);
-                  display:grid;place-items:center;box-shadow:0 6px 20px rgba(90,154,162,.25),inset 0 1px 0 rgba(255,255,255,.25);}
-  .banner .emblem svg{width:46px;height:46px;}
-  .banner h1{margin:0;line-height:1;display:flex;align-items:baseline;gap:1px;text-transform:none;letter-spacing:0;}
-  .banner h1 .chess{font-family:'Fraunces',Georgia,serif;font-style:italic;font-weight:750;font-size:2.4rem;color:#f2f4f6;
-                    font-variation-settings:"opsz" 144;}
-  .banner h1 .calc{font-family:'JetBrains Mono',ui-monospace,Menlo,monospace;font-weight:600;font-size:1.75rem;color:#63c0c9;
-                   letter-spacing:.02em;}
-  .banner .tagline{margin:6px 0 0;font-family:'JetBrains Mono',ui-monospace,monospace;font-size:.74rem;letter-spacing:.08em;
-                   color:var(--dim);text-transform:lowercase;}
-  .banner .tagline b{color:#9fd4da;font-weight:500;}
-  .banner details.about{position:relative;z-index:1;margin:0 0 0 auto;align-self:flex-start;max-width:46ch;text-align:right;}
-  .banner details.about[open]{text-align:left;}
-  @media (max-width:760px){.banner{flex-wrap:wrap;} .banner details.about{margin:6px 0 0;text-align:left;}}
-  header p{margin:4px 0 0;color:var(--dim);font-size:.88rem;max-width:78ch;}
-  /* Three columns: what is unbalanced, the board, and what to do about it. The first two stay in
-   * view while the third scrolls. Narrower screens fold the imbalances under the board, then
-   * stack everything. */
-  .statusbar{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-top:14px;padding:10px 16px;
-             background:var(--surface);border:1px solid var(--border);border-radius:10px;}
-  .layout{display:grid;grid-template-columns:minmax(220px,300px) minmax(320px,520px) minmax(380px,1fr);
-          grid-template-areas:"imb board tabs";gap:16px;margin-top:12px;align-items:start;}
-  .imb-col{grid-area:imb;} .board-col{grid-area:board;} .tabs-col{grid-area:tabs;}
-  @media (min-width:1101px){.imb-col,.board-col{position:sticky;top:12px;max-height:calc(100vh - 70px);overflow:auto;}}
-  @media (max-width:1100px){.layout{grid-template-columns:minmax(320px,480px) 1fr;grid-template-areas:"board tabs" "imb tabs";}}
-  @media (max-width:760px){.layout{grid-template-columns:1fr;grid-template-areas:"board" "imb" "tabs";}}
-  .tabbar{display:flex;gap:2px;border-bottom:1px solid var(--border);margin:-4px -4px 10px;}
-  .tabbar button{background:transparent;border:0;border-bottom:2px solid transparent;color:var(--dim);padding:8px 14px;
-                 cursor:pointer;font-size:.86rem;font-family:inherit;}
-  .tabbar button[aria-selected="true"]{color:var(--text);border-bottom-color:var(--cyan);}
-  .tabbar button .dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--cyan);margin-left:6px;vertical-align:middle;}
-  .tabpane[hidden]{display:none;}
-  /* `hidden` must win over the flex display labels and boxes are given. */
-  [hidden]{display:none !important;}
-  table.movestab{width:100%;border-collapse:collapse;font-size:.84rem;font-variant-numeric:tabular-nums;}
-  table.movestab th{text-align:left;color:var(--dim);font-weight:500;font-size:.72rem;padding:4px 6px;border-bottom:1px solid var(--border);white-space:nowrap;}
-  table.movestab td{padding:5px 6px;border-bottom:1px dashed var(--border);vertical-align:middle;}
-  table.movestab tr.detail td{border-bottom:1px solid var(--border);padding:2px 6px 10px;}
-  table.movestab .eng{white-space:nowrap;}
-  table.movestab .best{color:var(--green);font-size:.74rem;} table.movestab .style{color:var(--green);font-size:.74rem;}
-  table.movestab .cost{color:var(--amber);font-size:.74rem;} table.movestab .absent{color:var(--dim);}
-  table.movestab button.more{background:transparent;border:1px solid var(--border);border-radius:5px;color:var(--dim);cursor:pointer;font-size:.74rem;padding:1px 7px;white-space:nowrap;}
-  table.movestab button.more:hover{color:var(--cyan);}
-  .line{font-family:ui-monospace,Menlo,monospace;font-size:.76rem;color:var(--dim);margin-bottom:4px;}
-  .popwrap{overflow-x:auto;}
-  /* The popularity chart. Series colours are the reference categorical palette's dark steps,
-   * validated on this panel's surface (#13131a): every check passes, worst adjacent CVD ΔE 8.4.
-   * Colour is never the only cue — each line is labelled at its end and in the legend. */
-  .popchart{--s1:#3987e5;--s2:#d95926;--s3:#199e70;--s4:#c98500;--s5:#d55181;--grid:#262634;--axis:#8a8f98;
-            position:relative;margin-top:8px;}
-  .popchart svg{width:100%;height:auto;display:block;overflow:visible;}
-  .popchart .legend{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:.78rem;color:var(--text);margin-bottom:4px;}
-  .popchart .legend span{display:inline-flex;align-items:center;gap:6px;font-family:ui-monospace,Menlo,monospace;}
-  .popchart .legend i{display:inline-block;width:14px;height:2px;border-radius:1px;}
-  .popchart .tip{position:absolute;z-index:2;margin-top:2px;pointer-events:none;background:#1c1c26;border:1px solid var(--border);border-radius:6px;
-                 padding:6px 9px;font-size:.76rem;line-height:1.5;color:var(--text);white-space:nowrap;box-shadow:0 6px 18px rgba(0,0,0,.4);}
-  .popchart .tip b{font-weight:600;} .popchart .tip .sw{display:inline-block;width:10px;height:2px;margin-right:6px;vertical-align:middle;}
-  .popchart .tip .muted{color:var(--dim);}
-  details.poptable{margin-top:8px;} details.poptable summary{cursor:pointer;}
-  table.popgrid{border-collapse:collapse;font-size:.8rem;font-variant-numeric:tabular-nums;margin-top:6px;}
-  table.popgrid th{color:var(--dim);font-weight:500;font-size:.7rem;padding:3px 6px;text-align:center;white-space:nowrap;}
-  table.popgrid th.mv{text-align:left;}
-  table.popgrid td{padding:4px 5px;text-align:center;border:1px solid var(--bg);min-width:38px;}
-  table.popgrid td.mv{text-align:left;font-family:ui-monospace,Menlo,monospace;color:var(--cyan);border:0;}
-  .panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
-  #board{width:100%;aspect-ratio:1/1;}
-  /* The board in Embabel's colours: the theme's teal accent for the dark squares, a cool pale grey
-   * for the light ones — contrast enough for both piece colours — in place of the default wood. */
-  :root{--board-light:#dde8ea;--board-dark:#5a9aa2;}
-  .cm-chessboard.default .board .square.white{fill:var(--board-light);}
-  .cm-chessboard.default .board .square.black{fill:var(--board-dark);}
-  .cm-chessboard.default.border-type-none .board .border{stroke:var(--board-dark);fill:var(--board-dark);}
-  .cm-chessboard.default .coordinates .coordinate.white{fill:var(--board-dark);}
-  .cm-chessboard.default .coordinates .coordinate.black{fill:var(--board-light);}
-  .cm-chessboard .markers .marker.marker-square{fill:#63c0c9;opacity:.35;}
-  .controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center;}
-  button,select,input{font-family:inherit;font-size:.84rem;}
-  .btn{background:transparent;border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;}
-  .btn:hover{border-color:var(--cyan);}
-  .btn.primary{background:var(--cyan);border-color:var(--cyan);color:#06121c;}
-  .btn:disabled{opacity:.45;cursor:default;}
-  select,input[type=text]{background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:6px 8px;border-radius:6px;}
-  label.inline{color:var(--dim);font-size:.8rem;display:flex;align-items:center;gap:6px;}
-  .fen{display:flex;gap:6px;margin-top:10px;}
-  .fen input{flex:1;min-width:0;font-family:ui-monospace,Menlo,monospace;font-size:.76rem;}
-  .fen-error{color:var(--red);font-size:.8rem;margin-top:4px;min-height:1em;}
-  .moves{margin-top:12px;font-family:ui-monospace,Menlo,monospace;font-size:.82rem;color:var(--dim);
-         max-height:120px;overflow:auto;word-break:break-word;}
-  .moves b{color:var(--text);font-weight:500;}
-  .status{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;}
-  .status .who{font-size:1.1rem;font-weight:500;}
-  .status .eval{font-variant-numeric:tabular-nums;color:var(--dim);font-size:.9rem;}
-  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:10px 0 4px;}
-  .toolbar .spacer{flex:1;}
-  .note{color:var(--dim);font-size:.8rem;}
-  .state{padding:18px 4px;color:var(--dim);font-size:.9rem;}
-  .state.error{color:var(--red);}
-  .plan{border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:8px;padding:12px 14px;margin-top:10px;background:var(--surface2);}
-  .plan.best{border-left-color:var(--green);}
-  .plan h3{margin:0;font-size:1rem;font-weight:500;}
-  .plan .meaning{color:var(--dim);font-size:.82rem;margin:3px 0 8px;}
-  .cand button.mv{background:transparent;border:1px solid var(--cyan);color:var(--cyan);border-radius:5px;padding:2px 9px;
-                  cursor:pointer;font-weight:600;font-family:ui-monospace,Menlo,monospace;}
-  .cand button.mv:hover{background:var(--cyan);color:#06121c;}
-
-  .explain{margin-top:14px;}
-  .explain p{margin:0 0 10px;font-size:.92rem;}
-  .legend{margin-top:12px;font-size:.78rem;color:var(--dim);}
-  /* The board column stays in view while the analysis scrolls: the imbalances sit above the board
-   * so the position and what is unbalanced about it are always read together. */
-  .imb-col h2.sec{margin-top:0;}
-  .imb-group{break-inside:avoid;margin-bottom:6px;}
-  .imb-name{font-size:.72rem;font-weight:600;letter-spacing:.04em;color:var(--cyan);text-transform:uppercase;}
-  .imb-col ul.facts{font-size:.8rem;margin:1px 0 0;padding-left:16px;}
-  .chip b{font-weight:600;margin-right:2px;}
-  .nav{display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;}
-  .nav .ply{min-width:9ch;text-align:center;color:var(--dim);font-size:.8rem;font-variant-numeric:tabular-nums;}
-  .moves span.mv{cursor:pointer;padding:0 2px;border-radius:3px;}
-  .moves span.mv:hover{color:var(--cyan);}
-  .moves span.mv.at{background:var(--cyan);color:#06121c;}
-  .moves span.mv.after{opacity:.55;}
-  details.about{margin-top:4px;color:var(--dim);font-size:.86rem;max-width:80ch;}
-  details.about summary{cursor:pointer;font-size:.82rem;}
-  details.about p{margin:6px 0;}
-  .opening{color:var(--dim);font-size:.84rem;margin:2px 0 6px;min-height:1.2em;}
-  .opening b{color:var(--text);font-weight:500;}
-  h2.sec{font-size:.78rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--dim);margin:16px 0 4px;}
-  .changes{display:flex;flex-wrap:wrap;gap:4px;}
-  .chip{font-size:.72rem;border-radius:999px;padding:1px 8px;border:1px solid var(--border);color:var(--dim);}
-  .chip.plus{border-color:rgba(63,215,60,.45);color:#9ee89c;}
-  .chip.minus{border-color:rgba(226,104,95,.45);color:#f0a39c;}
-  ul.facts{margin:4px 0 0;padding-left:18px;font-size:.84rem;}
-  ul.facts li{margin:2px 0;}
-  .plans{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px;}
-  @media (max-width:640px){.plans{grid-template-columns:1fr;}}
-  .side h3{margin:0 0 6px;font-size:.95rem;font-weight:500;}
-  .plan{border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:8px;padding:10px 12px;margin-bottom:8px;background:var(--surface2);}
-  .plan.first{border-left-color:var(--green);}
-  .plan h4{margin:0;font-size:.92rem;font-weight:500;}
-  .plan p{margin:4px 0;font-size:.84rem;}
-  .plan .meta{font-size:.76rem;color:var(--dim);}
-  .summary{font-size:.9rem;margin:8px 0 4px;}
-  #plans > .meta{font-size:.8rem;color:var(--dim);}
-  table.practice{width:100%;border-collapse:collapse;font-size:.82rem;font-variant-numeric:tabular-nums;margin-top:4px;}
-  table.practice th{text-align:left;color:var(--dim);font-weight:500;font-size:.74rem;padding:3px 6px;border-bottom:1px solid var(--border);}
-  table.practice td{padding:3px 6px;border-bottom:1px dashed var(--border);}
-  table.practice td.mv{font-family:ui-monospace,Menlo,monospace;color:var(--cyan);cursor:pointer;}
-  .bar{display:flex;height:8px;border-radius:4px;overflow:hidden;min-width:90px;}
-  .bar span{display:block;height:100%;}
-  .bar .w{background:#e8eaed;} .bar .d{background:#8a8f98;} .bar .b{background:#2a2f38;}
-  .games a{color:var(--cyan);text-decoration:none;font-size:.8rem;} .games{margin-top:6px;}
-  .games div{margin:2px 0;color:var(--dim);font-size:.8rem;}
-  form.player{display:flex;gap:6px;margin:4px 0;}
-  .unavailable{border:1px solid rgba(232,182,76,.35);background:rgba(232,182,76,.07);color:#e9d3a0;border-radius:8px;
-               padding:8px 12px;font-size:.82rem;margin:6px 0 8px;}
-  form.player input{flex:1;max-width:260px;}
-  details.theory{margin:8px 0 4px;border:1px solid var(--border);border-radius:8px;padding:8px 12px;background:var(--surface2);}
-  details.theory summary{cursor:pointer;font-size:.86rem;font-weight:500;}
-  details.theory summary .meta{font-weight:400;color:var(--dim);font-size:.78rem;}
-  #theory{padding-right:6px;}
-  #theory p{font-size:.84rem;margin:6px 0;}
-  #theory h5{font-size:.84rem;margin:8px 0 2px;font-weight:600;}
-  .attribution{font-size:.72rem;color:var(--dim);margin-top:6px;}
-  .attribution a{color:var(--dim);}
-
-  footer.how{max-width:1480px;margin:18px auto 0;padding:0 16px;font-size:.75rem;}
-  footer.how a{color:var(--dim);text-decoration:none;} footer.how a:hover{color:var(--cyan);}
-  #how-it-works{display:none;max-width:1480px;margin:10px auto 0;padding:0 16px;}
-  #how-it-works:target{display:block;}
-  #how-it-works h2{font-weight:300;letter-spacing:.06em;text-transform:uppercase;font-size:1.1rem;margin:22px 0 6px;}
-  #how-it-works h3{font-size:.95rem;margin:16px 0 4px;}
-  #how-it-works p,#how-it-works li{font-size:.86rem;color:#c9cdd4;max-width:90ch;}
-  #how-it-works pre{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px 12px;
-                    overflow-x:auto;font-size:.75rem;line-height:1.45;}
-  #how-it-works code{font-size:.82rem;}
-</style>
 </head>
 <body>
 <div class="wrap">
   <header class="banner">
-    <div class="emblem" aria-hidden="true"><svg viewBox="0 0 40 40"><use href="chesscalator-pieces.svg#bn"/></svg></div>
+    <div class="emblem" aria-hidden="true"><svg viewBox="0 0 40 40"><use href="#bn"/></svg></div>
     <div>
       <h1><span class="chess">Chess</span><span class="calc">calator</span></h1>
       <p class="tagline"><b>engine</b> · imbalances · theory · <b>plans</b> · master practice</p>
@@ -372,13 +172,17 @@
   <h2>How it works</h2>
 
   <h3>1. The data</h3>
-  <p>Nothing on this page is stored. For the position on the board the page asks the world four questions by
-    view name; each pins a <code>Position</code> by its FEN and follows one relationship to a virtual type whose
-    rows come from one of the realm's own verbs, running in the appliance's sandbox:</p>
+  <p>Nothing on this page is stored. The page runs in the appliance's sandbox with no network, and asks the realm
+    one call at a time: <code>chess.appPosition</code> on every step, <code>chess.appPractice</code> for Lichess,
+    <code>chess.appPlans</code> when you ask for plans. Each answers the views below under their names, running each
+    view's own Cypher over the rows the realm's producers return, so the page shows exactly what a query would. Each
+    view pins a <code>Position</code> by its FEN (or a <code>GameLine</code> by its moves) and follows one relationship
+    to a virtual type whose rows come from the realm's own Wasm handlers:</p>
   <ul>
     <li><b>Engine lines</b> — <code>HAS_CANDIDATE</code> → <code>CandidateMove</code>, from
-      <code>chess.analysePosition</code>: Stockfish 19 (lite, single-threaded WebAssembly) under Node, five lines at
-      depth 18. Each line also carries the imbalances it creates and removes once its exchanges settle. Cached for
+      <code>chess.analysePosition</code>: Stockfish 19 (lite, WebAssembly) from the appliance's module registry, five
+      lines, searched to a fixed node budget of about three seconds and at most depth 18; each line says the depth it
+      reached. Each line also carries the imbalances it creates and removes once its exchanges settle. Cached for
       seven days per position — a search is not repeatable, and the cache keeps the numbers steady.</li>
     <li><b>Imbalances</b> — <code>HAS_IMBALANCES</code> → <code>PositionImbalances</code>, from
       <code>chess.positionImbalances</code>: computed from the board, never judged. Material, bishop pair and
@@ -410,8 +214,8 @@
       loose piece works is the engine's call. Material is counted once an exchange under way is finished, so straight
       after 4.Bxc6 the sides are level, not "White three points up".</li>
     <li><b>Plans</b> — <code>HAS_PLAN</code> → <code>Plan</code>, from <code>chess.explainPlans</code>, only when you
-      press <i>Show the plans</i>: the three above go to <code>gateway.ai.complete</code> with the
-      <code>chess-plans</code> skill attached — with the opening theory too, for a game played here — and the model
+      press <i>Show the plans</i>: the three above go to the model through <code>ai_complete</code>, with the
+      <code>chess-plans</code> skill attached and the realm granted the model — with the opening theory too, for a game played here — and the model
       names up to three plans for each side, citing the
       imbalances it uses by number. The facts are computed; the plans are its judgement. Cached for seven days.</li>
   </ul>
@@ -511,10 +315,8 @@ ORDER BY side DESC, priority</pre>
 </div>
 
 <script type="module">
-import { Chessboard, COLOR, INPUT_EVENT_TYPE, FEN } from "https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/src/Chessboard.js";
-import { Arrows, ARROW_TYPE } from "https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/src/extensions/arrows/Arrows.js";
-import { Markers, MARKER_TYPE } from "https://cdn.jsdelivr.net/npm/cm-chessboard@8.15.1/src/extensions/markers/Markers.js";
-import { Chess } from "https://cdn.jsdelivr.net/npm/chess.js@1.4.0/dist/esm/chess.js";
+/* The board and chess.js come with the app as assets (board.js), and so do the sprites. */
+const { Chessboard, COLOR, INPUT_EVENT_TYPE, FEN, Arrows, ARROW_TYPE, Markers, MARKER_TYPE, Chess, installSprites } = window.Chesscalator;
 
 /*
  * The page holds the game; the world holds everything else.
@@ -523,12 +325,18 @@ import { Chess } from "https://cdn.jsdelivr.net/npm/chess.js@1.4.0/dist/esm/ches
  * can be revisited, and a different move played there starts a new line from that point. Each
  * position change is a browser history entry, so Back and Forward step through the game too.
  *
- * For each position the page asks three views at once: BestMoves and ImbalancesOf by FEN, and
- * the opening. When the game began from the starting position the opening comes from the LINE
- * (OpeningOfLine), which keeps a name long after the position leaves the book; a game loaded
- * from a FEN has no line, so it is looked up by position (OpeningOf). Plans follow the same rule
- * (PlansInLine / PlansInPosition) and are asked for only on request. An answer for a position
- * the board has already left is dropped.
+ * The page runs in the appliance's sandboxed frame, which has no network and one way out:
+ * realm.call(handler, args), one call at a time. For each position it asks chess.appPosition,
+ * which answers BestMoves, ImbalancesOf and the opening, and then chess.appPractice for what
+ * masters played. When the game began from the starting position the opening comes from the
+ * LINE (OpeningOfLine), which keeps a name long after the position leaves the book, along with
+ * the wikibook's theory; a game loaded from a FEN has no line, so it is looked up by position
+ * (OpeningOf). Plans follow the same rule (PlansInLine / PlansInPosition) through
+ * chess.appPlans, and are asked for only when the button is pressed. Each reply carries the
+ * views' own rows under the views' names, and ChessStatus, which says why a column is empty.
+ *
+ * Every call goes through one queue (below). An answer for a position the board has already
+ * left is dropped.
  */
 
 const $ = (id) => document.getElementById(id);
@@ -541,7 +349,7 @@ let orientation = COLOR.white;
 let currentRows = [];
 let analysisSeq = 0;
 let settleTimer = null;
-let inFlight = null;   // AbortController for the current position's requests
+let lastStatus = null; // ChessStatus, as the last reply carried it
 
 /* How long a position must stay on the board before the world is asked about it. Stepping
  * through a game — a held arrow key, a run of Back — then costs one search, for the position
@@ -556,8 +364,8 @@ $("level").addEventListener("change", () => {
   $("plans").replaceChildren();
 });
 
-/* Sprites are served beside this page: the board's own asset folders are subdirectories, which
- * an app cannot serve, and a cross-origin sprite is refused by the browser. */
+/* The frame cannot fetch, so the sprites are put in the document, where the board finds them by id. */
+installSprites();
 const board = new Chessboard($("board"), {
   position: FEN.start,
   assetsUrl: "./",
@@ -567,6 +375,79 @@ const board = new Chessboard($("board"), {
     { class: Markers, props: { sprite: "chesscalator-markers.svg", autoMarkers: MARKER_TYPE.square } },
   ],
 });
+
+/*
+ * The queue. The bridge runs one realm.call at a time and refuses a second while one is
+ * pending, so every action waits its turn here: the step (appPosition, then appPractice for
+ * masters) and anything asked for on request (plans, popularity, a player). Stepping while a
+ * call is pending only records the latest position; when the call settles its answer is
+ * dropped if the board has moved on, and the latest position's step runs next. Requests made
+ * for a position the board has left are dropped without being asked.
+ */
+const queue = { busy: false, step: null, requests: [] };
+
+function queueStep(seq, userMove) {
+  queue.step = { seq, run: () => ask(seq, userMove) };
+  pump();
+}
+
+function queueRequest(run) {
+  queue.requests.push({ seq: analysisSeq, run });
+  pump();
+}
+
+async function pump() {
+  if (queue.busy) return;
+  let job = queue.step;
+  queue.step = null;
+  if (!job) {
+    queue.requests = queue.requests.filter((r) => r.seq === analysisSeq);
+    job = queue.requests.shift();
+  }
+  if (!job) return;
+  queue.busy = true;
+  try {
+    if (job.seq === analysisSeq) await job.run();
+  } finally {
+    queue.busy = false;
+    pump();
+  }
+}
+
+/* One call to the realm. The reply is plain data; nothing in it is ever inserted as HTML. */
+async function call(handler, args) {
+  const reply = await realm.call(handler, args);
+  if (reply && reply.status) lastStatus = reply.status;
+  return reply;
+}
+
+/*
+ * One view's answer from a reply, in the shape the rendering below was written for: fulfilled
+ * with its rows, or rejected with the realm's reason. A view skipped for time is an empty
+ * answer with a warning saying so.
+ */
+function settled(reply, name) {
+  const v = reply && reply.views ? reply.views[name] : undefined;
+  if (!v) return { status: "fulfilled", value: null };
+  if (v.error) return { status: "rejected", reason: new Error(v.error) };
+  const warnings = v.skipped ? [{ message: "there was no time left in this call; ask again to fetch the rest" }] : [];
+  return { status: "fulfilled", value: { data: v.rows || [], warnings } };
+}
+
+/*
+ * Why a column is empty, in the words ChessStatus carries: whether Lichess or the model was
+ * refused the last time, the code, and when. Empty when the status says nothing about it.
+ */
+function statusWords(source) {
+  const s = lastStatus;
+  if (!s) return "";
+  const when = s.at ? ` at ${s.at}` : "";
+  const code = s.lastRefusal ? ` (${s.lastRefusal}${when})` : when ? ` (${when.trim()})` : "";
+  if (source === "lichess" && s.lichess === "refused") return `ChessStatus: lichess refused${code}.`;
+  if (source === "model" && s.model === "not_granted") return `ChessStatus: model not_granted${code}: grant the chess realm the model to get plans.`;
+  if (source === "model" && /^MODEL_/.test(s.lastRefusal || "")) return `ChessStatus: the model refused${code}.`;
+  return "";
+}
 
 /* A view envelope carries its rows under `data` — as the array itself, or as `data.rows` — and
  * older runtimes put them at `rows`. Reading only one of those turns every answer into "no lines". */
@@ -635,8 +516,12 @@ function record(replace = false) {
   const hash = "#" + new URLSearchParams(fromStart()
     ? { line: line.join(" "), at: String(cursor) }
     : { fen: baseFen, line: line.join(" "), at: String(cursor) }).toString();
-  if (replace) history.replaceState(st, "", hash);
-  else history.pushState(st, "", hash);
+  // A frame whose document has no address of its own may refuse a new history entry; the game
+  // still plays, it just cannot be stepped with the browser's Back.
+  try {
+    if (replace) history.replaceState(st, "", hash);
+    else history.pushState(st, "", hash);
+  } catch { /* no history in this frame */ }
 }
 
 /* Show the position at the cursor. `userMove` says whether a person just played, which is the
@@ -671,8 +556,6 @@ function play(san, { userMove = true } = {}) {
  */
 function analyse(userMove) {
   const seq = ++analysisSeq;
-  if (inFlight) inFlight.abort();
-  inFlight = null;
   clearTimeout(settleTimer);
   board.removeArrows();
   $("plans").replaceChildren();
@@ -693,54 +576,63 @@ function analyse(userMove) {
     return;
   }
   state("analysis", "\u2026");
-  settleTimer = setTimeout(() => { if (seq === analysisSeq) ask(seq, userMove); }, userMove ? 0 : SETTLE_MS);
+  settleTimer = setTimeout(() => { if (seq === analysisSeq) queueStep(seq, userMove); }, userMove ? 0 : SETTLE_MS);
 }
 
 async function ask(seq, userMove) {
-  inFlight = new AbortController();
-  const opts = { signal: inFlight.signal };
-  state("analysis", "The engine is thinking — one to four seconds for a new position.");
-  state("imbalances", "Reading the position…");
+  state("analysis", "The engine is thinking \u2014 one to four seconds for a new position.");
+  state("imbalances", "Reading the position\u2026");
   const fen = game.fen();
   const within = Number($("within").value);
-  const openingCall = fromStart()
-    ? (cursor === 0 ? Promise.resolve(null) : embabel.views.invoke("OpeningOfLine", { moves: playedLine() }, opts))
-    : embabel.views.invoke("OpeningOf", { fen }, opts);
-  const theoryCall = fromStart() && cursor > 0 ? embabel.views.invoke("TheoryOfLine", { moves: playedLine() }, opts) : Promise.resolve(null);
-  if ($("playerName").value.trim()) lookUpPlayer(seq);
-  // The engine and master practice answer one question — what to play here — so they arrive
-  // together and go in one table. Both master views read one explorer request.
-  const [moves, imb, opening, theory, masters, masterGames] = await Promise.allSettled([
-    embabel.views.invoke("BestMoves", { fen, withinCp: within, maxLines: 5 }, opts),
-    embabel.views.invoke("ImbalancesOf", { fen }, opts),
-    openingCall,
-    theoryCall,
-    embabel.views.invoke("MastersAtPosition", { fen }, opts),
-    embabel.views.invoke("MasterGamesAtPosition", { fen }, opts),
-  ]);
-  if (seq !== analysisSeq) return;
-  renderOpening(opening, imb);
-  renderTheory(theory);
-  renderImbalances(imb);
-  if (moves.status === "rejected") {
-    state("analysis", `The engine did not answer: ${failure(moves.reason)}`, "error");
+  const moves = fromStart() && cursor > 0 ? playedLine() : null;
+  let reply;
+  try {
+    reply = await call("chess.appPosition", moves ? { fen, moves, withinCp: within } : { fen, withinCp: within });
+  } catch (e) {
+    if (seq !== analysisSeq) return;
+    state("analysis", `The engine did not answer: ${failure(e)}`, "error");
+    state("imbalances", `The imbalances could not be read: ${failure(e)}`, "error");
     return;
   }
-  const rows = rowsOf(moves.value);
+  if (seq !== analysisSeq) return;
+  // The starting position of a game played here is not looked up: it has no name to find.
+  const opening = cursor === 0 && fromStart() ? { status: "fulfilled", value: null } : settled(reply, moves ? "OpeningOfLine" : "OpeningOf");
+  const imb = settled(reply, "ImbalancesOf");
+  const best = settled(reply, "BestMoves");
+  renderOpening(opening, imb);
+  renderTheory(settled(reply, "TheoryOfLine"));
+  renderImbalances(imb);
+  if (best.status === "rejected") {
+    state("analysis", `The engine did not answer: ${failure(best.reason)}`, "error");
+    return;
+  }
+  const rows = rowsOf(best.value);
   currentRows = rows;
   if (rows.length === 0) {
-    const w = (moves.value && moves.value.warnings) || [];
+    const w = (best.value && best.value.warnings) || [];
     state("analysis", w.length ? `No lines: ${w.map((x) => x.message || x).join("; ")}` : "The engine returned no lines for this position.", "error");
     return;
   }
-  const best = rows[0];
-  $("evalText").textContent = best.mate != null
-    ? `mate in ${Math.abs(best.mate)} for ${best.mate > 0 ? sideName(game.turn()) : sideName(game.turn() === "w" ? "b" : "w")}`
-    : `${fmt(best.whiteCp)} \u00b7 depth ${best.depth}`;
-  renderMovesTable(rows, masters, masterGames);
+  const top = rows[0];
+  $("evalText").textContent = top.mate != null
+    ? `mate in ${Math.abs(top.mate)} for ${top.mate > 0 ? sideName(game.turn()) : sideName(game.turn() === "w" ? "b" : "w")}`
+    : `${fmt(top.whiteCp)} \u00b7 depth ${top.depth}`;
+  renderMovesTable(rows, null, null);
   $("plansBtn").disabled = false;
   $("popBtn").disabled = false;
   if (userMove) maybeEngineMove(seq);
+  // The engine and master practice answer one question, what to play here, so masters join the
+  // same table when they arrive. Both master views come from one explorer request.
+  $("mastersNote").textContent = "Asking the masters database\u2026";
+  let practice;
+  try {
+    practice = await call("chess.appPractice", { fen, filters: { masters: true } });
+  } catch (e) {
+    practice = { views: { MastersAtPosition: { rows: [], error: failure(e) } } };
+  }
+  if (seq !== analysisSeq) return;
+  renderMovesTable(rows, settled(practice, "MastersAtPosition"), settled(practice, "MasterGamesAtPosition"));
+  if ($("playerName").value.trim()) lookUpPlayer();
 }
 
 function renderOpening(opening, imb) {
@@ -878,10 +770,12 @@ function renderMovesTable(engineRows, masters, masterGames) {
   $("analysis").replaceChildren(t);
   // Master practice: a quiet note when it is unavailable, and the top games behind a disclosure.
   const note = $("mastersNote");
-  if (masters && masters.status === "rejected") note.textContent = needsKey(masters.reason)
+  if (!masters) note.textContent = "";
+  else if (masters.status === "rejected") note.textContent = [needsKey(masters.reason)
     ? "Master games need a Lichess token — add one in the chess realm's settings."
-    : `The masters database could not be read: ${failure(masters.reason)}`;
-  else note.textContent = mRows.length ? `Masters: ${totalMaster.toLocaleString()} games from this position.` : "No master games reached this position.";
+    : `The masters database could not be read: ${failure(masters.reason)}`, statusWords("lichess")].filter(Boolean).join(" ");
+  else note.textContent = mRows.length ? `Masters: ${totalMaster.toLocaleString()} games from this position.`
+    : ["No master games reached this position.", statusWords("lichess")].filter(Boolean).join(" ");
   const games = masterGames && masterGames.status === "fulfilled" ? rowsOf(masterGames.value).slice(0, 8) : [];
   $("gamesBox").hidden = games.length === 0;
   $("masterGames").replaceChildren(...games.map((x) => {
@@ -905,18 +799,26 @@ function popAxisChanged() {
   $("popularity").replaceChildren();
 }
 
-async function comparePopularity() {
+function comparePopularity() {
+  $("popBtn").disabled = true;
+  state("popularity", "Waiting for the board's own questions to finish\u2026", "note");
+  queueRequest(askPopularity);
+}
+
+async function askPopularity() {
   const seq = analysisSeq;
   const byRating = $("popAxis").value === "rating";
   $("popBtn").disabled = true;
   state("popularity", "Asking Lichess, one column at a time \u2014 about ten seconds for a new position.", "note");
   try {
-    const env = byRating
-      ? await embabel.views.invoke("MovesByRating", { fen: game.fen(), speed: $("popSpeed").value, minShare: 3 }, inFlight ? { signal: inFlight.signal } : {})
-      : await embabel.views.invoke("MovesByTimeControl", { fen: game.fen(), band: $("popBand").value, minShare: 3 }, inFlight ? { signal: inFlight.signal } : {});
+    const name = byRating ? "MovesByRating" : "MovesByTimeControl";
+    const reply = await call("chess.appPractice", { fen: game.fen(), filters: byRating ? { speed: $("popSpeed").value, minShare: 3 } : { band: $("popBand").value, minShare: 3 } });
     if (seq !== analysisSeq) return;
-    const rows = rowsOf(env);
-    if (rows.length === 0) return state("popularity", "No Lichess games from this position in that selection.", "note");
+    const answer = settled(reply, name);
+    if (answer.status === "rejected") throw answer.reason;
+    const rows = rowsOf(answer.value);
+    const skipped = answer.value && answer.value.warnings.length ? ` Not every column arrived: ${answer.value.warnings[0].message}.` : "";
+    if (rows.length === 0) return state("popularity", ["No Lichess games from this position in that selection." + skipped, statusWords("lichess")].filter(Boolean).join(" "), "note");
     const colKey = (r) => (byRating ? r.rating : r.timeControl);
     const cols = [...new Set(rows.map(colKey))];
     if (byRating) cols.sort((a, b) => rows.find((r) => r.rating === a).band - rows.find((r) => r.rating === b).band);
@@ -958,10 +860,10 @@ async function comparePopularity() {
     const chart = popChart(cols, { axis: byRating ? "rating" : "time control", short, full: (c) => (byRating ? `Rated ${c}` : c) }, series);
     const table = el("details", "poptable");
     table.append(el("summary", "note", "Table"), wrap);
-    $("popularity").replaceChildren(el("div", "note", `Share of Lichess games from this position, ${what}.`), chart, table);
+    $("popularity").replaceChildren(el("div", "note", `Share of Lichess games from this position, ${what}.${skipped}`), chart, table);
   } catch (e) {
     if (seq !== analysisSeq) return;
-    state("popularity", needsKey(e) ? "Popularity needs a Lichess token \u2014 add one in the chess realm's settings." : `Lichess could not be asked: ${failure(e)}`, needsKey(e) ? "note" : "error");
+    state("popularity", [needsKey(e) ? "Popularity needs a Lichess token \u2014 add one in the chess realm's settings." : `Lichess could not be asked: ${failure(e)}`, statusWords("lichess")].filter(Boolean).join(" "), needsKey(e) ? "note" : "error");
   } finally {
     if (seq === analysisSeq) $("popBtn").disabled = false;
   }
@@ -1049,25 +951,29 @@ function popChart(cols, colTitles, series) {
   return wrap;
 }
 
-/*
- * Player look-ups are off until the appliance can read Lichess's streamed (NDJSON) answers: the
- * failure comes back as an empty success, which this page would otherwise report as "no games" —
- * a confident wrong answer. Flip this when that is fixed; nothing else changes.
- */
-const PLAYER_LOOKUP_AVAILABLE = false;
+/* Player look-ups read Lichess's streamed (NDJSON) answers, which the appliance now reads whole. */
+const PLAYER_LOOKUP_AVAILABLE = true;
 
 /* What one Lichess player chose here, playing the side to move. Remembered in this browser. */
-async function lookUpPlayer(seq = analysisSeq) {
+function lookUpPlayer() {
+  if (!$("playerName").value.trim() || !PLAYER_LOOKUP_AVAILABLE) return;
+  queueRequest(askPlayer);
+}
+
+async function askPlayer() {
+  const seq = analysisSeq;
   const player = $("playerName").value.trim();
-  if (!player || !PLAYER_LOOKUP_AVAILABLE) return;
+  if (!player) return;
   try { localStorage.setItem("chesscalator.player", player); } catch { /* no storage */ }
   const color = game.turn() === "w" ? "white" : "black";
   state("player", `Looking up ${player} as ${color}\u2026`, "note");
   try {
-    const env = await embabel.views.invoke("PlayerAtPosition", { fen: game.fen(), player, color }, inFlight ? { signal: inFlight.signal } : {});
+    const reply = await call("chess.appPractice", { fen: game.fen(), filters: { player, color } });
     if (seq !== analysisSeq) return;
-    const rows = rowsOf(env);
-    if (rows.length === 0) return state("player", `${player} has no Lichess games from this position as ${color}.`, "note");
+    const answer = settled(reply, "PlayerAtPosition");
+    if (answer.status === "rejected") throw answer.reason;
+    const rows = rowsOf(answer.value);
+    if (rows.length === 0) return state("player", [`${player} has no Lichess games from this position as ${color}.`, statusWords("lichess")].filter(Boolean).join(" "), "note");
     $("player").replaceChildren(el("div", "meta", `${player} as ${color}`), practiceTable(rows, `For ${player}`));
   } catch (e) {
     if (seq !== analysisSeq) return;
@@ -1212,25 +1118,33 @@ $("loadFen").addEventListener("click", () => {
   show();
 });
 
-$("plansBtn").addEventListener("click", async () => {
-  const seq = analysisSeq;
+/* Plans cost a model call, so they are asked for only here, when the button is pressed. */
+$("plansBtn").addEventListener("click", () => {
   $("plansBtn").disabled = true;
-  state("plans", "Reading the plans — an engine search and a model call, up to half a minute the first time.", "note");
+  state("plans", "Reading the plans \u2014 an engine search and a model call, up to half a minute the first time.", "note");
+  queueRequest(askPlans);
+});
+
+async function askPlans() {
+  const seq = analysisSeq;
   try {
-    const opts = inFlight ? { signal: inFlight.signal } : {};
     const level = $("level").value;
-    const env = fromStart() && cursor > 0
-      ? await embabel.views.invoke("PlansInLine", { moves: playedLine(), level }, opts)
-      : await embabel.views.invoke("PlansInPosition", { fen: game.fen(), level }, opts);
+    const moves = fromStart() && cursor > 0 ? playedLine() : null;
+    const name = moves ? "PlansInLine" : "PlansInPosition";
+    const reply = await call("chess.appPlans", moves ? { fen: game.fen(), moves, level } : { fen: game.fen(), level });
     if (seq !== analysisSeq) return;
-    renderPlans(rowsOf(env));
+    const answer = settled(reply, name);
+    if (answer.status === "rejected") throw answer.reason;
+    const rows = rowsOf(answer.value);
+    if (rows.length === 0 && statusWords("model")) return state("plans", `No plans. ${statusWords("model")}`, "error");
+    renderPlans(rows);
   } catch (e) {
     if (seq !== analysisSeq) return;
     state("plans", `The plans could not be read: ${failure(e)}`, "error");
   } finally {
     if (seq === analysisSeq) $("plansBtn").disabled = false;
   }
-});
+}
 
 try { const saved = localStorage.getItem("chesscalator.player"); if (saved) $("playerName").value = saved; } catch { /* no storage */ }
 

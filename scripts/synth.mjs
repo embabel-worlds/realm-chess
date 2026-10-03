@@ -19,6 +19,7 @@ import { dirname, join } from "node:path";
 /* What synth writes. Everything else in its output is a copy of a source file already here. */
 const GENERATED = [
   "realm.yml", "credentials.yml", "apis/apis.yml", "producers", "types", "views", "dependencies", "dist/manifest.json", "dist/skills.json",
+  "apps/chesscalator.html.app.json",
 ];
 const TYPES = "wasm/generated/realm.ts";
 

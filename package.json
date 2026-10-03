@@ -10,9 +10,10 @@
     "test": "vitest run",
     "vendor": "node scripts/vendor-chess.mjs",
     "book": "node scripts/book.mjs",
+    "app": "node scripts/app.mjs",
     "synth": "node scripts/synth.mjs",
-    "build": "npm run vendor && npm run book && npm run synth",
-    "check": "npm run typecheck && npm run build && npm test",
+    "build": "npm run vendor && npm run book && npm run app && npm run synth",
+    "check": "npm run typecheck && npm run build && npm test && npm run test:app",
     "test:app": "playwright test"
   },
   "dependencies": {
@@ -23,6 +24,7 @@
     "@playwright/test": "^1.63.0",
     "@types/node": "^24.0.0",
     "cm-chessboard": "^8.15.1",
+    "esbuild": "^0.28.2",
     "typescript": "^5.4.0",
     "vitest": "^3.2.7",
     "yaml": "^2.9.1"

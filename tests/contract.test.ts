@@ -10,7 +10,8 @@ import { baselineJson, baselineYaml } from "./baseline/rod";
  *
  * The differences a captured realm is allowed are listed here, by name, and nowhere else:
  * - producers have internal lowercase names and carry the joins types used to carry;
- * - the `rows*` handlers serve those producers and `status` serves ChessStatus;
+ * - the `rows*` handlers serve those producers, `status` serves ChessStatus, and the `app*`
+ *   handlers serve Chesscalator;
  * - the relationships still to be ported are not produced yet, listed in PENDING.
  */
 
@@ -30,6 +31,7 @@ const ADDED_PROPERTIES: Record<string, string[]> = { CandidateMove: ["analysisId
 const ADDED_HANDLERS = [
   "rowsImbalances", "rowsOpeningOfPosition", "rowsOpeningOfLine", "rowsCandidates", "status", "rowsTheory", "rowsPositionPlans",
   "rowsLinePlans", "rowsMasterMoves", "rowsMasterGames", "rowsPlayerMoves", "rowsPlayerGames", "rowsRatedMoves",
+  "appPosition", "appPractice", "appPlans",
 ];
 const ADDED_RELATIONSHIPS = ["AssistantUser-HAS_CHESS_STATUS->ChessStatus"];
 

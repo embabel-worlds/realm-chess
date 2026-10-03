@@ -100,6 +100,155 @@
       }
     },
     {
+      "description": "For Chesscalator, when the reader asks for plans: PlansInLine along `moves`, else PlansInPosition, at `level`. A new position costs an engine search and a model call.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "fen": {
+            "description": "The position, as a complete FEN.",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "level": {
+            "description": "Who the plans are for. intermediate when absent.",
+            "enum": [
+              "beginner",
+              "intermediate",
+              "expert"
+            ],
+            "type": "string"
+          },
+          "moves": {
+            "description": "The game's moves from the start in SAN, space-separated, when the game was played from the start. They must reach `fen`.",
+            "maxLength": 4096,
+            "type": "string"
+          }
+        },
+        "required": [
+          "fen"
+        ],
+        "type": "object"
+      },
+      "name": "appPlans",
+      "namespace": "chess",
+      "outputSchema": {
+        "description": "`views`: for each view the page shows, `{rows}` as the view returns them, or `{rows: [], error}` when the realm could not get them, or `{rows: [], skipped: \"time\"}` when there was no time left in the call. `status`: ChessStatus, which says why a column is empty.",
+        "type": "object"
+      }
+    },
+    {
+      "description": "For Chesscalator, on every step: ImbalancesOf, the opening (OpeningOfLine along `moves`, else OpeningOf), TheoryOfLine along `moves`, and BestMoves within `withinCp` of the best. A new position costs one engine search.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "fen": {
+            "description": "The position, as a complete FEN.",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "moves": {
+            "description": "The game's moves from the start in SAN, space-separated, when the game was played from the start. They must reach `fen`.",
+            "maxLength": 4096,
+            "type": "string"
+          },
+          "withinCp": {
+            "description": "Keep moves at most this many centipawns worse than the best. 50 when absent.",
+            "maximum": 1000,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "fen"
+        ],
+        "type": "object"
+      },
+      "name": "appPosition",
+      "namespace": "chess",
+      "outputSchema": {
+        "description": "`views`: for each view the page shows, `{rows}` as the view returns them, or `{rows: [], error}` when the realm could not get them, or `{rows: [], skipped: \"time\"}` when there was no time left in the call. `status`: ChessStatus, which says why a column is empty.",
+        "type": "object"
+      }
+    },
+    {
+      "description": "For Chesscalator: what Lichess says about a position. `masters` gives MastersAtPosition and MasterGamesAtPosition; `player` (and `color`, white when absent) gives PlayerAtPosition and PlayerGamesAtPosition; `speed` gives MovesByRating and `band` gives MovesByTimeControl, with `minShare`. Needs the Lichess token.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "fen": {
+            "description": "The position, as a complete FEN.",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "filters": {
+            "additionalProperties": false,
+            "properties": {
+              "band": {
+                "enum": [
+                  "0",
+                  "1000",
+                  "1200",
+                  "1400",
+                  "1600",
+                  "1800",
+                  "2000",
+                  "2200",
+                  "2500"
+                ],
+                "type": "string"
+              },
+              "color": {
+                "enum": [
+                  "white",
+                  "black"
+                ],
+                "type": "string"
+              },
+              "masters": {
+                "type": "boolean"
+              },
+              "minShare": {
+                "maximum": 100,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "player": {
+                "maxLength": 30,
+                "type": "string"
+              },
+              "speed": {
+                "enum": [
+                  "ultraBullet",
+                  "bullet",
+                  "blitz",
+                  "rapid",
+                  "classical",
+                  "correspondence",
+                  "all"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "fen",
+          "filters"
+        ],
+        "type": "object"
+      },
+      "name": "appPractice",
+      "namespace": "chess",
+      "outputSchema": {
+        "description": "`views`: for each view the page shows, `{rows}` as the view returns them, or `{rows: [], error}` when the realm could not get them, or `{rows: [], skipped: \"time\"}` when there was no time left in the call. `status`: ChessStatus, which says why a column is empty.",
+        "type": "object"
+      }
+    },
+    {
       "description": "The plans in the position a game line reaches, told the line's deepest opening name — which a position looked up alone has lost once it is past the book.",
       "inputSchema": {},
       "name": "explainLinePlans",

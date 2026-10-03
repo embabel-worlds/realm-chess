@@ -1,0 +1,13 @@
+{
+  "handlers": [
+    "chess.appPosition",
+    "chess.appPractice",
+    "chess.appPlans"
+  ],
+  "resources": [
+    "apps/chesscalator.html.assets/board.css",
+    "apps/chesscalator.html.assets/chesscalator.css",
+    "apps/chesscalator.html.assets/board.js"
+  ],
+  "version": 1
+}

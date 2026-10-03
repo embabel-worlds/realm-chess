@@ -682,6 +682,86 @@ export type AnalysePositionOutput = {
   whiteCp?: number;
 }[];
 
+/** Input for the appPlans handler. */
+export interface AppPlansInput {
+  /**
+   * The position, as a complete FEN.
+   *
+   * Min length: 1.
+   * Max length: 100.
+   */
+  fen: string;
+  /**
+   * Who the plans are for. intermediate when absent.
+   *
+   * Enum: 'beginner' | 'intermediate' | 'expert'.
+   */
+  level?: "beginner" | "intermediate" | "expert";
+  /**
+   * The game's moves from the start in SAN, space-separated, when the game was played from the start. They must reach `fen`.
+   *
+   * Max length: 4096.
+   */
+  moves?: string;
+}
+
+export type AppPlansOutput = unknown;
+
+/** Input for the appPosition handler. */
+export interface AppPositionInput {
+  /**
+   * The position, as a complete FEN.
+   *
+   * Min length: 1.
+   * Max length: 100.
+   */
+  fen: string;
+  /**
+   * The game's moves from the start in SAN, space-separated, when the game was played from the start. They must reach `fen`.
+   *
+   * Max length: 4096.
+   */
+  moves?: string;
+  /**
+   * Keep moves at most this many centipawns worse than the best. 50 when absent.
+   *
+   * Minimum: 0.
+   * Maximum: 1000.
+   */
+  withinCp?: number;
+}
+
+export type AppPositionOutput = unknown;
+
+/** Input for the appPractice handler. */
+export interface AppPracticeInput {
+  /**
+   * The position, as a complete FEN.
+   *
+   * Min length: 1.
+   * Max length: 100.
+   */
+  fen: string;
+  filters: {
+  /** Enum: '0' | '1000' | '1200' | '1400' | '1600' | '1800' | '2000' | '2200' | '2500'. */
+  band?: "0" | "1000" | "1200" | "1400" | "1600" | "1800" | "2000" | "2200" | "2500";
+  /** Enum: 'white' | 'black'. */
+  color?: "white" | "black";
+  masters?: boolean;
+  /**
+   * Minimum: 0.
+   * Maximum: 100.
+   */
+  minShare?: number;
+  /** Max length: 30. */
+  player?: string;
+  /** Enum: 'ultraBullet' | 'bullet' | 'blitz' | 'rapid' | 'classical' | 'correspondence' | 'all'. */
+  speed?: "ultraBullet" | "bullet" | "blitz" | "rapid" | "classical" | "correspondence" | "all";
+};
+}
+
+export type AppPracticeOutput = unknown;
+
 export type ExplainLinePlansInput = Record<string, never>;
 
 export type ExplainLinePlansOutput = {
@@ -1071,6 +1151,9 @@ export type TheoryOfGameLineOutput = {
 /** Every handler this realm exposes, keyed by name and typed by input/output. */
 export interface Handlers {
   analysePosition: Handler<AnalysePositionInput, AnalysePositionOutput>;
+  appPlans: Handler<AppPlansInput, AppPlansOutput>;
+  appPosition: Handler<AppPositionInput, AppPositionOutput>;
+  appPractice: Handler<AppPracticeInput, AppPracticeOutput>;
   explainLinePlans: Handler<ExplainLinePlansInput, ExplainLinePlansOutput>;
   explainPlans: Handler<ExplainPlansInput, ExplainPlansOutput>;
   mastersAtPosition: Handler<MastersAtPositionInput, MastersAtPositionOutput>;
@@ -1096,6 +1179,9 @@ export interface Handlers {
 }
 
 export type AnalysePositionHandler = Handler<AnalysePositionInput, AnalysePositionOutput>;
+export type AppPlansHandler = Handler<AppPlansInput, AppPlansOutput>;
+export type AppPositionHandler = Handler<AppPositionInput, AppPositionOutput>;
+export type AppPracticeHandler = Handler<AppPracticeInput, AppPracticeOutput>;
 export type ExplainLinePlansHandler = Handler<ExplainLinePlansInput, ExplainLinePlansOutput>;
 export type ExplainPlansHandler = Handler<ExplainPlansInput, ExplainPlansOutput>;
 export type MastersAtPositionHandler = Handler<MastersAtPositionInput, MastersAtPositionOutput>;
