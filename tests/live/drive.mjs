@@ -22,7 +22,7 @@ page.on("pageerror", (e) => errors.push(String(e)));
 await page.route(`${base}/**`, (route) => route.continue({ headers: { ...route.request().headers(), authorization: auth } }));
 
 const t0 = Date.now();
-await page.goto(`${base}/api/v1/apps/chess/chesscalator.html`);
+await page.goto(`${base}/apps/chess/chesscalator.html`);
 const f = page.frameLocator("iframe");
 const ms = () => `${Date.now() - t0} ms`;
 await f.locator(".cand button.mv").first().waitFor({ timeout: 120000 });
