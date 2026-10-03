@@ -24,7 +24,7 @@ and `(p)-[:HAS_PLAN]->(:Plan)` for the plans. A game played from the start is al
 `GameLine` — its moves — with `IN_OPENING` (the deepest name along it, kept past the book),
 `HAS_THEORY` (the wikibook's page for it) and `HAS_PLAN` (plans told that name and theory).
 
-With a Lichess token (declared in `keys.yml`; the console asks for it) a position also has
+With a Lichess token (declared in `realm.ts` under `credentials`; the console asks for it) a position also has
 `MASTERS_PLAYED` / `MASTER_GAME` (master practice), `PLAYER_PLAYED` / `PLAYER_GAME` (one Lichess
 player's choices) and `PLAYED_AT_RATING` (each move's share of games by rating band and time
 control). Comparing moves across rating bands in blitz is one query:
@@ -158,14 +158,18 @@ APPLIANCE=http://127.0.0.1:11043 APPLIANCE_AUTH="Basic ..." node tests/battery/r
 - **Experimental.** The engine, imbalances, opening book and query surface are sound. Plans are
   a model's judgement: on the battery it names the plans theory expects almost always, and leads
   with the right one most of the time — the report says which. Improving that is editing the skill.
-- **Plans need an appliance whose `gateway.ai.complete` accepts `skills`.** On an older one
-  `PlansInPosition` fails; everything else works.
+- **Plans need the owner's model grant.** The realm asks for the `model` capability; without the
+  grant, or when a model budget is spent, there are no plans and `ChessStatus` says why. Everything
+  else works. A dispatch makes at most two model calls (the second only to repair invalid JSON).
+- **Theory needs a Wikimedia token.** The wikibook is public, but the appliance calls no API it
+  holds no credential for, so `HAS_THEORY` and the theory in line plans need one bound as
+  `wikibooks`. Line plans without it are made without theory.
+- **Lichess is asked one request at a time, 1.1 s apart.** A rating comparison is nine requests,
+  about ten seconds the first time; answers are kept (masters and ratings 30 days, a player's
+  games a day, theory and plans a week). An empty or refused answer is never kept.
 - **Scores are for the side to move.** `whiteCp` is for display; compare moves with `lossCp`.
 - **A search is not repeatable, and neither is a model's answer.** The per-position caches keep
   the numbers and the plans shown together consistent.
-- **Room for master games:** a producer keyed by FEN over the Lichess masters explorer would add
-  `MASTERS_PLAYED` and `MASTER_GAME` hops; the skill already says how to weigh practice against
-  the engine. It needs a Lichess token.
 
 ## Licences
 

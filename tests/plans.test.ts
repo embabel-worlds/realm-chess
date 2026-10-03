@@ -316,3 +316,23 @@ describe.skipIf(!hasTooling)("plans, in the guest", () => {
     });
   });
 });
+
+/*
+ * The plan battery's structure, with a fake model: every battery position goes through the
+ * handler tests/battery/run.mjs calls on an appliance (explainLinePlans for moves, explainPlans
+ * for a FEN), and comes back with plans for both sides that the runner can grade. Whether the
+ * plans are the ones theory gives needs a real model on an appliance; this proves the path.
+ */
+describe.skipIf(!hasTooling)("the plan battery, with a fake model", () => {
+  it("every battery position answers plans for both sides through the verb the runner calls", { timeout: 120_000 }, () => {
+    const s = setup();
+    for (const p of battery()) {
+      const [verb, args] = p.moves ? ["explainLinePlans", { lines: [p.moves], role: "best" }] : ["explainPlans", { fens: [p.fen], role: "best" }];
+      const rows = s.run(verb, args) as Record<string, unknown>[];
+      expect(new Set(rows.map((r) => r.side)), p.id).toEqual(new Set(["white", "black"]));
+      for (const r of rows) for (const k of ["name", "idea", "moves", "priority", "summary", "structure", "opening", "level"]) expect(r, `${p.id} ${k}`).toHaveProperty(k);
+    }
+    expect(s.model.requests).toHaveLength(battery().length);
+    expect(s.model.requests.every((r) => r.role === "best" && (r.skills as string[])[0] === "chess-plans")).toBe(true);
+  });
+});
