@@ -1,334 +1,205 @@
-# A position and what the realm knows about it. Nothing here is stored: pin a Position from a
-# view parameter — `MATCH (p:Position {fen: $fen})` — and each hop is computed on demand, then
-# cached per position.
-#
-#   Position ──HAS_IMBALANCES──▶ PositionImbalances   Silman's imbalances, computed from the board
-#            ──IN_OPENING──────▶ Opening              its name in the Lichess opening book
-#            ──HAS_CANDIDATE───▶ CandidateMove        the engine's best lines, and what each changes
-#            ──HAS_PLAN────────▶ Plan                 plans for both sides: a model's judgement, with
-#                                                     the chess-plans skill, over the three above
-#
-#   GameLine ──IN_OPENING──▶ Opening    the deepest name along the moves, kept past the book
-#            ──HAS_THEORY──▶ OpeningTheory  what the Chess Opening Theory wikibook says along it
-#            ──HAS_PLAN────▶ Plan       plans in the position the line reaches, told that name
-#                                        and that theory
-#
-# The facts (imbalances, lines, opening) are computed and checkable. The plans are judged.
-#
-#   Position ──MASTERS_PLAYED──▶ MasterMove   what masters played here, and how it scored
-#            ──MASTER_GAME─────▶ MasterGame   the top master games through it
-#            ──PLAYER_PLAYED───▶ PlayerMove   what one Lichess player played here (WHERE m.player = …)
-#            ──PLAYER_GAME─────▶ PlayerGame   their recent games through it
-#            ──PLAYED_AT_RATING▶ RatedMove   how often each move is played by rating band and time control
-#   (the five from the Lichess opening explorer; they need the LICHESS_TOKEN key in keys.yml)
-
-- name: Position
-  description: "A chess position, identified by its FEN. Rarely stored: pin one with `MATCH (p:Position {fen: $fen})` and its imbalances, opening, engine lines and plans are computed on demand. The FEN must be complete — six fields — because who is to move changes every score."
-  properties:
-    fen:
-      description: "Full FEN, e.g. `rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1`. Identity."
-      metadata:
-        identity: "true"
-
-- name: GameLine
-  description: "A game as its moves from the starting position, in SAN, space-separated — e.g. `e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6`. Pin one with `MATCH (g:GameLine {moves: $moves})`. A line keeps the name of the deepest book position it passed through, which a position looked up alone loses once it leaves the book: this is how a game twenty moves into the Exchange Ruy Lopez is still called that."
-  properties:
-    moves:
-      description: "SAN moves from the start, space-separated. Identity."
-      metadata:
-        identity: "true"
-
-- name: PositionImbalances
-  description: "Jeremy Silman's imbalances of a position — material, the minor pieces (bishop pair, good and bad bishops), pawn structure (doubled, isolated, backward, passed, hanging, isolated queen's pawn, majorities, locked chains and the wing they point to), space, open and half-open files, outposts, development and king safety. Computed from the board, not judged. Reached from Position via HAS_IMBALANCES. `facts` is one plain sentence per imbalance and is what to read."
-  virtualJoins:
-    - anchorLabel: Position
-      relationship: HAS_IMBALANCES
-      keyField: fen
-      recordKeyField: fen
-      producer: positionImbalances
-      maxAnchors: 50
-      description: "The position's imbalances — for 'what are the imbalances', 'who has the bishop pair', 'is there an isolated pawn'."
-  properties:
-    fen:
-      description: "The position. Identity."
-      metadata:
-        identity: "true"
-    sideToMove: "`white` or `black`."
-    phase: "`opening`, `middlegame` or `endgame`."
-    facts: "Every imbalance, one sentence per line, White's then Black's then shared. Quote these."
-    structure: "Which named opening's pawn structure this is — matched on the pawns alone against every line in the opening book, exactly or within two pawns. Empty when nothing is that close."
-    materialWhite: "White's material in points (pawn 1, knight and bishop 3, rook 5, queen 9)."
-    materialBlack: "Black's material in points."
-    bishopPairWhite: "Whether White has the bishop pair."
-    bishopPairBlack: "Whether Black has the bishop pair."
-    isolatedQueenPawnWhite: "Whether White has an isolated d-pawn."
-    isolatedQueenPawnBlack: "Whether Black has an isolated d-pawn."
-    passedWhite: "White's passed pawns, space-separated squares."
-    passedBlack: "Black's passed pawns."
-    openFiles: "Files with no pawns, space-separated."
-    oppositeSideCastling: "Whether the kings stand on opposite wings."
-    oppositeColouredBishops: "Whether each side has one bishop, on different colours, and no knights."
-    detail: "The whole computation as JSON."
-
-- name: Opening
-  description: "The named opening a position is, from the Lichess opening book (3,815 named lines, CC0). Only a position that IS a book position has one — a position deeper than the book returns none. Reached from Position via IN_OPENING."
-  virtualJoins:
-    - anchorLabel: Position
-      relationship: IN_OPENING
-      keyField: fen
-      recordKeyField: fen
-      producer: openingLookup
-      maxAnchors: 50
-      description: "The opening's name and ECO code — for 'what opening is this'."
-    - anchorLabel: GameLine
-      relationship: IN_OPENING
-      keyField: moves
-      recordKeyField: line
-      producer: openingOfGameLine
-      maxAnchors: 50
-      description: "The deepest named opening along a game's moves — for 'what opening did this game become'."
-  properties:
-    fen:
-      description: "The position. Identity."
-      metadata:
-        identity: "true"
-    eco: "ECO code, e.g. `C68`."
-    name: "The opening's name, e.g. `Ruy Lopez: Exchange Variation`."
-    pgn: "The moves that reach it."
-    line: "For an opening reached from a GameLine: the line's moves."
-    namedAtPly: "For a GameLine: the ply at which the book last named the line."
-    pliesPast: "For a GameLine: how many plies the line has gone past that name."
-
-- name: CandidateMove
-  description: "One of the engine's best lines in a position (Stockfish 19, five lines, depth 18). Reached from Position via HAS_CANDIDATE. THE SCORE IS FOR THE SIDE TO MOVE; `whiteCp` is the same from White's side. `lossCp` is how much worse than the best line this one is, in centipawns — the ONLY field to filter on for 'moves within half a pawn of best' (lossCp <= 50; a pawn is 100). `rank` is the engine's order, 1 to 5. `creates` and `removes` say which imbalances the line changes once its exchanges settle — the best evidence of what a move is for."
-  virtualJoins:
-    - anchorLabel: Position
-      relationship: HAS_CANDIDATE
-      keyField: fen
-      recordKeyField: fen
-      producer: candidateLines
-      maxAnchors: 8
-      description: "The engine's best lines — for 'what are the best moves here', 'which moves are within half a pawn of best'."
+- description: One of the engine's best lines in a position (Stockfish 19, five lines, depth 18). Reached from Position via HAS_CANDIDATE. THE SCORE IS FOR THE SIDE TO MOVE; `whiteCp` is the same from White's side. `lossCp` is how much worse than the best line this one is, in centipawns — the ONLY field to filter on for 'moves within half a pawn of best' (lossCp <= 50; a pawn is 100). `rank` is the engine's order, 1 to 5. `creates` and `removes` say which imbalances the line changes once its exchanges settle — the best evidence of what a move is for.
+  name: CandidateMove
   properties:
     candidateId:
       description: "The FEN and the first move in UCI. Identity: stable across searches, where the rank is not."
       metadata:
         identity: "true"
-    fen: "The position this line was computed in."
+    creates: Imbalances the line creates once its exchanges settle, one sentence per line.
+    depth: Search depth reached, in plies.
+    elapsedMs: Engine time for the position, in milliseconds.
+    engine: Which engine produced the line.
+    fen: The position this line was computed in.
+    lossCp: Centipawns worse than the best line; 0 for the best. 'Within half a pawn' is lossCp <= 50. Null when the best line is a mate and this one is not.
+    mate: Moves to mate, positive when the side to move mates. Null otherwise.
+    pvSan: The whole line in SAN, space-separated.
+    pvUci: The whole line in UCI.
     rank: "The engine's order: 1 is its best, up to 5. Sort by it; never filter on it for 'within N pawns of best' — that is lossCp."
-    uci: "First move in UCI, e.g. `g2g4`."
-    san: "First move in standard notation, e.g. `g4`."
+    removes: Imbalances the line removes.
+    san: First move in standard notation, e.g. `g4`.
+    scoreCp: Centipawns for the side to move (100 = a pawn). Null when the line is a forced mate.
     side: "`white` or `black`: who plays this move."
-    scoreCp: "Centipawns for the side to move (100 = a pawn). Null when the line is a forced mate."
-    mate: "Moves to mate, positive when the side to move mates. Null otherwise."
-    whiteCp: "The same score from White's point of view. Null for mates."
-    lossCp: "Centipawns worse than the best line; 0 for the best. 'Within half a pawn' is lossCp <= 50. Null when the best line is a mate and this one is not."
-    depth: "Search depth reached, in plies."
-    pvSan: "The whole line in SAN, space-separated."
-    pvUci: "The whole line in UCI."
-    creates: "Imbalances the line creates once its exchanges settle, one sentence per line."
-    removes: "Imbalances the line removes."
-    engine: "Which engine produced the line."
-    elapsedMs: "Engine time for the position, in milliseconds."
-
-- name: Plan
-  description: "A plan for one side in a position: what it should be trying to achieve and why, with its key moves, the imbalances it uses and which of the engine's candidate moves carry it. Decided by a model with the chess-plans skill, from the position's imbalances, opening and engine lines — a judgement, not a computation. Reached from Position via HAS_PLAN; up to three per side, `priority` 1 first. `summary` is the same on every plan of a position: who stands better and how the plans meet. Costs one engine search and one model call per new position."
-  virtualJoins:
-    - anchorLabel: Position
-      relationship: HAS_PLAN
-      keyField: fen
-      recordKeyField: fen
-      producer: positionPlans
-      maxAnchors: 3
-      description: "Plans for both sides — for 'what's the plan here', 'what should Black be doing', 'explain the engine's moves'."
-    - anchorLabel: GameLine
-      relationship: HAS_PLAN
-      keyField: moves
-      recordKeyField: line
-      producer: linePlans
-      maxAnchors: 3
-      description: "Plans in the position a game line reaches, judged knowing the line's opening name."
+    uci: First move in UCI, e.g. `g2g4`.
+    whiteCp: The same score from White's point of view. Null for mates.
+- description: "A game as its moves from the starting position, in SAN, space-separated — e.g. `e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6`. Pin one with `MATCH (g:GameLine {moves: $moves})`. A line keeps the name of the deepest book position it passed through, which a position looked up alone loses once it leaves the book: this is how a game twenty moves into the Exchange Ruy Lopez is still called that."
+  name: GameLine
   properties:
-    planId:
-      description: "The position, side, priority and plan name. Identity."
+    moves:
+      description: SAN moves from the start, space-separated. Identity.
       metadata:
         identity: "true"
-    fen: "The position."
-    side: "`white` or `black`."
-    priority: "1 is the side's most important plan."
-    name: "The plan in a few words."
-    idea: "What the plan achieves and why the position calls for it."
-    moves: "Key moves and manoeuvres, in notation."
-    imbalances: "The imbalances the plan exploits or repairs, one per line."
-    engineEvidence: "Which of the engine's candidate moves carry the plan."
-    summary: "Who stands better and why, and how the two sides' plans meet."
-    structure: "The row of the chess-plans skill's structure table the model judged this to be, or `none`."
-    opening: "The book name of the position, if it has one."
-    model: "The model role that judged it."
+- description: "A top master game through a position, from the Lichess masters database: who played it, when, the result, and the move played from the position. Reached from Position via MASTER_GAME."
+  name: MasterGame
+  properties:
+    black: Black's name.
+    blackElo: Black's rating.
+    fen: The position the game passed through.
+    gameId:
+      description: The position and the Lichess game id. Identity.
+      metadata:
+        identity: "true"
+    month: Month played, YYYY-MM.
+    result: 1-0, 0-1 or ½-½.
+    speed: Time control class, for a Lichess game.
+    uci: The move played from it in this game, in notation (e.g. Ba4).
+    url: The game on Lichess.
+    white: White's name.
+    whiteElo: White's rating.
+    year: Year played.
+- description: "A move masters played from a position, with how often and how it scored — from the Lichess masters database (over-the-board games, players rated 2200+). Reached from Position via MASTERS_PLAYED. `scoreForMover` is the side-that-played-it's points per game. This is practice, not analysis: compare it with the engine's CandidateMove lines, and where they disagree, both are worth saying."
+  name: MasterMove
+  properties:
+    averageRating: Average rating of the players (masters), or of the opponents (a player's games).
+    black: Won by Black.
+    blackWinPct: Percent won by Black.
+    drawPct: Percent drawn.
+    draws: Drawn.
+    fen: The position.
+    games: Games in which it was played here.
+    moveId:
+      description: The position and the move. Identity.
+      metadata:
+        identity: "true"
+    san: The move in notation.
+    scoreForMover: "Points per game for the side that played the move (1 a win, 0.5 a draw): how the move has scored for whoever chose it."
+    uci: The move in UCI.
+    white: Of those, won by White.
+    whiteWinPct: Percent won by White.
+- description: The named opening a position is, from the Lichess opening book (3,815 named lines, CC0). Only a position that IS a book position has one — a position deeper than the book returns none. Reached from Position via IN_OPENING.
+  name: Opening
+  properties:
+    eco: ECO code, e.g. `C68`.
+    fen:
+      description: The position. Identity.
+      metadata:
+        identity: "true"
+    line: "For an opening reached from a GameLine: the line's moves."
+    name: "The opening's name, e.g. `Ruy Lopez: Exchange Variation`."
+    namedAtPly: "For a GameLine: the ply at which the book last named the line."
+    pgn: The moves that reach it.
+    pliesPast: "For a GameLine: how many plies the line has gone past that name."
+- description: "What opening theory says along a game line: the text of the deepest page of the Chess Opening Theory wikibook (CC BY-SA 4.0) that the line reaches — the wikibook keeps a page per move sequence, deep into the main lines, and its prose says what each side is playing for. Reached from GameLine via HAS_THEORY. A line the wikibook has no page for returns nothing. Quote it with its title and licence."
+  name: OpeningTheory
+  properties:
+    licence: Attribution and licence to show with the text.
+    line:
+      description: The game line. Identity.
+      metadata:
+        identity: "true"
+    pliesCovered: How many plies of the line the page covers.
+    pliesPast: How many plies the line has gone past the page.
+    theory: The page's theory as plain text, up to about 3,000 characters.
+    title: The wikibook page, e.g. `Chess Opening Theory/1. e4/1...e5/2. Nf3/2...Nc6/3. Bb5/3...a6/4. Bxc6`.
+    url: Link to the page.
+- description: "A plan for one side in a position: what it should be trying to achieve and why, with its key moves, the imbalances it uses and which of the engine's candidate moves carry it. Decided by a model with the chess-plans skill, from the position's imbalances, opening and engine lines — a judgement, not a computation. Reached from Position via HAS_PLAN; up to three per side, `priority` 1 first. `summary` is the same on every plan of a position: who stands better and how the plans meet. Costs one engine search and one model call per new position."
+  name: Plan
+  properties:
+    engineEvidence: Which of the engine's candidate moves carry the plan.
+    fen: The position.
+    idea: What the plan achieves and why the position calls for it.
+    imbalances: The imbalances the plan exploits or repairs, one per line.
     level: "Who the plans were written for: `beginner`, `intermediate` or `expert`. Filter on it — `WHERE pl.level = 'beginner'` — to ask for that level; it is passed to the model, and each level is judged and cached separately."
     line: "For plans reached from a GameLine: the line's moves."
-
-- name: OpeningTheory
-  description: "What opening theory says along a game line: the text of the deepest page of the Chess Opening Theory wikibook (CC BY-SA 4.0) that the line reaches — the wikibook keeps a page per move sequence, deep into the main lines, and its prose says what each side is playing for. Reached from GameLine via HAS_THEORY. A line the wikibook has no page for returns nothing. Quote it with its title and licence."
-  virtualJoins:
-    - anchorLabel: GameLine
-      relationship: HAS_THEORY
-      keyField: moves
-      recordKeyField: line
-      producer: theoryOfGameLine
-      maxAnchors: 10
-      description: "Opening theory for a game line — for 'what does theory say here', 'what is the idea of this variation'."
-  properties:
-    line:
-      description: "The game line. Identity."
+    model: The model role that judged it.
+    moves: Key moves and manoeuvres, in notation.
+    name: The plan in a few words.
+    opening: The book name of the position, if it has one.
+    planId:
+      description: The position, side, priority and plan name. Identity.
       metadata:
         identity: "true"
-    title: "The wikibook page, e.g. `Chess Opening Theory/1. e4/1...e5/2. Nf3/2...Nc6/3. Bb5/3...a6/4. Bxc6`."
-    url: "Link to the page."
-    pliesCovered: "How many plies of the line the page covers."
-    pliesPast: "How many plies the line has gone past the page."
-    theory: "The page's theory as plain text, up to about 3,000 characters."
-    licence: "Attribution and licence to show with the text."
-
-- name: MasterMove
-  description: "A move masters played from a position, with how often and how it scored — from the Lichess masters database (over-the-board games, players rated 2200+). Reached from Position via MASTERS_PLAYED. `scoreForMover` is the side-that-played-it's points per game. This is practice, not analysis: compare it with the engine's CandidateMove lines, and where they disagree, both are worth saying."
-  virtualJoins:
-    - anchorLabel: Position
-      relationship: MASTERS_PLAYED
-      keyField: fen
-      recordKeyField: fen
-      producer: masterMoves
-      maxAnchors: 10
-      description: "What masters played here — for 'what do masters play in this position', 'how does Bxc6 score'."
+    priority: 1 is the side's most important plan.
+    side: "`white` or `black`."
+    structure: The row of the chess-plans skill's structure table the model judged this to be, or `none`.
+    summary: Who stands better and why, and how the two sides' plans meet.
+- description: A recent game of one Lichess player through a position, as one colour. Reached from Position via PLAYER_GAME; asked with the player and colour, like PlayerMove.
+  name: PlayerGame
   properties:
-    moveId:
-      description: "The position and the move. Identity."
-      metadata:
-        identity: "true"
-    fen: "The position."
-    uci: "The move in UCI."
-    san: "The move in notation."
-    games: "Games in which it was played here."
-    white: "Of those, won by White."
-    draws: "Drawn."
-    black: "Won by Black."
-    whiteWinPct: "Percent won by White."
-    drawPct: "Percent drawn."
-    blackWinPct: "Percent won by Black."
-    scoreForMover: "Points per game for the side that played the move (1 a win, 0.5 a draw): how the move has scored for whoever chose it."
-    averageRating: "Average rating of the players (masters), or of the opponents (a player's games)."
-
-- name: MasterGame
-  description: "A top master game through a position, from the Lichess masters database: who played it, when, the result, and the move played from the position. Reached from Position via MASTER_GAME."
-  virtualJoins:
-    - anchorLabel: Position
-      relationship: MASTER_GAME
-      keyField: fen
-      recordKeyField: fen
-      producer: masterGames
-      maxAnchors: 10
-      description: "Master games that reached this position — for 'show me master games from here'."
-  properties:
+    black: Black's name.
+    blackElo: Black's rating.
+    color: The colour the player had.
+    fen: The position the game passed through.
     gameId:
-      description: "The position and the Lichess game id. Identity."
+      description: The position, player, colour and game id. Identity.
       metadata:
         identity: "true"
-    fen: "The position the game passed through."
-    uci: "The move played from it in this game, in notation (e.g. Ba4)."
-    white: "White's name."
-    whiteElo: "White's rating."
-    black: "Black's name."
-    blackElo: "Black's rating."
-    result: "1-0, 0-1 or ½-½."
-    year: "Year played."
-    month: "Month played, YYYY-MM."
-    speed: "Time control class, for a Lichess game."
-    url: "The game on Lichess."
-
-- name: PlayerMove
-  description: "A move one Lichess player chose from a position, as one colour, with how it scored for them — from the Lichess player explorer, across their whole Lichess history. Reached from Position via PLAYER_PLAYED, and ALWAYS asked with the player and colour: `WHERE m.player = 'DrNykterstein' AND m.color = 'white'`. Without a player the hop returns nothing."
-  virtualJoins:
-    - anchorLabel: Position
-      relationship: PLAYER_PLAYED
-      keyField: fen
-      recordKeyField: fen
-      producer: playerMoves
-      maxAnchors: 10
-      description: "What a given Lichess player played here — for 'what does X play in this position'."
+    month: Month played, YYYY-MM.
+    player: The Lichess username asked about.
+    result: 1-0, 0-1 or ½-½.
+    speed: Time control class, for a Lichess game.
+    uci: The move played from it in this game, in notation (e.g. Ba4).
+    url: The game on Lichess.
+    white: White's name.
+    whiteElo: White's rating.
+    year: Year played.
+- description: "A move one Lichess player chose from a position, as one colour, with how it scored for them — from the Lichess player explorer, across their whole Lichess history. Reached from Position via PLAYER_PLAYED, and ALWAYS asked with the player and colour: `WHERE m.player = 'DrNykterstein' AND m.color = 'white'`. Without a player the hop returns nothing."
+  name: PlayerMove
   properties:
-    moveId:
-      description: "The position, player, colour and move. Identity."
-      metadata:
-        identity: "true"
-    player: "The Lichess username asked about. Filter on it."
+    averageRating: Average rating of the players (masters), or of the opponents (a player's games).
+    black: Won by Black.
+    blackWinPct: Percent won by Black.
     color: "`white` or `black`: the colour the player had. Filter on it."
-    fen: "The position."
-    uci: "The move in UCI."
-    san: "The move in notation."
-    games: "Games in which it was played here."
-    white: "Of those, won by White."
-    draws: "Drawn."
-    black: "Won by Black."
-    whiteWinPct: "Percent won by White."
-    drawPct: "Percent drawn."
-    blackWinPct: "Percent won by Black."
+    drawPct: Percent drawn.
+    draws: Drawn.
+    fen: The position.
+    games: Games in which it was played here.
+    moveId:
+      description: The position, player, colour and move. Identity.
+      metadata:
+        identity: "true"
+    player: The Lichess username asked about. Filter on it.
+    san: The move in notation.
     scoreForMover: "Points per game for the side that played the move (1 a win, 0.5 a draw): how the move has scored for whoever chose it."
-    averageRating: "Average rating of the players (masters), or of the opponents (a player's games)."
-
-- name: PlayerGame
-  description: "A recent game of one Lichess player through a position, as one colour. Reached from Position via PLAYER_GAME; asked with the player and colour, like PlayerMove."
-  virtualJoins:
-    - anchorLabel: Position
-      relationship: PLAYER_GAME
-      keyField: fen
-      recordKeyField: fen
-      producer: playerGames
-      maxAnchors: 10
-      description: "A player's own games from this position."
+    uci: The move in UCI.
+    white: Of those, won by White.
+    whiteWinPct: Percent won by White.
+- description: "A chess position, identified by its FEN. Rarely stored: pin one with `MATCH (p:Position {fen: $fen})` and its imbalances, opening, engine lines and plans are computed on demand. The FEN must be complete — six fields — because who is to move changes every score."
+  name: Position
   properties:
-    gameId:
-      description: "The position, player, colour and game id. Identity."
+    fen:
+      description: Full FEN, e.g. `rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1`. Identity.
       metadata:
         identity: "true"
-    player: "The Lichess username asked about."
-    color: "The colour the player had."
-    fen: "The position the game passed through."
-    uci: "The move played from it in this game, in notation (e.g. Ba4)."
-    white: "White's name."
-    whiteElo: "White's rating."
-    black: "Black's name."
-    blackElo: "Black's rating."
-    result: "1-0, 0-1 or ½-½."
-    year: "Year played."
-    month: "Month played, YYYY-MM."
-    speed: "Time control class, for a Lichess game."
-    url: "The game on Lichess."
-
-- name: RatedMove
-  description: "How often a move is played from a position on Lichess, in one rating band and one time control, and how it scores — for comparing what players at different levels or speeds choose. Reached from Position via PLAYED_AT_RATING. Pin ONE dimension and the other is compared across: `WHERE m.speed = 'blitz'` returns every rating band in blitz; `WHERE m.band = '1600'` returns every time control at 1600; pin neither and every band over all time controls comes back (speed `all`). `share` is the move's percent of the games from the position in that band and time control — compare shares, not raw game counts, across bands."
-  virtualJoins:
-    - anchorLabel: Position
-      relationship: PLAYED_AT_RATING
-      keyField: fen
-      recordKeyField: fen
-      producer: ratedMoves
-      maxAnchors: 5
-      description: "Move popularity by rating band and time control — for 'what do 1600s play here', 'how does this change from blitz to classical'."
+- description: Jeremy Silman's imbalances of a position — material, the minor pieces (bishop pair, good and bad bishops), pawn structure (doubled, isolated, backward, passed, hanging, isolated queen's pawn, majorities, locked chains and the wing they point to), space, open and half-open files, outposts, development and king safety. Computed from the board, not judged. Reached from Position via HAS_IMBALANCES. `facts` is one plain sentence per imbalance and is what to read.
+  name: PositionImbalances
   properties:
-    rowId:
-      description: "Position, band, time control and move. Identity."
+    bishopPairBlack: Whether Black has the bishop pair.
+    bishopPairWhite: Whether White has the bishop pair.
+    detail: The whole computation as JSON.
+    facts: Every imbalance, one sentence per line, White's then Black's then shared. Quote these.
+    fen:
+      description: The position. Identity.
       metadata:
         identity: "true"
-    fen: "The position."
+    isolatedQueenPawnBlack: Whether Black has an isolated d-pawn.
+    isolatedQueenPawnWhite: Whether White has an isolated d-pawn.
+    materialBlack: Black's material in points.
+    materialWhite: White's material in points (pawn 1, knight and bishop 3, rook 5, queen 9).
+    openFiles: Files with no pawns, space-separated.
+    oppositeColouredBishops: Whether each side has one bishop, on different colours, and no knights.
+    oppositeSideCastling: Whether the kings stand on opposite wings.
+    passedBlack: Black's passed pawns.
+    passedWhite: White's passed pawns, space-separated squares.
+    phase: "`opening`, `middlegame` or `endgame`."
+    sideToMove: "`white` or `black`."
+    structure: Which named opening's pawn structure this is — matched on the pawns alone against every line in the opening book, exactly or within two pawns. Empty when nothing is that close.
+- description: "How often a move is played from a position on Lichess, in one rating band and one time control, and how it scores — for comparing what players at different levels or speeds choose. Reached from Position via PLAYED_AT_RATING. Pin ONE dimension and the other is compared across: `WHERE m.speed = 'blitz'` returns every rating band in blitz; `WHERE m.band = '1600'` returns every time control at 1600; pin neither and every band over all time controls comes back (speed `all`). `share` is the move's percent of the games from the position in that band and time control — compare shares, not raw game counts, across bands."
+  name: RatedMove
+  properties:
     band: "Rating band floor as Lichess names it: 0, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2500. Filter on it."
+    bandGames: All games from the position in this band and time control.
     bandLabel: "The band as a person reads it: under 1000, 1000-1199, …, 2500+."
+    blackWinPct: Percent won by Black.
+    drawPct: Percent drawn.
+    fen: The position.
+    games: Games in which it was played, in this band and time control.
+    rowId:
+      description: Position, band, time control and move. Identity.
+      metadata:
+        identity: "true"
+    san: The move in notation.
+    scoreForMover: Points per game for the side that played it.
+    share: Its percent of all games from the position in this band and time control.
     speed: "Time control: ultraBullet, bullet, blitz, rapid, classical, correspondence — or all. Filter on it."
-    san: "The move in notation."
-    uci: "The move in UCI."
-    games: "Games in which it was played, in this band and time control."
-    share: "Its percent of all games from the position in this band and time control."
-    whiteWinPct: "Percent won by White."
-    drawPct: "Percent drawn."
-    blackWinPct: "Percent won by Black."
-    scoreForMover: "Points per game for the side that played it."
-    bandGames: "All games from the position in this band and time control."
+    uci: The move in UCI.
+    whiteWinPct: Percent won by White.

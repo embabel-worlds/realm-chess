@@ -1,0 +1,221 @@
+import type { CapturedViewSpec } from "@embabel/realm-types";
+
+/* Rod's thirteen views, exactly as views/chess.yml had them at 86b5bb5. */
+export const rodViews: CapturedViewSpec[] = [
+  {
+    "name": "BestMoves",
+    "description": "The engine's best moves in a position, strongest first: every move within `withinCp` centipawns of the best, and always the best itself, each with its line, its score, how much worse than best it is, and which imbalances it creates and removes. Answers 'what are the best moves here', 'which moves are within half a pawn of best', 'what should White play'.",
+    "params": {
+      "fen": {
+        "type": "string",
+        "default": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        "description": "The position, as a complete FEN (six fields)."
+      },
+      "withinCp": {
+        "type": "int",
+        "default": 50,
+        "description": "Keep moves at most this many CENTIPAWNS worse than the best (100 = one pawn): 'within half a pawn' is 50, 'within a pawn' is 100. Always a whole number of centipawns."
+      },
+      "maxLines": {
+        "type": "int",
+        "default": 5,
+        "description": "At most this many moves, best first. The engine computes five."
+      }
+    },
+    "cypher": "MATCH (p:Position {fen: $fen})-[:HAS_CANDIDATE]->(c:CandidateMove)\nWHERE toInteger(c.rank) = 1 OR (c.lossCp IS NOT NULL AND toInteger(c.lossCp) <= $withinCp)\nRETURN toInteger(c.rank) AS rank, c.san AS move, c.uci AS uci, c.side AS side,\n       c.scoreCp AS scoreCp, c.mate AS mate, c.whiteCp AS whiteCp, c.lossCp AS lossCp,\n       c.pvSan AS line, c.pvUci AS lineUci, toInteger(c.depth) AS depth,\n       c.creates AS creates, c.removes AS removes\nORDER BY rank\nLIMIT $maxLines\n"
+  },
+  {
+    "name": "ImbalancesOf",
+    "description": "Jeremy Silman's imbalances of a position, computed from the board: material, bishop pair and good/bad bishops, pawn structure (doubled, isolated, backward, passed, hanging, isolated queen's pawn, majorities, locked chains and the wing they point to), space, open and half-open files, outposts, development and king safety. Answers 'what are the imbalances', 'who has the better pawn structure', 'is there an outpost'.",
+    "params": {
+      "fen": {
+        "type": "string",
+        "default": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        "description": "The position, as a complete FEN."
+      }
+    },
+    "cypher": "MATCH (p:Position {fen: $fen})-[:HAS_IMBALANCES]->(i:PositionImbalances)\nRETURN i.sideToMove AS sideToMove, i.phase AS phase, i.facts AS facts, i.structure AS structure,\n       i.materialWhite AS materialWhite, i.materialBlack AS materialBlack,\n       i.bishopPairWhite AS bishopPairWhite, i.bishopPairBlack AS bishopPairBlack,\n       i.passedWhite AS passedWhite, i.passedBlack AS passedBlack, i.openFiles AS openFiles,\n       i.oppositeSideCastling AS oppositeSideCastling, i.oppositeColouredBishops AS oppositeColouredBishops\n"
+  },
+  {
+    "name": "OpeningOf",
+    "description": "The named opening a position is, from the Lichess opening book — ECO code, name and moves. A position deeper than the book has none, and the view returns no row. Answers 'what opening is this', 'what is this position called'.",
+    "params": {
+      "fen": {
+        "type": "string",
+        "default": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+        "description": "The position, as a complete FEN."
+      }
+    },
+    "cypher": "MATCH (p:Position {fen: $fen})-[:IN_OPENING]->(o:Opening)\nRETURN o.eco AS eco, o.name AS name, o.pgn AS moves\n"
+  },
+  {
+    "name": "PlansInPosition",
+    "description": "The plans for BOTH sides in a position — what each should be trying to do and why, with key moves, the imbalances each plan uses and which of the engine's candidate moves carry it — plus a summary of who stands better and how the plans meet. Judged by a model with the chess-plans skill from the position's imbalances, opening and engine lines. Costs an engine search and a model call per new position (tens of seconds); cached for a week. Answers 'what's the plan here', 'what should Black be aiming for', 'explain the engine's moves'.",
+    "params": {
+      "fen": {
+        "type": "string",
+        "default": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        "description": "The position, as a complete FEN."
+      },
+      "level": {
+        "type": "string",
+        "default": "intermediate",
+        "description": "Who the plans are for: `beginner` (tactics first — threats, loose pieces, checks — and the basic principles, in plain words), `intermediate` (plans from the imbalances, structures by name), or `expert` (full strategic depth, move-order nuance, no hand-holding)."
+      }
+    },
+    "cypher": "MATCH (p:Position {fen: $fen})-[:HAS_PLAN]->(pl:Plan)\nWHERE pl.level = $level\nRETURN pl.side AS side, toInteger(pl.priority) AS priority, pl.name AS plan, pl.idea AS idea,\n       pl.moves AS moves, pl.imbalances AS imbalances, pl.engineEvidence AS engineEvidence,\n       pl.summary AS summary, pl.structure AS structure, pl.opening AS opening, pl.level AS level\nORDER BY side DESC, priority\n"
+  },
+  {
+    "name": "OpeningOfLine",
+    "description": "The opening a game became: the deepest named book position along its moves, and how far past it the game has gone. A game keeps its name after it leaves the book — twenty moves into the Exchange Ruy Lopez it is still the Exchange Ruy Lopez. Answers 'what opening is this game', 'what variation did we play'.",
+    "params": {
+      "moves": {
+        "type": "string",
+        "default": "e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1",
+        "description": "The game's moves from the start in SAN, space-separated."
+      }
+    },
+    "cypher": "MATCH (g:GameLine {moves: $moves})-[:IN_OPENING]->(o:Opening)\nRETURN o.eco AS eco, o.name AS name, o.pgn AS bookMoves,\n       toInteger(o.namedAtPly) AS namedAtPly, toInteger(o.pliesPast) AS pliesPast\n"
+  },
+  {
+    "name": "PlansInLine",
+    "description": "The plans for both sides in the position a game has reached, judged by a model with the chess-plans skill knowing the game's opening name — which the position alone loses once it leaves the book. Same shape as PlansInPosition. Costs an engine search and a model call per new line; cached for a week.",
+    "params": {
+      "moves": {
+        "type": "string",
+        "default": "e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1",
+        "description": "The game's moves from the start in SAN, space-separated."
+      },
+      "level": {
+        "type": "string",
+        "default": "intermediate",
+        "description": "Who the plans are for: `beginner` (tactics first — threats, loose pieces, checks — and the basic principles, in plain words), `intermediate` (plans from the imbalances, structures by name), or `expert` (full strategic depth, move-order nuance, no hand-holding)."
+      }
+    },
+    "cypher": "MATCH (g:GameLine {moves: $moves})-[:HAS_PLAN]->(pl:Plan)\nWHERE pl.level = $level\nRETURN pl.side AS side, toInteger(pl.priority) AS priority, pl.name AS plan, pl.idea AS idea,\n       pl.moves AS moves, pl.imbalances AS imbalances, pl.engineEvidence AS engineEvidence,\n       pl.summary AS summary, pl.structure AS structure, pl.opening AS opening, pl.level AS level\nORDER BY side DESC, priority\n"
+  },
+  {
+    "name": "TheoryOfLine",
+    "description": "What opening theory says about a game line: the deepest page of the Chess Opening Theory wikibook the line reaches, its text (CC BY-SA 4.0), and how far past it the game has gone. Answers 'what does theory say here', 'what is the idea behind this variation', 'why is this move played'.",
+    "params": {
+      "moves": {
+        "type": "string",
+        "default": "e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O",
+        "description": "The game's moves from the start in SAN, space-separated."
+      }
+    },
+    "cypher": "MATCH (g:GameLine {moves: $moves})-[:HAS_THEORY]->(t:OpeningTheory)\nRETURN t.title AS page, t.url AS url, t.theory AS theory, toInteger(t.pliesCovered) AS pliesCovered,\n       toInteger(t.pliesPast) AS pliesPast, t.licence AS licence\n"
+  },
+  {
+    "name": "MastersAtPosition",
+    "description": "What masters played from a position — each move with its number of games, how often White won, drew and lost, and how it scored for the side that chose it — from the Lichess masters database (over-the-board, 2200+). Answers 'what do masters play here', 'what's the most popular move', 'how does this move score'. Needs the Lichess key.",
+    "params": {
+      "fen": {
+        "type": "string",
+        "default": "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+        "description": "The position, as a complete FEN."
+      }
+    },
+    "cypher": "MATCH (p:Position {fen: $fen})-[:MASTERS_PLAYED]->(m:MasterMove)\nRETURN m.san AS move, m.uci AS uci, toInteger(m.games) AS games, m.whiteWinPct AS whiteWinPct,\n       m.drawPct AS drawPct, m.blackWinPct AS blackWinPct, m.scoreForMover AS scoreForMover,\n       toInteger(m.averageRating) AS averageRating\nORDER BY games DESC\n"
+  },
+  {
+    "name": "MasterGamesAtPosition",
+    "description": "Top master games that reached a position: players, ratings, year, result, the move played from the position, and a link. Answers 'show me master games from here', 'who has played this'. Needs the Lichess key.",
+    "params": {
+      "fen": {
+        "type": "string",
+        "default": "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+        "description": "The position, as a complete FEN."
+      }
+    },
+    "cypher": "MATCH (p:Position {fen: $fen})-[:MASTER_GAME]->(g:MasterGame)\nRETURN g.white AS white, toInteger(g.whiteElo) AS whiteElo, g.black AS black, toInteger(g.blackElo) AS blackElo,\n       g.result AS result, toInteger(g.year) AS year, g.uci AS movePlayed, g.url AS url\nORDER BY year DESC\n"
+  },
+  {
+    "name": "PlayerAtPosition",
+    "description": "What one Lichess player chose from a position, as White or as Black, across their whole Lichess history — each move with games played and how it scored for them. Answers 'what does DrNykterstein play here', 'what does X play against the Sicilian as White'. Needs the Lichess key.",
+    "params": {
+      "fen": {
+        "type": "string",
+        "default": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        "description": "The position, as a complete FEN."
+      },
+      "player": {
+        "type": "string",
+        "default": "DrNykterstein",
+        "description": "The Lichess username."
+      },
+      "color": {
+        "type": "string",
+        "default": "white",
+        "description": "`white` or `black`: the colour the player had."
+      }
+    },
+    "cypher": "MATCH (p:Position {fen: $fen})-[:PLAYER_PLAYED]->(m:PlayerMove)\nWHERE m.player = $player AND m.color = $color\nRETURN m.san AS move, toInteger(m.games) AS games, m.scoreForMover AS scoreForPlayer,\n       m.whiteWinPct AS whiteWinPct, m.drawPct AS drawPct, m.blackWinPct AS blackWinPct,\n       toInteger(m.averageRating) AS averageOpponentRating\nORDER BY games DESC\n"
+  },
+  {
+    "name": "PlayerGamesAtPosition",
+    "description": "A Lichess player's recent games through a position, as White or as Black: opponent, ratings, result, speed and a link. Needs the Lichess key.",
+    "params": {
+      "fen": {
+        "type": "string",
+        "default": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        "description": "The position, as a complete FEN."
+      },
+      "player": {
+        "type": "string",
+        "default": "DrNykterstein",
+        "description": "The Lichess username."
+      },
+      "color": {
+        "type": "string",
+        "default": "white",
+        "description": "`white` or `black`."
+      }
+    },
+    "cypher": "MATCH (p:Position {fen: $fen})-[:PLAYER_GAME]->(g:PlayerGame)\nWHERE g.player = $player AND g.color = $color\nRETURN g.white AS white, toInteger(g.whiteElo) AS whiteElo, g.black AS black, toInteger(g.blackElo) AS blackElo,\n       g.result AS result, g.speed AS speed, g.month AS month, g.uci AS movePlayed, g.url AS url\nORDER BY month DESC\n"
+  },
+  {
+    "name": "MovesByRating",
+    "description": "How the moves played from a position change with rating: for one time control, each move's share of games in every Lichess rating band, from under 1000 to 2500+, with how it scored. Answers 'what do 1600s play here compared with 2200s', 'is Bxc6 a club-player move'. `speed` is a time control, or `all`. Needs the Lichess key; a new position takes several seconds (one request per band), then it is cached.",
+    "params": {
+      "fen": {
+        "type": "string",
+        "default": "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+        "description": "The position, as a complete FEN."
+      },
+      "speed": {
+        "type": "string",
+        "default": "blitz",
+        "description": "ultraBullet, bullet, blitz, rapid, classical, correspondence — or all."
+      },
+      "minShare": {
+        "type": "int",
+        "default": 3,
+        "description": "Leave out moves under this percent of games in a band."
+      }
+    },
+    "cypher": "MATCH (p:Position {fen: $fen})-[:PLAYED_AT_RATING]->(m:RatedMove)\nWHERE m.speed = $speed AND toFloat(m.share) >= $minShare\nRETURN toInteger(m.band) AS band, m.bandLabel AS rating, m.san AS move, toFloat(m.share) AS pctOfGames,\n       toInteger(m.games) AS games, m.scoreForMover AS scored\nORDER BY band, pctOfGames DESC\n"
+  },
+  {
+    "name": "MovesByTimeControl",
+    "description": "How the moves played from a position change with time control: for one Lichess rating band, each move's share of games in every time control from ultrabullet to correspondence, with how it scored. Answers 'do people play this differently in blitz and classical'. Needs the Lichess key.",
+    "params": {
+      "fen": {
+        "type": "string",
+        "default": "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+        "description": "The position, as a complete FEN."
+      },
+      "band": {
+        "type": "string",
+        "default": "1600",
+        "description": "The rating band's floor: 0, 1000, 1200, 1400, 1600, 1800, 2000, 2200 or 2500."
+      },
+      "minShare": {
+        "type": "int",
+        "default": 3,
+        "description": "Leave out moves under this percent of games in a time control."
+      }
+    },
+    "cypher": "MATCH (p:Position {fen: $fen})-[:PLAYED_AT_RATING]->(m:RatedMove)\nWHERE m.band = $band AND toFloat(m.share) >= $minShare\nRETURN m.speed AS timeControl, m.san AS move, toFloat(m.share) AS pctOfGames,\n       toInteger(m.games) AS games, m.scoreForMover AS scored\nORDER BY timeControl, pctOfGames DESC\n"
+  }
+];

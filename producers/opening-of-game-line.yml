@@ -1,0 +1,10 @@
+handler: chess.rowsOpeningOfLine
+joins:
+  - anchorLabel: GameLine
+    keyField: moves
+    recordKeyField: line
+    relationship: IN_OPENING
+    targetLabel: Opening
+keyArgument: lines
+name: opening-of-game-line
+version: 1

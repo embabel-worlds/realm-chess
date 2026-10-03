@@ -1,35 +1,23 @@
 name: chess
-description: |
+host: wasm
+version: 0.5.0
+description: |-
   A chessboard, a strong engine, and the plans a position calls for.
 
-  Stockfish 19 — compiled to WebAssembly, running in the appliance's own
-  sandbox — gives the best lines. The position's imbalances, in Jeremy
-  Silman's sense, are computed from the board: material, the minor pieces,
-  pawn structure, space, files, outposts, development, king safety. The
-  Lichess opening book names it — along the game's moves, so a line keeps its
-  name long after it leaves the book — and the Chess Opening Theory wikibook
-  (CC BY-SA 4.0) says what theory holds along the line. A model with the
-  chess-plans skill then decides the plans for both sides from those facts —
-  the King's Indian Classical and Samisch, or the Exchange and closed Ruy
-  Lopez, call for opposite plans, and the skill knows which.
+  Stockfish 19, compiled to WebAssembly and running in the appliance's own sandbox, gives the best
+  lines, each saying how deep it searched. The position's imbalances, in Jeremy Silman's sense, are
+  computed from the board: material, the minor pieces, pawn structure, space, files, outposts,
+  development, king safety. The Lichess opening book names it, along the game's moves, so a line
+  keeps its name long after it leaves the book.
 
-  Everything is a Virtual Cypher hop from a pinned Position (HAS_IMBALANCES,
-  IN_OPENING, HAS_CANDIDATE, HAS_PLAN) or GameLine (IN_OPENING, HAS_THEORY,
-  HAS_PLAN), so the analysis is a query and a REST call, not only a page.
-
-  No key needed for any of that. With a Lichess token — which the realm asks
-  for, and can do without — it also shows what masters played in a position,
-  and what any Lichess player has chosen there, with results. The engine is GPL-3.0, and so is
-  this realm.
-version: 0.4.0
-
-# Plans are a model's judgement with the chess-plans skill, and need an appliance whose
-# gateway.ai.complete accepts `skills`. On an older one PlansInPosition fails; the engine, the
-# imbalances and the opening book work anywhere.
-maturity: experimental
-url: https://github.com/embabel-worlds/realm-chess
+  Everything is a Virtual Cypher hop from a pinned Position (HAS_IMBALANCES, IN_OPENING,
+  HAS_CANDIDATE) or GameLine (IN_OPENING), so the analysis is a query and a REST call, not only a
+  page. The engine is GPL-3.0, and so is this realm.
 author: Rod Johnson
-host: docker
+url: https://github.com/embabel-worlds/realm-chess
+maturity: experimental
+capabilities:
+  - model
 tags:
   - chess
   - games
@@ -39,7 +27,6 @@ tags:
   - skills
 exports:
   - chess
-  - wikibooks
   - lichess
   - Position
   - GameLine
@@ -66,6 +53,3 @@ exports:
   - PlayerGamesAtPosition
   - MovesByRating
   - MovesByTimeControl
-  # A realm with an exports list loads only the skills named in it; leave this out and the
-  # skill is dropped at load with nothing but a debug line to say so.
-  - chess-plans

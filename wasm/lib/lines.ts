@@ -1,5 +1,7 @@
-import { Chess, type Move } from "chess.js";
-import { imbalanceChanges, imbalancesOf, type Imbalances } from "./imbalances";
+import { Chess } from "./chess.js";
+import type { Move } from "./chess.js";
+import { imbalanceChanges, imbalancesOf } from "./imbalances.ts";
+import type { Imbalances } from "./imbalances.ts";
 
 /*
  * What an engine line DOES to the position — never what it is FOR. The plan a line serves is

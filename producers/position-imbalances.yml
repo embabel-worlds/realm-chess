@@ -1,0 +1,10 @@
+handler: chess.rowsImbalances
+joins:
+  - anchorLabel: Position
+    keyField: fen
+    recordKeyField: fen
+    relationship: HAS_IMBALANCES
+    targetLabel: PositionImbalances
+keyArgument: fens
+name: position-imbalances
+version: 1

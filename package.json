@@ -1,26 +1,28 @@
 {
   "name": "realm-chess",
-  "version": "0.1.0",
+  "version": "0.5.0",
   "private": true,
-  "description": "A chessboard, Stockfish on the server, and the plans behind its best moves, as an Embabel realm",
+  "description": "A chessboard, a strong engine, and the plans behind its best moves, as a captured Embabel realm",
   "license": "GPL-3.0-only",
+  "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "build": "node scripts/build.mjs && embabel-build-manifest",
-    "check": "npm run typecheck && npm test && npm run build && npm run test:app",
+    "vendor": "node scripts/vendor-chess.mjs",
+    "book": "node scripts/book.mjs",
+    "synth": "node scripts/synth.mjs",
+    "build": "npm run vendor && npm run book && npm run synth",
+    "check": "npm run typecheck && npm run build && npm test",
     "test:app": "playwright test"
   },
   "dependencies": {
-    "chess.js": "1.4.0",
-    "stockfish": "19.0.0"
+    "chess.js": "1.4.0"
   },
   "devDependencies": {
-    "@embabel/runtime-types": "file:../assistant/tooling/runtime-types",
+    "@embabel/realm-types": "file:../../../../embabel-ts/.claude/worktrees/captured-deps/packages/realm-types",
     "@playwright/test": "^1.63.0",
-    "@types/node": "^20.0.0",
+    "@types/node": "^24.0.0",
     "cm-chessboard": "^8.15.1",
-    "esbuild": "^0.25.0",
     "typescript": "^5.4.0",
     "vitest": "^3.2.7",
     "yaml": "^2.9.1"

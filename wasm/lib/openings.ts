@@ -1,6 +1,4 @@
-import { Chess } from "chess.js";
-import { readFileSync } from "node:fs";
-import * as path from "node:path";
+import { Chess } from "./chess.js";
 
 /*
  * The opening book: every named line in the Lichess chess-openings list (CC0), keyed by the
@@ -10,9 +8,15 @@ import * as path from "node:path";
  * The key is the position without move counters (EPD), with the en passant square kept only
  * when a capture there is legal: 1.e4 and 1.e4 reached by transposition are one position, and a
  * phantom en passant square would split them.
+ *
+ * The book itself lives in the realm's SQLite (db/0001-openings.sql, db/0002-skeletons.sql).
+ * The handlers read the rows a question needs and hand them in here, so this file only matches.
  */
 
 export interface BookEntry { eco: string; name: string; pgn: string }
+
+/** Book entries by position key: the whole book, or just the rows a lookup needs. */
+export type Book = Record<string, BookEntry>;
 
 export function positionKey(fen: string): string {
   const c = new Chess(fen);
@@ -21,28 +25,23 @@ export function positionKey(fen: string): string {
   return `${board} ${turn} ${castling} ${epLegal ? ep : "-"}`;
 }
 
-let book: Record<string, BookEntry> | null = null;
-
-/* The bundled tables, built by scripts/build.mjs into dist/data/ beside the handler — found there
- * from the bundle, and from the source tree (tests) via dist/. */
-function readData(file: string): any {
-  for (const dir of [path.join(__dirname, "..", "data"), path.join(__dirname, "..", "..", "dist", "data")]) {
+/** The position key of every position along a line, for reading its book rows in one go. */
+export function lineKeys(moves: string[]): string[] {
+  const c = new Chess();
+  const keys: string[] = [];
+  for (const m of moves) {
     try {
-      return JSON.parse(readFileSync(path.join(dir, file), "utf8"));
+      c.move(m);
     } catch {
-      /* try the next */
+      break;
     }
+    keys.push(positionKey(c.fen()));
   }
-  throw new Error(`${file} not found: run npm run build`);
+  return keys;
 }
 
-function load(): Record<string, BookEntry> {
-  if (!book) book = readData("openings.json");
-  return book!;
-}
-
-export function openingOf(fen: string): BookEntry | null {
-  return load()[positionKey(fen)] ?? null;
+export function openingOf(fen: string, book: Book): BookEntry | null {
+  return book[positionKey(fen)] ?? null;
 }
 
 export interface LineOpening extends BookEntry {
@@ -60,7 +59,7 @@ export interface LineOpening extends BookEntry {
  * moves later. Each position along the line is looked up, so a transposition into a named line
  * is found too. `moves` is SAN from the starting position; an illegal move ends the line there.
  */
-export function openingOfLine(moves: string[]): LineOpening | null {
+export function openingOfLine(moves: string[], book: Book): LineOpening | null {
   const c = new Chess();
   let best: LineOpening | null = null;
   let ply = 0;
@@ -71,7 +70,7 @@ export function openingOfLine(moves: string[]): LineOpening | null {
       break;
     }
     ply++;
-    const hit = load()[positionKey(c.fen())];
+    const hit = book[positionKey(c.fen())];
     if (hit) best = { ...hit, fen: c.fen(), namedAtPly: ply, pliesPast: 0 };
   }
   if (best) best.pliesPast = ply - best.namedAtPly;
@@ -100,12 +99,21 @@ export interface StructureMatch {
   pawnsDifferent: number;
 }
 
-let skeletons: Record<string, { families: number; openings: { eco: string; name: string }[] }> | null = null;
+/* A pawn skeleton from the book: how many opening families share it, and their names, shortest first. */
+export interface Skeleton { families: number; openings: { eco: string; name: string }[] }
+
+/** Skeletons by pawn key: the whole table, or the rows a lookup needs. */
+export type Skeletons = Record<string, Skeleton>;
 
 /* More families than this share the skeleton, and it is not a structure: the starting pawns are
  * shared by every knight-first opening, 1.e4 e5 by thirteen families. Every structure in the
  * test battery that deserves a name belongs to one. */
-const MAX_FAMILIES = 2;
+export const MAX_FAMILIES = 2;
+
+/** The pawns alone, as the skeleton table keys them: colour and square, sorted. */
+export function pawnKey(fen: string): string {
+  return [...pawnSet(fen)].sort().join(" ");
+}
 
 function pawnSet(fen: string): Set<string> {
   const c = new Chess(fen);
@@ -120,13 +128,12 @@ function pawnSet(fen: string): Set<string> {
  * table row for plans, and saying how close keeps it honest. Beyond two pawns, nothing: a
  * structure that far off is a different structure.
  */
-export function structureOf(fen: string, maxDifferent = 2): StructureMatch | null {
-  if (!skeletons) skeletons = readData("skeletons.json");
+export function structureOf(fen: string, skeletons: Skeletons, maxDifferent = 2): StructureMatch | null {
   const mine = pawnSet(fen);
-  const exact = skeletons![[...mine].sort().join(" ")];
+  const exact = skeletons[[...mine].sort().join(" ")];
   if (exact) return exact.families <= MAX_FAMILIES ? { openings: exact.openings, pawnsDifferent: 0 } : null;
   let best: StructureMatch | null = null;
-  for (const [key, { families, openings }] of Object.entries(skeletons!)) {
+  for (const [key, { families, openings }] of Object.entries(skeletons)) {
     if (families > MAX_FAMILIES) continue;
     const theirs = new Set(key.split(" "));
     let diff = 0;

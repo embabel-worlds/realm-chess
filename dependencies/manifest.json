@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "init": "db/schema.sql",
+      "migrations": [
+        "db/0001-openings.sql",
+        "db/0002-skeletons.sql"
+      ],
+      "module": "sqlite3-wasi",
+      "name": "db",
+      "persistent": true,
+      "sha256": "9a5542e25e42fbbb48501bae0ab4295cdf0fd0f41219ec3b6c891c4a282e7779",
+      "version": "3.53"
+    }
+  ]
+}

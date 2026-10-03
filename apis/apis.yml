@@ -1,25 +1,11 @@
-# One source: the Chess Opening Theory wikibook, read through the Wikibooks MediaWiki API. Open,
-# keyless. Its text is CC BY-SA 4.0 — every place the realm shows it names the page and licence.
-- url: wikibooks.yml
-  name: wikibooks
-  type: openapi
-  auth: none
-  headers:
-    User-Agent: "embabel-realm-chess/0.2 (https://github.com/embabel-worlds/realm-chess)"
-  operation-ids:
-    - wikibooksQuery
-
-# The Lichess opening explorer. Needs a personal API token (no scopes): declared in keys.yml, so
-# the console asks for it when the realm is installed. Without one this API is skipped at load
-# and the masters and player hops are simply absent; everything else works.
-- url: lichess.yml
+- auth: bearer
+  credential: lichess
   name: lichess
-  type: openapi
-  auth: bearer
-  token-env: LICHESS_TOKEN
-  headers:
-    User-Agent: "embabel-realm-chess/0.4 (https://github.com/embabel-worlds/realm-chess)"
+  ndjson-operation-ids:
+    - playerExplorer
   operation-ids:
     - mastersExplorer
     - lichessExplorer
     - playerExplorer
+  type: openapi
+  url: lichess.json

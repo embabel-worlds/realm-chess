@@ -1,4 +1,5 @@
-import { Chess, type Color, type PieceSymbol, type Square } from "chess.js";
+import { Chess } from "./chess.js";
+import type { Color, PieceSymbol, Square } from "./chess.js";
 
 /*
  * The imbalances of a position, in Jeremy Silman's sense: the differences between the two

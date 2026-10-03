@@ -1,4 +1,4 @@
-import { Chess } from "chess.js";
+import { Chess } from "./chess.js";
 
 /*
  * The Chess Opening Theory wikibook keeps a page per move sequence — "Chess Opening Theory/1. e4/
