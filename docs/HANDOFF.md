@@ -74,11 +74,13 @@ published version when it ships; nothing else changes.
 - **A raced cold plan.** When two dispatches make the same plan at once, the second keeps its
   answer but its stored row is refused, since it read before writing. Replaying an upsert keyed by
   the row it read would keep it.
-- **The app's frame.** It has an opaque origin, so there is no storage: the level, tab and player
-  are not remembered. The host page carries no hash into the frame, so a shared link cannot open a
-  position. The frame's document starts with the policy and scripts ahead of the page's doctype,
-  so it renders in quirks mode. Chrome refuses `data:` URLs in an SVG `<use>`, so the sprites are
-  placed in the document by id.
+- **The app's frame.** The level, tab and player are kept through `realm.prefs`, per app and per
+  reader; a bridge without it keeps nothing. The owner page's hash reaches the frame as
+  `realm.hash` and a `hashchange` just after load, and opens the game it names (`line=`/`fen=`,
+  a bare FEN, or bare SAN moves). The page's history entries use the frame's own address with
+  the new hash, since a bare `#...` resolves against the owner page. The app cannot yet push a
+  hash back out to the owner page, so a link to a position reached in the app is not shareable.
+  Chrome refuses `data:` URLs in an SVG `<use>`, so the sprites are placed in the document by id.
 - **Admission and macOS.** A folder copied from macOS carries `._` files, which admission refuses;
   copy without them (or the appliance could ignore them).
 

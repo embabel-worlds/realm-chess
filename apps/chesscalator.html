@@ -356,11 +356,34 @@ let lastStatus = null; // ChessStatus, as the last reply carried it
  * you stop on, instead of a queue of searches for positions already gone. */
 const SETTLE_MS = 300;
 
-/* The reader's level is a per-viewer preference, so it lives in this browser only; storage may be
- * unavailable (a private window), and then the page simply starts at intermediate. */
-try { const saved = localStorage.getItem("chesscalator.level"); if (saved) $("level").value = saved; } catch { /* no storage */ }
+/*
+ * The reader's level, tab and player are kept by the appliance for this app and this reader,
+ * through realm.prefs: the frame has no storage of its own. A bridge without realm.prefs keeps
+ * nothing, and the page starts from its defaults. A saved value only fills in what the reader has
+ * not already changed, since it arrives after the page is up.
+ */
+const prefs = {
+  async get(name) {
+    try {
+      const v = await window.realm?.prefs?.get(name);
+      return typeof v === "string" ? v : null;
+    } catch {
+      return null;
+    }
+  },
+  set(name, value) {
+    try {
+      window.realm?.prefs?.set(name, value)?.catch?.(() => { /* not kept, nothing else to do */ });
+    } catch { /* no preferences on this bridge */ }
+  },
+};
+const touched = new Set();
+prefs.get("level").then((v) => {
+  if (v && !touched.has("level") && [...$("level").options].some((o) => o.value === v)) $("level").value = v;
+});
 $("level").addEventListener("change", () => {
-  try { localStorage.setItem("chesscalator.level", $("level").value); } catch { /* no storage */ }
+  touched.add("level");
+  prefs.set("level", $("level").value);
   $("plans").replaceChildren();
 });
 
@@ -516,11 +539,13 @@ function record(replace = false) {
   const hash = "#" + new URLSearchParams(fromStart()
     ? { line: line.join(" "), at: String(cursor) }
     : { fen: baseFen, line: line.join(" "), at: String(cursor) }).toString();
-  // A frame whose document has no address of its own may refuse a new history entry; the game
-  // still plays, it just cannot be stepped with the browser's Back.
+  // The address is the document's own with the new hash. A bare "#..." would resolve against the
+  // owner page's address in the appliance's frame. A frame that refuses a history entry still
+  // plays the game; it just cannot be stepped with the browser's Back.
+  const here = location.href.split("#")[0];
   try {
-    if (replace) history.replaceState(st, "", hash);
-    else history.pushState(st, "", hash);
+    if (replace) history.replaceState(st, "", here + hash);
+    else history.pushState(st, "", here + hash);
   } catch { /* no history in this frame */ }
 }
 
@@ -954,7 +979,7 @@ function popChart(cols, colTitles, series) {
 /* Player look-ups read Lichess's streamed (NDJSON) answers, which the appliance now reads whole. */
 const PLAYER_LOOKUP_AVAILABLE = true;
 
-/* What one Lichess player chose here, playing the side to move. Remembered in this browser. */
+/* What one Lichess player chose here, playing the side to move. The name is remembered for this reader. */
 function lookUpPlayer() {
   if (!$("playerName").value.trim() || !PLAYER_LOOKUP_AVAILABLE) return;
   queueRequest(askPlayer);
@@ -964,7 +989,7 @@ async function askPlayer() {
   const seq = analysisSeq;
   const player = $("playerName").value.trim();
   if (!player) return;
-  try { localStorage.setItem("chesscalator.player", player); } catch { /* no storage */ }
+  prefs.set("player", player);
   const color = game.turn() === "w" ? "white" : "black";
   state("player", `Looking up ${player} as ${color}\u2026`, "note");
   try {
@@ -1146,26 +1171,40 @@ async function askPlans() {
   }
 }
 
-try { const saved = localStorage.getItem("chesscalator.player"); if (saved) $("playerName").value = saved; } catch { /* no storage */ }
+prefs.get("player").then((v) => { if (v && !$("playerName").value) $("playerName").value = v; });
 
-/* The tabs. The chosen one is remembered in this browser. */
+/* The tabs. The chosen one is remembered for this reader. */
 function showTab(name) {
   for (const b of document.querySelectorAll(".tabbar [data-tab]")) b.setAttribute("aria-selected", String(b.dataset.tab === name));
   for (const p of document.querySelectorAll(".tabpane")) p.hidden = p.dataset.pane !== name;
-  try { localStorage.setItem("chesscalator.tab", name); } catch { /* no storage */ }
 }
-for (const b of document.querySelectorAll(".tabbar [data-tab]")) b.addEventListener("click", () => showTab(b.dataset.tab));
-try { const t = localStorage.getItem("chesscalator.tab"); if (t) showTab(t); } catch { /* no storage */ }
+for (const b of document.querySelectorAll(".tabbar [data-tab]")) {
+  b.addEventListener("click", () => {
+    touched.add("tab");
+    showTab(b.dataset.tab);
+    prefs.set("tab", b.dataset.tab);
+  });
+}
+prefs.get("tab").then((t) => {
+  if (t && !touched.has("tab") && document.querySelector(`.tabbar [data-tab="${CSS.escape(t)}"]`)) showTab(t);
+});
 $("playerForm").addEventListener("submit", (e) => { e.preventDefault(); lookUpPlayer(); });
 $("playerUnavailable").hidden = PLAYER_LOOKUP_AVAILABLE;
 for (const c of $("playerForm").elements) c.disabled = !PLAYER_LOOKUP_AVAILABLE;
 $("popAxis").addEventListener("change", popAxisChanged);
 $("popBtn").addEventListener("click", comparePopularity);
 
-/* A link or a reload carries the game in its hash. An unreadable hash is ignored, not trusted. */
+/*
+ * A link carries the game in its hash: `line=...&at=...`, with `fen=` for a game from a set-up
+ * position, as the page writes it; or a bare FEN, or bare SAN moves from the start, as an owner
+ * may type a link (spaces as %20 or _). In the appliance the owner page's hash reaches the frame
+ * just after load and on every change, as a hashchange. An unreadable hash is ignored, not trusted.
+ */
 function fromHash() {
-  const q = new URLSearchParams(location.hash.slice(1));
-  if (!q.has("line") && !q.has("fen")) return null;
+  const raw = location.hash.slice(1);
+  if (!raw) return null;
+  const q = new URLSearchParams(raw);
+  if (!q.has("line") && !q.has("fen")) return bareHash(raw);
   try {
     const base = q.get("fen") ? new Chess(q.get("fen")).fen() : START;
     const moves = (q.get("line") || "").split(" ").filter(Boolean);
@@ -1177,6 +1216,32 @@ function fromHash() {
     return null;
   }
 }
+
+function bareHash(raw) {
+  let text;
+  try { text = decodeURIComponent(raw).replace(/_/g, " ").trim(); } catch { return null; }
+  if (!text) return null;
+  try { return { baseFen: new Chess(text).fen(), line: [], cursor: 0 }; } catch { /* not a FEN */ }
+  try {
+    const moves = text.split(/\s+/);
+    const c = new Chess();
+    for (const m of moves) c.move(m);
+    return { baseFen: START, line: moves, cursor: moves.length };
+  } catch {
+    return null;
+  }
+}
+
+/* A hash that names another game, or another point in this one, opens it. The page's own
+ * history entries change the hash without this event, so only a link moves the board here. */
+window.addEventListener("hashchange", () => {
+  const h = fromHash();
+  if (!h) return;
+  if (h.baseFen === baseFen && h.cursor === cursor && h.line.join(" ") === line.join(" ")) return;
+  baseFen = h.baseFen; line = h.line; cursor = h.cursor;
+  show({ push: false });
+  record(true);
+});
 
 const initial = fromHash();
 if (initial) { baseFen = initial.baseFen; line = initial.line; cursor = initial.cursor; }

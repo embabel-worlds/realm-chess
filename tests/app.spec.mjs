@@ -88,10 +88,35 @@ const factsOf = (fen) => {
 const namesOf = (fen) => [...new Set(rowsOf(key("ImbalancesOf", { fen }))[0].facts.split("\n")
   .filter((f) => f && !f.startsWith("Phase:")).map((f) => f.slice(0, f.indexOf(": "))))];
 
-/* The bridge stub. `overrides` replaces replies; `delays` holds a call back, in ms. */
-function bridge(overrides = {}, delays = {}) {
+/*
+ * The bridge stub. `overrides` replaces replies; `delays` holds a call back, in ms. `frame` sets
+ * what the host's frame adds: `prefs: false` leaves realm.prefs out, as an older bridge does;
+ * `hash` is the owner page's hash, delivered just after load as the host delivers it. Preferences
+ * are kept in sessionStorage, standing for the appliance's store, so they survive a reload.
+ * `window.__deliverHash(h)` stands for the owner page's hash changing.
+ */
+function bridge(overrides = {}, delays = {}, frame = {}) {
   return `window.__calls = [];
+  window.__prefs = [];
   (() => {
+    const frame = ${JSON.stringify(frame)};
+    let hash = '';
+    const store = () => JSON.parse(sessionStorage.getItem('__prefs') || '{}');
+    const prefs = Object.freeze({
+      async get(key) { window.__prefs.push(['get', key]); return store()[key] ?? null; },
+      async set(key, value) {
+        window.__prefs.push(['set', key, value]);
+        const s = store();
+        if (value === null) delete s[key]; else s[key] = value;
+        sessionStorage.setItem('__prefs', JSON.stringify(s));
+      },
+    });
+    /* As the host's guest script does: keep realm.hash, and move the frame's own document to it. */
+    window.__deliverHash = (h) => {
+      hash = h;
+      location.replace(location.href.split('#')[0] + '#' + h);
+    };
+    if (frame.hash !== undefined) window.addEventListener('load', () => setTimeout(() => window.__deliverHash(frame.hash), 0));
     const fx = Object.assign(${JSON.stringify(replies)}, ${JSON.stringify(overrides)});
     const delays = ${JSON.stringify(delays)};
     const key = (handler, args) => 'call:' + handler + ':' + JSON.stringify(Object.fromEntries(Object.entries(args || {}).sort()));
@@ -110,15 +135,17 @@ function bridge(overrides = {}, delays = {}) {
           return JSON.parse(JSON.stringify(reply));
         } finally { pending = false; }
       },
+      get hash() { return hash; },
+      ...(frame.prefs === false ? {} : { prefs }),
     }) });
   })();`;
 }
 
 /* The document as the host composes it: policy, bridge, assets, then the page. */
-const documentFor = (overrides, delays) =>
-  `<meta http-equiv="Content-Security-Policy" content="${GUEST_CSP}"><script>${bridge(overrides, delays)}</script>${assets}${html}`;
+const documentFor = (overrides, delays, frame) =>
+  `<meta http-equiv="Content-Security-Policy" content="${GUEST_CSP}"><script>${bridge(overrides, delays, frame)}</script>${assets}${html}`;
 
-async function open(page, overrides, delays, hash = "") {
+async function open(page, overrides, delays, hash = "", frame = {}) {
   const errors = [];
   const network = [];
   page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
@@ -126,7 +153,7 @@ async function open(page, overrides, delays, hash = "") {
   await page.route("**/*", async (route) => {
     const url = new URL(route.request().url());
     if (url.host === "chess.test" && url.pathname === "/apps/chess/chesscalator.html") {
-      return route.fulfill({ contentType: "text/html", body: documentFor(overrides, delays) });
+      return route.fulfill({ contentType: "text/html", body: documentFor(overrides, delays, frame) });
     }
     network.push(url.href);
     return route.abort();
@@ -557,5 +584,80 @@ test("in a sandboxed frame with an opaque origin, as the appliance runs it, the 
   await expect(frame.locator(".cand button.mv").first()).toHaveText(best(E4)[0].move);
   if (process.env.SCREENSHOT) await page.screenshot({ path: join(root, "docs/chesscalator-harness.png") });
   expect(network).toEqual([]);
+  expect(errors).toEqual([]);
+});
+
+test("the level, tab and player are kept through realm.prefs, and come back on the next visit", async ({ page }) => {
+  const errors = await open(page, {}, {}, link(EXCHANGE, 17));
+  await expect(moves(page).first()).toBeVisible();
+  await tab(page, "plans");
+  await page.selectOption("#level", "expert");
+  await tab(page, "player");
+  await page.fill("#playerName", "DrNykterstein");
+  // The player is kept when it is looked up; the lookup itself is not what this test is about.
+  await page.evaluate(() => window.realm.prefs.set("player", "DrNykterstein"));
+  const sets = await page.evaluate(() => window.__prefs.filter((p) => p[0] === "set"));
+  expect(sets).toEqual(expect.arrayContaining([["set", "tab", "player"], ["set", "level", "expert"]]));
+  await page.reload();
+  await expect(page.locator('.tabpane[data-pane="player"]')).toBeVisible();
+  await expect(page.locator("#level")).toHaveValue("expert");
+  await expect(page.locator("#playerName")).toHaveValue("DrNykterstein");
+  expect(await page.evaluate(() => window.__prefs.filter((p) => p[0] === "get").map((p) => p[1]).sort())).toEqual(["level", "player", "tab"]);
+  expect(await page.evaluate(() => { try { return localStorage.length; } catch { return 0; } })).toBe(0);
+  expect(errors).toEqual([]);
+});
+
+test("a bridge without realm.prefs keeps nothing, and the page starts from its defaults", async ({ page }) => {
+  const errors = await open(page, {}, {}, "", { prefs: false });
+  await expect(moves(page).first()).toBeVisible();
+  await tab(page, "plans");
+  await page.selectOption("#level", "beginner");
+  await tab(page, "theory");
+  await page.reload();
+  await expect(page.locator('.tabpane[data-pane="moves"]')).toBeVisible();
+  await expect(page.locator("#level")).toHaveValue("intermediate");
+  expect(errors).toEqual([]);
+});
+
+test("the owner page's hash, arriving after load, opens the game it names", async ({ page }) => {
+  const errors = await open(page, {}, {}, "", { hash: new URLSearchParams({ line: EXCHANGE, at: "17" }).toString() });
+  await expect(page.locator("#fenInput")).toHaveValue(RUY);
+  await expect(moves(page)).toHaveCount(best(RUY).length);
+  expect(errors).toEqual([]);
+});
+
+test("a bare FEN or bare moves in the hash open that position, and a later hash moves the board again", async ({ page }) => {
+  const errors = await open(page, {}, {}, "", { hash: encodeURIComponent(RUY) });
+  await expect(page.locator("#fenInput")).toHaveValue(RUY);
+  await expect(moves(page)).toHaveCount(best(RUY).length);
+  await page.evaluate(() => window.__deliverHash("e4_e5"));
+  await expect(page.locator("#fenInput")).toHaveValue("rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2");
+  await expect.poll(() => page.evaluate(() => window.__calls.some((c) => c.includes('"moves":"e4 e5"')))).toBe(true);
+  // A hash naming nothing playable is ignored.
+  await page.evaluate(() => window.__deliverHash("not%20a%20game"));
+  await expect(page.locator("#fenInput")).toHaveValue("rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2");
+  expect(errors).toEqual([]);
+});
+
+test("in the sandboxed frame, the owner's hash opens a game, and moves keep the frame on its own document", async ({ page }) => {
+  const errors = [];
+  page.on("pageerror", (e) => errors.push(String(e)));
+  await page.route("**/*", (route) => {
+    const url = new URL(route.request().url());
+    if (url.host === "host.test") return route.fulfill({ contentType: "text/html", body: '<!doctype html><iframe sandbox="allow-scripts" style="width:1280px;height:1000px"></iframe>' });
+    return route.abort();
+  });
+  await page.goto("http://host.test/");
+  await page.evaluate((doc) => { document.querySelector("iframe").srcdoc = doc; }, documentFor({}, {}, { hash: "e4" }));
+  const frame = page.frameLocator("iframe");
+  await expect(frame.locator("#fenInput")).toHaveValue(E4);
+  await expect(frame.locator(".cand button.mv").first()).toHaveText(best(E4)[0].move);
+  await frame.getByRole("button", { name: best(E4)[0].move, exact: true }).first().click();
+  await expect(frame.locator("#moves")).toContainText("1. e4");
+  await expect(frame.locator("#fenInput")).not.toHaveValue(E4);
+  const { href, state } = await page.frames()[1].evaluate(() => ({ href: location.href, state: history.state }));
+  expect(href.startsWith("about:srcdoc#")).toBe(true);
+  // The frame keeps its own history, so the browser's Back steps through the game in it too.
+  expect(state?.line?.length).toBeGreaterThan(1);
   expect(errors).toEqual([]);
 });
