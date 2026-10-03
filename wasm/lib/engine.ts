@@ -63,6 +63,9 @@ export async function search(engine: Engine, fen: string, c: SearchConfig): Prom
   return answerOf(fen, await engine.analyse(fen, c.nodes, c.depthCap, c.multiPv));
 }
 
+/** Whether the host offers the engine's batch call. */
+export const canBatch = (engine: Engine): boolean => typeof engine.analyse.batch === "function";
+
 /**
  * Several searches under one configuration, answered in order, each a search or the error that
  * stopped it. One batch call when the host offers it, which runs them side by side where it has
@@ -76,8 +79,9 @@ export async function searchAll(engine: Engine, fens: string[], c: SearchConfig)
       return e as Error;
     }
   };
-  if (typeof engine.analyse.batch === "function") {
-    const texts = await engine.analyse.batch(fens.map((fen) => [fen, c.nodes, c.depthCap, c.multiPv] as const));
+  const batch = engine.analyse.batch;
+  if (typeof batch === "function") {
+    const texts = await batch.call(engine.analyse, fens.map((fen) => [fen, c.nodes, c.depthCap, c.multiPv] as const));
     if (!Array.isArray(texts) || texts.length !== fens.length) throw new Error("The engine's batch answered the wrong number of searches");
     return fens.map((fen, i) => settle(fen, texts[i]));
   }

@@ -64,9 +64,13 @@ published version when it ships; nothing else changes.
 ## Host follow-ups
 
 - **Background deepening** uses the scheduled background class and the engine's batch call,
-  both in review on the host. On a host without the batch call the tick searches one position at
-  a time inside the same 15 s; on one without the background class it competes with pages for
-  slots. The queue is added to by pages and never trimmed, like `analyses`; a cap is a follow-up.
+  both in review on the host. On a host without the batch call the tick searches one position a
+  round, checking its 12 s budget before each search; on one without the background class it
+  competes with pages for slots. The first round of a batch trusts the calibration: a host that
+  runs a batch one search after another on a runtime much slower than the calibration could take
+  a first round past the budget, though it stays inside the deadline unless a search takes more
+  than about 15 s. `db/0006-deepen.sql` keeps its first header, since the appliance has applied
+  it and the host checks each applied migration's hash; `0007` replaces its queue.
 
 - **Handlers on the native runtime.** On the appliance's interpreter the handlers are far too slow
   (imbalances alone took 26.9 s). Running realm handlers on the native Wasm runtime is in progress;

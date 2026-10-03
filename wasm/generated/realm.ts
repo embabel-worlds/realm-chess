@@ -855,6 +855,12 @@ export type ExplainPlansOutput = {
   summary: string;
 }[];
 
+export type MarkDeepenedInput = Record<string, never>;
+
+export type MarkDeepenedOutput = {
+  marked: number;
+};
+
 /** Input for the mastersAtPosition handler. */
 export interface MastersAtPositionInput {
   fens: string[];
@@ -1211,6 +1217,7 @@ export interface Handlers {
   deepen: Handler<DeepenInput, DeepenOutput>;
   explainLinePlans: Handler<ExplainLinePlansInput, ExplainLinePlansOutput>;
   explainPlans: Handler<ExplainPlansInput, ExplainPlansOutput>;
+  markDeepened: Handler<MarkDeepenedInput, MarkDeepenedOutput>;
   mastersAtPosition: Handler<MastersAtPositionInput, MastersAtPositionOutput>;
   openingLookup: Handler<OpeningLookupInput, OpeningLookupOutput>;
   openingOfGameLine: Handler<OpeningOfGameLineInput, OpeningOfGameLineOutput>;
@@ -1240,6 +1247,7 @@ export type AppPracticeHandler = Handler<AppPracticeInput, AppPracticeOutput>;
 export type DeepenHandler = Handler<DeepenInput, DeepenOutput>;
 export type ExplainLinePlansHandler = Handler<ExplainLinePlansInput, ExplainLinePlansOutput>;
 export type ExplainPlansHandler = Handler<ExplainPlansInput, ExplainPlansOutput>;
+export type MarkDeepenedHandler = Handler<MarkDeepenedInput, MarkDeepenedOutput>;
 export type MastersAtPositionHandler = Handler<MastersAtPositionInput, MastersAtPositionOutput>;
 export type OpeningLookupHandler = Handler<OpeningLookupInput, OpeningLookupOutput>;
 export type OpeningOfGameLineHandler = Handler<OpeningOfGameLineInput, OpeningOfGameLineOutput>;

@@ -73,14 +73,21 @@ export const PLANS_TTL_MS = 7 * DAY_MS;
 
 /*
  * Deepening in the background. A position someone looked at is queued, and a scheduled tick
- * searches it again with more nodes and a higher depth cap than a page can wait for. A tick uses
- * at most half the dispatch deadline, so it never races it, and starts another round only when a
- * round as long as the last one still fits. A round is a batch of DEEPEN_WIDTH searches, which a
- * host with spare cores runs side by side and any host can run one after another inside the tick.
+ * searches it again with more nodes and a higher depth cap than a page can wait for. A tick
+ * spends at most DEEPEN_TICK_MS, well short of the 30 s dispatch deadline: before each round it
+ * checks that a round as long as the last one (or, before the first, as long as the calibration
+ * says) still fits. With the engine's batch call a round is DEEPEN_WIDTH searches side by side;
+ * without it, a round is one search, so the time is checked before every search.
  */
 export const DEEP_NODES = 6_000_000;
 export const DEEP_DEPTH_CAP = 22;
-export const DEEPEN_TICK_MS = 15_000;
+export const DEEPEN_TICK_MS = 12_000;
 export const DEEPEN_WIDTH = 2;
+/** One deep search on the SIMD module under a native runtime: about 1.2M nodes a second. */
+export const DEEP_SEARCH_MS = 5_000;
 /** The most queued positions one tick looks at. */
 export const DEEPEN_PICK = 32;
+/** The queue has this many slots, so it never grows past it (see db/0007-deepen-slots.sql). */
+export const DEEPEN_SLOTS = 4096;
+/** How far back the marking tick looks for deeper rows to record as done. */
+export const MARK_WINDOW_MS = 15 * 60 * 1000;

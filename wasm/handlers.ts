@@ -7,7 +7,7 @@ import type {
 } from "./generated/realm.ts";
 import { Chess } from "./lib/chess.js";
 import { elapsedMs, fits, spent } from "./lib/clock.ts";
-import { ANALYSIS_TTL_MS, API_CALL_MS, DEEPEN_PICK, DEEPEN_TICK_MS, DEEPEN_WIDTH, LICHESS_SPACING_MS, MASTERS_TTL_MS, MAX_KEYS, MODEL_CALL_MS, MODEL_OUTPUT_TOKENS, PLANS_TTL_MS, PLAYER_TTL_MS, RATED_TTL_MS, SEARCH_MS, SEARCH_UNTIL, THEORY_TTL_MS, YIELD_AT } from "./lib/config.ts";
+import { ANALYSIS_TTL_MS, API_CALL_MS, DEEP_SEARCH_MS, DEEPEN_PICK, DEEPEN_TICK_MS, DEEPEN_WIDTH, MARK_WINDOW_MS, LICHESS_SPACING_MS, MASTERS_TTL_MS, MAX_KEYS, MODEL_CALL_MS, MODEL_OUTPUT_TOKENS, PLANS_TTL_MS, PLAYER_TTL_MS, RATED_TTL_MS, SEARCH_MS, SEARCH_UNTIL, THEORY_TTL_MS, YIELD_AT } from "./lib/config.ts";
 import { BAND, COLOR, gameRecords, gameUrl, LEVEL, moveRecords, PLAYER, playerCells, playerFilter, pinned, ratedCells, ratedGrid, ratedRecords, ratedRequest, SPEED } from "./lib/explorer.ts";
 import { runView } from "./lib/cypher.ts";
 import { allWithValues } from "./lib/records.ts";
@@ -25,7 +25,7 @@ import { timed, timedSync } from "./lib/timing.ts";
 import { readStatus, recordOutcome } from "./lib/status.ts";
 import { theoryFor, titlesOfSans } from "./lib/theory.ts";
 import type { TheoryRecord, WikibooksGateway } from "./lib/theory.ts";
-import { analysisIdOf, candidateRecords, configKey, DEEP, FULL, search, searchAll } from "./lib/engine.ts";
+import { analysisIdOf, canBatch, candidateRecords, configKey, DEEP, FULL, search, searchAll } from "./lib/engine.ts";
 import type { CandidateLineRecord, Engine, SearchConfig } from "./lib/engine.ts";
 import { imbalancesOf } from "./lib/imbalances.ts";
 import type { Imbalances } from "./lib/imbalances.ts";
@@ -220,12 +220,15 @@ export interface CandidateRow extends CandidateLineRecord {
 const isFresh = (a: KeptAnalysis | undefined): a is KeptAnalysis => a !== undefined && Date.now() - a.createdAt < ANALYSIS_TTL_MS;
 
 /**
- * The kept analyses for these positions under one configuration, by FEN. Under the graph's own
- * configuration a fresh row from the background tick, searched deeper, stands in for a page's.
+ * The kept analyses for these positions under one configuration, by FEN. For the graph's and
+ * the app's reads (`deeper`), a fresh row from the background tick, searched deeper, stands in
+ * for a page's under the graph's own configuration; its rows say the depth they reached. A caller
+ * that asked for a depth cap (analysePosition) or keys what it makes on the analysis (plans)
+ * reads the page's own rows only.
  */
-async function keptFor(db: Db, c: SearchConfig, fens: string[]): Promise<Map<string, KeptAnalysis>> {
+async function keptFor(db: Db, c: SearchConfig, fens: string[], deeper: boolean): Promise<Map<string, KeptAnalysis>> {
   const kept = await keptAnalyses(db, configKey(c), fens);
-  if (configKey(c) !== configKey(FULL)) return kept;
+  if (!deeper || configKey(c) !== configKey(FULL)) return kept;
   for (const [fen, deep] of await keptAnalyses(db, configKey(DEEP), fens, "deep_analyses")) if (isFresh(deep)) kept.set(fen, deep);
   return kept;
 }
@@ -234,7 +237,7 @@ async function keptFor(db: Db, c: SearchConfig, fens: string[]): Promise<Map<str
  * The lines for one position under one configuration: kept ones while they are fresh, else a
  * new search, which is kept. A checkmate or stalemate has no lines and is never searched. A new
  * search under the graph's own configuration also queues the position for the background tick,
- * once: the queue is only ever added to here, with INSERT OR IGNORE.
+ * in its slot, with a keyed upsert the host can replay. A page never reads the queue.
  */
 async function linesFor(ctx: Ctx, fen: string, c: SearchConfig, kept: KeptAnalysis | undefined): Promise<CandidateRow[]> {
   if (timedSync("legalMoves", () => legal(fen).moves().length === 0)) return [];
@@ -251,7 +254,9 @@ async function linesFor(ctx: Ctx, fen: string, c: SearchConfig, kept: KeptAnalys
     };
     await timed("keepAnalysis", () => keepAnalysis(ctx.deps.db, key, a!));
     if (key === configKey(FULL)) {
-      await ctx.deps.db.exec(`INSERT OR IGNORE INTO deepen_queue (fen, queued_at) VALUES (${sqlText(fen)}, ${sqlText(new Date().toISOString())})`);
+      await ctx.deps.db.exec(
+        `INSERT OR REPLACE INTO deepen_queue (slot, fen, queued_at) VALUES (${sqlText(slotOf(fen))}, ${sqlText(fen)}, ${sqlText(new Date().toISOString())})`,
+      );
     }
   }
   const { analysisId, nodes } = a;
@@ -268,7 +273,7 @@ export const analysePosition: Handlers["analysePosition"] = async (input: { fens
   const c: SearchConfig = { ...FULL, multiPv: clamp(input.multiPv, 5, 1, 8), depthCap: clamp(input.depth, 18, 6, 22) };
   const fens = (input.fens ?? []).map((f) => f.trim());
   fens.forEach(legal);
-  const kept = await keptFor(ctx.deps.db, c, fens);
+  const kept = await keptFor(ctx.deps.db, c, fens, false);
   const out: CandidateLineRecord[] = [];
   for (const fen of fens) {
     for (const { analysisId: _id, nodes: _nodes, ...record } of await linesFor(ctx, fen, c, kept.get(fen))) out.push(record);
@@ -293,7 +298,7 @@ export const rowsCandidates: Paged<RowsCandidatesInput, Item<AnalysePositionOutp
   }
   const page = keys.slice(start);
   page.forEach(legal);
-  const kept = await keptFor(ctx.deps.db, FULL, page);
+  const kept = await keptFor(ctx.deps.db, FULL, page, true);
   const rows: CandidateRow[] = [];
   for (let i = start; i < keys.length; i++) {
     const fen = keys[i];
@@ -308,27 +313,32 @@ export const rowsCandidates: Paged<RowsCandidatesInput, Item<AnalysePositionOutp
 
 /* ── Deepening in the background ── */
 
+/** The queue slot a position takes: the first three hex digits of its hash, so DEEPEN_SLOTS of them. */
+const slotOf = (fen: string) => sha256Hex(fen).slice(0, 3);
+
 /** What one tick did: how many positions it deepened, how many it could not, in how many rounds. */
 interface Deepened { deepened: number; failed: number; rounds: number }
 
 /**
- * The scheduled tick. It takes the most recently queued positions with no fresh deeper analysis,
- * searches them DEEPEN_WIDTH at a time at the deeper configuration, and keeps each answer in
- * deep_analyses, which every later read prefers. It stops when the queue has nothing left, or
- * when another round as long as the last would pass DEEPEN_TICK_MS of the dispatch.
+ * The scheduled tick. It takes queued positions that were queued after they were last deepened
+ * (or never were), oldest first, searches them at the deeper configuration, and keeps each answer
+ * in deep_analyses, which the graph's and the app's reads prefer.
  *
- * The tick reads deepen_queue and never writes it, and it is the only writer of deep_analyses,
- * so a page publishing while it runs cannot get its writes refused. Each row is keyed by
- * position and configuration and its id is its content, so a tick delivered twice keeps the
- * same rows.
+ * Time: before every round, including the first, it checks that the round still fits in
+ * DEEPEN_TICK_MS. The first round is estimated from the calibration (DEEP_SEARCH_MS a search,
+ * DEEPEN_WIDTH of them when the host batches); every later one by how long the last one took.
+ * Without the batch call a round is one search, so a slow runtime is caught after one search.
+ *
+ * Replay: the tick reads deepen_queue and deep_marks and writes only deep_analyses, with keyed
+ * upserts whose id is their content, so the host can replay it when a page published first, and
+ * a tick delivered twice keeps the same rows.
  */
 export const deepen: Handler<Record<string, never>, Deepened> = async (_input: unknown, ctx: Ctx) => {
   const db = ctx.deps.db;
   const deepKey = configKey(DEEP);
-  const staleBefore = new Date(Date.now() - ANALYSIS_TTL_MS).toISOString();
   const picked = (await db.exec(
-    `SELECT q.fen AS fen FROM deepen_queue q LEFT JOIN deep_analyses d ON d.fen = q.fen AND d.config_key = ${sqlText(deepKey)} ` +
-      `WHERE d.fen IS NULL OR d.created_at < ${sqlText(staleBefore)} ORDER BY q.queued_at DESC, q.fen LIMIT ${DEEPEN_PICK}`,
+    `SELECT q.fen AS fen FROM deepen_queue q LEFT JOIN deep_marks m ON m.fen = q.fen ` +
+      `WHERE m.fen IS NULL OR q.queued_at > m.deepened_at ORDER BY q.queued_at, q.slot LIMIT ${DEEPEN_PICK}`,
   )).map((r) => String(r.fen)).filter((fen) => {
     try {
       return legal(fen).moves().length > 0;
@@ -336,11 +346,12 @@ export const deepen: Handler<Record<string, never>, Deepened> = async (_input: u
       return false;
     }
   });
+  const width = canBatch(ctx.deps.engine) ? DEEPEN_WIDTH : 1;
   const out: Deepened = { deepened: 0, failed: 0, rounds: 0 };
-  let lastRoundMs = 0;
-  for (let i = 0; i < picked.length; i += DEEPEN_WIDTH) {
-    if (out.rounds > 0 && elapsedMs() + lastRoundMs > DEEPEN_TICK_MS) break;
-    const fens = picked.slice(i, i + DEEPEN_WIDTH);
+  let roundMs = width * DEEP_SEARCH_MS;
+  for (let i = 0; i < picked.length; i += width) {
+    if (elapsedMs() + roundMs > DEEPEN_TICK_MS) break;
+    const fens = picked.slice(i, i + width);
     const started = Date.now();
     let found: Awaited<ReturnType<typeof searchAll>>;
     try {
@@ -349,7 +360,7 @@ export const deepen: Handler<Record<string, never>, Deepened> = async (_input: u
       ctx.log(`deepening stopped: the engine refused a batch (${(e as Error).message})`);
       break;
     }
-    lastRoundMs = Date.now() - started;
+    roundMs = Date.now() - started;
     out.rounds++;
     for (const [k, fen] of fens.entries()) {
       const s = found[k];
@@ -361,12 +372,30 @@ export const deepen: Handler<Record<string, never>, Deepened> = async (_input: u
       const linesJson = JSON.stringify(s.lines);
       await keepAnalysis(db, deepKey, {
         fen, analysisId: analysisIdOf(deepKey, linesJson), depth: s.depth, nodes: s.nodes, linesJson,
-        recordsJson: JSON.stringify(candidateRecords(fen, s, imbalancesFor(fen), lastRoundMs)), elapsedMs: lastRoundMs, createdAt: Date.now(),
+        recordsJson: JSON.stringify(candidateRecords(fen, s, imbalancesFor(fen), roundMs)), elapsedMs: roundMs, createdAt: Date.now(),
       }, "deep_analyses");
       out.deepened++;
     }
   }
   return out;
+};
+
+/**
+ * The marking tick, half a minute after each deepen tick: it records in deep_marks when each
+ * position was last deepened, from the deeper rows of the last MARK_WINDOW_MS. It reads only
+ * deep_analyses and writes only deep_marks, with keyed upserts. A missed mark only means a
+ * position is deepened once more, to the same row.
+ */
+export const markDeepened: Handler<Record<string, never>, { marked: number }> = async (_input: unknown, ctx: Ctx) => {
+  const db = ctx.deps.db;
+  const since = new Date(Date.now() - MARK_WINDOW_MS).toISOString();
+  const rows = await db.exec(
+    `SELECT fen, created_at FROM deep_analyses WHERE config_key = ${sqlText(configKey(DEEP))} AND created_at >= ${sqlText(since)}`,
+  );
+  for (const r of rows) {
+    await db.exec(`INSERT OR REPLACE INTO deep_marks (fen, deepened_at) VALUES (${sqlText(String(r.fen))}, ${sqlText(String(r.created_at))})`);
+  }
+  return { marked: rows.length };
 };
 
 /* ── What the realm could not do ── */
@@ -603,7 +632,7 @@ async function plansFor(
   const x = imbalancesOf(fen);
   const structure = structureSentence(structureOf(fen, await skeletonsFor(db, pawnKey(fen))));
   const c: SearchConfig = { ...FULL, multiPv, depthCap: depth };
-  const kept = (await keptFor(db, c, [fen])).get(fen);
+  const kept = (await keptFor(db, c, [fen], false)).get(fen);
   const fresh = kept !== undefined && Date.now() - kept.createdAt < ANALYSIS_TTL_MS;
   if (!first && !fresh && !fits(SEARCH_MS + 2 * MODEL_CALL_MS)) return "later";
   const candidates = await linesFor(ctx, fen, c, kept);
@@ -885,7 +914,7 @@ export const appPosition: Handlers["appPosition"] = async (input: { fen?: unknow
     views.OpeningOf = await answer("OpeningOf", { fen }, () => openingRecords(db, [fen]));
   }
   views.BestMoves = await answer("BestMoves", { fen, withinCp, maxLines: 5 }, async () =>
-    linesFor(ctx, fen, FULL, (await timed("keptRead", () => keptFor(db, FULL, [fen]))).get(fen)));
+    linesFor(ctx, fen, FULL, (await timed("keptRead", () => keptFor(db, FULL, [fen], true))).get(fen)));
   if (moves && line) {
     views.TheoryOfLine = await answer("TheoryOfLine", { moves: moves.join(" ") }, async () => {
       const t = await timed("theory", () => theoryFor(db, ctx.gateway, moves, THEORY_TTL_MS, () => fits(API_CALL_MS), titlesOfSans(line.sans)));
@@ -1005,5 +1034,5 @@ void ({
   positionImbalances, openingLookup, openingOfGameLine, analysePosition, mastersAtPosition, playerAtPosition, ratedMoves, theoryOfGameLine,
   explainPlans, explainLinePlans, rowsImbalances, rowsOpeningOfPosition, rowsOpeningOfLine, rowsCandidates, status, rowsTheory,
   rowsPositionPlans, rowsLinePlans, rowsMasterMoves, rowsMasterGames, rowsPlayerMoves, rowsPlayerGames, rowsRatedMoves,
-  appPosition, appPractice, appPlans, deepen,
+  appPosition, appPractice, appPlans, deepen, markDeepened,
 } satisfies Handlers);

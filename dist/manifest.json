@@ -428,6 +428,29 @@
       }
     },
     {
+      "description": "Records which positions the background search has deepened, so the next search skips them until someone looks at them again. Runs every minute on its own.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {},
+        "type": "object"
+      },
+      "name": "markDeepened",
+      "namespace": "chess",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "marked": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "marked"
+        ],
+        "type": "object"
+      },
+      "schedule": "30 * * * * *"
+    },
+    {
       "description": "What masters played from each position — every move with its game count and results — and the top master games through it. One request per position feeds both: the moves (MASTERS_PLAYED) and the games (MASTER_GAME). Needs the Lichess token.",
       "inputSchema": {
         "properties": {

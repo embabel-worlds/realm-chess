@@ -175,4 +175,18 @@ export const producerHandlers = {
       required: ["deepened", "failed", "rounds"],
     },
   },
+  // Not a producer either: half a minute after each deepen tick, it records which positions are done.
+  markDeepened: {
+    namespace: "chess",
+    description:
+      "Records which positions the background search has deepened, so the next search skips them until someone looks at them again. Runs every minute on its own.",
+    schedule: "30 * * * * *",
+    input: { type: "object", additionalProperties: false, properties: {} },
+    output: {
+      type: "object",
+      additionalProperties: false,
+      properties: { marked: { type: "integer" } },
+      required: ["marked"],
+    },
+  },
 } satisfies Record<string, HandlerSpec>;

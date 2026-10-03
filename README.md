@@ -107,17 +107,27 @@ A refused fetch keeps what its pages searched, so asking again carries on from t
 ## Deepening in the background
 
 The first time a page searches a position at the graph's configuration, the position is queued
-(`deepen_queue`, `INSERT OR IGNORE`, so once). `chess.deepen` runs every minute on the host's
-schedule, in its background class. Each tick takes the most recently queued positions with no
-fresh deeper row and searches them two at a time at 6,000,000 nodes and depth 22 (the graph's own
-search is 3,500,000 and 18), through the engine's batch call where the host offers it, which runs
-them side by side on spare cores, or one call at a time where it does not. A tick starts another
-round only while one as long as the last still fits in 15 seconds, half the dispatch deadline.
-Every later read under the graph's configuration (BestMoves, `HAS_CANDIDATE`, the app, plans)
-prefers a fresh deeper row, so a position people look at gets deeper over time; its rows say the
-depth and nodes they reached. The tick reads the queue and never writes it, and it is the only
-writer of `deep_analyses`, so a page publishing while it runs cannot get its writes refused; a
-tick delivered twice keeps the same rows. The constants are in `wasm/lib/config.ts`.
+in its slot of `deepen_queue` (4096 slots, by hash, so the queue never grows past them; a keyed
+upsert, so the host can replay it). `chess.deepen` runs every minute on the host's schedule, in
+its background class. Each tick takes the queued positions that were queued after they were last
+deepened, oldest first, and searches them at 6,000,000 nodes and depth 22 (the graph's own search
+is 3,500,000 and 18): two side by side through the engine's batch call where the host offers it,
+one at a time where it does not. Before every round, the first included, it checks that the round
+still fits in 12 seconds, judging the first by the calibration (5 s a search) and the rest by the
+round before. Half a minute later `chess.markDeepened` records what was deepened, so the next
+tick skips it until a page searches it again, which happens only once its deeper row is a week
+old.
+
+The graph's and the app's reads (BestMoves, `HAS_CANDIDATE`, Chesscalator) prefer a fresh
+deeper row; its rows say the depth and nodes they reached. `analysePosition`, which takes a depth
+cap, and the plans, which are kept by the analysis they were made from, read the page's own rows,
+so a tick never changes their answer or makes a kept plan miss.
+
+No dispatch reads a table it writes: pages write the queue and never read it; the deepen tick
+reads the queue and the marks and writes only `deep_analyses`; the marking tick reads
+`deep_analyses` and writes only the marks. Every write is a keyed upsert, so the host can replay
+any of them when another dispatch published first, and a tick delivered twice keeps the same
+rows. The constants are in `wasm/lib/config.ts`.
 
 ## What is kept, and for how long
 
@@ -133,7 +143,8 @@ Everything the realm works out or fetches is kept in its SQLite, under the Node 
 | Game lines the app was sent (`game_lines`) | the line as sent: the position it reaches, its SAN, its deepest book name | while the book is unchanged |
 | A position's imbalances, for the app (`position_facts`) | the position | while the book is unchanged |
 | Deeper engine lines (`deep_analyses`) | position and the deeper configuration | 7 days |
-| Positions to deepen (`deepen_queue`) | the position | until a deeper row is kept |
+| Positions to deepen (`deepen_queue`) | the position's slot (4096) | until another position takes the slot |
+| When each position was deepened (`deep_marks`) | the position | until it is deepened again |
 
 Chesscalator sends the whole line on every step. The realm keeps each line it is sent, so a step
 plays only the one new move from the line before it, and asking the same position again does no
@@ -150,7 +161,7 @@ The opening book is rows in SQLite too, loaded by migrations. `db/schema.sql` is
 is never edited once installed: a change to the tables is a new `db/NNNN-*.sql` file, added to the
 end of `migrations` in `realm.ts`. The appliance applies the ones it has not applied yet, in order,
 and records which. The book is `0001` and `0002`, ChessStatus `0003`, the Lichess spacing clock `0004`,
-the app's kept lines and imbalances `0005`, background deepening `0006`. A migration that changes the book's skeletons also
+the app's kept lines and imbalances `0005`, background deepening `0006` and `0007`. A migration that changes the book's skeletons also
 empties `position_facts`, and one that changes the openings empties `game_lines`.
 
 ## When one read is not enough
