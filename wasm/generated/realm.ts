@@ -620,6 +620,32 @@ export interface WriteProposalResult {
   proposalId: string;
 }
 
+/** Which of the owner's models answers: the cheapest, the everyday one, or the best. */
+export type ModelRole = "cheap" | "workhorse" | "best";
+
+/** What a handler sends the owner's model with `ctx.call("ai_complete", ...)`. The host refuses any other field. */
+export interface AiCompleteRequest {
+  /** What to ask. Not blank. */
+  prompt: string;
+  /** Which model answers. The owner's default when left out. */
+  role?: ModelRole;
+  /**
+   * Up to eight skill names, each 1 to 64 characters: this realm's own, bare or as
+   * `<realm>-<skill>`, or one the owner's world has.
+   */
+  skills?: readonly string[];
+  /** The most tokens the reply may run to. A positive whole number. */
+  maxOutputTokens?: number;
+}
+
+/** What the model sends back. */
+export interface AiCompleteReply {
+  /** The model's text, cut to the host's limit when it ran longer. */
+  text: string;
+  /** True when the host cut `text`. */
+  truncated: boolean;
+}
+
 /** What the host passes a handler as its second argument. */
 export interface HandlerContext {
   /** Writes a line to the host log, attributed to this realm. */
@@ -645,6 +671,18 @@ export interface HandlerContext {
   writePropose<Proposal extends WriteProposal>(
     proposal: Proposal & OnlyDeclaredFields<WriteProposal, Proposal>,
   ): Promise<WriteProposalResult>;
+  /**
+   * Asks the owner's model, once the owner has granted this realm the model. It answers in
+   * place, so the reply is there without awaiting. A refusal is thrown as an Error whose
+   * `code` says why: MODEL_NOT_GRANTED, MODEL_SKILL_UNKNOWN, MODEL_CALL_BUDGET,
+   * MODEL_DAILY_BUDGET or MODEL_PROMPT_TOO_LARGE. A request the host cannot read is
+   * refused with no code. A field the request does not declare is a compile error even
+   * when the request was built as a value first, which is what the generic is for.
+   */
+  call<Request extends AiCompleteRequest>(
+    tool: "ai_complete",
+    request: Request & OnlyDeclaredFields<AiCompleteRequest, Request>,
+  ): AiCompleteReply;
   /** The dependencies this realm declared, each under the name it was declared with. They live in their own container so an author's chosen name can never collide with a context member the host adds later. */
   deps: {
     db: SqliteBridge;

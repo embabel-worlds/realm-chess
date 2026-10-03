@@ -1,16 +1,23 @@
 import { skills } from "./generated/realm.ts";
+import type {
+  AnalysePositionOutput, ExplainLinePlansOutput, ExplainPlansOutput, Handler, HandlerContext, Handlers, MastersAtPositionOutput, OpeningLookupOutput,
+  OpeningOfGameLineOutput, PlayerAtPositionOutput, PositionImbalancesOutput, RatedMovesOutput, RowsCandidatesInput, RowsImbalancesInput,
+  RowsLinePlansInput, RowsMasterGamesInput, RowsMasterMovesInput, RowsOpeningOfLineInput, RowsOpeningOfPositionInput, RowsPlayerGamesInput,
+  RowsPlayerMovesInput, RowsPositionPlansInput, RowsRatedMovesInput, RowsTheoryInput, StatusInput, TheoryOfGameLineOutput,
+} from "./generated/realm.ts";
 import { Chess } from "./lib/chess.js";
 import { fits, spent } from "./lib/clock.ts";
 import { ANALYSIS_TTL_MS, API_CALL_MS, LICHESS_SPACING_MS, MASTERS_TTL_MS, MAX_KEYS, MODEL_CALL_MS, MODEL_OUTPUT_TOKENS, PLANS_TTL_MS, PLAYER_TTL_MS, RATED_TTL_MS, SEARCH_MS, SEARCH_UNTIL, THEORY_TTL_MS, YIELD_AT } from "./lib/config.ts";
 import { BAND, COLOR, gameRecords, gameUrl, LEVEL, moveRecords, PLAYER, playerCells, playerFilter, pinned, ratedCells, ratedGrid, ratedRecords, ratedRequest, SPEED } from "./lib/explorer.ts";
 import { runView } from "./lib/cypher.ts";
 import { allWithValues } from "./lib/records.ts";
+import type { WithValues } from "./lib/records.ts";
 import { VIEWS } from "./lib/views.ts";
 import type { ExplorerGameRecord, ExplorerMoveRecord, RatedMoveRecord } from "./lib/explorer.ts";
 import { explorerAnswerFor, LichessRefused, lichessSession, recordLichess } from "./lib/lichess.ts";
 import type { ExplorerOperation, LichessGateway, LichessSession } from "./lib/lichess.ts";
 import { aiComplete, ModelRefused, ROLES } from "./lib/model.ts";
-import type { HostCall, ModelRole } from "./lib/model.ts";
+import type { ModelRole } from "./lib/model.ts";
 import { citable, levelOf, parseModelJson, planRecords, promptFor, repairPrompt } from "./lib/plans.ts";
 import type { Level, ParsedPlans, PlanArgs, PlanRecord } from "./lib/plans.ts";
 import { sha256Hex } from "./lib/sha256.ts";
@@ -35,12 +42,8 @@ import type { Db, KeptAnalysis } from "./lib/store.ts";
  * they compute. `status` says what the realm could not do.
  */
 
-interface Ctx {
-  log(line: string): void;
-  deps: { db: Db; engine: Engine };
-  gateway: LichessGateway & WikibooksGateway;
-  call: HostCall;
-}
+/** What the host passes every handler, as synth typed it from realm.ts. */
+type Ctx = HandlerContext;
 
 function legal(fen: string): Chess {
   try {
@@ -49,6 +52,16 @@ function legal(fen: string): Chess {
     throw new Error(`Not a legal position: ${fen} (${(e as Error).message})`);
   }
 }
+
+/*
+ * Every verb is typed with what synth generated from its declaration, so a result the manifest
+ * would refuse (a null where it says a number, a missing field) fails `npm run typecheck`. The
+ * rows* adapters declare only "an object" or "a list of objects" to the host, so they are typed
+ * by the records of the public handler they serve: one item of its output, plus their own fields.
+ */
+type Item<O> = O extends readonly (infer T)[] ? T : never;
+interface Page<R> { rows: R[]; next: string | null }
+type Paged<I, R> = Handler<I, Page<R>>;
 
 const clamp = (v: number | undefined, dflt: number, lo: number, hi: number) =>
   Math.min(Math.max(Math.trunc(v ?? dflt), lo), hi);
@@ -170,30 +183,30 @@ async function lineOpeningRecords(db: Db, lines: string[]): Promise<LineOpeningR
 }
 
 /** Jeremy Silman's imbalances for each position: material, minor pieces, pawn structure, space, files, key squares, development and king safety. */
-export const positionImbalances = async (input: { fens?: string[] }, ctx: Ctx) =>
+export const positionImbalances: Handlers["positionImbalances"] = async (input: { fens?: string[] }, ctx: Ctx) =>
   allWithValues(await imbalanceRecords(ctx.deps.db, input.fens ?? []));
 
 /** The named opening each position is, from the Lichess opening book. A position the book does not name returns nothing. */
-export const openingLookup = async (input: { fens?: string[] }, ctx: Ctx) => allWithValues(await openingRecords(ctx.deps.db, input.fens ?? []));
+export const openingLookup: Handlers["openingLookup"] = async (input: { fens?: string[] }, ctx: Ctx) => allWithValues(await openingRecords(ctx.deps.db, input.fens ?? []));
 
 /**
  * The deepest named opening along each game line (SAN from the start): the name a game keeps
  * after it leaves the book. A line the book never names returns nothing.
  */
-export const openingOfGameLine = async (input: { lines?: string[] }, ctx: Ctx) =>
+export const openingOfGameLine: Handlers["openingOfGameLine"] = async (input: { lines?: string[] }, ctx: Ctx) =>
   allWithValues(await lineOpeningRecords(ctx.deps.db, input.lines ?? []));
 
 /*
  * A producer with no page answers its rows as a plain list; only a paged one answers
  * `{ rows, next }`. The host refuses any other shape, so these three answer lists.
  */
-export const rowsImbalances = async (input: { fens?: unknown }, ctx: Ctx) =>
+export const rowsImbalances: Handler<RowsImbalancesInput, Item<PositionImbalancesOutput>[]> = async (input: { fens?: unknown }, ctx: Ctx) =>
   allWithValues(await imbalanceRecords(ctx.deps.db, keysOf(input.fens)));
 
-export const rowsOpeningOfPosition = async (input: { fens?: unknown }, ctx: Ctx) =>
+export const rowsOpeningOfPosition: Handler<RowsOpeningOfPositionInput, Item<OpeningLookupOutput>[]> = async (input: { fens?: unknown }, ctx: Ctx) =>
   allWithValues(await openingRecords(ctx.deps.db, keysOf(input.fens)));
 
-export const rowsOpeningOfLine = async (input: { lines?: unknown }, ctx: Ctx) =>
+export const rowsOpeningOfLine: Handler<RowsOpeningOfLineInput, Item<OpeningOfGameLineOutput>[]> = async (input: { lines?: unknown }, ctx: Ctx) =>
   allWithValues(await lineOpeningRecords(ctx.deps.db, keysOf(input.lines)));
 
 /* ── The engine's lines ── */
@@ -233,7 +246,7 @@ async function linesFor(ctx: Ctx, fen: string, c: SearchConfig, kept: KeptAnalys
  * to recommend in a checkmate or a stalemate, and the FEN says which. `depth` caps the search
  * and `multiPv` is the number of lines; the node budget is the realm's own.
  */
-export const analysePosition = async (input: { fens?: string[]; multiPv?: number; depth?: number }, ctx: Ctx) => {
+export const analysePosition: Handlers["analysePosition"] = async (input: { fens?: string[]; multiPv?: number; depth?: number }, ctx: Ctx) => {
   const c: SearchConfig = { ...FULL, multiPv: clamp(input.multiPv, 5, 1, 8), depthCap: clamp(input.depth, 18, 6, 22) };
   const fens = (input.fens ?? []).map((f) => f.trim());
   fens.forEach(legal);
@@ -251,7 +264,7 @@ export const analysePosition = async (input: { fens?: string[]; multiPv?: number
  * rest are left to the next page, whose cursor is the index of the first key it owes. Every
  * page serves at least one key, so a single position always answers in one read.
  */
-export const rowsCandidates = async (input: { fens?: unknown; cursor?: unknown }, ctx: Ctx) => {
+export const rowsCandidates: Paged<RowsCandidatesInput, Item<AnalysePositionOutput> & { analysisId: string; nodes: number }> = async (input: { fens?: unknown; cursor?: unknown }, ctx: Ctx) => {
   const keys = keysOf(input.fens).map((f) => f.trim());
   let start = 0;
   if (input.cursor !== undefined && input.cursor !== null) {
@@ -278,7 +291,7 @@ export const rowsCandidates = async (input: { fens?: unknown; cursor?: unknown }
 /* ── What the realm could not do ── */
 
 /** One ChessStatus row for each username the host asks about, as a plain list: the producer has no page. The installation has one owner. */
-export const status = async (input: { username?: unknown }, ctx: Ctx) => {
+export const status: Handler<StatusInput, ({ username: string } & Awaited<ReturnType<typeof readStatus>>)[]> = async (input: { username?: unknown }, ctx: Ctx) => {
   const users = keysOf(input.username);
   const s = await readStatus(ctx.deps.db);
   return allWithValues(users.map((username) => ({ username, ...s })));
@@ -302,7 +315,7 @@ function cursorOf(cursor: unknown, count: number): number {
  * page is always served, so the host's resent cursor always moves on. "stop" ends the whole
  * fetch, for a refusal that would only repeat.
  */
-async function paged<U, R extends object>(units: U[], cursor: unknown, serve: (u: U, first: boolean) => Promise<Served<R>>): Promise<{ rows: R[]; next: string | null }> {
+async function paged<U, R extends object>(units: U[], cursor: unknown, serve: (u: U, first: boolean) => Promise<Served<R>>): Promise<Page<WithValues<R>>> {
   const start = cursorOf(cursor, Math.max(units.length, 1));
   const rows: R[] = [];
   for (let i = start; i < units.length; i++) {
@@ -354,7 +367,7 @@ async function lichessRows<U, R extends object>(ctx: Ctx, units: U[], cursor: un
  * What masters played from each position, and the top master games through it. One request per
  * position feeds both: the moves (MASTERS_PLAYED) and the games (MASTER_GAME). Needs the Lichess token.
  */
-export const mastersAtPosition = async (input: { fens?: string[] }, ctx: Ctx) => {
+export const mastersAtPosition: Handlers["mastersAtPosition"] = async (input: { fens?: string[] }, ctx: Ctx) => {
   const s = lichessSession(ctx.deps.db, ctx.gateway);
   const out = { moves: [] as ExplorerMoveRecord[], games: [] as ExplorerGameRecord[] };
   for (const fen of fensOf(input.fens ?? [])) {
@@ -366,11 +379,11 @@ export const mastersAtPosition = async (input: { fens?: string[] }, ctx: Ctx) =>
   return { moves: allWithValues(out.moves), games: allWithValues(out.games) };
 };
 
-export const rowsMasterMoves = async (input: { fens?: unknown; cursor?: unknown }, ctx: Ctx) =>
+export const rowsMasterMoves: Paged<RowsMasterMovesInput, Item<MastersAtPositionOutput["moves"]>> = async (input: { fens?: unknown; cursor?: unknown }, ctx: Ctx) =>
   lichessRows(ctx, fensOf(keysOf(input.fens)), input.cursor, (s, fen, first) =>
     explorerRows(s, "mastersExplorer", mastersParams(fen), MASTERS_TTL_MS, first, (a) => moveRecords(fen, a)));
 
-export const rowsMasterGames = async (input: { fens?: unknown; cursor?: unknown }, ctx: Ctx) =>
+export const rowsMasterGames: Paged<RowsMasterGamesInput, Item<MastersAtPositionOutput["games"]>> = async (input: { fens?: unknown; cursor?: unknown }, ctx: Ctx) =>
   lichessRows(ctx, fensOf(keysOf(input.fens)), input.cursor, (s, fen, first) =>
     explorerRows(s, "mastersExplorer", mastersParams(fen), MASTERS_TTL_MS, first, (a) => gameRecords(fen, a.topGames, gameUrl)));
 
@@ -379,10 +392,10 @@ export const rowsMasterGames = async (input: { fens?: unknown; cursor?: unknown 
  * through it (PLAYER_PLAYED, PLAYER_GAME). The player and colour arrive as "player=X color=Y".
  * The player database streams its answer; the last complete record is the answer. Needs the Lichess token.
  */
-export const playerAtPosition = async (input: { fens?: string[]; filters?: string }, ctx: Ctx) => {
+export const playerAtPosition: Handlers["playerAtPosition"] = async (input: { fens?: string[]; filters?: string }, ctx: Ctx) => {
   const out = { moves: [] as ExplorerMoveRecord[], games: [] as ExplorerGameRecord[] };
   const who = playerFilter(input.filters);
-  if (!who) return out;
+  if (!who) return { moves: [], games: [] };
   const s = lichessSession(ctx.deps.db, ctx.gateway);
   for (const fen of fensOf(input.fens ?? [])) {
     const a = (await explorerAnswerFor(s, "playerExplorer", playerParams(fen, who), PLAYER_TTL_MS))!;
@@ -400,17 +413,17 @@ function playerUnits(input: { fens?: unknown; player?: unknown; color?: unknown 
   return fens.flatMap((fen) => cells.map((who) => ({ fen, who })));
 }
 
-export const rowsPlayerMoves = async (input: { fens?: unknown; player?: unknown; color?: unknown; cursor?: unknown }, ctx: Ctx) =>
+export const rowsPlayerMoves: Paged<RowsPlayerMovesInput, Item<PlayerAtPositionOutput["moves"]>> = async (input: { fens?: unknown; player?: unknown; color?: unknown; cursor?: unknown }, ctx: Ctx) =>
   lichessRows(ctx, playerUnits(input), input.cursor, (s, { fen, who }, first) =>
     explorerRows(s, "playerExplorer", playerParams(fen, who), PLAYER_TTL_MS, first, (a) => moveRecords(fen, a, who.player, who.color)));
 
-export const rowsPlayerGames = async (input: { fens?: unknown; player?: unknown; color?: unknown; cursor?: unknown }, ctx: Ctx) =>
+export const rowsPlayerGames: Paged<RowsPlayerGamesInput, Item<PlayerAtPositionOutput["games"]>> = async (input: { fens?: unknown; player?: unknown; color?: unknown; cursor?: unknown }, ctx: Ctx) =>
   lichessRows(ctx, playerUnits(input), input.cursor, (s, { fen, who }, first) =>
     explorerRows(s, "playerExplorer", playerParams(fen, who), PLAYER_TTL_MS, first,
       (a) => gameRecords(fen, a.recentGames, gameUrl, who.player, who.color)));
 
 /** How often each move is played from a position by rating band and time control on Lichess, and how it scores. */
-export const ratedMoves = async (input: { fens?: string[]; filters?: string }, ctx: Ctx) => {
+export const ratedMoves: Handlers["ratedMoves"] = async (input: { fens?: string[]; filters?: string }, ctx: Ctx) => {
   const s = lichessSession(ctx.deps.db, ctx.gateway);
   const out: RatedMoveRecord[] = [];
   for (const fen of fensOf(input.fens ?? [])) {
@@ -422,7 +435,7 @@ export const ratedMoves = async (input: { fens?: string[]; filters?: string }, c
   return allWithValues(out);
 };
 
-export const rowsRatedMoves = async (input: { fens?: unknown; band?: unknown; speed?: unknown; cursor?: unknown }, ctx: Ctx) => {
+export const rowsRatedMoves: Paged<RowsRatedMovesInput, Item<RatedMovesOutput>> = async (input: { fens?: unknown; band?: unknown; speed?: unknown; cursor?: unknown }, ctx: Ctx) => {
   const fens = fensOf(keysOf(input.fens));
   const cells = ratedCells(pinned(input.band, "band", BAND), pinned(input.speed, "speed", SPEED));
   const units = fens.flatMap((fen) => cells.map((cell) => ({ fen, cell })));
@@ -433,7 +446,7 @@ export const rowsRatedMoves = async (input: { fens?: unknown; band?: unknown; sp
 /* ── Theory from the wikibook ── */
 
 /** What opening theory says along each game line: the deepest page of the Chess Opening Theory wikibook the line reaches. */
-export const theoryOfGameLine = async (input: { lines?: string[] }, ctx: Ctx) => {
+export const theoryOfGameLine: Handlers["theoryOfGameLine"] = async (input: { lines?: string[] }, ctx: Ctx) => {
   const out: TheoryRecord[] = [];
   for (const raw of input.lines ?? []) {
     const moves = splitLine(raw);
@@ -448,7 +461,7 @@ export const theoryOfGameLine = async (input: { lines?: string[] }, ctx: Ctx) =>
  * The producer behind HAS_THEORY. A line the wikibook has no page for has no row, and that is
  * kept for the week. A refused request has no row and keeps nothing, so the next read asks again.
  */
-export const rowsTheory = async (input: { lines?: unknown; cursor?: unknown }, ctx: Ctx) =>
+export const rowsTheory: Paged<RowsTheoryInput, Item<TheoryOfGameLineOutput>> = async (input: { lines?: unknown; cursor?: unknown }, ctx: Ctx) =>
   paged(keysOf(input.lines), input.cursor, async (raw, first): Promise<Served<TheoryRecord>> => {
     const moves = splitLine(raw);
     positionAfter(moves);
@@ -530,7 +543,7 @@ async function plansFor(
   if (!first && !fits(2 * MODEL_CALL_MS)) return "later";
 
   const ask = (prompt: string) => {
-    const reply = aiComplete(ctx.call, { prompt, skills: ["chess-plans"], maxOutputTokens: MODEL_OUTPUT_TOKENS, ...(role ? { role } : {}) });
+    const reply = aiComplete(ctx, { prompt, skills: ["chess-plans"], maxOutputTokens: MODEL_OUTPUT_TOKENS, ...(role ? { role } : {}) });
     m.asked = true;
     return reply.text;
   };
@@ -593,7 +606,11 @@ async function lineTheory(ctx: Ctx, moves: string[]): Promise<TheoryRecord | nul
   }
 }
 
-const publicPlan = ({ analysisId: _id, ...p }: PlanRow) => p;
+const publicPlan = <R extends PlanRow>({ analysisId: _id, ...p }: R): Omit<R, "analysisId"> => p;
+
+/** Plans for a line carry the line, as the line views and explainLinePlans declare them. */
+const withLine = (rows: Served<PlanRow>, line: string): Served<PlanRow & { line: string }> =>
+  rows === "stop" || rows === "later" ? rows : rows.map((r) => ({ ...r, line }));
 
 /**
  * The plans for both sides in each position, decided by a model with the chess-plans skill from
@@ -601,7 +618,7 @@ const publicPlan = ({ analysisId: _id, ...p }: PlanRow) => p;
  * are computed; the judgement is the model's. Without the model (no grant, a budget spent) there
  * are no plans, and ChessStatus says why.
  */
-export const explainPlans = async (input: { fens?: string[] } & PlanArgs, ctx: Ctx) => {
+export const explainPlans: Handler<{ fens?: string[] } & PlanArgs, ExplainPlansOutput> = async (input: { fens?: string[] } & PlanArgs, ctx: Ctx) => {
   const m: ModelSession = { asked: false };
   const out: PlanRecord[] = [];
   for (const raw of input.fens ?? []) {
@@ -619,15 +636,15 @@ export const explainPlans = async (input: { fens?: string[] } & PlanArgs, ctx: C
  * The plans in the position a game line reaches, told the line's deepest opening name, which a
  * position looked up alone has lost once it is past the book, and what the wikibook says along it.
  */
-export const explainLinePlans = async (input: { lines?: string[] } & PlanArgs, ctx: Ctx) => {
+export const explainLinePlans: Handler<{ lines?: string[] } & PlanArgs, ExplainLinePlansOutput> = async (input: { lines?: string[] } & PlanArgs, ctx: Ctx) => {
   const m: ModelSession = { asked: false };
-  const out: PlanRecord[] = [];
+  const out: (PlanRecord & { line: string })[] = [];
   for (const raw of input.lines ?? []) {
     const moves = splitLine(raw);
     const line = moves.join(" ");
     const fen = positionAfter(moves);
     const theory = await lineTheory(ctx, moves);
-    const r = await plansFor(ctx, m, { kind: "line", fen, line }, await lineOpening(ctx.deps.db, moves), input, theory, true);
+    const r = withLine(await plansFor(ctx, m, { kind: "line", fen, line }, await lineOpening(ctx.deps.db, moves), input, theory, true), line);
     if (r === "stop") break;
     if (r !== "later") out.push(...r.map(publicPlan));
   }
@@ -645,10 +662,10 @@ const levelsOf = (level: unknown) => pinned(level, "level", LEVEL) ?? ["intermed
  * One unit a page: a plan costs a search and up to two model calls, which is a dispatch. The
  * cursor is the index of the next unit; a refusal from the model ends the fetch with no plans.
  */
-async function onePlanPage<U>(ctx: Ctx, units: U[], cursor: unknown, serve: (m: ModelSession, u: U) => Promise<Served<PlanRow>>) {
+async function onePlanPage<U, R extends PlanRow>(ctx: Ctx, units: U[], cursor: unknown, serve: (m: ModelSession, u: U) => Promise<Served<R>>) {
   const m: ModelSession = { asked: false };
   const start = cursorOf(cursor, Math.max(units.length, 1));
-  let page: { rows: PlanRow[]; next: string | null } = { rows: [], next: null };
+  let page: Page<WithValues<R>> = { rows: [], next: null };
   if (start < units.length) {
     const r = await serve(m, units[start]);
     page = r === "stop" || r === "later" ? { rows: [], next: null } : { rows: allWithValues(r), next: start + 1 < units.length ? String(start + 1) : null };
@@ -657,14 +674,14 @@ async function onePlanPage<U>(ctx: Ctx, units: U[], cursor: unknown, serve: (m: 
   return page;
 }
 
-export const rowsPositionPlans = async (input: { fens?: unknown; level?: unknown; cursor?: unknown }, ctx: Ctx) => {
+export const rowsPositionPlans: Paged<RowsPositionPlansInput, Item<ExplainPlansOutput> & { analysisId: string }> = async (input: { fens?: unknown; level?: unknown; cursor?: unknown }, ctx: Ctx) => {
   const levels = levelsOf(input.level);
   const units = fensOf(keysOf(input.fens)).flatMap((fen) => levels.map((level) => ({ fen, level })));
   return onePlanPage(ctx, units, input.cursor, async (m, { fen, level }) =>
     plansFor(ctx, m, { kind: "position", fen }, await positionOpening(ctx.deps.db, fen), { ...PRODUCER_PLAN_ARGS, level }, null, true));
 };
 
-export const rowsLinePlans = async (input: { lines?: unknown; level?: unknown; cursor?: unknown }, ctx: Ctx) => {
+export const rowsLinePlans: Paged<RowsLinePlansInput, Item<ExplainLinePlansOutput> & { analysisId: string }> = async (input: { lines?: unknown; level?: unknown; cursor?: unknown }, ctx: Ctx) => {
   const levels = levelsOf(input.level);
   const units = keysOf(input.lines).flatMap((raw) => {
     const moves = splitLine(raw);
@@ -674,7 +691,7 @@ export const rowsLinePlans = async (input: { lines?: unknown; level?: unknown; c
     const line = moves.join(" ");
     const fen = positionAfter(moves);
     const theory = await lineTheory(ctx, moves);
-    return plansFor(ctx, m, { kind: "line", fen, line }, await lineOpening(ctx.deps.db, moves), { ...PRODUCER_PLAN_ARGS, level }, theory, true);
+    return withLine(await plansFor(ctx, m, { kind: "line", fen, line }, await lineOpening(ctx.deps.db, moves), { ...PRODUCER_PLAN_ARGS, level }, theory, true), line);
   });
 };
 
@@ -771,7 +788,7 @@ async function appImbalances(db: Db, fen: string): Promise<ImbalanceRecord[]> {
  * lines within `withinCp` of the best. The engine's lines are searched at full, as the graph's are.
  * What the page asked for before is kept, so asking again costs a few reads.
  */
-export const appPosition = async (input: { fen?: unknown; moves?: unknown; withinCp?: unknown }, ctx: Ctx): Promise<AppReply> => {
+export const appPosition: Handlers["appPosition"] = async (input: { fen?: unknown; moves?: unknown; withinCp?: unknown }, ctx: Ctx): Promise<AppReply> => {
   const db = ctx.deps.db;
   const { fen, moves, line } = await timed("line", () => appStep(db, input));
   const withinCp = clamp(typeof input.withinCp === "number" ? input.withinCp : undefined, 50, 0, 1000);
@@ -814,7 +831,7 @@ interface PracticeFilters {
  * cell is one request, spaced as the producers space them; cells that do not fit are left for
  * the next call, which finds the kept ones, and the view says `skipped`.
  */
-export const appPractice = async (input: { fen?: unknown; filters?: unknown }, ctx: Ctx): Promise<AppReply> => {
+export const appPractice: Handlers["appPractice"] = async (input: { fen?: unknown; filters?: unknown }, ctx: Ctx): Promise<AppReply> => {
   const { fen } = appTarget({ fen: input.fen });
   const f = (input.filters ?? {}) as PracticeFilters;
   if (typeof f !== "object" || Array.isArray(f)) throw new Error("The filters are an object");
@@ -882,7 +899,7 @@ export const appPractice = async (input: { fen?: unknown; filters?: unknown }, c
  * when the game was played from the start (PlansInLine), else for the position (PlansInPosition),
  * with the producers' arguments, so the app and the views share kept plans.
  */
-export const appPlans = async (input: { fen?: unknown; moves?: unknown; level?: unknown }, ctx: Ctx): Promise<AppReply> => {
+export const appPlans: Handlers["appPlans"] = async (input: { fen?: unknown; moves?: unknown; level?: unknown }, ctx: Ctx): Promise<AppReply> => {
   const { fen, moves } = appTarget(input);
   const level = levelsOf(input.level === undefined || input.level === null ? undefined : [input.level])[0];
   const m: ModelSession = { asked: false };
@@ -901,3 +918,11 @@ export const appPlans = async (input: { fen?: unknown; moves?: unknown; level?: 
   await recordModel(ctx.deps.db, m);
   return { fen, views, status: await readStatus(ctx.deps.db) };
 };
+
+/* Every verb the manifest declares, each checked against its generated type. */
+void ({
+  positionImbalances, openingLookup, openingOfGameLine, analysePosition, mastersAtPosition, playerAtPosition, ratedMoves, theoryOfGameLine,
+  explainPlans, explainLinePlans, rowsImbalances, rowsOpeningOfPosition, rowsOpeningOfLine, rowsCandidates, status, rowsTheory,
+  rowsPositionPlans, rowsLinePlans, rowsMasterMoves, rowsMasterGames, rowsPlayerMoves, rowsPlayerGames, rowsRatedMoves,
+  appPosition, appPractice, appPlans,
+} satisfies Handlers);

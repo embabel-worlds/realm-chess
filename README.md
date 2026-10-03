@@ -197,8 +197,8 @@ npm run check        # typecheck, vendor chess.js, write the book, build the app
 
 `npm run check` needs Bun on the path (synth runs under it) and `npx playwright install
 chromium-headless-shell` once for the page tests. `@embabel/realm-types` is a `file:` dependency on
-an SDK checkout until the version with captured views, skills, apps, maturity and string
-dependencies is published; switch `package.json` to that version then.
+an SDK checkout until the version with captured views, skills, apps, maturity, string
+dependencies, the typed model call and null-refusing output types is published; switch `package.json` to that version then.
 
 To install, put the realm in the world's `config/realms/chess` folder (or install it from the
 Store) and admit it. Copy without macOS `._` files: admission refuses a capture that has them. The

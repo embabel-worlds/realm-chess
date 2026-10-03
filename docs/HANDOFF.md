@@ -56,7 +56,9 @@ reproducible. Never edit a generated file; edit `realm.ts` and run `npm run synt
 `@embabel/realm-types` is a `file:` dependency on an SDK checkout. The realm uses SDK features that
 are not released yet: captured `views`, `skills`, `apps` and `maturity`, `capabilities`, string
 argument and return types on dependency methods, `ndjson` API operations, migrations on a SQLite
-dependency, and synth refusing an output folder it did not write. Switch `package.json` to the
+dependency, synth refusing an output folder it did not write, the typed `ai_complete` call on the
+handler context, and handler output types that refuse null (every verb in `wasm/handlers.ts` is
+typed with them, so `npm run typecheck` catches a result the host would refuse). Switch `package.json` to the
 published version when it ships; nothing else changes.
 
 ## Host follow-ups
