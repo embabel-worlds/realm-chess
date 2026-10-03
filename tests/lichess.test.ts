@@ -5,6 +5,7 @@ import { LICHESS_SPACING_MS, MASTERS_TTL_MS, PLAYER_TTL_MS, RATED_TTL_MS, THEORY
 import { explorerAnswer } from "../wasm/lib/explorer";
 import { LICENCE, pageUrl, theoryText, theoryTitles } from "../wasm/lib/theory";
 import { rodBundle } from "./baseline/rod-bundle";
+import { allWithValues } from "../wasm/lib/records";
 import {
   AFTER_E4, FIXTURE_FENS, mastersAnswer, ndjsonReply, ndjsonText, playerRecords, ratedAnswer, RUY, RUY_THEORY, START, wikibooksAnswers,
 } from "./fixtures/lichess";
@@ -73,6 +74,15 @@ const ticking = () => {
   return () => (t += TICK);
 };
 
+/*
+ * Rod's moves and games with their valueless fields left out: the host checks results against the
+ * declared types, so a missing rating or year is absent, never null. That is the one difference.
+ */
+const rodWithValues = (r: unknown) => {
+  const x = r as { moves: object[]; games: object[] };
+  return { moves: allWithValues(x.moves), games: allWithValues(x.games) };
+};
+
 const lichessCalls = (host: ReturnType<typeof realmHost>) => host.calls.filter((c) => c.tool.startsWith("lichess_"));
 
 describe.skipIf(!hasTooling)("Lichess and theory, in the guest", () => {
@@ -116,7 +126,7 @@ describe.skipIf(!hasTooling)("Lichess and theory, in the guest", () => {
     afterEach(() => vi.restoreAllMocks());
 
     it("MastersAtPosition: moves and games for three positions, from one kept request per position", async () => {
-      const rod = (await rodBundle().mastersAtPosition(rodCtx, { fens: FIXTURE_FENS })) as { moves: unknown[]; games: unknown[] };
+      const rod = rodWithValues(await rodBundle().mastersAtPosition(rodCtx, { fens: FIXTURE_FENS }));
       const { fetch, host, run } = setup();
       const moves = await fetch("rowsMasterMoves", "fens", FIXTURE_FENS);
       const games = await fetch("rowsMasterGames", "fens", FIXTURE_FENS);
@@ -136,7 +146,7 @@ describe.skipIf(!hasTooling)("Lichess and theory, in the guest", () => {
 
     it("PlayerAtPosition: the player's moves and games for three positions, from the last complete NDJSON record", async () => {
       const filters = "player=DrNykterstein color=black";
-      const rod = (await rodBundle().playerAtPosition(rodCtx, { fens: FIXTURE_FENS, filters })) as { moves: unknown[]; games: unknown[] };
+      const rod = rodWithValues(await rodBundle().playerAtPosition(rodCtx, { fens: FIXTURE_FENS, filters }));
       const { fetch, run } = setup();
       const pin = { player: ["DrNykterstein"], color: ["black"] };
       expect((await fetch("rowsPlayerMoves", "fens", FIXTURE_FENS, pin)).rows).toEqual(rod.moves);

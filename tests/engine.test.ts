@@ -40,7 +40,8 @@ describe.skipIf(!hasTooling || !STOCKFISH)("with the real stockfish module", () 
     expect(rows).toHaveLength(5);
     expect(host.searches).toBe(1);
     for (const r of rows) {
-      expect(Object.keys(r).sort()).toEqual(rodRecordFields);
+      // Every declared field, apart from one with no value (no mate here), which is left out.
+      expect(Object.keys(r).sort()).toEqual(rodRecordFields.filter((f) => f !== "mate"));
       expect(r.fen).toBe(START);
       expect(r.depth).toBe(DEPTH_CAP);
     }

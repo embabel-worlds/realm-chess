@@ -4,6 +4,7 @@ import { fits, spent } from "./lib/clock.ts";
 import { ANALYSIS_TTL_MS, API_CALL_MS, LICHESS_SPACING_MS, MASTERS_TTL_MS, MAX_KEYS, MODEL_CALL_MS, MODEL_OUTPUT_TOKENS, PLANS_TTL_MS, PLAYER_TTL_MS, RATED_TTL_MS, SEARCH_MS, SEARCH_UNTIL, THEORY_TTL_MS, YIELD_AT } from "./lib/config.ts";
 import { BAND, COLOR, gameRecords, gameUrl, LEVEL, moveRecords, PLAYER, playerCells, playerFilter, pinned, ratedCells, ratedGrid, ratedRecords, ratedRequest, SPEED } from "./lib/explorer.ts";
 import { runView } from "./lib/cypher.ts";
+import { allWithValues } from "./lib/records.ts";
 import { VIEWS } from "./lib/views.ts";
 import type { ExplorerGameRecord, ExplorerMoveRecord, RatedMoveRecord } from "./lib/explorer.ts";
 import { explorerAnswerFor, LichessRefused, lichessSession, recordLichess } from "./lib/lichess.ts";
@@ -149,30 +150,30 @@ async function lineOpeningRecords(db: Db, lines: string[]): Promise<LineOpeningR
 
 /** Jeremy Silman's imbalances for each position: material, minor pieces, pawn structure, space, files, key squares, development and king safety. */
 export const positionImbalances = async (input: { fens?: string[] }, ctx: Ctx) =>
-  imbalanceRecords(ctx.deps.db, input.fens ?? []);
+  allWithValues(await imbalanceRecords(ctx.deps.db, input.fens ?? []));
 
 /** The named opening each position is, from the Lichess opening book. A position the book does not name returns nothing. */
-export const openingLookup = async (input: { fens?: string[] }, ctx: Ctx) => openingRecords(ctx.deps.db, input.fens ?? []);
+export const openingLookup = async (input: { fens?: string[] }, ctx: Ctx) => allWithValues(await openingRecords(ctx.deps.db, input.fens ?? []));
 
 /**
  * The deepest named opening along each game line (SAN from the start): the name a game keeps
  * after it leaves the book. A line the book never names returns nothing.
  */
 export const openingOfGameLine = async (input: { lines?: string[] }, ctx: Ctx) =>
-  lineOpeningRecords(ctx.deps.db, input.lines ?? []);
+  allWithValues(await lineOpeningRecords(ctx.deps.db, input.lines ?? []));
 
 export const rowsImbalances = async (input: { fens?: unknown }, ctx: Ctx) => ({
-  rows: await imbalanceRecords(ctx.deps.db, keysOf(input.fens)),
+  rows: allWithValues(await imbalanceRecords(ctx.deps.db, keysOf(input.fens))),
   next: null,
 });
 
 export const rowsOpeningOfPosition = async (input: { fens?: unknown }, ctx: Ctx) => ({
-  rows: await openingRecords(ctx.deps.db, keysOf(input.fens)),
+  rows: allWithValues(await openingRecords(ctx.deps.db, keysOf(input.fens))),
   next: null,
 });
 
 export const rowsOpeningOfLine = async (input: { lines?: unknown }, ctx: Ctx) => ({
-  rows: await lineOpeningRecords(ctx.deps.db, keysOf(input.lines)),
+  rows: allWithValues(await lineOpeningRecords(ctx.deps.db, keysOf(input.lines))),
   next: null,
 });
 
@@ -222,7 +223,7 @@ export const analysePosition = async (input: { fens?: string[]; multiPv?: number
   for (const fen of fens) {
     for (const { analysisId: _id, nodes: _nodes, ...record } of await linesFor(ctx, fen, c, kept.get(fen))) out.push(record);
   }
-  return out;
+  return allWithValues(out);
 };
 
 /**
@@ -249,10 +250,10 @@ export const rowsCandidates = async (input: { fens?: unknown; cursor?: unknown }
     const k = kept.get(fen);
     const fresh = k !== undefined && Date.now() - k.createdAt < ANALYSIS_TTL_MS;
     const first = i === start;
-    if (!first && (spent() >= YIELD_AT || (!fresh && spent() >= SEARCH_UNTIL))) return { rows, next: String(i) };
+    if (!first && (spent() >= YIELD_AT || (!fresh && spent() >= SEARCH_UNTIL))) return { rows: allWithValues(rows), next: String(i) };
     rows.push(...(await linesFor(ctx, fen, FULL, k)));
   }
-  return { rows, next: null };
+  return { rows: allWithValues(rows), next: null };
 };
 
 /* ── What the realm could not do ── */
@@ -261,7 +262,7 @@ export const rowsCandidates = async (input: { fens?: unknown; cursor?: unknown }
 export const status = async (input: { username?: unknown }, ctx: Ctx) => {
   const users = keysOf(input.username);
   const s = await readStatus(ctx.deps.db);
-  return { rows: users.map((username) => ({ username, ...s })), next: null };
+  return { rows: allWithValues(users.map((username) => ({ username, ...s }))), next: null };
 };
 
 /* ── Paging ── */
@@ -282,18 +283,18 @@ function cursorOf(cursor: unknown, count: number): number {
  * page is always served, so the host's resent cursor always moves on. "stop" ends the whole
  * fetch, for a refusal that would only repeat.
  */
-async function paged<U, R>(units: U[], cursor: unknown, serve: (u: U, first: boolean) => Promise<Served<R>>): Promise<{ rows: R[]; next: string | null }> {
+async function paged<U, R extends object>(units: U[], cursor: unknown, serve: (u: U, first: boolean) => Promise<Served<R>>): Promise<{ rows: R[]; next: string | null }> {
   const start = cursorOf(cursor, Math.max(units.length, 1));
   const rows: R[] = [];
   for (let i = start; i < units.length; i++) {
     const first = i === start;
-    if (!first && spent() >= YIELD_AT) return { rows, next: String(i) };
+    if (!first && spent() >= YIELD_AT) return { rows: allWithValues(rows), next: String(i) };
     const r = await serve(units[i], first);
-    if (r === "later") return { rows, next: String(i) };
-    if (r === "stop") return { rows, next: null };
+    if (r === "later") return { rows: allWithValues(rows), next: String(i) };
+    if (r === "stop") return { rows: allWithValues(rows), next: null };
     rows.push(...r);
   }
-  return { rows, next: null };
+  return { rows: allWithValues(rows), next: null };
 }
 
 /* ── The Lichess explorer ── */
@@ -307,7 +308,7 @@ const fensOf = (keys: string[]) => keys.map((f) => f.trim()).map((f) => (legal(f
  * One explorer request for a producer: its rows, "later" when it would not fit, or "stop" when
  * Lichess refused, since every request after it would be refused the same way.
  */
-async function explorerRows<R>(
+async function explorerRows<R extends object>(
   s: LichessSession, op: ExplorerOperation, params: Record<string, unknown>, ttlMs: number, first: boolean,
   rows: (a: NonNullable<Awaited<ReturnType<typeof explorerAnswerFor>>>) => R[],
 ): Promise<Served<R>> {
@@ -323,7 +324,7 @@ async function explorerRows<R>(
 const mastersParams = (fen: string) => ({ fen, moves: 12, topGames: 15 });
 const playerParams = (fen: string, who: { player: string; color: string }) => ({ player: who.player, color: who.color, fen, recentGames: 8 });
 
-async function lichessRows<U, R>(ctx: Ctx, units: U[], cursor: unknown, serve: (s: LichessSession, u: U, first: boolean) => Promise<Served<R>>) {
+async function lichessRows<U, R extends object>(ctx: Ctx, units: U[], cursor: unknown, serve: (s: LichessSession, u: U, first: boolean) => Promise<Served<R>>) {
   const s = lichessSession(ctx.deps.db, ctx.gateway);
   const page = await paged(units, cursor, (u, first) => serve(s, u, first));
   await recordLichess(s);
@@ -343,7 +344,7 @@ export const mastersAtPosition = async (input: { fens?: string[] }, ctx: Ctx) =>
     out.games.push(...gameRecords(fen, a.topGames, gameUrl));
   }
   await recordLichess(s);
-  return out;
+  return { moves: allWithValues(out.moves), games: allWithValues(out.games) };
 };
 
 export const rowsMasterMoves = async (input: { fens?: unknown; cursor?: unknown }, ctx: Ctx) =>
@@ -370,7 +371,7 @@ export const playerAtPosition = async (input: { fens?: string[]; filters?: strin
     out.games.push(...gameRecords(fen, a.recentGames, gameUrl, who.player, who.color));
   }
   await recordLichess(s);
-  return out;
+  return { moves: allWithValues(out.moves), games: allWithValues(out.games) };
 };
 
 /** The units of a player producer: each position, for each pinned player in each pinned colour. */
@@ -399,7 +400,7 @@ export const ratedMoves = async (input: { fens?: string[]; filters?: string }, c
     }
   }
   await recordLichess(s);
-  return out;
+  return allWithValues(out);
 };
 
 export const rowsRatedMoves = async (input: { fens?: unknown; band?: unknown; speed?: unknown; cursor?: unknown }, ctx: Ctx) => {
@@ -421,7 +422,7 @@ export const theoryOfGameLine = async (input: { lines?: string[] }, ctx: Ctx) =>
     const t = await theoryFor(ctx.deps.db, ctx.gateway, moves, THEORY_TTL_MS, () => true);
     if (t && t !== "later") out.push(t);
   }
-  return out;
+  return allWithValues(out);
 };
 
 /**
@@ -592,7 +593,7 @@ export const explainPlans = async (input: { fens?: string[] } & PlanArgs, ctx: C
     if (r !== "later") out.push(...r.map(publicPlan));
   }
   await recordModel(ctx.deps.db, m);
-  return out;
+  return allWithValues(out);
 };
 
 /**
@@ -612,7 +613,7 @@ export const explainLinePlans = async (input: { lines?: string[] } & PlanArgs, c
     if (r !== "later") out.push(...r.map(publicPlan));
   }
   await recordModel(ctx.deps.db, m);
-  return out;
+  return allWithValues(out);
 };
 
 /* The producers' fixed arguments, as the Node realm declared them: the level is the query's. */
@@ -631,7 +632,7 @@ async function onePlanPage<U>(ctx: Ctx, units: U[], cursor: unknown, serve: (m: 
   let page: { rows: PlanRow[]; next: string | null } = { rows: [], next: null };
   if (start < units.length) {
     const r = await serve(m, units[start]);
-    page = r === "stop" || r === "later" ? { rows: [], next: null } : { rows: r, next: start + 1 < units.length ? String(start + 1) : null };
+    page = r === "stop" || r === "later" ? { rows: [], next: null } : { rows: allWithValues(r), next: start + 1 < units.length ? String(start + 1) : null };
   }
   await recordModel(ctx.deps.db, m);
   return page;

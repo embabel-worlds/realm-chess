@@ -23,6 +23,7 @@
     "@embabel/realm-types": "file:../../../../embabel-ts/.claude/worktrees/captured-deps/packages/realm-types",
     "@playwright/test": "^1.63.0",
     "@types/node": "^24.0.0",
+    "ajv": "^8.20.0",
     "cm-chessboard": "^8.15.1",
     "esbuild": "^0.28.2",
     "typescript": "^5.4.0",
