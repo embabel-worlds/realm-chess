@@ -1210,7 +1210,9 @@ function fromHash() {
     const moves = (q.get("line") || "").split(" ").filter(Boolean);
     const c = new Chess(base);
     for (const m of moves) c.move(m);
-    const at = Math.max(0, Math.min(moves.length, Number(q.get("at") ?? moves.length)));
+    // An `at` that is not a whole number is ignored, and the game opens at its last move.
+    const asked = Number(q.get("at") ?? moves.length);
+    const at = Number.isInteger(asked) ? Math.max(0, Math.min(moves.length, asked)) : moves.length;
     return { baseFen: base, line: moves, cursor: at };
   } catch {
     return null;

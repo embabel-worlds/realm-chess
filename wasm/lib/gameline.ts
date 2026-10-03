@@ -12,6 +12,12 @@ import type { Db } from "./store.ts";
  * whose line is kept does no board work for it at all; a call one move further plays that one
  * move from the kept line before it; any other line is played from the start once and kept.
  *
+ * A line is kept under its moves as the board writes them (its own SAN, single-spaced), never
+ * under the text as sent: chess.js reads some loose spellings of a move, and each spelling would
+ * otherwise add a row of its own. A line sent in the board's SAN, which is what the app sends,
+ * is found by its text; any other spelling is played from the start and kept under the board's
+ * SAN, so it adds no row.
+ *
  * The kept row is read and then written in the same dispatch. When another dispatch publishes
  * first, the host drops this one's writes: the answer stands, and the next call plays the line
  * again. Every write is a keyed upsert on the line.
@@ -70,7 +76,7 @@ export async function gameLine(db: Db, moves: string[]): Promise<GameLine> {
   });
   const line: GameLine = { fen: board.fen(), sans, opening };
   await db.exec(
-    `INSERT OR REPLACE INTO game_lines (line_key, fen, sans_json, opening_json, created_at) VALUES (${sqlText(key)}, ` +
+    `INSERT OR REPLACE INTO game_lines (line_key, fen, sans_json, opening_json, created_at) VALUES (${sqlText(sans.join(" "))}, ` +
       `${sqlText(line.fen)}, ${sqlText(JSON.stringify(sans))}, ${opening ? sqlText(JSON.stringify(opening)) : "NULL"}, ` +
       `${sqlText(new Date().toISOString())})`,
   );

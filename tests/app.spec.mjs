@@ -661,3 +661,10 @@ test("in the sandboxed frame, the owner's hash opens a game, and moves keep the 
   expect(state?.line?.length).toBeGreaterThan(1);
   expect(errors).toEqual([]);
 });
+
+test("an at in the hash that is not a whole number opens the line at its last move", async ({ page }) => {
+  const errors = await open(page, {}, {}, `#${new URLSearchParams({ line: "e4 e5", at: "abc" })}`);
+  await expect(page.locator("#fenInput")).toHaveValue("rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2");
+  await expect(page.locator("#moves")).not.toContainText("NaN");
+  expect(errors).toEqual([]);
+});

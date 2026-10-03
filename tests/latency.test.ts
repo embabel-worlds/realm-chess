@@ -159,6 +159,17 @@ describe.skipIf(!hasTooling)("appPosition over a whole game, in the guest", () =
     }
   }, 60_000);
 
+  it("a line is kept under the board's SAN: a loose spelling of the same moves adds no row", () => {
+    const s = setup("fake");
+    const fen = plies()[2].fen;
+    s.ask(3, fen, "d4 d5");
+    for (const loose of ["d2d4 d7d5", "d2-d4 d5", "d4 d7d5"]) {
+      const r = s.ask(3, fen, loose);
+      expect(Object.values(r.reply.views).filter((v) => v.error)).toEqual([]);
+    }
+    expect(s.db.exec("SELECT line_key FROM game_lines").map((r) => r.line_key)).toEqual(["d4 d5"]);
+  }, 60_000);
+
   it("the theory titles from the board's own SAN are the titles a replay gives, at every ply", () => {
     const sans = GAME.split(" ");
     for (let n = 1; n <= sans.length; n++) expect(titlesOfSans(sans.slice(0, n))).toEqual(theoryTitles(sans.slice(0, n)));
