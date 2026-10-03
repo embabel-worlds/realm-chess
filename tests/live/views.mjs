@@ -54,8 +54,13 @@ calls.push(
   { name: "PlayerGamesAtPosition", args: { fen: START, player: "DrNykterstein", color: "white" } },
 );
 
-const status = (await invoke("ChessStatus", {})).rows[0] ?? {};
-console.log(`ChessStatus: ${JSON.stringify(status)}`);
+/*
+ * ChessStatus says what the realm last recorded. A view's own fetch is what records a refusal, so
+ * an empty view is judged by the status read just after it; a status read before any view ran
+ * says nothing about the views that follow, and on a fresh installation it is all unknown.
+ */
+const readStatus = async () => (await invoke("ChessStatus", {})).rows[0] ?? {};
+console.log(`ChessStatus before the views: ${JSON.stringify(await readStatus())}`);
 const columnsOf = (name) => {
   const r = Object.values(recorded).find((e) => e.operationId === name && e.data?.length);
   return r ? Object.keys(r.data[0]).sort().join(",") : undefined;
@@ -69,6 +74,7 @@ for (const c of calls) {
   else if (DETERMINISTIC.has(c.name)) {
     verdict = JSON.stringify(rows) === JSON.stringify(c.recorded.data) ? `ok, as recorded (${rows.length})` : "DIFFERS from the recorded rows";
   } else if (rows.length === 0) {
+    const status = await readStatus();
     const why = LICHESS.has(c.name) ? status.lichess === "refused" : c.name.startsWith("Plans") ? status.model === "not_granted" : c.name === "TheoryOfLine";
     verdict = why ? `empty, as ChessStatus explains (lichess=${status.lichess}, model=${status.model}, lastRefusal=${status.lastRefusal || "none"})` : "EMPTY with nothing to explain it";
   } else {
