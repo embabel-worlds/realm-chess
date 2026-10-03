@@ -56,6 +56,7 @@ const js = await build({
   format: "iife",
   target: "es2022",
   legalComments: "inline",
+  preserveSymlinks: true,
   write: false,
   logLevel: "warning",
 });

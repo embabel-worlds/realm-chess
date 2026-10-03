@@ -45,7 +45,8 @@ out is kept in its own SQLite.
 | Piece | What it is |
 |---|---|
 | `realm.ts`, `realm/` | The definition: metadata, handlers, types, producers, views, the Lichess API, the two dependencies. |
-| `wasm/handlers.ts` | The verbs. The ten public ones keep the Node realm's names and schemas; `rows*` serve the graph's producers. |
+| `wasm/handlers.ts` | The verbs. The ten public ones keep the Node realm's names and schemas; `rows*` serve the graph's producers; `app*` serve Chesscalator. |
+| `wasm/lib/views.ts`, `wasm/lib/cypher.ts` | The thirteen views and ChessStatus, and a reader for the Cypher they use, so the app handlers return exactly what a view would. |
 | `wasm/lib/imbalances.ts` | Silman's imbalances from a FEN, as plain sentences; and what a line changes about them. |
 | `wasm/lib/lines.ts` | An engine line read for what it does, never for what it is for. |
 | `wasm/lib/openings.ts` | Opening names by position, along a game line, and by pawn skeleton, over book rows. |
@@ -56,10 +57,11 @@ out is kept in its own SQLite.
 | `wasm/lib/chess.js` | chess.js, vendored by `scripts/vendor-chess.mjs`: the guest can import only from `wasm/`. |
 | `db/schema.sql` | The tables. Frozen once installed: changes go in a new `db/NNNN-*.sql` migration. |
 | `db/0001-openings.sql`, `db/0002-skeletons.sql` | The Lichess opening book (CC0) and its pawn skeletons, written by `scripts/book.mjs`. |
-| `realm.yml`, `credentials.yml`, `apis/apis.yml`, `producers/`, `types/`, `views/`, `dependencies/`, `dist/manifest.json` | Written by synth from `realm.ts`. Don't edit by hand. |
+| `realm.yml`, `credentials.yml`, `apis/apis.yml`, `producers/`, `types/`, `views/`, `dependencies/`, `dist/manifest.json`, `apps/chesscalator.html.app.json` | Written by synth from `realm.ts`. Don't edit by hand. |
 | `skills/chess-plans/` | The plan knowledge: Silman's method, what each imbalance calls for, a table of pawn structures and their plans, how to use the engine. |
-| `apps/chesscalator.html` | The board. |
+| `apps/chesscalator.html`, `apps/chesscalator.html.assets/` | The board, as a captured app. `chesscalator.css` is the page's own styles; `board.css` and `board.js` (cm-chessboard, chess.js and the sprites) are written by `scripts/app.mjs`. |
 | `tests/battery/positions.yml` | Fifteen common positions and the plans theory gives each side. |
+| `docs/PARITY.md`, `docs/HANDOFF.md` | What the captured realm does beside the Node realm, and notes for review. |
 
 ## The engine
 
@@ -102,6 +104,62 @@ The host bounds a fetch, and refuses past a bound with its own code:
 A refused fetch keeps what its pages searched, so asking again carries on from there.
 `MEASURE=1 npx vitest run tests/measure.test.ts` measures the row sizes again.
 
+## What is kept, and for how long
+
+Everything the realm works out or fetches is kept in its SQLite, under the Node realm's times:
+
+| Kept | Key | For |
+|---|---|---|
+| Engine lines (`analyses`) | position and configuration (module hash, budget, depth cap, lines) | 7 days |
+| Plans (`plans`) | kind, position or line, the `analysisId` they were made from, and a hash of every other input (level, `withinCp`, role, the facts, the opening, the theory text, the skill's digest) | 7 days |
+| Theory (`theory`) | the line; a page the wikibook does not have is kept too | 7 days |
+| Masters, ratings (`explorer`) | operation, position and every filter | 30 days |
+| A player's games (`explorer`) | the same, with the player and colour | 1 day |
+
+An empty Lichess answer and a refused request are never kept. Lines searched again that come out
+the same keep their `analysisId`, so plans made from them still describe them; a changed line, a
+changed skill or changed theory text makes new plans.
+
+The opening book is rows in SQLite too, loaded by migrations. `db/schema.sql` is the bootstrap and
+is never edited once installed: a change to the tables is a new `db/NNNN-*.sql` file, added to the
+end of `migrations` in `realm.ts`. The appliance applies the ones it has not applied yet, in order,
+and records which. The book is `0001` and `0002`, ChessStatus `0003`, the Lichess spacing clock `0004`.
+
+## When one read is not enough
+
+One position answers in one read. The exceptions, each measured in the plumbing spike and each
+answered with a labelled partial answer, a cursor or the host's refusal, never a silent gap:
+
+- Plans while the wikibook is slow: theory is skipped for time and the plans are made without it.
+- Plans when the model takes more than about six seconds a call and needs the repair retry.
+- A cold request that waits behind another dispatch of this realm, until the appliance locks the
+  realm's SQLite only to publish.
+- A query over many positions the realm has not seen: about six a page, at full depth, up to the
+  host's bounds above, then the host's code.
+- A Lichess grid that does not fit in one call: the app's popularity view says so, and asking again
+  finishes it from the kept answers.
+
+A checkmate or stalemate has no lines and no plans, as before.
+
+## Chesscalator
+
+The app runs in the appliance's sandboxed frame. It has no network and one way out,
+`realm.call(handler, args)`, one call at a time. So the page asks three handlers in place of the
+views it used to call in parallel:
+
+| Call | When | Answers |
+|---|---|---|
+| `chess.appPosition(fen, moves?, withinCp)` | every step | ImbalancesOf, OpeningOfLine with theory (with `moves`) or OpeningOf (without), BestMoves |
+| `chess.appPractice(fen, filters)` | every step for masters; on request for popularity and a player | MastersAtPosition, MasterGamesAtPosition, MovesByRating, MovesByTimeControl, PlayerAtPosition |
+| `chess.appPlans(fen, moves?, level)` | only when the plans button is pressed | PlansInLine (with `moves`) or PlansInPosition |
+
+Each reply carries the views' own rows under their names: the producers' code makes the rows and
+the views' own Cypher filters, orders and limits them. It also carries `ChessStatus`, and an empty
+column is explained in its words. Every action goes through one queue; stepping while a call is
+pending keeps only the latest position, and an answer for a position the board has left is
+dropped. cm-chessboard, chess.js, the sprites and the styles are assets inlined into the frame,
+and the fonts fall back to the system's. The owner approves the app once installed.
+
 ## What the realm could not do
 
 A query gets rows and nothing beside them, so an empty column needs somewhere to say why. That is
@@ -123,8 +181,25 @@ status says it was refused and cannot say whether the token is missing or Liches
 
 ```bash
 npm install
-npm run check        # typecheck, vendor chess.js, write the book, synth, tests
+npm run check        # typecheck, vendor chess.js, write the book, build the app's assets, synth, tests, the page
 ```
+
+`npm run check` needs Bun on the path (synth runs under it) and `npx playwright install
+chromium-headless-shell` once for the page tests. `@embabel/realm-types` is a `file:` dependency on
+an SDK checkout until the version with captured views, skills, apps, maturity and string
+dependencies is published; switch `package.json` to that version then.
+
+To install, put the realm in the world's `config/realms/chess` folder (or install it from the
+Store) and admit it. Copy without macOS `._` files: admission refuses a capture that has them. The
+appliance needs the `stockfish` 19.0.0 module in its registry and must run it on a native runtime.
+Then, in the console:
+
+- grant the realm the **model** capability, for plans;
+- bind a Lichess personal token (no scopes) as `lichess`, for masters, players and ratings;
+- bind a Wikimedia personal API token as `wikibooks`, for theory;
+- approve the **Chesscalator** app.
+
+Everything else works without the grants, and `ChessStatus` says which one is missing.
 
 The tests that run the handlers inside the guest build `wasm/handlers.ts` the way the appliance
 does, with the appliance's own build script and Javy 9, then dispatch into it with the realm's
@@ -141,10 +216,17 @@ checkout beside this one is found by itself). Without them those tests are skipp
 - `tests/handlers.test.ts`, `tests/engine.test.ts`: the handlers in the guest, the engine's
   paging and the host's bounds with a fake clock.
 - `tests/status.test.ts`: what ChessStatus records and reads back.
-- `tests/app.spec.mjs` — the page, headless, against envelopes captured from a live appliance
-  (`tests/fixtures/capture.mjs` recaptures them).
-- `tests/live/drive.mjs` — the real page on a running appliance.
-- `tests/battery/run.mjs` — every battery position through `explainPlans`, graded: whether each
+- `tests/views.test.ts`: every view over the producers' rows. Where the inputs are the board, the
+  book and the engine, the rows equal what the Node realm's views returned on a live appliance
+  (`tests/fixtures/envelopes.json`); the Lichess views and theory equal Rod's 86b5bb5 handlers on
+  the same answers.
+- `tests/app-handlers.test.ts`: the three app calls against the views, under 30 seconds cold and
+  1 MiB, no model call before the button. With `CAPTURE=1` it writes `tests/fixtures/app-replies.json`.
+- `tests/app.spec.mjs`: the page, headless, in a document composed as the appliance composes
+  it, against the captured replies; and in a sandboxed opaque-origin frame.
+- `tests/live/views.mjs`: every view on a running appliance, compared with the recorded rows.
+- `tests/live/drive.mjs`: the real app on a running appliance; writes `docs/chesscalator.png`.
+- `tests/battery/run.mjs`: every battery position through `chess_explainPlans`, graded: whether each
   expected plan is named at all, and whether it is the side's FIRST plan. Writes a readable report
   to `tests/battery/results/`. The grading is by words, so read the report; the score is how you
   notice a change between readings.
@@ -152,6 +234,11 @@ checkout beside this one is found by itself). Without them those tests are skipp
 ```bash
 APPLIANCE=http://127.0.0.1:11043 APPLIANCE_AUTH="Basic ..." node tests/battery/run.mjs
 ```
+
+For a parity reading, run it three times on one fixed model, at the realm's fixed depth, and
+compare the mean first-plan rate with the Node realm's on the same model. The plans are kept for a
+week under their inputs, so a second run reads the first run's plans: clear the `plans` table (or
+change the skill) between runs.
 
 ## Things to know
 
@@ -167,6 +254,10 @@ APPLIANCE=http://127.0.0.1:11043 APPLIANCE_AUTH="Basic ..." node tests/battery/r
 - **Lichess is asked one request at a time, 1.1 s apart.** A rating comparison is nine requests,
   about ten seconds the first time; answers are kept (masters and ratings 30 days, a player's
   games a day, theory and plans a week). An empty or refused answer is never kept.
+- **Handler speed depends on the appliance's runtime.** The handlers are JavaScript compiled to
+  Wasm. Under a JIT they take well under a second; on an interpreter they can take tens of seconds
+  (imbalances alone took 26.9 s), which runs past the 30 second deadline. The appliance should run
+  realm handlers on its native Wasm runtime.
 - **Scores are for the side to move.** `whiteCp` is for display; compare moves with `lossCp`.
 - **A search is not repeatable, and neither is a model's answer.** The per-position caches keep
   the numbers and the plans shown together consistent.
@@ -174,9 +265,10 @@ APPLIANCE=http://127.0.0.1:11043 APPLIANCE_AUTH="Basic ..." node tests/battery/r
 ## Licences
 
 Stockfish is GPL-3.0, and this realm, which ships it, is GPL-3.0 (`LICENSE`). The board is
-[cm-chessboard](https://github.com/shaack/cm-chessboard) (MIT), loaded from jsdelivr; its three
-SVG sprites are copied into `apps/` because an app serves only flat same-origin files. Moves are
-validated with [chess.js](https://github.com/jhlywa/chess.js) (BSD-2-Clause). The opening book is
+[cm-chessboard](https://github.com/shaack/cm-chessboard) (MIT), bundled into the app's
+`board.js` with its three SVG sprites. Moves are validated with
+[chess.js](https://github.com/jhlywa/chess.js) (BSD-2-Clause), bundled the same way and vendored
+into the guest. The opening book is
 the [Lichess opening list](https://github.com/lichess-org/chess-openings) (CC0). Opening theory is
 read at query time from the [Chess Opening Theory](https://en.wikibooks.org/wiki/Chess_Opening_Theory)
 wikibook, by Wikibooks contributors, under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/);
