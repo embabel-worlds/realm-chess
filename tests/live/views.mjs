@@ -12,7 +12,7 @@
  *   PlayerGamesAtPosition: rows with the recorded columns when a Lichess token is bound; with no
  *   token, no rows and ChessStatus saying lichess=refused. Lichess's own numbers move daily, so
  *   they are not compared.
- * - TheoryOfLine: a page with the recorded columns when the wikibooks credential is bound; none
+ * - TheoryOfLine: a page with the recorded columns once the wikibooks API is approved; none
  *   for the start position's empty line.
  * - PlansInPosition, PlansInLine: plans for both sides at the asked level with the model granted;
  *   no rows and ChessStatus saying model=not_granted without it.

@@ -66,8 +66,9 @@ published version when it ships; nothing else changes.
 - **Handlers on the native runtime.** On the appliance's interpreter the handlers are far too slow
   (imbalances alone took 26.9 s). Running realm handlers on the native Wasm runtime is in progress;
   the app's timings and the measured depth are taken after it lands.
-- **Public APIs without a credential.** The wikibook is public, but the appliance calls no API
-  without one, so theory needs a Wikimedia token. An `auth: none` API would remove that.
+- **Wikibooks with no credential.** The wikibook API is declared `auth: none`, with no
+  credential and no security scheme in its document. The realm sends no fixed headers: the host's
+  transport sets the User-Agent Wikimedia asks for, and a captured API may only fix `X-` headers.
 - **Coded API refusals.** A refused call reaches the guest without its HTTP status, so ChessStatus
   can say Lichess refused but not whether the token is missing or Lichess said no.
 - **A raced cold plan.** When two dispatches make the same plan at once, the second keeps its

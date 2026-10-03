@@ -125,3 +125,26 @@ describe("handlers", () => {
     for (const n of added) expect(ADDED_HANDLERS, n).toContain(n);
   });
 });
+
+describe("the public APIs", () => {
+  const apis = parse(readFileSync("apis/apis.yml", "utf8")) as { name: string; auth: string; credential?: string; url: string }[];
+  const credentials = parse(readFileSync("credentials.yml", "utf8")) as { id: string }[];
+
+  it("read the wikibook with no credential, as the host reads a public API", () => {
+    const wikibooks = apis.find((a) => a.name === "wikibooks")!;
+    expect(wikibooks).toMatchObject({ auth: "none" });
+    expect(wikibooks).not.toHaveProperty("credential");
+    expect(credentials.map((c) => c.id)).toEqual(["lichess"]);
+    const doc = JSON.parse(readFileSync(`apis/${wikibooks.url}`, "utf8"));
+    expect(doc).not.toHaveProperty("security");
+    expect(doc.components?.securitySchemes).toBeUndefined();
+  });
+
+  it("fix no header but an X- one, which is all the host lets a captured API fix", () => {
+    for (const a of apis) {
+      const text = readFileSync(`apis/${a.url}`, "utf8");
+      const fixed = [...text.matchAll(/"in":\s*"header"[^}]*"name":\s*"([^"]+)"|"name":\s*"([^"]+)"[^}]*"in":\s*"header"/g)].map((m) => m[1] ?? m[2]);
+      for (const h of fixed) expect(h, `${a.name} header ${h}`).toMatch(/^X-/i);
+    }
+  });
+});

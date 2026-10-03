@@ -9,8 +9,7 @@
     - playerExplorer
   type: openapi
   url: lichess.json
-- auth: bearer
-  credential: wikibooks
+- auth: none
   name: wikibooks
   operation-ids:
     - wikibooksQuery

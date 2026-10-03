@@ -97,19 +97,5 @@
         }
       }
     }
-  },
-  "components": {
-    "securitySchemes": {
-      "wikimediaToken": {
-        "type": "http",
-        "scheme": "bearer",
-        "description": "A Wikimedia personal API token. The pages read are public."
-      }
-    }
-  },
-  "security": [
-    {
-      "wikimediaToken": []
-    }
-  ]
+  }
 }

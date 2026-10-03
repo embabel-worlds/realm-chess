@@ -207,7 +207,7 @@ Then, in the console:
 
 - grant the realm the **model** capability, for plans;
 - bind a Lichess personal token (no scopes) as `lichess`, for masters, players and ratings;
-- bind a Wikimedia personal API token as `wikibooks`, for theory;
+- approve the `wikibooks` API, for theory (it is public and takes no credential);
 - approve the **Chesscalator** app.
 
 Everything else works without the grants, and `ChessStatus` says which one is missing.
@@ -259,9 +259,9 @@ change the skill) between runs.
 - **Plans need the owner's model grant.** The realm asks for the `model` capability; without the
   grant, or when a model budget is spent, there are no plans and `ChessStatus` says why. Everything
   else works. A dispatch makes at most two model calls (the second only to repair invalid JSON).
-- **Theory needs a Wikimedia token.** The wikibook is public, but the appliance calls no API it
-  holds no credential for, so `HAS_THEORY` and the theory in line plans need one bound as
-  `wikibooks`. Line plans without it are made without theory.
+- **Theory needs the `wikibooks` API approved.** The wikibook is public, so the API is declared
+  with `auth: none` and no credential; the owner still approves it. Until then `HAS_THEORY` is
+  empty and line plans are made without theory.
 - **Lichess is asked one request at a time, 1.1 s apart.** A rating comparison is nine requests,
   about ten seconds the first time; answers are kept (masters and ratings 30 days, a player's
   games a day, theory and plans a week). An empty or refused answer is never kept.

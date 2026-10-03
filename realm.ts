@@ -122,13 +122,6 @@ page. The engine is GPL-3.0, and so is this realm.`,
       docs: "https://lichess.org/account/oauth/token",
       description: "A Lichess personal API token, no scopes needed: master games and a player's own games by position.",
     },
-    wikibooks: {
-      kind: "bearer",
-      provider: "Wikimedia",
-      docs: "https://api.wikimedia.org/wiki/Special:AppManagement",
-      description:
-        "A Wikimedia personal API token, for reading the Chess Opening Theory wikibook. The wikibook is public; the appliance only calls APIs it holds a credential for.",
-    },
   },
 
   apis: {
@@ -145,8 +138,8 @@ page. The engine is GPL-3.0, and so is this realm.`,
       url: "wikibooks.json",
       type: "openapi",
       name: "wikibooks",
-      auth: "bearer",
-      credential: "wikibooks",
+      // The wikibook is public: the host calls it with no credential, once the owner approves the API.
+      auth: "none",
       operationIds: ["wikibooksQuery"],
     },
   },
