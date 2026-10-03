@@ -31,4 +31,11 @@ export const producers = {
     joins: [join("CandidateMove", "Position", "HAS_CANDIDATE", "fen", "fen")],
     page: { argument: "cursor", maxPages: 16 },
   },
+  // Keyed by the owner's username: the host sends the AssistantUser usernames it is fetching for
+  // and each row carries its username back as the key.
+  "chess-status": {
+    handler: "chess.status" as const,
+    keyArgument: "username",
+    joins: [join("ChessStatus", "AssistantUser", "HAS_CHESS_STATUS", "username", "username")],
+  },
 } satisfies Record<string, CapturedProducerSpec>;

@@ -962,6 +962,34 @@
       }
     },
     {
+      "description": "What the realm could not do, as the guest last recorded it: whether Lichess and the model answered, the last refusal code and when.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "username": {
+            "description": "The AssistantUser usernames the host is fetching for.",
+            "items": {
+              "maxLength": 2048,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 256,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "username"
+        ],
+        "type": "object"
+      },
+      "name": "status",
+      "namespace": "chess",
+      "outputSchema": {
+        "type": "object"
+      }
+    },
+    {
       "description": "What opening theory says along each game line: the deepest page of the Chess Opening Theory wikibook the line reaches.",
       "inputSchema": {
         "properties": {

@@ -53,4 +53,16 @@ export const producerHandlers = {
     },
     output: rows,
   },
+  status: {
+    namespace: "chess",
+    description:
+      "What the realm could not do, as the guest last recorded it: whether Lichess and the model answered, the last refusal code and when.",
+    input: {
+      type: "object",
+      additionalProperties: false,
+      properties: { username: keys("The AssistantUser usernames the host is fetching for.") },
+      required: ["username"],
+    },
+    output: rows,
+  },
 } satisfies Record<string, HandlerSpec>;

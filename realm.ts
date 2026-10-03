@@ -62,6 +62,7 @@ page. The engine is GPL-3.0, and so is this realm.`,
     "PlayerGamesAtPosition",
     "MovesByRating",
     "MovesByTimeControl",
+    "ChessStatus",
   ],
 
   handlers: { ...rodHandlers, ...producerHandlers },
@@ -77,11 +78,32 @@ page. The engine is GPL-3.0, and so is this realm.`,
         nodes: "Positions the engine searched for this analysis.",
       },
     },
+    ChessStatus: {
+      description:
+        "What the realm could not do, as it last recorded it. Reached from the owner via HAS_CHESS_STATUS. It knows only what a finished call recorded: a call that died records nothing, and a refused Lichess call does not say why.",
+      properties: {
+        username: { description: "The owner. Identity.", metadata: { identity: "true" } },
+        lichess: "`ok`, `refused` or `unknown`: how the last Lichess call went.",
+        model: "`ok`, `not_granted` or `unknown`: whether the last model call was allowed.",
+        lastRefusal: "The code of the last refusal a handler saw, or empty.",
+        at: "When the last outcome was recorded.",
+      },
+    },
   },
 
   producers,
 
-  views: rodViews,
+  views: [
+    ...rodViews,
+    {
+      name: "ChessStatus",
+      description:
+        "What the chess realm could not do: whether Lichess and the model answered the last time they were asked, the last refusal and when. Answers 'why are there no master games', 'why are there no plans'.",
+      cypher: `MATCH (u:AssistantUser)-[:HAS_CHESS_STATUS]->(s:ChessStatus)
+RETURN s.lichess AS lichess, s.model AS model, s.lastRefusal AS lastRefusal, s.at AS at
+`,
+    },
+  ],
 
   credentials: {
     lichess: {
@@ -112,7 +134,7 @@ page. The engine is GPL-3.0, and so is this realm.`,
       sha256: "9a5542e25e42fbbb48501bae0ab4295cdf0fd0f41219ec3b6c891c4a282e7779",
       persistent: true,
       init: "db/schema.sql",
-      migrations: ["db/0001-openings.sql", "db/0002-skeletons.sql"],
+      migrations: ["db/0001-openings.sql", "db/0002-skeletons.sql", "db/0003-status.sql"],
     },
     /** Stockfish 19 lite from the registry. How long it searches is in wasm/lib/config.ts. */
     engine: {

@@ -5,7 +5,8 @@
       "init": "db/schema.sql",
       "migrations": [
         "db/0001-openings.sql",
-        "db/0002-skeletons.sql"
+        "db/0002-skeletons.sql",
+        "db/0003-status.sql"
       ],
       "module": "sqlite3-wasi",
       "name": "db",

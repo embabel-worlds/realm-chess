@@ -214,3 +214,8 @@
       default: 3
       description: Leave out moves under this percent of games in a time control.
       type: int
+- cypher: |
+    MATCH (u:AssistantUser)-[:HAS_CHESS_STATUS]->(s:ChessStatus)
+    RETURN s.lichess AS lichess, s.model AS model, s.lastRefusal AS lastRefusal, s.at AS at
+  description: "What the chess realm could not do: whether Lichess and the model answered the last time they were asked, the last refusal and when. Answers 'why are there no master games', 'why are there no plans'."
+  name: ChessStatus

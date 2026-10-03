@@ -53,3 +53,4 @@ exports:
   - PlayerGamesAtPosition
   - MovesByRating
   - MovesByTimeControl
+  - ChessStatus

@@ -5,13 +5,14 @@ import type { CandidateLineRecord, Engine, SearchConfig } from "./lib/engine.ts"
 import { imbalancesOf } from "./lib/imbalances.ts";
 import { lineKeys, openingOf, openingOfLine, pawnKey, positionAfter, positionKey, splitLine, structureOf, structureSentence } from "./lib/openings.ts";
 import type { Skeletons } from "./lib/openings.ts";
+import { readStatus } from "./lib/status.ts";
 import { bookFor, keepAnalysis, keptAnalyses, skeletonsFor } from "./lib/store.ts";
 import type { Db, KeptAnalysis } from "./lib/store.ts";
 
 /*
  * The realm's verbs. The ten public ones keep the names and contracts they had in the Node realm. The `rows*` verbs serve the
  * graph's producers: they take the keys the host sends, answer `{ rows, next }`, and keep what
- * they compute.
+ * they compute. `status` says what the realm could not do.
  */
 
 interface Ctx {
@@ -239,6 +240,15 @@ export const rowsCandidates = async (input: { fens?: unknown; cursor?: unknown }
     rows.push(...(await linesFor(ctx, fen, FULL, k)));
   }
   return { rows, next: null };
+};
+
+/* ── What the realm could not do ── */
+
+/** One ChessStatus row for each username the host asks about. The installation has one owner. */
+export const status = async (input: { username?: unknown }, ctx: Ctx) => {
+  const users = keysOf(input.username);
+  const s = await readStatus(ctx.deps.db);
+  return { rows: users.map((username) => ({ username, ...s })), next: null };
 };
 
 /* ── The handlers that reach Lichess, the wikibook and the model ── */

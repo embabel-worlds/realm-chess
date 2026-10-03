@@ -23,6 +23,17 @@
     side: "`white` or `black`: who plays this move."
     uci: First move in UCI, e.g. `g2g4`.
     whiteCp: The same score from White's point of view. Null for mates.
+- description: "What the realm could not do, as it last recorded it. Reached from the owner via HAS_CHESS_STATUS. It knows only what a finished call recorded: a call that died records nothing, and a refused Lichess call does not say why."
+  name: ChessStatus
+  properties:
+    at: When the last outcome was recorded.
+    lastRefusal: The code of the last refusal a handler saw, or empty.
+    lichess: "`ok`, `refused` or `unknown`: how the last Lichess call went."
+    model: "`ok`, `not_granted` or `unknown`: whether the last model call was allowed."
+    username:
+      description: The owner. Identity.
+      metadata:
+        identity: "true"
 - description: "A game as its moves from the starting position, in SAN, space-separated — e.g. `e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6`. Pin one with `MATCH (g:GameLine {moves: $moves})`. A line keeps the name of the deepest book position it passed through, which a position looked up alone loses once it leaves the book: this is how a game twenty moves into the Exchange Ruy Lopez is still called that."
   name: GameLine
   properties:

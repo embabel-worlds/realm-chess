@@ -52,6 +52,7 @@ out is kept in its own SQLite.
 | `wasm/lib/engine.ts` | The call to the stockfish module, and its lines as candidate records. |
 | `wasm/lib/config.ts` | The engine's identity, its node budget, the depth cap, the deadline marks, the TTL. |
 | `wasm/lib/store.ts` | The realm's SQLite: book reads, kept analyses. |
+| `wasm/lib/status.ts` | What the realm could not do, recorded for `ChessStatus`. |
 | `wasm/lib/chess.js` | chess.js, vendored by `scripts/vendor-chess.mjs`: the guest can import only from `wasm/`. |
 | `db/schema.sql` | The tables. Frozen once installed: changes go in a new `db/NNNN-*.sql` migration. |
 | `db/0001-openings.sql`, `db/0002-skeletons.sql` | The Lichess opening book (CC0) and its pawn skeletons, written by `scripts/book.mjs`. |
@@ -101,6 +102,23 @@ The host bounds a fetch, and refuses past a bound with its own code:
 A refused fetch keeps what its pages searched, so asking again carries on from there.
 `MEASURE=1 npx vitest run tests/measure.test.ts` measures the row sizes again.
 
+## What the realm could not do
+
+A query gets rows and nothing beside them, so an empty column needs somewhere to say why. That is
+`ChessStatus`, reached from the owner:
+
+```cypher
+MATCH (:AssistantUser)-[:HAS_CHESS_STATUS]->(s:ChessStatus)
+RETURN s.lichess, s.model, s.lastRefusal, s.at
+```
+
+or the `ChessStatus` view. `lichess` is `ok`, `refused` or `unknown`; `model` is `ok`,
+`not_granted` or `unknown`; `lastRefusal` is the last refusal code a handler saw, and `at` when.
+
+It knows only what a finished call recorded. A dispatch that died publishes nothing, so it leaves
+the status as it was. And a refused Lichess call reaches the realm without its cause, so the
+status says it was refused and cannot say whether the token is missing or Lichess said no.
+
 ## Build, test, install
 
 ```bash
@@ -122,6 +140,7 @@ checkout beside this one is found by itself). Without them those tests are skipp
   the allowed differences listed in the test.
 - `tests/handlers.test.ts`, `tests/engine.test.ts`: the handlers in the guest, the engine's
   paging and the host's bounds with a fake clock.
+- `tests/status.test.ts`: what ChessStatus records and reads back.
 - `tests/app.spec.mjs` — the page, headless, against envelopes captured from a live appliance
   (`tests/fixtures/capture.mjs` recaptures them).
 - `tests/live/drive.mjs` — the real page on a running appliance.
