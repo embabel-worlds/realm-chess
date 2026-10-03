@@ -287,14 +287,14 @@ describe.skipIf(!hasTooling)("each view over the realm's producers", () => {
       const { fetch, run } = setup({ lichess: "refused" });
       expect(runView(view("MastersAtPosition"), { fen: START }, await fetch("rowsMasterMoves", "fens", [START]))).toEqual([]);
       expect(runView(view("MovesByRating"), { fen: START }, await fetch("rowsRatedMoves", "fens", [START], { speed: ["blitz"] }))).toEqual([]);
-      const status = (run("status", { username: ["james"] }) as { rows: Record<string, unknown>[] }).rows;
+      const status = await fetch("status", "username", ["james"]);
       expect(runView(STATUS_VIEW, {}, status)).toEqual([{ lichess: "refused", model: "unknown", lastRefusal: "LICHESS_REFUSED", at: expect.any(String) }]);
     });
 
     it("PlansInPosition without the model grant, and ChessStatus saying not_granted", async () => {
       const { fetch, run } = setup({ model: "none" });
       expect(runView(view("PlansInPosition"), { fen: RUY }, await fetch("rowsPositionPlans", "fens", [RUY]))).toEqual([]);
-      const status = (run("status", { username: ["james"] }) as { rows: Record<string, unknown>[] }).rows;
+      const status = await fetch("status", "username", ["james"]);
       expect(runView(STATUS_VIEW, {}, status)[0]).toMatchObject({ model: "not_granted", lastRefusal: "MODEL_NOT_GRANTED" });
     });
   });

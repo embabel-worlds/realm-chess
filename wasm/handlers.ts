@@ -162,20 +162,18 @@ export const openingLookup = async (input: { fens?: string[] }, ctx: Ctx) => all
 export const openingOfGameLine = async (input: { lines?: string[] }, ctx: Ctx) =>
   allWithValues(await lineOpeningRecords(ctx.deps.db, input.lines ?? []));
 
-export const rowsImbalances = async (input: { fens?: unknown }, ctx: Ctx) => ({
-  rows: allWithValues(await imbalanceRecords(ctx.deps.db, keysOf(input.fens))),
-  next: null,
-});
+/*
+ * A producer with no page answers its rows as a plain list; only a paged one answers
+ * `{ rows, next }`. The host refuses any other shape, so these three answer lists.
+ */
+export const rowsImbalances = async (input: { fens?: unknown }, ctx: Ctx) =>
+  allWithValues(await imbalanceRecords(ctx.deps.db, keysOf(input.fens)));
 
-export const rowsOpeningOfPosition = async (input: { fens?: unknown }, ctx: Ctx) => ({
-  rows: allWithValues(await openingRecords(ctx.deps.db, keysOf(input.fens))),
-  next: null,
-});
+export const rowsOpeningOfPosition = async (input: { fens?: unknown }, ctx: Ctx) =>
+  allWithValues(await openingRecords(ctx.deps.db, keysOf(input.fens)));
 
-export const rowsOpeningOfLine = async (input: { lines?: unknown }, ctx: Ctx) => ({
-  rows: allWithValues(await lineOpeningRecords(ctx.deps.db, keysOf(input.lines))),
-  next: null,
-});
+export const rowsOpeningOfLine = async (input: { lines?: unknown }, ctx: Ctx) =>
+  allWithValues(await lineOpeningRecords(ctx.deps.db, keysOf(input.lines)));
 
 /* ── The engine's lines ── */
 
@@ -258,11 +256,11 @@ export const rowsCandidates = async (input: { fens?: unknown; cursor?: unknown }
 
 /* ── What the realm could not do ── */
 
-/** One ChessStatus row for each username the host asks about. The installation has one owner. */
+/** One ChessStatus row for each username the host asks about, as a plain list: the producer has no page. The installation has one owner. */
 export const status = async (input: { username?: unknown }, ctx: Ctx) => {
   const users = keysOf(input.username);
   const s = await readStatus(ctx.deps.db);
-  return { rows: allWithValues(users.map((username) => ({ username, ...s }))), next: null };
+  return allWithValues(users.map((username) => ({ username, ...s })));
 };
 
 /* ── Paging ── */

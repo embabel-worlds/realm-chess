@@ -979,7 +979,7 @@ export interface RowsImbalancesInput {
   fens: string[];
 }
 
-export type RowsImbalancesOutput = unknown;
+export type RowsImbalancesOutput = unknown[];
 
 /** Input for the rowsLinePlans handler. */
 export interface RowsLinePlansInput {
@@ -1031,7 +1031,7 @@ export interface RowsOpeningOfLineInput {
   lines: string[];
 }
 
-export type RowsOpeningOfLineOutput = unknown;
+export type RowsOpeningOfLineOutput = unknown[];
 
 /** Input for the rowsOpeningOfPosition handler. */
 export interface RowsOpeningOfPositionInput {
@@ -1039,7 +1039,7 @@ export interface RowsOpeningOfPositionInput {
   fens: string[];
 }
 
-export type RowsOpeningOfPositionOutput = unknown;
+export type RowsOpeningOfPositionOutput = unknown[];
 
 /** Input for the rowsPlayerGames handler. */
 export interface RowsPlayerGamesInput {
@@ -1131,7 +1131,7 @@ export interface StatusInput {
   username: string[];
 }
 
-export type StatusOutput = unknown;
+export type StatusOutput = unknown[];
 
 /** Input for the theoryOfGameLine handler. */
 export interface TheoryOfGameLineInput {

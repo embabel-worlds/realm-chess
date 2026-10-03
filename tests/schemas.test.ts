@@ -15,7 +15,7 @@ import { buildGuest, call, hasTooling } from "./guest/runtime";
  * with each input checked against its inputSchema and each output against its outputSchema, as
  * the host checks them. A field declared as a number may be absent; it may not be null.
  *
- * The producers' `rows*` handlers declare only an object, so their rows are also checked against
+ * The producers' `rows*` handlers declare only a page object or a list of objects, so their rows are also checked against
  * the record schema of the public handler they serve. The app handlers return view rows, where
  * a column the row lacks is null, as a view's is.
  */
@@ -125,7 +125,7 @@ describe.skipIf(!hasTooling)("every handler's output, as the host checks it", ()
     const out = setup("fake")(name, input);
     expect(errorsOf(entry(name).outputSchema, out), name).toEqual([]);
     if (rowSchema) {
-      const rows = (out as { rows: unknown[] }).rows;
+      const rows = Array.isArray(out) ? out : (out as { rows: unknown[] }).rows;
       for (const r of rows) expect(errorsOf(rowSchema(), r), `${name} ${JSON.stringify(r).slice(0, 120)}`).toEqual([]);
     }
   });

@@ -53,11 +53,11 @@ describe.skipIf(!hasTooling)("the book and imbalance handlers, in the guest", ()
     expect(() => run("openingOfGameLine", { lines: ["e4 e5 Ke3"] })).toThrow(/Move 3 \(Ke3\)/);
   });
 
-  it("the producer adapters answer the same records as rows, in one page", () => {
-    expect(run("rowsImbalances", { fens: [START] })).toEqual({ rows: run("positionImbalances", { fens: [START] }), next: null });
-    expect(run("rowsOpeningOfLine", { lines: [RUY_EXCHANGE] })).toEqual({ rows: run("openingOfGameLine", { lines: [RUY_EXCHANGE] }), next: null });
+  it("the unpaged producer adapters answer the same records, as a plain list of rows", () => {
+    expect(run("rowsImbalances", { fens: [START] })).toEqual(run("positionImbalances", { fens: [START] }));
+    expect(run("rowsOpeningOfLine", { lines: [RUY_EXCHANGE] })).toEqual(run("openingOfGameLine", { lines: [RUY_EXCHANGE] }));
     const e4 = "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1";
-    expect(run("rowsOpeningOfPosition", { fens: [e4] })).toEqual({ rows: run("openingLookup", { fens: [e4] }), next: null });
+    expect(run("rowsOpeningOfPosition", { fens: [e4] })).toEqual(run("openingLookup", { fens: [e4] }));
   });
 
   it("the producer adapters refuse keys the host would never send", () => {

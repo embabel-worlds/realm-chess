@@ -79,10 +79,9 @@ describe.skipIf(!hasTooling)("chess.status, in the guest", () => {
     const db = new FakeDb();
     const host = chessHost(db, noEngine);
     call(buildGuest(RECORDER), "chess.record", { outcomes: [{ source: "lichess", code: "UPSTREAM_REFUSED", at: T0 }, { source: "model", at: T0 + 5 }] }, { host });
-    expect(call(buildGuest(), "chess.status", { username: ["james"] }, { host })).toEqual({
-      rows: [{ username: "james", lichess: "refused", model: "ok", lastRefusal: "UPSTREAM_REFUSED", at: "2026-10-03T09:00:00.005Z" }],
-      next: null,
-    });
+    expect(call(buildGuest(), "chess.status", { username: ["james"] }, { host })).toEqual([
+      { username: "james", lichess: "refused", model: "ok", lastRefusal: "UPSTREAM_REFUSED", at: "2026-10-03T09:00:00.005Z" },
+    ]);
   });
 
   it("a dispatch that died left nothing, so the status is unchanged", () => {
@@ -94,7 +93,7 @@ describe.skipIf(!hasTooling)("chess.status, in the guest", () => {
     const d = dispatch(buildGuest(failing), "chess.recordThenFail", { outcomes: [{ source: "lichess", code: "X", at: T0 }] }, { host });
     expect(d.error).toBe("died");
     db.rollback();
-    expect(call(buildGuest(), "chess.status", { username: ["james"] }, { host })).toMatchObject({ rows: [{ lichess: "unknown", lastRefusal: "" }] });
+    expect(call(buildGuest(), "chess.status", { username: ["james"] }, { host })).toMatchObject([{ lichess: "unknown", lastRefusal: "" }]);
   });
 
   it("refuses keys the host would never send", () => {

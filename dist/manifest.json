@@ -1051,7 +1051,10 @@
       "name": "rowsImbalances",
       "namespace": "chess",
       "outputSchema": {
-        "type": "object"
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
       }
     },
     {
@@ -1187,7 +1190,10 @@
       "name": "rowsOpeningOfLine",
       "namespace": "chess",
       "outputSchema": {
-        "type": "object"
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
       }
     },
     {
@@ -1215,7 +1221,10 @@
       "name": "rowsOpeningOfPosition",
       "namespace": "chess",
       "outputSchema": {
-        "type": "object"
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
       }
     },
     {
@@ -1471,7 +1480,10 @@
       "name": "status",
       "namespace": "chess",
       "outputSchema": {
-        "type": "object"
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
       }
     },
     {

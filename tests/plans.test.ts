@@ -298,7 +298,7 @@ describe.skipIf(!hasTooling)("plans, in the guest", () => {
       expect(f.refused).toBeUndefined();
       expect(f.rows).toEqual([]);
       expect(f.dispatches).toBe(1);
-      expect((s.run("status", { username: ["james"] }) as { rows: Record<string, string>[] }).rows[0]).toMatchObject({ model: "not_granted", lastRefusal: "MODEL_NOT_GRANTED" });
+      expect((s.run("status", { username: ["james"] }) as Record<string, string>[])[0]).toMatchObject({ model: "not_granted", lastRefusal: "MODEL_NOT_GRANTED" });
       expect((await s.fetch("rowsCandidates", "fens", [NAJDORF.fen])).rows).toHaveLength(5);
       expect(s.run("explainPlans", { fens: [NAJDORF.fen] })).toEqual([]);
     });
@@ -306,13 +306,13 @@ describe.skipIf(!hasTooling)("plans, in the guest", () => {
     it.each(["MODEL_DAILY_BUDGET", "MODEL_CALL_BUDGET", "MODEL_SKILL_UNKNOWN"])("%s: no plans, said in lastRefusal, the grant left alone", async (code) => {
       const s = setup({ model: coded(code) });
       expect((await plansOf(s)).rows).toEqual([]);
-      expect((s.run("status", { username: ["james"] }) as { rows: Record<string, string>[] }).rows[0]).toMatchObject({ model: "unknown", lastRefusal: code });
+      expect((s.run("status", { username: ["james"] }) as Record<string, string>[])[0]).toMatchObject({ model: "unknown", lastRefusal: code });
     });
 
     it("an answered call records the model as ok", async () => {
       const s = setup();
       await plansOf(s);
-      expect((s.run("status", { username: ["james"] }) as { rows: Record<string, string>[] }).rows[0]).toMatchObject({ model: "ok" });
+      expect((s.run("status", { username: ["james"] }) as Record<string, string>[])[0]).toMatchObject({ model: "ok" });
     });
   });
 });

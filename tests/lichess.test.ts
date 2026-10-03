@@ -94,9 +94,9 @@ describe.skipIf(!hasTooling)("Lichess and theory, in the guest", () => {
       expect((await fetch("rowsPlayerMoves", "fens", [START], { player: ["DrNykterstein"] })).rows).toEqual([]);
       expect((await fetch("rowsPlayerGames", "fens", [START], { player: ["DrNykterstein"] })).rows).toEqual([]);
       expect((await fetch("rowsRatedMoves", "fens", [START], { speed: ["blitz"] })).rows).toEqual([]);
-      const status = run("status", { username: ["james"] }) as { rows: Record<string, string>[] };
-      expect(status.rows[0]).toMatchObject({ lichess: "refused", lastRefusal: "LICHESS_REFUSED" });
-      expect(status.rows[0].at).toMatch(/^2026-10-03T09:/);
+      const status = run("status", { username: ["james"] }) as Record<string, string>[];
+      expect(status[0]).toMatchObject({ lichess: "refused", lastRefusal: "LICHESS_REFUSED" });
+      expect(status[0].at).toMatch(/^2026-10-03T09:/);
       expect(db.exec("SELECT COUNT(*) AS n FROM explorer")[0].n).toBe("0");
       const theory = await fetch("rowsTheory", "lines", [RUY_LINE]);
       expect(theory.rows).toHaveLength(1);
@@ -288,14 +288,14 @@ describe.skipIf(!hasTooling)("Lichess and theory, in the guest", () => {
       let refuse = true;
       const { fetch, host, run, clock } = setup({ masters: (a) => (refuse ? apiRefusal() : mastersAnswer(String(a.fen))) });
       await fetch("rowsMasterMoves", "fens", [START]);
-      const refusedAt = (run("status", { username: ["james"] }) as { rows: { at: string; lichess: string }[] }).rows[0];
+      const refusedAt = (run("status", { username: ["james"] }) as { at: string; lichess: string }[])[0];
       expect(refusedAt.lichess).toBe("refused");
       expect(Date.parse(refusedAt.at)).toBeGreaterThanOrEqual(T0);
       expect(Date.parse(refusedAt.at)).toBeLessThanOrEqual(clock.now);
       refuse = false;
       expect((await fetch("rowsMasterMoves", "fens", [START])).rows.length).toBeGreaterThan(0);
       expect(host.count("lichess_mastersExplorer")).toBe(2);
-      expect((run("status", { username: ["james"] }) as { rows: { lichess: string; lastRefusal: string }[] }).rows[0]).toMatchObject({ lichess: "ok", lastRefusal: "LICHESS_REFUSED" });
+      expect((run("status", { username: ["james"] }) as { lichess: string; lastRefusal: string }[])[0]).toMatchObject({ lichess: "ok", lastRefusal: "LICHESS_REFUSED" });
     });
 
     it("what is kept is the checked answer: unknown fields and malformed entries never reach SQLite", async () => {

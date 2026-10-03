@@ -2,8 +2,8 @@ import type { HandlerSpec } from "@embabel/realm-types";
 
 /*
  * The handlers the graph's producers call. A captured producer sends the anchor keys it is
- * fetching for as one list and expects `{ rows, next }` back, so each of these wraps one of
- * the public handlers for that shape.
+ * fetching for as one list. A paged producer expects `{ rows, next }` back; one with no page
+ * expects the rows as a plain list. Each of these wraps one of the public handlers for its shape.
  */
 
 const keys = (description: string) => ({
@@ -14,7 +14,11 @@ const keys = (description: string) => ({
   description,
 });
 
+/* What a paged producer's handler answers: one page of rows and the next cursor. */
 const rows = { type: "object" };
+
+/* What an unpaged producer's handler answers: every row, as a list. */
+const rowList = { type: "array", items: { type: "object" } };
 
 /* A list of the values a query pinned for one property. The handler checks each one. */
 const pushed = (description: string) => ({
@@ -34,19 +38,19 @@ export const producerHandlers = {
     namespace: "chess",
     description: "Silman's imbalances of each position the host names, as PositionImbalances rows.",
     input: { type: "object", additionalProperties: false, properties: { fens }, required: ["fens"] },
-    output: rows,
+    output: rowList,
   },
   rowsOpeningOfPosition: {
     namespace: "chess",
     description: "The book's name for each position the host names, as Opening rows. A position the book does not name has none.",
     input: { type: "object", additionalProperties: false, properties: { fens }, required: ["fens"] },
-    output: rows,
+    output: rowList,
   },
   rowsOpeningOfLine: {
     namespace: "chess",
     description: "The deepest book name along each game line the host names, as Opening rows.",
     input: { type: "object", additionalProperties: false, properties: { lines }, required: ["lines"] },
-    output: rows,
+    output: rowList,
   },
   rowsCandidates: {
     namespace: "chess",
@@ -155,6 +159,6 @@ export const producerHandlers = {
       properties: { username: keys("The AssistantUser usernames the host is fetching for.") },
       required: ["username"],
     },
-    output: rows,
+    output: rowList,
   },
 } satisfies Record<string, HandlerSpec>;
