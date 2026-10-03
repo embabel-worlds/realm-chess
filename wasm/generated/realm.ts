@@ -469,7 +469,15 @@ export interface SqliteBridge {
 
 /** The bridge to the "stockfish" dependency, typed from exactly the methods this realm declares it calls. */
 export interface EngineBridge {
-  analyse(arg0: string, arg1: number, arg2: number, arg3: number): Promise<string>;
+  analyse: {
+    (arg0: string, arg1: number, arg2: number, arg3: number): Promise<string>;
+    /**
+     * Runs many calls at once on the host and resolves to one result per entry, in the
+     * order given. Each entry is one call's arguments: the value itself when the method
+     * takes one, otherwise an array of them. The host takes 1 to 256 entries.
+     */
+    batch(calls: readonly (readonly [arg0: string, arg1: number, arg2: number, arg3: number])[]): Promise<string[]>;
+  };
 }
 
 /**
@@ -799,6 +807,14 @@ export interface AppPracticeInput {
 }
 
 export type AppPracticeOutput = unknown;
+
+export type DeepenInput = Record<string, never>;
+
+export type DeepenOutput = {
+  deepened: number;
+  failed: number;
+  rounds: number;
+};
 
 export type ExplainLinePlansInput = Record<string, never>;
 
@@ -1192,6 +1208,7 @@ export interface Handlers {
   appPlans: Handler<AppPlansInput, AppPlansOutput>;
   appPosition: Handler<AppPositionInput, AppPositionOutput>;
   appPractice: Handler<AppPracticeInput, AppPracticeOutput>;
+  deepen: Handler<DeepenInput, DeepenOutput>;
   explainLinePlans: Handler<ExplainLinePlansInput, ExplainLinePlansOutput>;
   explainPlans: Handler<ExplainPlansInput, ExplainPlansOutput>;
   mastersAtPosition: Handler<MastersAtPositionInput, MastersAtPositionOutput>;
@@ -1220,6 +1237,7 @@ export type AnalysePositionHandler = Handler<AnalysePositionInput, AnalysePositi
 export type AppPlansHandler = Handler<AppPlansInput, AppPlansOutput>;
 export type AppPositionHandler = Handler<AppPositionInput, AppPositionOutput>;
 export type AppPracticeHandler = Handler<AppPracticeInput, AppPracticeOutput>;
+export type DeepenHandler = Handler<DeepenInput, DeepenOutput>;
 export type ExplainLinePlansHandler = Handler<ExplainLinePlansInput, ExplainLinePlansOutput>;
 export type ExplainPlansHandler = Handler<ExplainPlansInput, ExplainPlansOutput>;
 export type MastersAtPositionHandler = Handler<MastersAtPositionInput, MastersAtPositionOutput>;

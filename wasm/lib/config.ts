@@ -70,3 +70,17 @@ export const RATED_TTL_MS = 30 * DAY_MS;
 export const PLAYER_TTL_MS = DAY_MS;
 export const THEORY_TTL_MS = 7 * DAY_MS;
 export const PLANS_TTL_MS = 7 * DAY_MS;
+
+/*
+ * Deepening in the background. A position someone looked at is queued, and a scheduled tick
+ * searches it again with more nodes and a higher depth cap than a page can wait for. A tick uses
+ * at most half the dispatch deadline, so it never races it, and starts another round only when a
+ * round as long as the last one still fits. A round is a batch of DEEPEN_WIDTH searches, which a
+ * host with spare cores runs side by side and any host can run one after another inside the tick.
+ */
+export const DEEP_NODES = 6_000_000;
+export const DEEP_DEPTH_CAP = 22;
+export const DEEPEN_TICK_MS = 15_000;
+export const DEEPEN_WIDTH = 2;
+/** The most queued positions one tick looks at. */
+export const DEEPEN_PICK = 32;

@@ -63,6 +63,11 @@ published version when it ships; nothing else changes.
 
 ## Host follow-ups
 
+- **Background deepening** uses the scheduled background class and the engine's batch call,
+  both in review on the host. On a host without the batch call the tick searches one position at
+  a time inside the same 15 s; on one without the background class it competes with pages for
+  slots. The queue is added to by pages and never trimmed, like `analyses`; a cap is a follow-up.
+
 - **Handlers on the native runtime.** On the appliance's interpreter the handlers are far too slow
   (imbalances alone took 26.9 s). Running realm handlers on the native Wasm runtime is in progress;
   the app's timings and the measured depth are taken after it lands.

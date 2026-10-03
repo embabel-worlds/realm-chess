@@ -161,4 +161,18 @@ export const producerHandlers = {
     },
     output: rowList,
   },
+  // Not a producer: the host runs it on its schedule, in the background class, with no arguments.
+  deepen: {
+    namespace: "chess",
+    description:
+      "Searches the positions people have looked at again, deeper than a page can wait for, and keeps the answers, which later reads prefer. Runs every minute on its own.",
+    schedule: "0 * * * * *",
+    input: { type: "object", additionalProperties: false, properties: {} },
+    output: {
+      type: "object",
+      additionalProperties: false,
+      properties: { deepened: { type: "integer" }, failed: { type: "integer" }, rounds: { type: "integer" } },
+      required: ["deepened", "failed", "rounds"],
+    },
+  },
 } satisfies Record<string, HandlerSpec>;

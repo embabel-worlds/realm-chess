@@ -87,12 +87,15 @@ export interface KeptAnalysis {
   createdAt: number;
 }
 
+/** Where an analysis is kept: a page's searches, or the background tick's deeper ones. */
+export type AnalysisTable = "analyses" | "deep_analyses";
+
 /** The kept analyses for these positions under one configuration, by FEN. */
-export async function keptAnalyses(db: Db, configKey: string, fens: string[]): Promise<Map<string, KeptAnalysis>> {
+export async function keptAnalyses(db: Db, configKey: string, fens: string[], table: AnalysisTable = "analyses"): Promise<Map<string, KeptAnalysis>> {
   const out = new Map<string, KeptAnalysis>();
   if (fens.length === 0) return out;
   const rows = await db.exec(
-    `SELECT fen, analysis_id, depth, nodes, lines_json, records_json, elapsed_ms, created_at FROM analyses ` +
+    `SELECT fen, analysis_id, depth, nodes, lines_json, records_json, elapsed_ms, created_at FROM ${table} ` +
       `WHERE config_key = ${sqlText(configKey)} AND fen IN (${sqlList([...new Set(fens)])})`,
   );
   for (const r of rows) {
@@ -111,9 +114,9 @@ export async function keptAnalyses(db: Db, configKey: string, fens: string[]): P
 }
 
 /** Keeps an analysis, replacing whatever was kept for the position under that configuration. */
-export async function keepAnalysis(db: Db, configKey: string, a: KeptAnalysis): Promise<void> {
+export async function keepAnalysis(db: Db, configKey: string, a: KeptAnalysis, table: AnalysisTable = "analyses"): Promise<void> {
   await db.exec(
-    `INSERT OR REPLACE INTO analyses (fen, config_key, analysis_id, depth, nodes, lines_json, records_json, elapsed_ms, created_at) VALUES (` +
+    `INSERT OR REPLACE INTO ${table} (fen, config_key, analysis_id, depth, nodes, lines_json, records_json, elapsed_ms, created_at) VALUES (` +
       `${sqlText(a.fen)}, ${sqlText(configKey)}, ${sqlText(a.analysisId)}, ${Math.trunc(a.depth)}, ${Math.trunc(a.nodes)}, ` +
       `${sqlText(a.linesJson)}, ${sqlText(a.recordsJson)}, ${Math.trunc(a.elapsedMs)}, ${sqlText(new Date(a.createdAt).toISOString())})`,
   );

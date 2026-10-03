@@ -95,6 +95,7 @@ const CASES: [string, Record<string, unknown>, (() => object)?][] = [
   ["appPosition", { fen: RUY, moves: EXCHANGE, withinCp: 100 }],
   ["appPractice", { fen: E4, filters: { masters: true, player: "DrNykterstein", speed: "blitz", minShare: 3 } }],
   ["appPlans", { fen: RUY }],
+  ["deepen", {}],
 ];
 
 const errorsOf = (schema: object, value: unknown) => {

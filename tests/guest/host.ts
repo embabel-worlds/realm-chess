@@ -59,18 +59,45 @@ export class FakeDb {
 
 export type Analyse = (fen: string, nodes: number, maxDepth: number, multiPv: number) => string;
 
-/** Answers the host calls a chess dispatch makes, and counts the engine's searches. */
-export function chessHost(db: FakeDb, engine: Analyse): HostCall & { searches: number } {
+/**
+ * How the host runs a batch of engine calls, for the fake clock: side by side on spare cores (the
+ * batch takes as long as its longest search) or one after another (as long as all of them).
+ */
+export interface BatchModel { clock: { now: number }; parallel: boolean }
+
+/**
+ * Answers the host calls a chess dispatch makes, and counts the engine's searches. The engine
+ * answers one call, or a batch (`{ batch: [[fen, nodes, depth, multiPv], ...] }`), one answer per
+ * entry in order, as the host's batch form does.
+ */
+export function chessHost(db: FakeDb, engine: Analyse, batchModel?: BatchModel): HostCall & { searches: number; batches: number[] } {
   const host = ((tool: string, args: unknown) => {
     if (tool === "dep:db.exec") return db.exec((args as { sql: string }).sql);
     if (tool === "dep:engine.analyse") {
-      host.searches++;
-      const [fen, nodes, depth, multiPv] = args as [string, number, number, number];
-      return engine(fen, nodes, depth, multiPv);
+      const batch = (args as { batch?: [string, number, number, number][] }).batch;
+      if (!batch) {
+        host.searches++;
+        const [fen, nodes, depth, multiPv] = args as [string, number, number, number];
+        return engine(fen, nodes, depth, multiPv);
+      }
+      if (batch.length < 1 || batch.length > 256) throw new Error("A batch takes 1 to 256 calls");
+      host.batches.push(batch.length);
+      host.searches += batch.length;
+      const start = batchModel?.clock.now ?? 0;
+      let end = start;
+      const out = batch.map(([fen, nodes, depth, multiPv]) => {
+        if (batchModel?.parallel) batchModel.clock.now = start;
+        const answer = engine(fen, nodes, depth, multiPv);
+        end = Math.max(end, batchModel?.clock.now ?? 0);
+        return answer;
+      });
+      if (batchModel) batchModel.clock.now = end;
+      return out;
     }
     throw new Error(`unexpected host call ${tool}`);
-  }) as HostCall & { searches: number };
+  }) as HostCall & { searches: number; batches: number[] };
   host.searches = 0;
+  host.batches = [];
   return host;
 }
 
@@ -84,6 +111,8 @@ export interface RealmHostOptions {
   model?: Answer;
   /** The guest's clock, so each call can be stamped with the time it was made. */
   clock?: { now: number };
+  /** Whether a batch of engine calls runs side by side; needs `clock`. */
+  parallelBatches?: boolean;
 }
 
 export interface CallRecord {
@@ -96,14 +125,15 @@ export interface CallRecord {
  * Answers every host call a chess dispatch makes: its SQLite, the engine, the declared APIs and
  * the model. Every call but SQLite's is recorded with the guest clock's time.
  */
-export function realmHost(db: FakeDb, o: RealmHostOptions = {}): HostCall & { searches: number; calls: CallRecord[]; count(tool: string): number } {
+export function realmHost(db: FakeDb, o: RealmHostOptions = {}): HostCall & { searches: number; batches: number[]; calls: CallRecord[]; count(tool: string): number } {
   const base = chessHost(db, o.engine ?? (() => {
     throw new Error("no engine in this test");
-  }));
+  }), o.clock ? { clock: o.clock, parallel: !!o.parallelBatches } : undefined);
   const host = ((tool: string, args: unknown) => {
     if (tool.startsWith("dep:")) {
       const r = base(tool, args);
       host.searches = base.searches;
+      host.batches = base.batches;
       return r;
     }
     host.calls.push({ tool, args: args as Record<string, unknown>, at: o.clock?.now ?? Date.now() });
@@ -114,8 +144,9 @@ export function realmHost(db: FakeDb, o: RealmHostOptions = {}): HostCall & { se
     const api = o.apis?.[tool];
     if (!api) throw new Error(`unexpected host call ${tool}`);
     return api(args as Record<string, unknown>);
-  }) as HostCall & { searches: number; calls: CallRecord[]; count(tool: string): number };
+  }) as HostCall & { searches: number; batches: number[]; calls: CallRecord[]; count(tool: string): number };
   host.searches = 0;
+  host.batches = [];
   host.calls = [];
   host.count = (tool: string) => host.calls.filter((c) => c.tool === tool).length;
   return host;

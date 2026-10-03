@@ -31,7 +31,7 @@ const ADDED_PROPERTIES: Record<string, string[]> = { CandidateMove: ["analysisId
 const ADDED_HANDLERS = [
   "rowsImbalances", "rowsOpeningOfPosition", "rowsOpeningOfLine", "rowsCandidates", "status", "rowsTheory", "rowsPositionPlans",
   "rowsLinePlans", "rowsMasterMoves", "rowsMasterGames", "rowsPlayerMoves", "rowsPlayerGames", "rowsRatedMoves",
-  "appPosition", "appPractice", "appPlans",
+  "appPosition", "appPractice", "appPlans", "deepen",
 ];
 const ADDED_RELATIONSHIPS = ["AssistantUser-HAS_CHESS_STATUS->ChessStatus"];
 

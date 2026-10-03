@@ -8,7 +8,8 @@
         "db/0002-skeletons.sql",
         "db/0003-status.sql",
         "db/0004-lichess.sql",
-        "db/0005-app.sql"
+        "db/0005-app.sql",
+        "db/0006-deepen.sql"
       ],
       "module": "sqlite3-wasi",
       "name": "db",

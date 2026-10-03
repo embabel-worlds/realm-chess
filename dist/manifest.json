@@ -249,6 +249,37 @@
       }
     },
     {
+      "description": "Searches the positions people have looked at again, deeper than a page can wait for, and keeps the answers, which later reads prefer. Runs every minute on its own.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {},
+        "type": "object"
+      },
+      "name": "deepen",
+      "namespace": "chess",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "deepened": {
+            "type": "integer"
+          },
+          "failed": {
+            "type": "integer"
+          },
+          "rounds": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "deepened",
+          "failed",
+          "rounds"
+        ],
+        "type": "object"
+      },
+      "schedule": "0 * * * * *"
+    },
+    {
       "description": "The plans in the position a game line reaches, told the line's deepest opening name — which a position looked up alone has lost once it is past the book.",
       "inputSchema": {},
       "name": "explainLinePlans",

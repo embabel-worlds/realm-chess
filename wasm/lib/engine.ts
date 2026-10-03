@@ -1,4 +1,4 @@
-import { DEPTH_CAP, ENGINE_MODULE, FULL_NODES, MULTI_PV } from "./config.ts";
+import { DEEP_DEPTH_CAP, DEEP_NODES, DEPTH_CAP, ENGINE_MODULE, FULL_NODES, MULTI_PV } from "./config.ts";
 import type { Imbalances } from "./imbalances.ts";
 import { readLine } from "./lines.ts";
 import { sha256Hex } from "./sha256.ts";
@@ -11,7 +11,11 @@ import { sha256Hex } from "./sha256.ts";
  */
 
 export interface Engine {
-  analyse(fen: string, nodes: number, maxDepth: number, multiPv: number): Promise<string>;
+  analyse: {
+    (fen: string, nodes: number, maxDepth: number, multiPv: number): Promise<string>;
+    /** Many searches at once, one answer per entry in order. A host without it leaves it out. */
+    batch?(calls: readonly (readonly [string, number, number, number])[]): Promise<string[]>;
+  };
 }
 
 export interface EngineLine {
@@ -38,6 +42,9 @@ export interface SearchConfig {
 /** The one search the graph's candidate lines use. */
 export const FULL: SearchConfig = { nodes: FULL_NODES, depthCap: DEPTH_CAP, multiPv: MULTI_PV };
 
+/** The background tick's search: the same lines, with more nodes and a higher depth cap. */
+export const DEEP: SearchConfig = { nodes: DEEP_NODES, depthCap: DEEP_DEPTH_CAP, multiPv: MULTI_PV };
+
 export const ENGINE_NAME = "Stockfish 19 lite (single-threaded WebAssembly)";
 
 /** What an analysis is looked up by: the engine module and how it was asked to search. */
@@ -53,7 +60,39 @@ export const analysisIdOf = (key: string, linesJson: string): string => sha256He
 
 /** One search through the module. A refusal from the module is an error, never empty lines. */
 export async function search(engine: Engine, fen: string, c: SearchConfig): Promise<Search> {
-  const text = await engine.analyse(fen, c.nodes, c.depthCap, c.multiPv);
+  return answerOf(fen, await engine.analyse(fen, c.nodes, c.depthCap, c.multiPv));
+}
+
+/**
+ * Several searches under one configuration, answered in order, each a search or the error that
+ * stopped it. One batch call when the host offers it, which runs them side by side where it has
+ * cores; one call after another when it does not. A refused batch call throws.
+ */
+export async function searchAll(engine: Engine, fens: string[], c: SearchConfig): Promise<(Search | Error)[]> {
+  const settle = (fen: string, text: string) => {
+    try {
+      return answerOf(fen, text);
+    } catch (e) {
+      return e as Error;
+    }
+  };
+  if (typeof engine.analyse.batch === "function") {
+    const texts = await engine.analyse.batch(fens.map((fen) => [fen, c.nodes, c.depthCap, c.multiPv] as const));
+    if (!Array.isArray(texts) || texts.length !== fens.length) throw new Error("The engine's batch answered the wrong number of searches");
+    return fens.map((fen, i) => settle(fen, texts[i]));
+  }
+  const out: (Search | Error)[] = [];
+  for (const fen of fens) {
+    try {
+      out.push(settle(fen, await engine.analyse(fen, c.nodes, c.depthCap, c.multiPv)));
+    } catch (e) {
+      out.push(e as Error);
+    }
+  }
+  return out;
+}
+
+function answerOf(fen: string, text: string): Search {
   const answer = JSON.parse(text) as Partial<Search> & { error?: string };
   if (answer.error) throw new Error(`The engine refused ${fen}: ${answer.error}`);
   if (!Array.isArray(answer.lines)) throw new Error(`The engine answered without lines for ${fen}`);

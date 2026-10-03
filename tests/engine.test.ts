@@ -272,7 +272,8 @@ describe.skipIf(!hasTooling)("with a fake engine and a fake clock", () => {
       const clock = { now: Date.now() };
       (await candidates(db, chessHost(db, fakeEngine(clock).analyse), positions(3), clock));
       expect(db.writes().length).toBeGreaterThan(0);
-      for (const w of db.writes()) expect(w).toMatch(/^INSERT OR REPLACE INTO analyses /);
+      // A new search is kept, and its position queued for deepening, once.
+      for (const w of db.writes()) expect(w).toMatch(/^(INSERT OR REPLACE INTO analyses |INSERT OR IGNORE INTO deepen_queue )/);
     });
   });
 
