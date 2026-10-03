@@ -37,6 +37,20 @@ export class FakeDb {
     );
   }
 
+  /*
+   * A dispatch's writes are published only when it succeeds, as the host publishes a
+   * persistent mount: begin before, commit after, roll back when it fails.
+   */
+  begin(): void {
+    this.sqlite.exec("BEGIN");
+  }
+  commit(): void {
+    this.sqlite.exec("COMMIT");
+  }
+  rollback(): void {
+    this.sqlite.exec("ROLLBACK");
+  }
+
   /** The statements that wrote, for checking every write is a keyed upsert. */
   writes(): string[] {
     return this.statements.filter((s) => !/^\s*SELECT\b/i.test(s));

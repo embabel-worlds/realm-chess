@@ -1,7 +1,7 @@
 import type { TypeSpec } from "@embabel/realm-types";
 
 /*
- * Rod's labels and properties as they were in types/chess.yml at 86b5bb5. The joins that hung
+ * The labels and properties as the Node realm's types/chess.yml had them at 86b5bb5. The joins that hung
  * off them are on the producers in realm/producers.ts, which is where a captured realm keeps them.
  */
 export const rodTypes = {

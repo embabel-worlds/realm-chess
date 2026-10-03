@@ -6,6 +6,7 @@
 
 -- The engine's lines for a position under one configuration (module, node budget, depth cap,
 -- lines). analysis_id is the hash of the configuration and the lines: what the lines are.
+-- records_json is the candidate rows made from them, kept so a read does not compute them again.
 CREATE TABLE analyses (
   fen TEXT NOT NULL,
   config_key TEXT NOT NULL,
@@ -13,6 +14,7 @@ CREATE TABLE analyses (
   depth INTEGER NOT NULL,
   nodes INTEGER NOT NULL,
   lines_json TEXT NOT NULL,
+  records_json TEXT NOT NULL,
   elapsed_ms INTEGER NOT NULL,
   created_at TEXT NOT NULL,
   PRIMARY KEY (fen, config_key)

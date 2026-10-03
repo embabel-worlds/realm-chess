@@ -1,7 +1,7 @@
 import type { HandlerSpec } from "@embabel/realm-types";
 
 /*
- * Rod's ten handlers, with the names, descriptions and schemas they had at 86b5bb5, so a caller
+ * The ten public handlers, with the names, descriptions and schemas they had at 86b5bb5, so a caller
  * of the Node realm calls this one the same way. tests/contract.test.ts holds them to that.
  */
 export const rodHandlers = {

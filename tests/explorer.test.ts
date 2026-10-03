@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { libs } from "./impl";
 
-/* Rod's tests, run against Node and against the built guest (tests/impl.ts). */
+/* These tests run against Node and against the built guest (tests/impl.ts). */
 describe.each(libs)("$name", ({ explorerAnswer, playerFilter, ratedGrid }) => {
   describe("the Lichess explorer's answers", () => {
     it("a streamed answer is read from its last complete line, not its first", () => {

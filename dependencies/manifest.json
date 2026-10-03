@@ -12,6 +12,23 @@
       "persistent": true,
       "sha256": "9a5542e25e42fbbb48501bae0ab4295cdf0fd0f41219ec3b6c891c4a282e7779",
       "version": "3.53"
+    },
+    {
+      "methods": {
+        "analyse": {
+          "args": [
+            "string",
+            "i32",
+            "i32",
+            "i32"
+          ],
+          "returns": "string"
+        }
+      },
+      "module": "stockfish",
+      "name": "engine",
+      "sha256": "de1517a78b37ea79925b78124a6afb4e8eb20afa3695523131548883fddaed0a",
+      "version": "19.0.0"
     }
   ]
 }

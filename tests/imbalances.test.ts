@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { battery } from "./battery/battery";
 import { libs } from "./impl";
 
-/* Rod's tests, run against Node and against the built guest (tests/impl.ts). */
+/* These tests run against Node and against the built guest (tests/impl.ts). */
 describe.each(libs)("$name", ({ imbalancesOf, CATEGORIES }) => {
   /*
    * Every imbalance the battery names for a position must be among the facts computed for it.

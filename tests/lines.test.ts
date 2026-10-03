@@ -2,7 +2,7 @@ import { Chess } from "chess.js";
 import { describe, expect, it } from "vitest";
 import { libs } from "./impl";
 
-/* Rod's tests, run against Node and against the built guest (tests/impl.ts). */
+/* These tests run against Node and against the built guest (tests/impl.ts). */
 describe.each(libs)("$name", ({ readLine, openingOfLine, positionAfter, theoryTitles, theoryText, pageUrl }) => {
   function uci(fen: string, san: string): string[] {
     const c = new Chess(fen);

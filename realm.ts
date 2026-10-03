@@ -4,10 +4,11 @@ import { producers } from "./realm/producers.ts";
 import { rodHandlers } from "./realm/rod-handlers.ts";
 import { rodTypes } from "./realm/types.ts";
 import { rodViews } from "./realm/views.ts";
+import { ENGINE_MODULE } from "./wasm/lib/config.ts";
 
 /**
- * Chess, as a captured realm: the handlers run as Wasm inside the appliance, and what the
- * realm computes is kept in its own SQLite.
+ * Chess, as a captured realm: the handlers run as Wasm inside the appliance, the engine is the
+ * stockfish registry module, and what the realm computes is kept in its own SQLite.
  *
  * `npm run synth` writes realm.yml, credentials.yml, apis/apis.yml, producers/, types/, views/,
  * dependencies/ and dist/manifest.json from this file. Edit this file, never those.
@@ -65,7 +66,18 @@ page. The engine is GPL-3.0, and so is this realm.`,
 
   handlers: { ...rodHandlers, ...producerHandlers },
 
-  types: rodTypes,
+  types: {
+    ...rodTypes,
+    CandidateMove: {
+      ...rodTypes.CandidateMove,
+      properties: {
+        ...rodTypes.CandidateMove.properties,
+        analysisId:
+          "What the line belongs to: the hash of the engine, how it searched and the lines it found. Plans made from these lines carry the same id.",
+        nodes: "Positions the engine searched for this analysis.",
+      },
+    },
+  },
 
   producers,
 
@@ -101,6 +113,11 @@ page. The engine is GPL-3.0, and so is this realm.`,
       persistent: true,
       init: "db/schema.sql",
       migrations: ["db/0001-openings.sql", "db/0002-skeletons.sql"],
+    },
+    /** Stockfish 19 lite from the registry. How long it searches is in wasm/lib/config.ts. */
+    engine: {
+      ...ENGINE_MODULE,
+      methods: { analyse: { args: ["string", "i32", "i32", "i32"], returns: "string" } },
     },
   },
 });

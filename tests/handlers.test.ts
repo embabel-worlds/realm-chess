@@ -23,7 +23,7 @@ describe.skipIf(!hasTooling)("the book and imbalance handlers, in the guest", ()
   const run = (verb: string, args: unknown) => call(buildGuest(), `chess.${verb}`, args, { host: chessHost(db, noEngine) });
   const fens = battery().map((p) => p.fen);
 
-  it("chess.positionImbalances answers Rod's record for every battery position, structure included", () => {
+  it("chess.positionImbalances answers the public record for every battery position, structure included", () => {
     const rows = run("positionImbalances", { fens }) as Record<string, unknown>[];
     expect(rows).toHaveLength(fens.length);
     rows.forEach((r, i) => {

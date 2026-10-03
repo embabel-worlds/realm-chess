@@ -10,7 +10,7 @@ import { libs } from "./impl";
 
 /*
  * The book moved from JSON files beside the bundle to rows in the realm's SQLite. These hold the
- * move to the answers Rod's realm gave at 86b5bb5, with his own built files as the reference.
+ * move to the answers the Node realm gave at 86b5bb5, with its own built files as the reference.
  */
 
 const rodBook = baselineJson<Book>("dist/data/openings.json");
@@ -36,7 +36,7 @@ describe("db/schema.sql", () => {
 
   it("is the file installed realms hold: a changed init script locks them out of their database", () => {
     expect(createHash("sha256").update(schema).digest("hex")).toBe(
-      "a5155b917fc5ba9dceab12234365a1c8307865c3cc777f1f08f21e069f93d301",
+      "38f0d1b930a1a273c8048475c3a2c46f5b23fcbc0036f3759a6639b2de519b61",
     );
   });
 
@@ -44,7 +44,7 @@ describe("db/schema.sql", () => {
     expect(schema.toString()).not.toMatch(/\bINSERT\b/i);
     const db = new FakeDb([]);
     const columns = (table: string) => db.exec(`SELECT name FROM pragma_table_info('${table}') ORDER BY cid`).map((r) => r.name);
-    expect(columns("analyses")).toEqual(["fen", "config_key", "analysis_id", "depth", "nodes", "lines_json", "elapsed_ms", "created_at"]);
+    expect(columns("analyses")).toEqual(["fen", "config_key", "analysis_id", "depth", "nodes", "lines_json", "records_json", "elapsed_ms", "created_at"]);
     expect(columns("plans")).toEqual(["identity", "kind", "fen_or_line", "analysis_id", "inputs_hash", "skill_sha", "plans_json", "created_at"]);
     expect(columns("theory")).toEqual(["line_key", "title", "extract", "url", "text_sha", "fetched_at", "found"]);
     expect(columns("explorer")).toEqual(["request_key", "operation", "fen", "filters_json", "response_json", "fetched_at"]);
@@ -70,7 +70,7 @@ describe("the book as migrations", () => {
     for (const f of ["db/0001-openings.sql", "db/0002-skeletons.sql"]) expect(statSync(f).size).toBeLessThan(800_000);
   });
 
-  it("holds every named position of Rod's book", () => {
+  it("holds every named position of the Node realm's book", () => {
     const db = new FakeDb();
     const rows = db.exec("SELECT position_key, eco, name, pgn FROM openings");
     expect(rows).toHaveLength(Object.keys(rodBook).length);
@@ -93,7 +93,7 @@ describe("the book as migrations", () => {
 });
 
 describe.each(libs)("$name: structure and line names answer as at 86b5bb5", ({ structureOf: structureFromBook, openingOfLine: lineFromBook }) => {
-  it(`structureOf matches Rod's over ${positions.length} positions, ambiguous skeletons and near matches included`, () => {
+  it(`structureOf matches the Node realm's over ${positions.length} positions, ambiguous skeletons and near matches included`, () => {
     let near = 0, none = 0;
     for (const fen of positions) {
       const rod = structureOf(fen, rodSkeletons);
@@ -110,7 +110,7 @@ describe.each(libs)("$name: structure and line names answer as at 86b5bb5", ({ s
     expect(structureFromBook(new Chess().fen())).toBeNull();
   });
 
-  it("openingOfLine matches Rod's along every battery line", () => {
+  it("openingOfLine matches the Node realm's along every battery line", () => {
     for (const p of battery().filter((b) => b.moves)) {
       const moves = p.moves!.split(/\s+/);
       expect(lineFromBook(moves), p.id).toEqual(openingOfLine(moves, rodBook));

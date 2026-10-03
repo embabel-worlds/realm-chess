@@ -1,6 +1,7 @@
 - description: One of the engine's best lines in a position (Stockfish 19, five lines, depth 18). Reached from Position via HAS_CANDIDATE. THE SCORE IS FOR THE SIDE TO MOVE; `whiteCp` is the same from White's side. `lossCp` is how much worse than the best line this one is, in centipawns — the ONLY field to filter on for 'moves within half a pawn of best' (lossCp <= 50; a pawn is 100). `rank` is the engine's order, 1 to 5. `creates` and `removes` say which imbalances the line changes once its exchanges settle — the best evidence of what a move is for.
   name: CandidateMove
   properties:
+    analysisId: "What the line belongs to: the hash of the engine, how it searched and the lines it found. Plans made from these lines carry the same id."
     candidateId:
       description: "The FEN and the first move in UCI. Identity: stable across searches, where the rank is not."
       metadata:
@@ -12,6 +13,7 @@
     fen: The position this line was computed in.
     lossCp: Centipawns worse than the best line; 0 for the best. 'Within half a pawn' is lossCp <= 50. Null when the best line is a mate and this one is not.
     mate: Moves to mate, positive when the side to move mates. Null otherwise.
+    nodes: Positions the engine searched for this analysis.
     pvSan: The whole line in SAN, space-separated.
     pvUci: The whole line in UCI.
     rank: "The engine's order: 1 is its best, up to 5. Sort by it; never filter on it for 'within N pawns of best' — that is lossCp."

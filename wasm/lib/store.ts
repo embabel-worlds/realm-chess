@@ -3,6 +3,13 @@ import type { Book, Skeletons } from "./openings.ts";
 
 /*
  * The realm's SQLite: the opening book, and the results it keeps (db/schema.sql).
+ *
+ * Every write is a keyed upsert. When two dispatches change the database at once, the host
+ * replays the loser's keyed writes onto the newer copy, unless the loser also read a table it
+ * writes. A kept analysis is read before it is written, so a dispatch that loses that race has
+ * its writes dropped: its answer still stands and only the kept row is missed, which the next
+ * read searches again. Rows are keyed by position and configuration, and their content identity
+ * is the analysis id, so nothing a reader saw can be overwritten by something else.
  */
 
 /** One row back from SQLite. The host hands every value back as text. */
@@ -57,4 +64,49 @@ export async function skeletonsFor(db: Db, pawns: string, nearby: { rows?: Skele
     for (const r of rows) nearby.rows[str(r.pawns_key)] = skeletonOf(r);
   }
   return nearby.rows;
+}
+
+/** An analysis as it is kept: the lines the engine found for a position under one configuration. */
+export interface KeptAnalysis {
+  fen: string;
+  analysisId: string;
+  depth: number;
+  nodes: number;
+  linesJson: string;
+  /** The candidate rows made from the lines, without the analysis fields. */
+  recordsJson: string;
+  elapsedMs: number;
+  createdAt: number;
+}
+
+/** The kept analyses for these positions under one configuration, by FEN. */
+export async function keptAnalyses(db: Db, configKey: string, fens: string[]): Promise<Map<string, KeptAnalysis>> {
+  const out = new Map<string, KeptAnalysis>();
+  if (fens.length === 0) return out;
+  const rows = await db.exec(
+    `SELECT fen, analysis_id, depth, nodes, lines_json, records_json, elapsed_ms, created_at FROM analyses ` +
+      `WHERE config_key = ${sqlText(configKey)} AND fen IN (${sqlList([...new Set(fens)])})`,
+  );
+  for (const r of rows) {
+    out.set(str(r.fen), {
+      fen: str(r.fen),
+      analysisId: str(r.analysis_id),
+      depth: num(r.depth),
+      nodes: num(r.nodes),
+      linesJson: str(r.lines_json),
+      recordsJson: str(r.records_json),
+      elapsedMs: num(r.elapsed_ms),
+      createdAt: Date.parse(str(r.created_at)),
+    });
+  }
+  return out;
+}
+
+/** Keeps an analysis, replacing whatever was kept for the position under that configuration. */
+export async function keepAnalysis(db: Db, configKey: string, a: KeptAnalysis): Promise<void> {
+  await db.exec(
+    `INSERT OR REPLACE INTO analyses (fen, config_key, analysis_id, depth, nodes, lines_json, records_json, elapsed_ms, created_at) VALUES (` +
+      `${sqlText(a.fen)}, ${sqlText(configKey)}, ${sqlText(a.analysisId)}, ${Math.trunc(a.depth)}, ${Math.trunc(a.nodes)}, ` +
+      `${sqlText(a.linesJson)}, ${sqlText(a.recordsJson)}, ${Math.trunc(a.elapsedMs)}, ${sqlText(new Date(a.createdAt).toISOString())})`,
+  );
 }

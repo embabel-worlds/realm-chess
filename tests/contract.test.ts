@@ -4,7 +4,7 @@ import { parse } from "yaml";
 import { baselineJson, baselineYaml } from "./baseline/rod";
 
 /*
- * The public contract, compared with Rod's realm at 86b5bb5 after normalising away what only
+ * The public contract, compared with the Node realm at 86b5bb5 after normalising away what only
  * says how a file is laid out: the labels and their properties, the relationships the graph
  * offers, the views with their params and defaults, and the handlers with their schemas.
  *
@@ -14,12 +14,12 @@ import { baselineJson, baselineYaml } from "./baseline/rod";
  * - the relationships still to be ported are not produced yet, listed in PENDING.
  */
 
-interface RodType { name: string; description: string; properties: Record<string, unknown>; virtualJoins?: { anchorLabel: string; relationship: string; keyField: string; recordKeyField: string }[] }
+interface NodeType { name: string; description: string; properties: Record<string, unknown>; virtualJoins?: { anchorLabel: string; relationship: string; keyField: string; recordKeyField: string }[] }
 interface Entry { namespace: string; name: string; description?: string; inputSchema?: unknown; outputSchema?: unknown }
 interface Join { anchorLabel: string; relationship: string; targetLabel: string; keyField: string; recordKeyField: string }
 
-const rodTypes = baselineYaml<RodType[]>("types/chess.yml");
-const ourTypes = parse(readFileSync("types/chess.yml", "utf8")) as RodType[];
+const rodTypes = baselineYaml<NodeType[]>("types/chess.yml");
+const ourTypes = parse(readFileSync("types/chess.yml", "utf8")) as NodeType[];
 const rodManifest = baselineJson<{ entries: Entry[] }>("dist/manifest.json");
 const ourManifest = JSON.parse(readFileSync("dist/manifest.json", "utf8")) as { entries: Entry[] };
 const ourProducers = readdirSync("producers").map((f) => parse(readFileSync(`producers/${f}`, "utf8")) as { name: string; handler: string; joins: Join[] });
@@ -30,9 +30,8 @@ const ADDED_PROPERTIES: Record<string, string[]> = { CandidateMove: ["analysisId
 const ADDED_HANDLERS = ["rowsImbalances", "rowsOpeningOfPosition", "rowsOpeningOfLine", "rowsCandidates", "status"];
 const ADDED_RELATIONSHIPS = ["AssistantUser-HAS_CHESS_STATUS->ChessStatus"];
 
-/* Rod's relationships the captured realm does not produce yet. Each port removes its own. */
+/* The Node realm's relationships the captured realm does not produce yet. Each port removes its own. */
 const PENDING = [
-  "Position-HAS_CANDIDATE->CandidateMove",
   "Position-HAS_PLAN->Plan",
   "GameLine-HAS_PLAN->Plan",
   "GameLine-HAS_THEORY->OpeningTheory",
@@ -49,11 +48,11 @@ describe("types", () => {
   const rod = Object.fromEntries(rodTypes.map((t) => [t.name, t]));
   const ours = Object.fromEntries(ourTypes.map((t) => [t.name, t]));
 
-  it("has Rod's labels, with only the listed additions", () => {
+  it("has the Node realm's labels, with only the listed additions", () => {
     expect(sorted(Object.keys(ours))).toEqual(sorted([...Object.keys(rod), ...ADDED_LABELS.filter((l) => l in ours)]));
   });
 
-  it("gives every label Rod's description and properties, with only the listed additions", () => {
+  it("gives every label the Node realm's description and properties, with only the listed additions", () => {
     for (const [name, t] of Object.entries(rod)) {
       expect(ours[name].description, name).toBe(t.description);
       const added = (ADDED_PROPERTIES[name] ?? []).filter((p) => p in ours[name].properties);
@@ -68,7 +67,7 @@ describe("relationships", () => {
   const rodJoins = rodTypes.flatMap((t) => (t.virtualJoins ?? []).map((j) => ({ ...j, targetLabel: t.name })));
   const ourJoins = ourProducers.flatMap((p) => p.joins);
 
-  it("offers each of Rod's relationships with his key fields, apart from those still pending", () => {
+  it("offers each of the Node realm's relationships with its key fields, apart from those still pending", () => {
     for (const j of rodJoins) {
       const k = key(j.anchorLabel, j.relationship, j.targetLabel);
       const mine = ourJoins.find((o) => key(o.anchorLabel, o.relationship, o.targetLabel) === k);
@@ -97,7 +96,7 @@ describe("views", () => {
   const rod = baselineYaml<View[]>("views/chess.yml");
   const ours = parse(readFileSync("views/chess.yml", "utf8")) as View[];
 
-  it("keeps Rod's views with their params, defaults and cypher", () => {
+  it("keeps the Node realm's views with their params, defaults and cypher", () => {
     for (const v of rod) {
       const mine = ours.find((o) => o.name === v.name);
       expect(mine, v.name).toBeDefined();
@@ -116,7 +115,7 @@ describe("handlers", () => {
   const rod = Object.fromEntries(rodManifest.entries.map((e) => [e.name, e]));
   const ours = Object.fromEntries(ourManifest.entries.map((e) => [e.name, e]));
 
-  it("keeps Rod's ten handlers with their names, descriptions and schemas", () => {
+  it("keeps the Node realm's ten handlers with their names, descriptions and schemas", () => {
     expect(Object.keys(rod)).toHaveLength(10);
     for (const [name, e] of Object.entries(rod)) {
       expect(ours[name], name).toBeDefined();

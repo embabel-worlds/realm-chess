@@ -1,6 +1,6 @@
 import type { CapturedViewSpec } from "@embabel/realm-types";
 
-/* Rod's thirteen views, exactly as views/chess.yml had them at 86b5bb5. */
+/* The thirteen views, exactly as the Node realm's views/chess.yml had them at 86b5bb5. */
 export const rodViews: CapturedViewSpec[] = [
   {
     "name": "BestMoves",

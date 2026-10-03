@@ -845,6 +845,39 @@
       }
     },
     {
+      "description": "The engine's best lines in each position the host names, as CandidateMove rows carrying the analysis they came from. Pages when there are more new positions than one dispatch can search.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "cursor": {
+            "description": "This realm's own next cursor, resent by the host.",
+            "maxLength": 8,
+            "type": "string"
+          },
+          "fens": {
+            "description": "The Position FENs the host is fetching for.",
+            "items": {
+              "maxLength": 2048,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 256,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "fens"
+        ],
+        "type": "object"
+      },
+      "name": "rowsCandidates",
+      "namespace": "chess",
+      "outputSchema": {
+        "type": "object"
+      }
+    },
+    {
       "description": "Silman's imbalances of each position the host names, as PositionImbalances rows.",
       "inputSchema": {
         "additionalProperties": false,

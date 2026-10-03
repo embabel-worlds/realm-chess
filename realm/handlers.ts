@@ -3,7 +3,7 @@ import type { HandlerSpec } from "@embabel/realm-types";
 /*
  * The handlers the graph's producers call. A captured producer sends the anchor keys it is
  * fetching for as one list and expects `{ rows, next }` back, so each of these wraps one of
- * Rod's handlers for that shape.
+ * the public handlers for that shape.
  */
 
 const keys = (description: string) => ({
@@ -36,6 +36,21 @@ export const producerHandlers = {
     namespace: "chess",
     description: "The deepest book name along each game line the host names, as Opening rows.",
     input: { type: "object", additionalProperties: false, properties: { lines }, required: ["lines"] },
+    output: rows,
+  },
+  rowsCandidates: {
+    namespace: "chess",
+    description:
+      "The engine's best lines in each position the host names, as CandidateMove rows carrying the analysis they came from. Pages when there are more new positions than one dispatch can search.",
+    input: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        fens,
+        cursor: { type: "string", maxLength: 8, description: "This realm's own next cursor, resent by the host." },
+      },
+      required: ["fens"],
+    },
     output: rows,
   },
 } satisfies Record<string, HandlerSpec>;

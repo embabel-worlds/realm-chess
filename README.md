@@ -38,41 +38,90 @@ RETURN m.bandLabel, m.san, m.share, m.scoreForMover ORDER BY toInteger(m.band), 
 
 ## How it is put together
 
+The realm is a captured realm: `realm.ts` declares it, its handlers run as Wasm inside the
+appliance, the engine is a registry module the appliance mounts, and everything the realm works
+out is kept in its own SQLite.
+
 | Piece | What it is |
 |---|---|
-| `src/lib/engine.ts` | Stockfish 19, lite single-threaded WebAssembly build, over UCI under Node. |
-| `src/lib/imbalances.ts` | Silman's imbalances from a FEN, as plain sentences; and what a line changes about them. |
-| `src/lib/lines.ts` | An engine line read for what it does — its moves, the imbalances it creates and removes — never for what it is for. |
-| `src/lib/openings.ts` | The Lichess opening book (CC0): by position, along a game line, and by pawn skeleton. |
-| `src/lib/theory.ts` | Chess Opening Theory wikibook page titles for a line, and the page text trimmed to theory. |
-| `apis/wikibooks.yml` | The Wikibooks MediaWiki API, declared — the only network the realm uses. |
-| `src/api/chess.ts` | The verbs: `analysePosition`, `positionImbalances`, `openingLookup`, `explainPlans`. |
-| `producers/engine.yml` | One producer per verb, keyed by FEN, cached per position. |
-| `types/chess.yml` | `Position` → `HAS_IMBALANCES` / `IN_OPENING` / `HAS_CANDIDATE` / `HAS_PLAN`. |
-| `views/chess.yml` | `BestMoves`, `ImbalancesOf`, `OpeningOf`, `PlansInPosition`; by line, `OpeningOfLine`, `TheoryOfLine`, `PlansInLine`. |
+| `realm.ts`, `realm/` | The definition: metadata, handlers, types, producers, views, the Lichess API, the two dependencies. |
+| `wasm/handlers.ts` | The verbs. The ten public ones keep the Node realm's names and schemas; `rows*` serve the graph's producers. |
+| `wasm/lib/imbalances.ts` | Silman's imbalances from a FEN, as plain sentences; and what a line changes about them. |
+| `wasm/lib/lines.ts` | An engine line read for what it does, never for what it is for. |
+| `wasm/lib/openings.ts` | Opening names by position, along a game line, and by pawn skeleton, over book rows. |
+| `wasm/lib/engine.ts` | The call to the stockfish module, and its lines as candidate records. |
+| `wasm/lib/config.ts` | The engine's identity, its node budget, the depth cap, the deadline marks, the TTL. |
+| `wasm/lib/store.ts` | The realm's SQLite: book reads, kept analyses. |
+| `wasm/lib/chess.js` | chess.js, vendored by `scripts/vendor-chess.mjs`: the guest can import only from `wasm/`. |
+| `db/schema.sql` | The tables. Frozen once installed: changes go in a new `db/NNNN-*.sql` migration. |
+| `db/0001-openings.sql`, `db/0002-skeletons.sql` | The Lichess opening book (CC0) and its pawn skeletons, written by `scripts/book.mjs`. |
+| `realm.yml`, `credentials.yml`, `apis/apis.yml`, `producers/`, `types/`, `views/`, `dependencies/`, `dist/manifest.json` | Written by synth from `realm.ts`. Don't edit by hand. |
 | `skills/chess-plans/` | The plan knowledge: Silman's method, what each imbalance calls for, a table of pawn structures and their plans, how to use the engine. |
-| `apps/chesscalator.html` | The board: imbalances above it, the game stepped through with buttons, arrow keys or the browser's Back, and a link that reopens the same position. |
-| `tests/battery/positions.yml` | Fifteen common positions and the plans theory gives each side, including pairs from one opening family with opposite plans. |
+| `apps/chesscalator.html` | The board. |
+| `tests/battery/positions.yml` | Fifteen common positions and the plans theory gives each side. |
 
-`explainPlans` sends the imbalances (numbered), the opening name or the book structure the pawns
-match, and the engine's candidate moves to `gateway.ai.complete` with `skills: ["chess-plans"]`.
-The model activates the skill through the framework's `Skills`, the way chat does, and cites
-imbalances by number, so a plan cannot cite one that is not there.
+## The engine
+
+Stockfish 19 lite, single thread, built as a Wasm library with no imports, is the registry
+module `stockfish` 19.0.0. The realm declares it as its `engine` dependency with one method,
+`analyse(fen, nodes, maxDepth, multiPv)`, which answers JSON.
+
+A search is timed by a node budget, the way a chess engine is timed without a clock: the same
+position with the same budget always gives the same lines. The numbers are in
+`wasm/lib/config.ts`:
+
+| | |
+|---|---|
+| `full` budget | 3,500,000 nodes: about three seconds on the SIMD module under a native Wasm runtime |
+| depth cap | 18 |
+| lines | 5 |
+
+This is a deliberate change from the Node realm, which ran `go depth 18` and waited up to 45
+seconds. Under a native runtime `full` reaches depth 18 on every battery position (0.6 to 3.5
+seconds each, measured under V8). On a slower runtime the same budget takes longer, so every
+row says the `depth` and `nodes` it reached.
+
+Lines are kept in SQLite for seven days, looked up by position and configuration: the module's
+hash, the budget, the depth cap and the number of lines. Each row carries `analysisId`, the hash
+of that configuration and the lines. Searching again after the lines expire finds the same lines
+and so the same `analysisId`; anything made from those lines still describes them.
+
+A single position always answers in one read. For many new positions at once, a page searches
+while it has spent under 60 percent of the 30 second dispatch deadline, about six at three
+seconds, and hands the rest to the next page; past 90 percent it stops even for kept lines.
+The host bounds a fetch, and refuses past a bound with its own code:
+
+| Bound | Code | What it means here (measured) |
+|---|---|---|
+| 256 keys | `KEY_BOUND` | at most 256 positions in one query |
+| 1024 rows | `ROW_BOUND` | 204 positions at five lines each |
+| 1 MiB of rows | `RESULT_BYTES` | rows run to about 6 KB a position, so about 140 kept positions in one fetch; this bound comes first |
+| 16 pages | `PAGE_BOUND` | about 96 new positions at six a page |
+
+A refused fetch keeps what its pages searched, so asking again carries on from there.
+`MEASURE=1 npx vitest run tests/measure.test.ts` measures the row sizes again.
 
 ## Build, test, install
 
 ```bash
 npm install
-npm run check        # typecheck, unit tests, build, page harness
+npm run check        # typecheck, vendor chess.js, write the book, synth, tests
 ```
 
-`host: docker` — the handler runs in the appliance's Node sandbox, which is seeded with `dist/`
-and nothing else, so `npm run build` bundles the handler, copies the engine beside it and builds
-the opening book. Install by path from a checkout under the appliance's realms mount, then
-`realm_refresh` after each edit. Producer caches outlive a refresh: restart the appliance to see
-a handler or skill change in the views.
+The tests that run the handlers inside the guest build `wasm/handlers.ts` the way the appliance
+does, with the appliance's own build script and Javy 9, then dispatch into it with the realm's
+SQLite and engine answered from the test. Point `EMBABEL_WASM_TOOLING` at the appliance's
+`tooling/wasm-realm` folder, and `STOCKFISH_WASM` at the stockfish module (a `wasm-stockfish`
+checkout beside this one is found by itself). Without them those tests are skipped.
 
-- `tests/*.test.ts` — the imbalances of every battery position, and what lines change.
+- `tests/imbalances.test.ts`, `tests/lines.test.ts`, `tests/explorer.test.ts`: the unit tests,
+  run under Node and again inside the guest.
+- `tests/book.test.ts`: the schema, pinned by its hash, and the book in SQLite answering as the
+  JSON files did at 86b5bb5.
+- `tests/contract.test.ts`: labels, relationships, views and handlers compared with 86b5bb5, with
+  the allowed differences listed in the test.
+- `tests/handlers.test.ts`, `tests/engine.test.ts`: the handlers in the guest, the engine's
+  paging and the host's bounds with a fake clock.
 - `tests/app.spec.mjs` — the page, headless, against envelopes captured from a live appliance
   (`tests/fixtures/capture.mjs` recaptures them).
 - `tests/live/drive.mjs` — the real page on a running appliance.

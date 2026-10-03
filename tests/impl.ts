@@ -9,9 +9,9 @@ import { chessHost, FakeDb } from "./guest/host";
 import { bookLines, buildBook, buildSkeletons } from "../scripts/book.mjs";
 
 /*
- * Rod's pure board code, twice: as Node runs it, and inside the realm's built Javy guest, where
+ * The pure board code, twice: as Node runs it, and inside the realm's built Javy guest, where
  * each call is a real dispatch into the module the appliance would run, reading the book from
- * SQLite. His tests run against both, since passing under Node says nothing about the guest.
+ * SQLite. The tests run against both, since passing under Node says nothing about the guest.
  */
 export interface Lib {
   name: string;
