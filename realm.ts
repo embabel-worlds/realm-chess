@@ -34,6 +34,7 @@ page. The engine is GPL-3.0, and so is this realm.`,
   author: "Rod Johnson",
   tags: ["chess", "games", "engine", "virtual-cypher", "apps", "skills"],
   capabilities: ["model"],
+  skills: ["chess-plans"],
   exports: [
     "chess",
     "lichess",
@@ -78,6 +79,13 @@ page. The engine is GPL-3.0, and so is this realm.`,
         nodes: "Positions the engine searched for this analysis.",
       },
     },
+    Plan: {
+      ...rodTypes.Plan,
+      properties: {
+        ...rodTypes.Plan.properties,
+        analysisId: "The engine analysis these plans were made from: the same id as the CandidateMove rows they describe.",
+      },
+    },
     ChessStatus: {
       description:
         "What the realm could not do, as it last recorded it. Reached from the owner via HAS_CHESS_STATUS. It knows only what a finished call recorded: a call that died records nothing, and a refused Lichess call does not say why.",
@@ -112,6 +120,13 @@ RETURN s.lichess AS lichess, s.model AS model, s.lastRefusal AS lastRefusal, s.a
       docs: "https://lichess.org/account/oauth/token",
       description: "A Lichess personal API token, no scopes needed: master games and a player's own games by position.",
     },
+    wikibooks: {
+      kind: "bearer",
+      provider: "Wikimedia",
+      docs: "https://api.wikimedia.org/wiki/Special:AppManagement",
+      description:
+        "A Wikimedia personal API token, for reading the Chess Opening Theory wikibook. The wikibook is public; the appliance only calls APIs it holds a credential for.",
+    },
   },
 
   apis: {
@@ -124,6 +139,14 @@ RETURN s.lichess AS lichess, s.model AS model, s.lastRefusal AS lastRefusal, s.a
       operationIds: ["mastersExplorer", "lichessExplorer", "playerExplorer"],
       operations: { playerExplorer: { response: "ndjson" } },
     },
+    wikibooks: {
+      url: "wikibooks.json",
+      type: "openapi",
+      name: "wikibooks",
+      auth: "bearer",
+      credential: "wikibooks",
+      operationIds: ["wikibooksQuery"],
+    },
   },
 
   dependencies: {
@@ -134,7 +157,7 @@ RETURN s.lichess AS lichess, s.model AS model, s.lastRefusal AS lastRefusal, s.a
       sha256: "9a5542e25e42fbbb48501bae0ab4295cdf0fd0f41219ec3b6c891c4a282e7779",
       persistent: true,
       init: "db/schema.sql",
-      migrations: ["db/0001-openings.sql", "db/0002-skeletons.sql", "db/0003-status.sql"],
+      migrations: ["db/0001-openings.sql", "db/0002-skeletons.sql", "db/0003-status.sql", "db/0004-lichess.sql"],
     },
     /** Stockfish 19 lite from the registry. How long it searches is in wasm/lib/config.ts. */
     engine: {

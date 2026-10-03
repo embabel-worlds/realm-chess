@@ -107,6 +107,7 @@
 - description: "A plan for one side in a position: what it should be trying to achieve and why, with its key moves, the imbalances it uses and which of the engine's candidate moves carry it. Decided by a model with the chess-plans skill, from the position's imbalances, opening and engine lines — a judgement, not a computation. Reached from Position via HAS_PLAN; up to three per side, `priority` 1 first. `summary` is the same on every plan of a position: who stands better and how the plans meet. Costs one engine search and one model call per new position."
   name: Plan
   properties:
+    analysisId: "The engine analysis these plans were made from: the same id as the CandidateMove rows they describe."
     engineEvidence: Which of the engine's candidate moves carry the plan.
     fen: The position.
     idea: What the plan achieves and why the position calls for it.

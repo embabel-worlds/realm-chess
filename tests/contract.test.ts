@@ -26,21 +26,15 @@ const ourProducers = readdirSync("producers").map((f) => parse(readFileSync(`pro
 
 /* Labels, properties and handlers that are additions, each with the ticket that brings it. */
 const ADDED_LABELS = ["ChessStatus"];
-const ADDED_PROPERTIES: Record<string, string[]> = { CandidateMove: ["analysisId", "nodes"] };
-const ADDED_HANDLERS = ["rowsImbalances", "rowsOpeningOfPosition", "rowsOpeningOfLine", "rowsCandidates", "status"];
+const ADDED_PROPERTIES: Record<string, string[]> = { CandidateMove: ["analysisId", "nodes"], Plan: ["analysisId"] };
+const ADDED_HANDLERS = [
+  "rowsImbalances", "rowsOpeningOfPosition", "rowsOpeningOfLine", "rowsCandidates", "status", "rowsTheory", "rowsPositionPlans",
+  "rowsLinePlans", "rowsMasterMoves", "rowsMasterGames", "rowsPlayerMoves", "rowsPlayerGames", "rowsRatedMoves",
+];
 const ADDED_RELATIONSHIPS = ["AssistantUser-HAS_CHESS_STATUS->ChessStatus"];
 
 /* The Node realm's relationships the captured realm does not produce yet. Each port removes its own. */
-const PENDING = [
-  "Position-HAS_PLAN->Plan",
-  "GameLine-HAS_PLAN->Plan",
-  "GameLine-HAS_THEORY->OpeningTheory",
-  "Position-MASTERS_PLAYED->MasterMove",
-  "Position-MASTER_GAME->MasterGame",
-  "Position-PLAYER_PLAYED->PlayerMove",
-  "Position-PLAYER_GAME->PlayerGame",
-  "Position-PLAYED_AT_RATING->RatedMove",
-];
+const PENDING: string[] = [];
 
 const sorted = <T>(xs: T[]) => [...xs].sort();
 

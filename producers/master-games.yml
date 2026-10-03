@@ -1,0 +1,13 @@
+handler: chess.rowsMasterGames
+joins:
+  - anchorLabel: Position
+    keyField: fen
+    recordKeyField: fen
+    relationship: MASTER_GAME
+    targetLabel: MasterGame
+keyArgument: fens
+name: master-games
+page:
+  argument: cursor
+  maxPages: 16
+version: 1

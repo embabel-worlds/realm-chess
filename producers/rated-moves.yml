@@ -1,0 +1,18 @@
+handler: chess.rowsRatedMoves
+joins:
+  - anchorLabel: Position
+    keyField: fen
+    recordKeyField: fen
+    relationship: PLAYED_AT_RATING
+    targetLabel: RatedMove
+keyArgument: fens
+name: rated-moves
+page:
+  argument: cursor
+  maxPages: 16
+pushdown:
+  - argument: band
+    property: band
+  - argument: speed
+    property: speed
+version: 1

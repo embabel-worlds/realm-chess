@@ -77,8 +77,4 @@ describe.skipIf(!hasTooling)("the book and imbalance handlers, in the guest", ()
     run("rowsImbalances", { fens });
     expect(Date.now() - t).toBeLessThan(5000);
   });
-
-  it("the handlers not yet ported say so", () => {
-    expect(() => run("theoryOfGameLine", { lines: ["e4"] })).toThrow(/not available in this build/);
-  });
 });

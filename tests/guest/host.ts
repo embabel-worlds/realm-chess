@@ -73,3 +73,55 @@ export function chessHost(db: FakeDb, engine: Analyse): HostCall & { searches: n
   host.searches = 0;
   return host;
 }
+
+/** A host call the test answers: an API operation or the model. Throw to refuse; give the error a `code` to code it. */
+export type Answer = (args: Record<string, unknown>) => unknown;
+
+export interface RealmHostOptions {
+  engine?: Analyse;
+  /** API operations by host call name, `lichess_mastersExplorer` and so on. */
+  apis?: Record<string, Answer>;
+  model?: Answer;
+  /** The guest's clock, so each call can be stamped with the time it was made. */
+  clock?: { now: number };
+}
+
+export interface CallRecord {
+  tool: string;
+  args: Record<string, unknown>;
+  at: number;
+}
+
+/**
+ * Answers every host call a chess dispatch makes: its SQLite, the engine, the declared APIs and
+ * the model. Every call but SQLite's is recorded with the guest clock's time.
+ */
+export function realmHost(db: FakeDb, o: RealmHostOptions = {}): HostCall & { searches: number; calls: CallRecord[]; count(tool: string): number } {
+  const base = chessHost(db, o.engine ?? (() => {
+    throw new Error("no engine in this test");
+  }));
+  const host = ((tool: string, args: unknown) => {
+    if (tool.startsWith("dep:")) {
+      const r = base(tool, args);
+      host.searches = base.searches;
+      return r;
+    }
+    host.calls.push({ tool, args: args as Record<string, unknown>, at: o.clock?.now ?? Date.now() });
+    if (tool === "ai_complete") {
+      if (!o.model) throw Object.assign(new Error("refused"), { code: "MODEL_NOT_GRANTED" });
+      return o.model(args as Record<string, unknown>);
+    }
+    const api = o.apis?.[tool];
+    if (!api) throw new Error(`unexpected host call ${tool}`);
+    return api(args as Record<string, unknown>);
+  }) as HostCall & { searches: number; calls: CallRecord[]; count(tool: string): number };
+  host.searches = 0;
+  host.calls = [];
+  host.count = (tool: string) => host.calls.filter((c) => c.tool === tool).length;
+  return host;
+}
+
+/** A refusal as the host sends an API one: a message and no code, whatever the cause. */
+export const apiRefusal = () => {
+  throw new Error("The API call was refused");
+};

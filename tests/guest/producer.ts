@@ -20,6 +20,8 @@ export interface Fetch {
   /** The cursor each page was sent. */
   cursors: (string | undefined)[];
   refused?: Refusal;
+  /** The handler's error, when it failed. */
+  error?: string;
   dispatches: number;
 }
 
@@ -36,6 +38,10 @@ export async function fetchProducer(o: {
   db: FakeDb;
   host: HostCall;
   clock: Clock;
+  /** Fake time each read of the guest's clock takes. A guest that waits spins on its clock, so a test of waiting needs it to move. */
+  tickMs?: number;
+  /** Arguments the host adds to every page, such as the values a query pushed down. */
+  extra?: Record<string, unknown>;
 }): Promise<Fetch> {
   const out: Fetch = { rows: [], pages: [], cursors: [], dispatches: 0 };
   if (o.keys.length > LIMITS.keys) return { ...out, refused: "KEY_BOUND" };
@@ -50,13 +56,13 @@ export async function fetchProducer(o: {
     out.cursors.push(cursor);
     const started = o.clock.now;
     o.db.begin();
-    const d = dispatch(o.module, o.handler, { [o.keyArgument]: o.keys, ...(cursor === undefined ? {} : { cursor }) }, {
+    const d = dispatch(o.module, o.handler, { [o.keyArgument]: o.keys, ...o.extra, ...(cursor === undefined ? {} : { cursor }) }, {
       host: o.host,
-      clock: () => o.clock.now,
+      clock: () => (o.clock.now += o.tickMs ?? 0),
     });
     if (d.error !== undefined || o.clock.now - started > LIMITS.deadlineMs) {
       o.db.rollback();
-      return { ...out, refused: "HANDLER_FAILED" };
+      return { ...out, refused: "HANDLER_FAILED", error: d.error };
     }
     o.db.commit();
     const page = d.result as { rows: Record<string, unknown>[]; next: string | null };

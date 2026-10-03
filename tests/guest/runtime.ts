@@ -32,12 +32,14 @@ const built = new Map<string, WebAssembly.Module>();
 
 /**
  * Compiles the realm's wasm/ folder, with `entry` standing in for wasm/handlers.ts when given
- * (a test-only entry that reaches the realm's lib files). Cached by content.
+ * (a test-only entry that reaches the realm's lib files), and any file under wasm/ replaced by
+ * `overrides`, keyed by its path inside wasm/. Cached by content.
  */
-export function buildGuest(entry?: string): WebAssembly.Module {
+export function buildGuest(entry?: string, overrides: Record<string, string> = {}): WebAssembly.Module {
   if (!hasTooling) throw new Error("EMBABEL_WASM_TOOLING is not set to the appliance's wasm-realm tooling folder");
   const hash = createHash("sha256");
   for (const f of filesUnder(join(ROOT, "wasm"))) hash.update(f).update(readFileSync(f));
+  for (const [path, text] of Object.entries(overrides)) hash.update(path).update(text);
   hash.update(entry ?? "").update(readFileSync(join(TOOLING!, "shim.js"))).update(readFileSync(join(TOOLING!, "build-handlers-wasm.mjs")));
   const key = hash.digest("hex");
   const hit = built.get(key);
@@ -48,6 +50,7 @@ export function buildGuest(entry?: string): WebAssembly.Module {
     const work = mkdtempSync(join(tmpdir(), "realm-chess-guest-"));
     cpSync(join(ROOT, "wasm"), join(work, "wasm"), { recursive: true });
     if (entry !== undefined) writeFileSync(join(work, "wasm", "handlers.ts"), entry);
+    for (const [path, text] of Object.entries(overrides)) writeFileSync(join(work, "wasm", path), text);
     mkdirSync(cacheDir, { recursive: true });
     const run = spawnSync(process.execPath, [
       join(TOOLING!, "build-handlers-wasm.mjs"), "--handlers", join(work, "wasm", "handlers.ts"), "--out", cacheFile,

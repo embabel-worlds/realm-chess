@@ -1,0 +1,115 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Wikibooks MediaWiki API — page queries",
+    "version": "1",
+    "description": "The subset realm-chess uses to read the Chess Opening Theory wikibook (CC BY-SA 4.0): which of a line's pages exist, and the plain text of one.\n"
+  },
+  "servers": [
+    {
+      "url": "https://en.wikibooks.org/w"
+    }
+  ],
+  "paths": {
+    "/api.php": {
+      "get": {
+        "operationId": "wikibooksQuery",
+        "summary": "A MediaWiki query — page existence (prop=info) or plain-text extracts (prop=extracts).",
+        "parameters": [
+          {
+            "name": "action",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "query"
+              ]
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "json"
+              ]
+            }
+          },
+          {
+            "name": "prop",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "info",
+                "extracts"
+              ]
+            }
+          },
+          {
+            "name": "titles",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Up to 50 titles separated by |"
+          },
+          {
+            "name": "explaintext",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          },
+          {
+            "name": "redirects",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "1"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The query result.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "wikimediaToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "description": "A Wikimedia personal API token. The pages read are public."
+      }
+    }
+  },
+  "security": [
+    {
+      "wikimediaToken": []
+    }
+  ]
+}

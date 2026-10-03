@@ -41,3 +41,32 @@ export const ANALYSIS_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 /** The most keys the host sends a producer at once. */
 export const MAX_KEYS = 256;
+
+/*
+ * The worst case of each step a handler may take, for the yield rule: a step starts only when
+ * it can finish inside the page (see clock.ts). These are the host's own bounds where it has one.
+ */
+
+/** A `full` search, calibrated above. */
+export const SEARCH_MS = 3_000;
+
+/** One API call: the host's transport gives up after 10 seconds. */
+export const API_CALL_MS = 10_000;
+
+/** Lichess asks for one request at a time on a token; the Node realm spaced them 1.1 s apart. */
+export const LICHESS_SPACING_MS = 1_100;
+
+/** One model call. The host bounds it only by the dispatch deadline, so this is the measured worst case. */
+export const MODEL_CALL_MS = 6_000;
+
+/** Output tokens asked for on each model call. Two calls fit the host's 4096 per dispatch. */
+export const MODEL_OUTPUT_TOKENS = 2_048;
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/* How long kept answers stay fresh, as the Node realm's producers cached them. */
+export const MASTERS_TTL_MS = 30 * DAY_MS;
+export const RATED_TTL_MS = 30 * DAY_MS;
+export const PLAYER_TTL_MS = DAY_MS;
+export const THEORY_TTL_MS = 7 * DAY_MS;
+export const PLANS_TTL_MS = 7 * DAY_MS;
