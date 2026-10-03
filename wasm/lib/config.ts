@@ -74,10 +74,10 @@ export const PLANS_TTL_MS = 7 * DAY_MS;
 /*
  * Deepening in the background. A position someone looked at is queued, and a scheduled tick
  * searches it again with more nodes and a higher depth cap than a page can wait for. A tick
- * spends at most DEEPEN_TICK_MS, well short of the 30 s dispatch deadline: before each round it
- * checks that a round as long as the last one (or, before the first, as long as the calibration
- * says) still fits. With the engine's batch call a round is DEEPEN_WIDTH searches side by side;
- * without it, a round is one search, so the time is checked before every search.
+ * spends at most DEEPEN_TICK_MS, well short of the 30 s dispatch deadline. Its first round is one
+ * search, timed; before every round it checks that the round still fits, by the calibration for
+ * the first and by measurement after. With the engine's batch call the later rounds are
+ * DEEPEN_WIDTH searches side by side.
  */
 export const DEEP_NODES = 6_000_000;
 export const DEEP_DEPTH_CAP = 22;

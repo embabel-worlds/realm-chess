@@ -140,19 +140,25 @@ describe.skipIf(!hasTooling)("deepening in the background, in the guest", () => 
   });
 
   /*
-   * Each search costs the calibrated DEEP_SEARCH_MS. One search a round without the batch call;
-   * DEEPEN_WIDTH side by side, or one after another, with it. Every tick ends inside its budget.
+   * Each search costs the calibrated DEEP_SEARCH_MS. The first round is one search; later rounds
+   * are DEEPEN_WIDTH with the batch call, side by side or one after another, and one without it.
+   * A tick ends inside its budget, or one search past it when the host runs a batch one search
+   * after another.
    */
   const modes = hasBatch
-    ? [{ name: "batch, side by side", parallel: true, deepened: 2 * DEEPEN_WIDTH, rounds: 2 }, { name: "batch, one after another", parallel: false, deepened: DEEPEN_WIDTH, rounds: 1 }]
-    : [{ name: "no batch", parallel: false, deepened: 2, rounds: 2 }];
-  it.each(modes)("a tick stays within its budget and publishes deeper rows ($name)", async ({ parallel, deepened, rounds }) => {
+    ? [
+      { name: "batch, side by side", parallel: true, deepened: 1 + DEEPEN_WIDTH, rounds: 2, within: DEEPEN_TICK_MS },
+      { name: "batch, one after another", parallel: false, deepened: 1 + DEEPEN_WIDTH, rounds: 2, within: DEEPEN_TICK_MS + DEEP_SEARCH_MS },
+    ]
+    : [{ name: "no batch", parallel: false, deepened: 2, rounds: 2, within: DEEPEN_TICK_MS }];
+  it.each(modes)("a tick stays within its budget and publishes deeper rows ($name)", async ({ parallel, deepened, rounds, within }) => {
     const s = setup({ parallel });
     await s.fetch(positions(10, 5));
     s.cost.ms = DEEP_SEARCH_MS;
     const t = s.tick();
     expect(t.result).toEqual({ deepened, failed: 0, rounds });
-    expect(t.ms).toBeLessThanOrEqual(DEEPEN_TICK_MS);
+    expect(t.ms).toBeLessThanOrEqual(within);
+    if (hasBatch) expect(s.host.batches).toEqual([1, DEEPEN_WIDTH]);
     const rows = s.deep();
     expect(rows).toHaveLength(deepened);
     for (const r of rows) expect(r).toMatchObject({ depth: String(DEEP_DEPTH_CAP), nodes: String(DEEP_NODES) });
@@ -161,13 +167,30 @@ describe.skipIf(!hasTooling)("deepening in the background, in the guest", () => 
     expect(replayRefusal(t.statements)).toBeNull();
   });
 
-  it("on a runtime four times slower than the calibration, the tick stops after one round, well inside the deadline", async () => {
-    const s = setup({ parallel: true });
+  it.each([true, false])("on a runtime three times slower than the calibration, the first round is one search and the tick stops there (batch side by side: %s)", async (parallel) => {
+    const s = setup({ parallel });
     await s.fetch(positions(6, 5));
-    s.cost.ms = 4 * DEEP_SEARCH_MS;
+    s.cost.ms = 3 * DEEP_SEARCH_MS;
     const t = s.tick();
-    expect(t.result).toEqual({ deepened: hasBatch ? DEEPEN_WIDTH : 1, failed: 0, rounds: 1 });
-    expect(t.ms).toBeLessThan(DEADLINE_MS * 0.75);
+    expect(t.result).toEqual({ deepened: 1, failed: 0, rounds: 1 });
+    expect(t.ms).toBeLessThan(DEADLINE_MS * 0.6);
+  });
+
+  it("a tick whose start was slow (the mount waited) starts no search it cannot finish in its budget", async () => {
+    const s = setup();
+    await s.fetch(positions(3, 5));
+    s.cost.ms = DEEP_SEARCH_MS;
+    // The queue read returns 8 s into the dispatch: one more calibrated search would pass 12 s.
+    const slowMount = (tool: string, args: unknown) => {
+      if (tool === "dep:db.exec" && /FROM deepen_queue/.test((args as { sql: string }).sql)) s.clock.now += 8_000;
+      return s.host(tool, args);
+    };
+    s.db.begin();
+    const d = dispatch(buildGuest(), "chess.deepen", {}, { host: slowMount, clock: () => (s.clock.now += TICK) });
+    s.db.commit();
+    expect(d.error).toBeUndefined();
+    expect(d.result).toEqual({ deepened: 0, failed: 0, rounds: 0 });
+    expect(s.host.searches).toBe(3);
   });
 
   it("ticks take the oldest first, a marked position is skipped, and the marking tick is replayable too", async () => {
@@ -257,9 +280,28 @@ describe.skipIf(!hasTooling)("deepening in the background, in the guest", () => 
     const d = dispatch(buildGuest(), "chess.deepen", {}, { host, clock: () => (s.clock.now += TICK) });
     s.db.commit();
     expect(d.error).toBeUndefined();
-    expect(d.result).toEqual({ deepened: 1, failed: 1, rounds: hasBatch ? 1 : 2 });
+    expect(d.result).toEqual({ deepened: 1, failed: 1, rounds: 2 });
     expect(d.logs.join("\n")).toContain(`deepening ${fens[0]} failed`);
     expect(s.deep().map((r) => r.fen)).toEqual([fens[1]]);
+    // The failure is kept, marked, and the position leaves the queue until a page queues it again.
+    expect(s.db.exec("SELECT fen FROM deep_failures").map((r) => r.fen)).toEqual([fens[0]]);
+    expect(s.mark().result).toEqual({ marked: 2 });
+    const searches = s.host.searches;
+    expect(s.tick().result).toEqual({ deepened: 0, failed: 0, rounds: 0 });
+    expect(s.host.searches).toBe(searches);
+  });
+
+  it("a queued position with no legal move is given up on and leaves the queue once marked", async () => {
+    const s = setup();
+    s.db.exec(`INSERT INTO deepen_queue (slot, fen, queued_at) VALUES ('${slotOf(FOOLS_MATE)}', '${FOOLS_MATE}', '2026-10-03T09:00:00.000Z')`);
+    const t = s.tick();
+    expect(t.result).toEqual({ deepened: 0, failed: 0, rounds: 0 });
+    expect(replayRefusal(t.statements)).toBeNull();
+    expect(s.db.exec("SELECT fen, error FROM deep_failures")).toEqual([{ fen: FOOLS_MATE, error: "no legal move" }]);
+    const m = s.mark();
+    expect(m.result).toEqual({ marked: 1 });
+    expect(replayRefusal(m.statements)).toBeNull();
+    expect(writes(s.tick().statements)).toEqual([]);
   });
 
   it("an empty queue costs a read and nothing else", () => {

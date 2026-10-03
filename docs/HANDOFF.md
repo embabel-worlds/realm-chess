@@ -66,11 +66,23 @@ published version when it ships; nothing else changes.
 - **Background deepening** uses the scheduled background class and the engine's batch call,
   both in review on the host. On a host without the batch call the tick searches one position a
   round, checking its 12 s budget before each search; on one without the background class it
-  competes with pages for slots. The first round of a batch trusts the calibration: a host that
-  runs a batch one search after another on a runtime much slower than the calibration could take
-  a first round past the budget, though it stays inside the deadline unless a search takes more
-  than about 15 s. `db/0006-deepen.sql` keeps its first header, since the appliance has applied
-  it and the host checks each applied migration's hash; `0007` replaces its queue.
+  competes with pages for slots. The first round is a single timed search, and each later round
+  is estimated from it or from the round before, so even a host that ran a batch one search after
+  another ends a tick at most one search past the budget. `db/0006-deepen.sql` and
+  `db/0007-deepen-slots.sql` keep their headers, since the host checks each applied migration's
+  hash. 0006 says the queue is written with INSERT OR IGNORE; 0007 replaced it with a keyed upsert.
+  0007 says no dispatch reads a table it writes; that holds for the two ticks, not for a page that
+  searches (see 0008's header and the README).
+- **Replaying a page's search.** A page reads `analyses` and then writes its new search there, so
+  the host refuses to replay it after a race, as it always has. No cheap realm-side change keeps
+  the cache read and avoids that: the nearest is for pages to write new searches only to a table
+  they never read, and a scheduled dispatch to copy them into `analyses`, which would leave a
+  page's own search unreused for up to a minute. A host rule that replays a read-then-write when
+  the rows it read are unchanged would fix it without that lag.
+- **Trimming kept rows.** Nothing trims `deep_analyses`, `deep_marks` or `deep_failures`, or
+  `analyses`. The host replays only keyed upserts, and a DELETE is not one, so a delete inside a
+  tick would make the whole tick unreplayable. A dispatch that only deletes by age would be safe to
+  lose to a race and could run on its own schedule; it is not built.
 
 - **Handlers on the native runtime.** On the appliance's interpreter the handlers are far too slow
   (imbalances alone took 26.9 s). Running realm handlers on the native Wasm runtime is in progress;

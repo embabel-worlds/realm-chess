@@ -237,7 +237,9 @@ async function keptFor(db: Db, c: SearchConfig, fens: string[], deeper: boolean)
  * The lines for one position under one configuration: kept ones while they are fresh, else a
  * new search, which is kept. A checkmate or stalemate has no lines and is never searched. A new
  * search under the graph's own configuration also queues the position for the background tick,
- * in its slot, with a keyed upsert the host can replay. A page never reads the queue.
+ * in its slot, with a keyed upsert. A page never reads the queue, but a page that searches has
+ * read analyses before writing it, so the host does not replay it when another dispatch published
+ * first: that page's analyses and queue rows are lost, and the next read searches again.
  */
 async function linesFor(ctx: Ctx, fen: string, c: SearchConfig, kept: KeptAnalysis | undefined): Promise<CandidateRow[]> {
   if (timedSync("legalMoves", () => legal(fen).moves().length === 0)) return [];
@@ -321,37 +323,52 @@ interface Deepened { deepened: number; failed: number; rounds: number }
 
 /**
  * The scheduled tick. It takes queued positions that were queued after they were last deepened
- * (or never were), oldest first, searches them at the deeper configuration, and keeps each answer
- * in deep_analyses, which the graph's and the app's reads prefer.
+ * or given up on (or never were), oldest first, searches them at the deeper configuration, and
+ * keeps each answer in deep_analyses, which the graph's and the app's reads prefer.
  *
- * Time: before every round, including the first, it checks that the round still fits in
- * DEEPEN_TICK_MS. The first round is estimated from the calibration (DEEP_SEARCH_MS a search,
- * DEEPEN_WIDTH of them when the host batches); every later one by how long the last one took.
- * Without the batch call a round is one search, so a slow runtime is caught after one search.
+ * Time: the first round is one search, so whatever the runtime, the tick spends at most one
+ * search's time before it has a measurement. Before every round, the first included, it checks
+ * the round still fits in DEEPEN_TICK_MS: the first by the calibration (DEEP_SEARCH_MS), the
+ * second by the measured search, and every later one by the round before. With the engine's
+ * batch call the later rounds are DEEPEN_WIDTH searches side by side. A host that ran a batch one
+ * search after another would take at most one more search's time than the budget.
  *
- * Replay: the tick reads deepen_queue and deep_marks and writes only deep_analyses, with keyed
- * upserts whose id is their content, so the host can replay it when a page published first, and
- * a tick delivered twice keeps the same rows.
+ * A search that fails, or a queued FEN with no legal move, is written to deep_failures, which the
+ * marking tick turns into a mark, so it leaves the queue until a page queues it again.
+ *
+ * Replay: the tick reads deepen_queue and deep_marks and writes only deep_analyses and
+ * deep_failures, with keyed upserts whose id is their content, so the host can replay it when a
+ * page published first, and a tick delivered twice keeps the same rows.
  */
 export const deepen: Handler<Record<string, never>, Deepened> = async (_input: unknown, ctx: Ctx) => {
   const db = ctx.deps.db;
   const deepKey = configKey(DEEP);
-  const picked = (await db.exec(
+  const queued = (await db.exec(
     `SELECT q.fen AS fen FROM deepen_queue q LEFT JOIN deep_marks m ON m.fen = q.fen ` +
       `WHERE m.fen IS NULL OR q.queued_at > m.deepened_at ORDER BY q.queued_at, q.slot LIMIT ${DEEPEN_PICK}`,
-  )).map((r) => String(r.fen)).filter((fen) => {
+  )).map((r) => String(r.fen));
+  const giveUp = (fen: string, error: string) =>
+    db.exec(
+      `INSERT OR REPLACE INTO deep_failures (fen, failed_at, error) VALUES (${sqlText(fen)}, ${sqlText(new Date().toISOString())}, ${sqlText(error.slice(0, 500))})`,
+    );
+  const picked: string[] = [];
+  for (const fen of queued) {
+    let playable = false;
     try {
-      return legal(fen).moves().length > 0;
+      playable = legal(fen).moves().length > 0;
     } catch {
-      return false;
+      playable = false;
     }
-  });
+    if (playable) picked.push(fen);
+    else await giveUp(fen, "no legal move");
+  }
   const width = canBatch(ctx.deps.engine) ? DEEPEN_WIDTH : 1;
   const out: Deepened = { deepened: 0, failed: 0, rounds: 0 };
-  let roundMs = width * DEEP_SEARCH_MS;
-  for (let i = 0; i < picked.length; i += width) {
-    if (elapsedMs() + roundMs > DEEPEN_TICK_MS) break;
-    const fens = picked.slice(i, i + width);
+  let estimate = DEEP_SEARCH_MS;
+  for (let i = 0; i < picked.length;) {
+    if (elapsedMs() + estimate > DEEPEN_TICK_MS) break;
+    const fens = picked.slice(i, i + (out.rounds === 0 ? 1 : width));
+    i += fens.length;
     const started = Date.now();
     let found: Awaited<ReturnType<typeof searchAll>>;
     try {
@@ -360,13 +377,17 @@ export const deepen: Handler<Record<string, never>, Deepened> = async (_input: u
       ctx.log(`deepening stopped: the engine refused a batch (${(e as Error).message})`);
       break;
     }
-    roundMs = Date.now() - started;
+    const roundMs = Date.now() - started;
+    // After the one-search first round, the next round is estimated as side by side. After that,
+    // each round is estimated by the one before, however the host ran it.
+    estimate = roundMs;
     out.rounds++;
     for (const [k, fen] of fens.entries()) {
       const s = found[k];
       if (s instanceof Error) {
         out.failed++;
         ctx.log(`deepening ${fen} failed: ${s.message}`);
+        await giveUp(fen, s.message);
         continue;
       }
       const linesJson = JSON.stringify(s.lines);
@@ -382,20 +403,28 @@ export const deepen: Handler<Record<string, never>, Deepened> = async (_input: u
 
 /**
  * The marking tick, half a minute after each deepen tick: it records in deep_marks when each
- * position was last deepened, from the deeper rows of the last MARK_WINDOW_MS. It reads only
- * deep_analyses and writes only deep_marks, with keyed upserts. A missed mark only means a
- * position is deepened once more, to the same row.
+ * position was last deepened or given up on, from the deeper rows and the failures of the last
+ * MARK_WINDOW_MS. It reads only deep_analyses and deep_failures and writes only deep_marks, with
+ * keyed upserts. A missed mark only means a position is tried once more.
  */
 export const markDeepened: Handler<Record<string, never>, { marked: number }> = async (_input: unknown, ctx: Ctx) => {
   const db = ctx.deps.db;
   const since = new Date(Date.now() - MARK_WINDOW_MS).toISOString();
-  const rows = await db.exec(
-    `SELECT fen, created_at FROM deep_analyses WHERE config_key = ${sqlText(configKey(DEEP))} AND created_at >= ${sqlText(since)}`,
+  const done = await db.exec(
+    `SELECT fen, created_at AS at FROM deep_analyses WHERE config_key = ${sqlText(configKey(DEEP))} AND created_at >= ${sqlText(since)}`,
   );
-  for (const r of rows) {
-    await db.exec(`INSERT OR REPLACE INTO deep_marks (fen, deepened_at) VALUES (${sqlText(String(r.fen))}, ${sqlText(String(r.created_at))})`);
+  const failed = await db.exec(`SELECT fen, failed_at AS at FROM deep_failures WHERE failed_at >= ${sqlText(since)}`);
+  // A position both deepened and given up on in the window keeps the later time.
+  const latest = new Map<string, string>();
+  for (const r of [...done, ...failed]) {
+    const at = String(r.at);
+    const fen = String(r.fen);
+    if (!latest.has(fen) || at > latest.get(fen)!) latest.set(fen, at);
   }
-  return { marked: rows.length };
+  for (const [fen, at] of latest) {
+    await db.exec(`INSERT OR REPLACE INTO deep_marks (fen, deepened_at) VALUES (${sqlText(fen)}, ${sqlText(at)})`);
+  }
+  return { marked: latest.size };
 };
 
 /* ── What the realm could not do ── */

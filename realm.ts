@@ -152,7 +152,7 @@ page. The engine is GPL-3.0, and so is this realm.`,
       sha256: "9a5542e25e42fbbb48501bae0ab4295cdf0fd0f41219ec3b6c891c4a282e7779",
       persistent: true,
       init: "db/schema.sql",
-      migrations: ["db/0001-openings.sql", "db/0002-skeletons.sql", "db/0003-status.sql", "db/0004-lichess.sql", "db/0005-app.sql", "db/0006-deepen.sql", "db/0007-deepen-slots.sql"],
+      migrations: ["db/0001-openings.sql", "db/0002-skeletons.sql", "db/0003-status.sql", "db/0004-lichess.sql", "db/0005-app.sql", "db/0006-deepen.sql", "db/0007-deepen-slots.sql", "db/0008-deep-failures.sql"],
     },
     /** Stockfish 19 lite from the registry. How long it searches is in wasm/lib/config.ts. */
     engine: {

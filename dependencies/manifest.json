@@ -10,7 +10,8 @@
         "db/0004-lichess.sql",
         "db/0005-app.sql",
         "db/0006-deepen.sql",
-        "db/0007-deepen-slots.sql"
+        "db/0007-deepen-slots.sql",
+        "db/0008-deep-failures.sql"
       ],
       "module": "sqlite3-wasi",
       "name": "db",
