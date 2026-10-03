@@ -40,16 +40,27 @@ const positions = parse(readFileSync(join(here, "positions.yml"), "utf8"))
 async function plansFor(p) {
   const t = Date.now();
   const [verb, args] = p.moves ? ["explainLinePlans", { lines: [p.moves], role }] : ["explainPlans", { fens: [p.fen], role }];
-  const res = await fetch(`${base}/api/v1/tools/${verb}`, {
+  // The gateway names a realm's handler after its namespace: chess_explainPlans. The bare verb
+  // is offered too, but only while no other realm has a verb of the same name.
+  const res = await fetch(`${base}/api/v1/tools/chess_${verb}`, {
     method: "POST",
     headers: { authorization: auth, "content-type": "application/json" },
     body: JSON.stringify(args),
   });
   const body = await res.json();
   if (!res.ok || body.error) throw new Error(`HTTP ${res.status}: ${JSON.stringify(body.error ?? body).slice(0, 300)}`);
-  // A handler failure comes back as a 200 whose result is the script's error text.
-  if (typeof body.result === "string") throw new Error(body.result.slice(0, 400));
-  return { rows: body.result, ms: Date.now() - t };
+  // A captured handler's result can arrive as its JSON text; anything else in a string is the
+  // error text of a handler that failed.
+  let rows = body.result;
+  if (typeof rows === "string") {
+    try {
+      rows = JSON.parse(rows);
+    } catch {
+      throw new Error(rows.slice(0, 400));
+    }
+  }
+  if (!Array.isArray(rows)) throw new Error(`not a list of plans: ${JSON.stringify(rows).slice(0, 400)}`);
+  return { rows, ms: Date.now() - t };
 }
 
 /*
