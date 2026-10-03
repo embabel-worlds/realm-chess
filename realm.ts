@@ -3,7 +3,7 @@ import { producerHandlers } from "./realm/handlers.ts";
 import { producers } from "./realm/producers.ts";
 import { rodHandlers } from "./realm/rod-handlers.ts";
 import { rodTypes } from "./realm/types.ts";
-import { rodViews } from "./realm/views.ts";
+import { views } from "./realm/views.ts";
 import { ENGINE_MODULE } from "./wasm/lib/config.ts";
 
 /**
@@ -101,17 +101,7 @@ page. The engine is GPL-3.0, and so is this realm.`,
 
   producers,
 
-  views: [
-    ...rodViews,
-    {
-      name: "ChessStatus",
-      description:
-        "What the chess realm could not do: whether Lichess and the model answered the last time they were asked, the last refusal and when. Answers 'why are there no master games', 'why are there no plans'.",
-      cypher: `MATCH (u:AssistantUser)-[:HAS_CHESS_STATUS]->(s:ChessStatus)
-RETURN s.lichess AS lichess, s.model AS model, s.lastRefusal AS lastRefusal, s.at AS at
-`,
-    },
-  ],
+  views,
 
   credentials: {
     lichess: {
