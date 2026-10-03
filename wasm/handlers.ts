@@ -14,12 +14,16 @@ import type { HostCall, ModelRole } from "./lib/model.ts";
 import { citable, levelOf, parseModelJson, planRecords, promptFor, repairPrompt } from "./lib/plans.ts";
 import type { Level, ParsedPlans, PlanArgs, PlanRecord } from "./lib/plans.ts";
 import { sha256Hex } from "./lib/sha256.ts";
+import { timed, timedSync } from "./lib/timing.ts";
 import { readStatus, recordOutcome } from "./lib/status.ts";
-import { theoryFor } from "./lib/theory.ts";
+import { theoryFor, titlesOfSans } from "./lib/theory.ts";
 import type { TheoryRecord, WikibooksGateway } from "./lib/theory.ts";
 import { analysisIdOf, candidateRecords, configKey, FULL, search } from "./lib/engine.ts";
 import type { CandidateLineRecord, Engine, SearchConfig } from "./lib/engine.ts";
 import { imbalancesOf } from "./lib/imbalances.ts";
+import type { Imbalances } from "./lib/imbalances.ts";
+import { gameLine, lineOpeningOf } from "./lib/gameline.ts";
+import type { GameLine } from "./lib/gameline.ts";
 import { lineKeys, openingOf, openingOfLine, pawnKey, positionAfter, positionKey, splitLine, structureOf, structureSentence } from "./lib/openings.ts";
 import type { Skeletons } from "./lib/openings.ts";
 import { bookFor, keepAnalysis, keptAnalyses, skeletonsFor, sqlText } from "./lib/store.ts";
@@ -82,20 +86,35 @@ export interface ImbalanceRecord {
   detail: string;
 }
 
+/*
+ * A position's imbalances, worked out once a dispatch: the ImbalancesOf row and the candidate
+ * lines both start from them. A dispatch is a fresh instance, so this lives as long as it does.
+ */
+const imbalancesSeen = new Map<string, Imbalances>();
+function imbalancesFor(fen: string): Imbalances {
+  let x = imbalancesSeen.get(fen);
+  if (!x) {
+    x = timedSync("imbalances", () => imbalancesOf(fen));
+    imbalancesSeen.set(fen, x);
+  }
+  return x;
+}
+
 async function imbalanceRecords(db: Db, fens: string[]): Promise<ImbalanceRecord[]> {
-  const nearby: { rows?: Skeletons } = {};
+  const nearby: { byCount?: Map<number, Skeletons> } = {};
   const out: ImbalanceRecord[] = [];
   for (const raw of fens) {
     const fen = raw.trim();
     legal(fen);
-    const x = imbalancesOf(fen);
-    const skeletons = await skeletonsFor(db, pawnKey(fen), nearby);
+    const x = imbalancesFor(fen);
+    const skeletons = await timed("skeletons", () => skeletonsFor(db, pawnKey(fen), nearby));
+    const structure = timedSync("structure", () => structureSentence(structureOf(fen, skeletons)) ?? "");
     out.push({
       fen,
       sideToMove: x.sideToMove,
       phase: x.phase,
       facts: x.facts.join("\n"),
-      structure: structureSentence(structureOf(fen, skeletons)) ?? "",
+      structure,
       materialWhite: x.white.material.points,
       materialBlack: x.black.material.points,
       bishopPairWhite: x.white.bishopPair,
@@ -141,8 +160,10 @@ async function lineOpeningRecords(db: Db, lines: string[]): Promise<LineOpeningR
   for (const raw of lines) {
     const moves = splitLine(raw);
     const line = moves.join(" ");
-    positionAfter(moves);
-    const hit = openingOfLine(moves, await bookFor(db, lineKeys(moves)));
+    timedSync("lineReplay", () => positionAfter(moves));
+    const keys = timedSync("lineKeys", () => lineKeys(moves));
+    const book = await timed("lineBook", () => bookFor(db, keys));
+    const hit = timedSync("openingOfLine", () => openingOfLine(moves, book));
     if (hit) out.push({ line, fen: hit.fen, eco: hit.eco, name: hit.name, pgn: hit.pgn, namedAtPly: hit.namedAtPly, pliesPast: hit.pliesPast });
   }
   return out;
@@ -188,22 +209,22 @@ export interface CandidateRow extends CandidateLineRecord {
  * new search, which is kept. A checkmate or stalemate has no lines and is never searched.
  */
 async function linesFor(ctx: Ctx, fen: string, c: SearchConfig, kept: KeptAnalysis | undefined): Promise<CandidateRow[]> {
-  if (legal(fen).moves().length === 0) return [];
+  if (timedSync("legalMoves", () => legal(fen).moves().length === 0)) return [];
   let a = kept && Date.now() - kept.createdAt < ANALYSIS_TTL_MS ? kept : undefined;
   if (!a) {
     const started = Date.now();
-    const s = await search(ctx.deps.engine, fen, c);
+    const s = await timed("search", () => search(ctx.deps.engine, fen, c));
     const key = configKey(c);
     const linesJson = JSON.stringify(s.lines);
     const elapsedMs = Date.now() - started;
     a = {
       fen, analysisId: analysisIdOf(key, linesJson), depth: s.depth, nodes: s.nodes, linesJson,
-      recordsJson: JSON.stringify(candidateRecords(fen, s, imbalancesOf(fen), elapsedMs)), elapsedMs, createdAt: Date.now(),
+      recordsJson: timedSync("candidateRows", () => JSON.stringify(candidateRecords(fen, s, imbalancesFor(fen), elapsedMs))), elapsedMs, createdAt: Date.now(),
     };
-    await keepAnalysis(ctx.deps.db, key, a);
+    await timed("keepAnalysis", () => keepAnalysis(ctx.deps.db, key, a!));
   }
   const { analysisId, nodes } = a;
-  return (JSON.parse(a.recordsJson) as CandidateLineRecord[]).map((r) => ({ ...r, analysisId, nodes }));
+  return timedSync("keptRows", () => JSON.parse(a!.recordsJson) as CandidateLineRecord[]).map((r) => ({ ...r, analysisId, nodes }));
 }
 
 /**
@@ -693,7 +714,7 @@ const viewNamed = (name: string) => {
 async function answer(name: string, params: Record<string, unknown>, rows: () => Promise<readonly object[] | "later">): Promise<ViewAnswer> {
   try {
     const r = await rows();
-    return r === "later" ? { rows: [], skipped: "time" } : { rows: runView(viewNamed(name), params, r) };
+    return r === "later" ? { rows: [], skipped: "time" } : { rows: timedSync("view", () => runView(viewNamed(name), params, r)) };
   } catch (e) {
     return { rows: [], error: (e as Error).message };
   }
@@ -712,31 +733,68 @@ function appTarget(input: { fen?: unknown; moves?: unknown }): { fen: string; mo
 }
 
 /**
+ * The app's position and its line, the line kept between calls (wasm/lib/gameline.ts) so a step
+ * plays at most the one new move. A line must reach the position.
+ */
+async function appStep(db: Db, input: { fen?: unknown; moves?: unknown }): Promise<{ fen: string; moves: string[] | null; line: GameLine | null }> {
+  if (typeof input.fen !== "string") throw new Error("The app sends a FEN");
+  const fen = input.fen.trim();
+  if (input.moves === undefined || input.moves === null || input.moves === "") {
+    legal(fen);
+    return { fen, moves: null, line: null };
+  }
+  if (typeof input.moves !== "string") throw new Error("The moves are SAN from the start, space-separated");
+  const moves = splitLine(input.moves);
+  const line = await gameLine(db, moves);
+  if (line.fen !== fen) throw new Error("The moves do not reach that position");
+  return { fen, moves, line };
+}
+
+/**
+ * The ImbalancesOf row for a position, kept: it depends only on the board and the book, so a
+ * position the app has shown before is read back, never worked out again.
+ */
+async function appImbalances(db: Db, fen: string): Promise<ImbalanceRecord[]> {
+  const kept = await db.exec(`SELECT record_json FROM position_facts WHERE fen = ${sqlText(fen)}`);
+  if (kept.length > 0) return [JSON.parse(String(kept[0].record_json)) as ImbalanceRecord];
+  const records = await imbalanceRecords(db, [fen]);
+  await db.exec(
+    `INSERT OR REPLACE INTO position_facts (fen, record_json, created_at) VALUES (${sqlText(fen)}, ` +
+      `${sqlText(JSON.stringify(records[0]))}, ${sqlText(new Date().toISOString())})`,
+  );
+  return records;
+}
+
+/**
  * Everything the page shows on every step: the imbalances, the opening (along the line when the
  * game was played from the start, else by position), the theory for the line, and the engine's
  * lines within `withinCp` of the best. The engine's lines are searched at full, as the graph's are.
+ * What the page asked for before is kept, so asking again costs a few reads.
  */
 export const appPosition = async (input: { fen?: unknown; moves?: unknown; withinCp?: unknown }, ctx: Ctx): Promise<AppReply> => {
-  const { fen, moves } = appTarget(input);
   const db = ctx.deps.db;
+  const { fen, moves, line } = await timed("line", () => appStep(db, input));
   const withinCp = clamp(typeof input.withinCp === "number" ? input.withinCp : undefined, 50, 0, 1000);
   const views: Record<string, ViewAnswer> = {};
-  views.ImbalancesOf = await answer("ImbalancesOf", { fen }, () => imbalanceRecords(db, [fen]));
-  if (moves) {
-    const line = moves.join(" ");
-    views.OpeningOfLine = await answer("OpeningOfLine", { moves: line }, () => lineOpeningRecords(db, [line]));
+  views.ImbalancesOf = await answer("ImbalancesOf", { fen }, () => timed("facts", () => appImbalances(db, fen)));
+  if (moves && line) {
+    const joined = moves.join(" ");
+    views.OpeningOfLine = await answer("OpeningOfLine", { moves: joined }, async () => {
+      const hit = lineOpeningOf(line);
+      return hit ? [{ line: joined, fen: hit.fen, eco: hit.eco, name: hit.name, pgn: hit.pgn, namedAtPly: hit.namedAtPly, pliesPast: hit.pliesPast }] : [];
+    });
   } else {
     views.OpeningOf = await answer("OpeningOf", { fen }, () => openingRecords(db, [fen]));
   }
   views.BestMoves = await answer("BestMoves", { fen, withinCp, maxLines: 5 }, async () =>
-    linesFor(ctx, fen, FULL, (await keptAnalyses(db, configKey(FULL), [fen])).get(fen)));
-  if (moves) {
+    linesFor(ctx, fen, FULL, (await timed("keptRead", () => keptAnalyses(db, configKey(FULL), [fen]))).get(fen)));
+  if (moves && line) {
     views.TheoryOfLine = await answer("TheoryOfLine", { moves: moves.join(" ") }, async () => {
-      const t = await theoryFor(db, ctx.gateway, moves, THEORY_TTL_MS, () => fits(API_CALL_MS));
+      const t = await timed("theory", () => theoryFor(db, ctx.gateway, moves, THEORY_TTL_MS, () => fits(API_CALL_MS), titlesOfSans(line.sans)));
       return t === "later" ? "later" : t ? [t] : [];
     });
   }
-  return { fen, views, status: await readStatus(db) };
+  return { fen, views, status: await timed("status", () => readStatus(db)) };
 };
 
 /** What the page may ask of Lichess at once: masters on every step, the rest on request. */

@@ -11,7 +11,8 @@ sandbox. There is no Docker image and no Node server.
 - **Engine.** Stockfish 19 lite is the `stockfish` 19.0.0 registry module, called through
   `analyse(fen, nodes, maxDepth, multiPv)`. A search is bounded by 3,500,000 nodes and depth 18.
 - **Your code, kept.** `imbalances.ts`, `lines.ts` and the opening logic moved to `wasm/lib/`
-  unchanged apart from imports; your tests run under Node and again inside the built guest. Your
+  unchanged apart from imports and one speed change: `mateInOne` reads the plain move list,
+  which has the same SAN in the same order and costs a fraction as much inside the guest. Your tests run under Node and again inside the built guest. Your
   plan prompt and parser are byte for byte yours, checked by a test. Your ten handlers keep their
   names, descriptions and schemas, checked against 86b5bb5's manifest.
 - **Producers.** A captured producer sends a list of keys and wants rows back, so `rows*` handlers

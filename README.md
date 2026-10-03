@@ -115,6 +115,15 @@ Everything the realm works out or fetches is kept in its SQLite, under the Node 
 | Theory (`theory`) | the line; a page the wikibook does not have is kept too | 7 days |
 | Masters, ratings (`explorer`) | operation, position and every filter | 30 days |
 | A player's games (`explorer`) | the same, with the player and colour | 1 day |
+| Game lines the app was sent (`game_lines`) | the line as sent: the position it reaches, its SAN, its deepest book name | while the book is unchanged |
+| A position's imbalances, for the app (`position_facts`) | the position | while the book is unchanged |
+
+Chesscalator sends the whole line on every step. The realm keeps each line it is sent, so a step
+plays only the one new move from the line before it, and asking the same position again does no
+board work at all: a few reads. In the guest under Node, a repeated call takes about 9 ms at any
+ply of an 80-ply game (it took 70 ms at ply 1 and 475 ms at ply 80 before), and a fresh call
+spends most of its time in the engine. `MEASURE=1 npx vitest run tests/latency.test.ts` prints the
+stages.
 
 An empty Lichess answer and a refused request are never kept. Lines searched again that come out
 the same keep their `analysisId`, so plans made from them still describe them; a changed line, a
@@ -123,7 +132,9 @@ changed skill or changed theory text makes new plans.
 The opening book is rows in SQLite too, loaded by migrations. `db/schema.sql` is the bootstrap and
 is never edited once installed: a change to the tables is a new `db/NNNN-*.sql` file, added to the
 end of `migrations` in `realm.ts`. The appliance applies the ones it has not applied yet, in order,
-and records which. The book is `0001` and `0002`, ChessStatus `0003`, the Lichess spacing clock `0004`.
+and records which. The book is `0001` and `0002`, ChessStatus `0003`, the Lichess spacing clock `0004`,
+the app's kept lines and imbalances `0005`. A migration that changes the book's skeletons also
+empties `position_facts`, and one that changes the openings empties `game_lines`.
 
 ## When one read is not enough
 

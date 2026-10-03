@@ -30,6 +30,18 @@ export function theoryTitles(moves: string[]): string[] {
   return titles;
 }
 
+/*
+ * The same titles from a line's moves as the board already wrote them (its own SAN, from the
+ * start), with no board to replay: White's moves are the even plies.
+ */
+export function titlesOfSans(sans: string[]): string[] {
+  const parts: string[] = [];
+  return sans.map((san, i) => {
+    parts.push(i % 2 === 0 ? `${i / 2 + 1}. ${san}` : `${(i + 1) / 2}...${san}`);
+    return `${ROOT}/${parts.join("/")}`;
+  });
+}
+
 export const pageUrl = (title: string) => `https://en.wikibooks.org/wiki/${encodeURIComponent(title.replace(/ /g, "_")).replace(/%2F/g, "/")}`;
 
 /*
@@ -82,8 +94,8 @@ function pagesOf(answer: unknown): Page[] {
 /** The longest extract the realm reads before cutting it to an excerpt. */
 const MAX_EXTRACT = 200_000;
 
-function recordFor(moves: string[], title: string, theory: string): TheoryRecord {
-  const covered = theoryTitles(moves).indexOf(title) + 1;
+function recordFor(moves: string[], titles: string[], title: string, theory: string): TheoryRecord {
+  const covered = titles.indexOf(title) + 1;
   return { line: moves.join(" "), title, url: pageUrl(title), pliesCovered: covered, pliesPast: moves.length - covered, theory, licence: LICENCE };
 }
 
@@ -95,7 +107,8 @@ function recordFor(moves: string[], title: string, theory: string): TheoryRecord
  * throws and keeps nothing.
  *
  * `mayFetch` is asked before each of the two requests. When it says there is no time, the
- * lookup stops, keeps nothing, and answers "later".
+ * lookup stops, keeps nothing, and answers "later". A caller that already has the line's titles
+ * (from titlesOfSans) passes them, and the line is not replayed.
  */
 export async function theoryFor(
   db: { exec(sql: string): Promise<Record<string, string | number | null>[]> },
@@ -103,14 +116,15 @@ export async function theoryFor(
   moves: string[],
   ttlMs: number,
   mayFetch: () => boolean,
+  knownTitles?: string[],
 ): Promise<TheoryRecord | null | "later"> {
-  const titles = theoryTitles(moves);
+  const titles = knownTitles ?? theoryTitles(moves);
   if (titles.length === 0) return null;
   const line = moves.join(" ");
   const q = (s: string) => `'${s.replaceAll("'", "''")}'`;
   const kept = (await db.exec(`SELECT title, extract, fetched_at, found FROM theory WHERE line_key = ${q(line)}`))[0];
   if (kept && Date.now() - Date.parse(String(kept.fetched_at)) < ttlMs) {
-    return String(kept.found) === "1" ? recordFor(moves, String(kept.title), String(kept.extract)) : null;
+    return String(kept.found) === "1" ? recordFor(moves, titles, String(kept.title), String(kept.extract)) : null;
   }
   if (!mayFetch()) return "later";
   const keep = (title: string, excerpt: string, found: boolean) =>
@@ -135,5 +149,5 @@ export async function theoryFor(
     return null;
   }
   await keep(deepest, text, true);
-  return recordFor(moves, deepest, text);
+  return recordFor(moves, titles, deepest, text);
 }

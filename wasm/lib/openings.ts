@@ -19,7 +19,11 @@ export interface BookEntry { eco: string; name: string; pgn: string }
 export type Book = Record<string, BookEntry>;
 
 export function positionKey(fen: string): string {
-  const c = new Chess(fen);
+  return boardKey(new Chess(fen));
+}
+
+/** The book key of the position a board is in now, without reading its FEN back in. */
+export function boardKey(c: Chess): string {
   const [board, turn, castling, ep] = c.fen().split(" ");
   const epLegal = ep !== "-" && c.moves({ verbose: true }).some((m) => m.flags.includes("e"));
   return `${board} ${turn} ${castling} ${epLegal ? ep : "-"}`;

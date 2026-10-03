@@ -50,20 +50,28 @@ function skeletonOf(r: Row): Skeletons[string] {
 
 /**
  * The skeleton rows a structure lookup needs: the exact pawn skeleton if the book has it, which
- * decides on its own, or else every skeleton few enough families share to name a structure.
- * The second read is the same for every position, so `nearby` keeps it for the dispatch.
+ * decides on its own, or else the skeletons few enough families share to name a structure and
+ * close enough in pawn count to be within two pawns moved. Two pawns moved is at most four
+ * differences, and the counts of two skeletons differ by no more than their differences, so no
+ * skeleton the match could pick is left out. `nearby` keeps the second read for the dispatch,
+ * by pawn count.
  */
-export async function skeletonsFor(db: Db, pawns: string, nearby: { rows?: Skeletons } = {}): Promise<Skeletons> {
+export async function skeletonsFor(db: Db, pawns: string, nearby: { byCount?: Map<number, Skeletons> } = {}): Promise<Skeletons> {
   const exact = await db.exec(`SELECT pawns_key, families_json, names_json FROM skeletons WHERE pawns_key = ${sqlText(pawns)}`);
   if (exact.length > 0) return { [pawns]: skeletonOf(exact[0]) };
-  if (!nearby.rows) {
-    const rows = await db.exec(
-      `SELECT pawns_key, families_json, names_json FROM skeletons WHERE json_array_length(families_json) <= ${MAX_FAMILIES}`,
+  const count = pawns === "" ? 0 : pawns.split(" ").length;
+  nearby.byCount ??= new Map();
+  let rows = nearby.byCount.get(count);
+  if (!rows) {
+    const found = await db.exec(
+      `SELECT pawns_key, families_json, names_json FROM skeletons WHERE json_array_length(families_json) <= ${MAX_FAMILIES} ` +
+        `AND abs((CASE WHEN pawns_key = '' THEN 0 ELSE length(pawns_key) - length(replace(pawns_key, ' ', '')) + 1 END) - ${count}) <= 4`,
     );
-    nearby.rows = {};
-    for (const r of rows) nearby.rows[str(r.pawns_key)] = skeletonOf(r);
+    rows = {};
+    for (const r of found) rows[str(r.pawns_key)] = skeletonOf(r);
+    nearby.byCount.set(count, rows);
   }
-  return nearby.rows;
+  return rows;
 }
 
 /** An analysis as it is kept: the lines the engine found for a position under one configuration. */

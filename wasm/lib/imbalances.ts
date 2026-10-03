@@ -304,7 +304,9 @@ function mateInOne(fen: string, threat: boolean): string[] {
     parts[3] = "-";
     try { c = new Chess(parts.join(" ")); } catch { return []; }
   }
-  return c.moves({ verbose: true }).filter((m) => m.san.endsWith("#")).map((m) => m.san);
+  // The plain move list has the same SAN in the same order, and skips building a move object,
+  // with its two FENs, for every legal move.
+  return c.moves().filter((san) => san.endsWith("#"));
 }
 
 /* A piece attacked and not defended, or attacked by something cheaper: facts a beginner must see
