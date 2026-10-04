@@ -179,9 +179,10 @@ describe.skipIf(!hasTooling)("Lichess and theory, in the guest", () => {
   });
 
   describe("the player database streams NDJSON", () => {
-    it("is declared ndjson, so synth lists it for the host", () => {
-      const lichess = (parse(readFileSync("apis/apis.yml", "utf8")) as { name: string; "ndjson-operation-ids"?: string[] }[]).find((a) => a.name === "lichess")!;
-      expect(lichess["ndjson-operation-ids"]).toEqual(["playerExplorer"]);
+    it("is declared under responses, since the host reads an undeclared reply as JSON", () => {
+      const lichess = (parse(readFileSync("apis/apis.yml", "utf8")) as { name: string; responses?: Record<string, unknown> }[]).find((a) => a.name === "lichess")!;
+      expect(lichess.responses).toEqual({ playerExplorer: "application/x-ndjson" });
+      expect(lichess).not.toHaveProperty("ndjson-operation-ids");
     });
 
     it("a truncated stream is read as the Node realm reads it: from the last complete record", () => {

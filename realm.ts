@@ -132,6 +132,7 @@ page. The engine is GPL-3.0, and so is this realm.`,
       auth: "bearer",
       credential: "lichess",
       operationIds: ["mastersExplorer", "lichessExplorer", "playerExplorer"],
+      // playerExplorer streams NDJSON. The host reads an undeclared reply as JSON, so it is declared.
       operations: { playerExplorer: { response: "ndjson" } },
     },
     wikibooks: {

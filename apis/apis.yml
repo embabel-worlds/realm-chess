@@ -1,12 +1,12 @@
 - auth: bearer
   credential: lichess
   name: lichess
-  ndjson-operation-ids:
-    - playerExplorer
   operation-ids:
     - mastersExplorer
     - lichessExplorer
     - playerExplorer
+  responses:
+    playerExplorer: application/x-ndjson
   type: openapi
   url: lichess.json
 - auth: none
