@@ -156,10 +156,10 @@
           that kind of answer yet — so a look-up here would come back empty and wrongly say the player has no games. It
           will work, unchanged, once the appliance reads streamed answers.
         </div>
-        <form class="player" id="playerForm">
+        <div class="player" id="playerForm" role="search">
           <input type="text" id="playerName" placeholder="Lichess username" aria-label="Lichess username" spellcheck="false" autocomplete="off">
-          <button class="btn" type="submit">Look up</button>
-        </form>
+          <button class="btn" type="button" id="playerLookUp">Look up</button>
+        </div>
         <div id="player"></div>
       </div>
     </section>
@@ -1188,9 +1188,12 @@ for (const b of document.querySelectorAll(".tabbar [data-tab]")) {
 prefs.get("tab").then((t) => {
   if (t && !touched.has("tab") && document.querySelector(`.tabbar [data-tab="${CSS.escape(t)}"]`)) showTab(t);
 });
-$("playerForm").addEventListener("submit", (e) => { e.preventDefault(); lookUpPlayer(); });
+/* The appliance's frame is sandboxed without forms, so a form's submit never fires there. The
+ * look-up runs from the button and from Enter in the name field instead. */
+$("playerLookUp").addEventListener("click", () => lookUpPlayer());
+$("playerName").addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); lookUpPlayer(); } });
 $("playerUnavailable").hidden = PLAYER_LOOKUP_AVAILABLE;
-for (const c of $("playerForm").elements) c.disabled = !PLAYER_LOOKUP_AVAILABLE;
+for (const c of $("playerForm").querySelectorAll("input, button")) c.disabled = !PLAYER_LOOKUP_AVAILABLE;
 $("popAxis").addEventListener("change", popAxisChanged);
 $("popBtn").addEventListener("click", comparePopularity);
 
