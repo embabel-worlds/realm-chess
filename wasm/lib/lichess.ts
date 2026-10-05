@@ -14,10 +14,11 @@ import type { Db } from "./store.ts";
  * is never kept, and neither is a refusal, as the Node realm's producers never cached either: a
  * refused call (an unbound token, a rate limit) would otherwise read as "nothing here" for a month.
  *
- * Lichess wants one request at a time on a token. Requests are spaced 1.1 seconds apart, within a
- * dispatch and across dispatches through the lichess_last_request_at row. That row is a best
- * effort: a dispatch that dies publishes nothing, and a dispatch that loses a publishing race to
- * another has its writes refused, so the next one may ask a little early.
+ * Lichess wants one request at a time on a token. Requests are spaced 1.1 seconds apart within a
+ * dispatch. Across dispatches the lichess_last_request_at row is a best effort, as each dispatch
+ * sees it: two dispatches that read the same row at once both ask straight away, a dispatch that
+ * dies publishes nothing, and one that loses a publishing race has its writes refused, so the next
+ * one may ask early. Nothing on the host holds a slot for the token.
  */
 
 export type ExplorerOperation = "mastersExplorer" | "lichessExplorer" | "playerExplorer";
