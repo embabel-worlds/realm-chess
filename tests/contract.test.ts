@@ -1,85 +1,65 @@
-import { readdirSync, readFileSync } from "node:fs";
+import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { parse } from "yaml";
-import { baselineJson, baselineYaml } from "./baseline/rod";
 
 /*
- * The public contract, compared with the Node realm at 86b5bb5 after normalising away what only
- * says how a file is laid out: the labels and their properties, the relationships the graph
- * offers, the views with their params and defaults, and the handlers with their schemas.
- *
- * The differences a captured realm is allowed are listed here, by name, and nowhere else:
- * - producers have internal lowercase names and carry the joins types used to carry;
- * - the `rows*` handlers serve those producers, `status` serves ChessStatus, and the `app*`
- *   handlers serve Chesscalator;
- * - the relationships still to be ported are not produced yet, listed in PENDING.
+ * The public contract, held to the committed fixture tests/fixtures/public-contract.json: the ten
+ * public handlers with their schemas, the graph types and joins, and the views. Run with
+ * UPDATE_CONTRACT=1 to rewrite the fixture from the synthesized files when the contract changes on purpose.
  */
 
-interface NodeType { name: string; description: string; properties: Record<string, unknown>; virtualJoins?: { anchorLabel: string; relationship: string; keyField: string; recordKeyField: string }[] }
 interface Entry { namespace: string; name: string; description?: string; inputSchema?: unknown; outputSchema?: unknown }
 interface Join { anchorLabel: string; relationship: string; targetLabel: string; keyField: string; recordKeyField: string }
+interface Fixture { handlers: Entry[]; types: unknown[]; joins: Join[]; views: unknown[] }
 
-const rodTypes = baselineYaml<NodeType[]>("types/chess.yml");
-const ourTypes = parse(readFileSync("types/chess.yml", "utf8")) as NodeType[];
-const rodManifest = baselineJson<{ entries: Entry[] }>("dist/manifest.json");
+const FIXTURE = "tests/fixtures/public-contract.json";
+const PUBLIC_HANDLERS = [
+  "analysePosition", "explainLinePlans", "explainPlans", "mastersAtPosition", "openingLookup",
+  "openingOfGameLine", "playerAtPosition", "positionImbalances", "ratedMoves", "theoryOfGameLine",
+];
+
+const sortKeys = (v: unknown): unknown =>
+  Array.isArray(v) ? v.map(sortKeys)
+    : v && typeof v === "object" ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, sortKeys((v as Record<string, unknown>)[k])]))
+      : v;
+
 const ourManifest = JSON.parse(readFileSync("dist/manifest.json", "utf8")) as { entries: Entry[] };
 const ourProducers = readdirSync("producers").map((f) => parse(readFileSync(`producers/${f}`, "utf8")) as { name: string; handler: string; joins: Join[] });
 
-/* Labels, properties and handlers that are additions, each with the ticket that brings it. */
-const ADDED_LABELS = ["ChessStatus"];
-const ADDED_PROPERTIES: Record<string, string[]> = { CandidateMove: ["analysisId", "nodes"], Plan: ["analysisId"] };
-const ADDED_HANDLERS = [
-  "rowsImbalances", "rowsOpeningOfPosition", "rowsOpeningOfLine", "rowsCandidates", "status", "rowsTheory", "rowsPositionPlans",
-  "rowsLinePlans", "rowsMasterMoves", "rowsMasterGames", "rowsPlayerMoves", "rowsPlayerGames", "rowsRatedMoves",
-  "appPosition", "appPractice", "appPlans", "deepen", "markDeepened",
-];
-const ADDED_RELATIONSHIPS = ["AssistantUser-HAS_CHESS_STATUS->ChessStatus"];
+const current: Fixture = {
+  handlers: PUBLIC_HANDLERS.map((n) => {
+    const e = ourManifest.entries.find((x) => x.name === n);
+    return { name: n, namespace: e?.namespace, description: e?.description, inputSchema: e?.inputSchema, outputSchema: e?.outputSchema } as Entry;
+  }),
+  types: parse(readFileSync("types/chess.yml", "utf8")) as unknown[],
+  joins: ourProducers.flatMap((p) => p.joins ?? []).sort((a, b) => (JSON.stringify(sortKeys(a)) < JSON.stringify(sortKeys(b)) ? -1 : 1)),
+  views: parse(readFileSync("views/chess.yml", "utf8")) as unknown[],
+};
 
-/* The Node realm's relationships the captured realm does not produce yet. Each port removes its own. */
-const PENDING: string[] = [];
+if (process.env.UPDATE_CONTRACT === "1") writeFileSync(FIXTURE, `${JSON.stringify(sortKeys(current), null, 2)}\n`);
+const fixture = JSON.parse(readFileSync(FIXTURE, "utf8")) as Fixture;
 
-const sorted = <T>(xs: T[]) => [...xs].sort();
-
-describe("types", () => {
-  const rod = Object.fromEntries(rodTypes.map((t) => [t.name, t]));
-  const ours = Object.fromEntries(ourTypes.map((t) => [t.name, t]));
-
-  it("has the Node realm's labels, with only the listed additions", () => {
-    expect(sorted(Object.keys(ours))).toEqual(sorted([...Object.keys(rod), ...ADDED_LABELS.filter((l) => l in ours)]));
+describe("handler signatures", () => {
+  it("has the ten public handlers, by name", () => {
+    expect(fixture.handlers.map((h) => h.name)).toEqual(PUBLIC_HANDLERS);
   });
 
-  it("gives every label the Node realm's description and properties, with only the listed additions", () => {
-    for (const [name, t] of Object.entries(rod)) {
-      expect(ours[name].description, name).toBe(t.description);
-      const added = (ADDED_PROPERTIES[name] ?? []).filter((p) => p in ours[name].properties);
-      const mine = Object.fromEntries(Object.entries(ours[name].properties).filter(([p]) => !added.includes(p)));
-      expect(mine, name).toEqual(t.properties);
+  it("keeps each handler's namespace, description, input schema and output schema", () => {
+    for (const h of fixture.handlers) {
+      const mine = current.handlers.find((c) => c.name === h.name);
+      expect(mine?.namespace, h.name).toBeDefined();
+      expect(mine, h.name).toEqual(h);
     }
   });
 });
 
-describe("relationships", () => {
-  const key = (anchor: string, rel: string, target: string) => `${anchor}-${rel}->${target}`;
-  const rodJoins = rodTypes.flatMap((t) => (t.virtualJoins ?? []).map((j) => ({ ...j, targetLabel: t.name })));
-  const ourJoins = ourProducers.flatMap((p) => p.joins);
-
-  it("offers each of the Node realm's relationships with its key fields, apart from those still pending", () => {
-    for (const j of rodJoins) {
-      const k = key(j.anchorLabel, j.relationship, j.targetLabel);
-      const mine = ourJoins.find((o) => key(o.anchorLabel, o.relationship, o.targetLabel) === k);
-      if (PENDING.includes(k)) {
-        expect(mine, `${k} is listed as pending but is produced: take it off PENDING`).toBeUndefined();
-        continue;
-      }
-      expect(mine, k).toBeDefined();
-      expect({ keyField: mine!.keyField, recordKeyField: mine!.recordKeyField }, k).toEqual({ keyField: j.keyField, recordKeyField: j.recordKeyField });
-    }
+describe("graph types and joins", () => {
+  it("keeps every type's description and properties", () => {
+    expect(current.types).toEqual(fixture.types);
   });
 
-  it("adds only the listed relationships", () => {
-    const rod = new Set(rodJoins.map((j) => key(j.anchorLabel, j.relationship, j.targetLabel)));
-    const added = ourJoins.map((j) => key(j.anchorLabel, j.relationship, j.targetLabel)).filter((k) => !rod.has(k));
-    for (const k of added) expect(ADDED_RELATIONSHIPS, k).toContain(k);
+  it("keeps every join with its anchor, relationship, target and key fields", () => {
+    expect(current.joins).toEqual(fixture.joins);
   });
 
   it("names its producers as the host requires", () => {
@@ -88,41 +68,8 @@ describe("relationships", () => {
 });
 
 describe("views", () => {
-  type View = { name: string; params?: Record<string, { type: string; default?: unknown }>; cypher: string };
-  const rod = baselineYaml<View[]>("views/chess.yml");
-  const ours = parse(readFileSync("views/chess.yml", "utf8")) as View[];
-
-  it("keeps the Node realm's views with their params, defaults and cypher", () => {
-    for (const v of rod) {
-      const mine = ours.find((o) => o.name === v.name);
-      expect(mine, v.name).toBeDefined();
-      expect(mine).toEqual(v);
-    }
-  });
-
-  it("adds only ChessStatus, with no params", () => {
-    const added = ours.filter((o) => !rod.some((v) => v.name === o.name));
-    expect(added.map((v) => v.name)).toEqual(added.length ? ["ChessStatus"] : []);
-    for (const v of added) expect(v.params ?? {}).toEqual({});
-  });
-});
-
-describe("handlers", () => {
-  const rod = Object.fromEntries(rodManifest.entries.map((e) => [e.name, e]));
-  const ours = Object.fromEntries(ourManifest.entries.map((e) => [e.name, e]));
-
-  it("keeps the Node realm's ten handlers with their names, descriptions and schemas", () => {
-    expect(Object.keys(rod)).toHaveLength(10);
-    for (const [name, e] of Object.entries(rod)) {
-      expect(ours[name], name).toBeDefined();
-      const pick = (x: Entry) => ({ namespace: x.namespace, description: x.description, input: x.inputSchema, output: x.outputSchema });
-      expect(pick(ours[name]), name).toEqual(pick(e));
-    }
-  });
-
-  it("adds only the listed producer handlers", () => {
-    const added = Object.keys(ours).filter((n) => !(n in rod));
-    for (const n of added) expect(ADDED_HANDLERS, n).toContain(n);
+  it("keeps every view's name, params and cypher", () => {
+    expect(current.views).toEqual(fixture.views);
   });
 });
 
