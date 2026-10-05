@@ -1,7 +1,6 @@
 /*
- * Writes the realm's declaration files from realm.ts with the SDK's synth, found beside the
- * installed @embabel/realm-types package so it is the same SDK the definition is typed against.
- * It runs under Bun.
+ * Writes the realm's declaration files from realm.ts with the SDK's synth, the realm-synth command
+ * from the installed @embabel/realm-synth package. It runs from TypeScript source under Bun.
  *
  * Synth clears the directory it writes to, so it writes to a fresh temporary one and only the
  * files it generates are copied back here. Pointing it at the realm itself would delete the
@@ -12,7 +11,8 @@
  * as well as types: the digest of each skill folder, which the plan handlers key their kept plans on.
  */
 import { spawnSync } from "node:child_process";
-import { cpSync, mkdirSync, mkdtempSync, realpathSync, rmSync } from "node:fs";
+import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 
@@ -23,8 +23,8 @@ const GENERATED = [
 ];
 const TYPES = "wasm/generated/realm.ts";
 
-const types = realpathSync("node_modules/@embabel/realm-types");
-const cli = join(types, "..", "realm-synth", "src", "cli.ts");
+const manifest = createRequire(import.meta.url).resolve("@embabel/realm-synth/package.json");
+const cli = join(dirname(manifest), JSON.parse(readFileSync(manifest, "utf8")).bin["realm-synth"]);
 const out = mkdtempSync(join(tmpdir(), "realm-chess-synth-"));
 try {
   const run = spawnSync("bun", [cli, "realm.ts", "--out", join(out, "realm"), "--types", join(out, "realm.ts"), ...process.argv.slice(2)], {

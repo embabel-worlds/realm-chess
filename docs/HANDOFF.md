@@ -21,7 +21,8 @@ sandbox. There is no Docker image and no Node server.
 - **Keeping.** Your caches became SQLite tables with your TTLs (`db/schema.sql`), and the opening
   book became migrations (`db/0001`, `db/0002`).
 - **Plans** go through `ai_complete` with the chess-plans skill, behind the owner's model grant,
-  and are keyed to the lines they describe (`analysisId`).
+  and are keyed to the `full` lines they were made from (`analysisId`), which a later deeper search
+  does not change.
 - **ChessStatus** is new: the one place an empty column can be explained.
 - **Chesscalator** is a captured app: it calls `chess.appPosition`, `chess.appPractice` and
   `chess.appPlans` through the frame's single `realm.call`, and carries its board, chess.js,
@@ -53,13 +54,17 @@ reproducible. Never edit a generated file; edit `realm.ts` and run `npm run synt
 
 ## What needs the published SDK
 
-`@embabel/realm-types` is a `file:` dependency on an SDK checkout. The realm uses SDK features that
-are not released yet: captured `views`, `skills`, `apps` and `maturity`, `capabilities`, string
-argument and return types on dependency methods, `ndjson` API operations, migrations on a SQLite
+`@embabel/realm-types` and `@embabel/realm-synth` are vendored as tarballs in `vendor/sdk/`, packed
+from embabel-ts branch `feat/sdk-auth-none-typed-model`, so a fresh clone installs without an SDK
+checkout. Refresh them with `npm run vendor:sdk -- <embabel-ts checkout>`, then reinstall the
+tarballs as the README's "Build, test, install" shows, so `package-lock.json` records their new
+integrity. The realm uses SDK features that are not released yet: captured `views`, `skills`,
+`apps` and `maturity`, `capabilities`, string argument and return types on dependency methods, `ndjson` API operations, migrations on a SQLite
 dependency, synth refusing an output folder it did not write, the typed `ai_complete` call on the
 handler context, and handler output types that refuse null (every verb in `wasm/handlers.ts` is
-typed with them, so `npm run typecheck` catches a result the host would refuse). Switch `package.json` to the
-published version when it ships; nothing else changes.
+typed with them, so `npm run typecheck` catches a result the host would refuse). Switch both
+entries in `package.json` to the published version when it ships and delete `vendor/sdk/`; nothing
+else changes.
 
 ## Host follow-ups
 

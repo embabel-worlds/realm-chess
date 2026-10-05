@@ -57,6 +57,17 @@ export class FakeDb {
   }
 }
 
+/**
+ * The SQL in a `dep:db.exec` frame, read the way the host's SQLite adapter reads it: a bare
+ * string, `[sql]` or `[sql, params]` from the current shim, or `{ sql, params }` from a guest
+ * built with an older one.
+ */
+export function execSql(args: unknown): string {
+  if (typeof args === "string") return args;
+  if (Array.isArray(args)) return String(args[0]);
+  return (args as { sql: string }).sql;
+}
+
 export type Analyse = (fen: string, nodes: number, maxDepth: number, multiPv: number) => string;
 
 /**
@@ -72,7 +83,7 @@ export interface BatchModel { clock: { now: number }; parallel: boolean }
  */
 export function chessHost(db: FakeDb, engine: Analyse, batchModel?: BatchModel): HostCall & { searches: number; batches: number[] } {
   const host = ((tool: string, args: unknown) => {
-    if (tool === "dep:db.exec") return db.exec((args as { sql: string }).sql);
+    if (tool === "dep:db.exec") return db.exec(execSql(args));
     if (tool === "dep:engine.analyse") {
       const batch = (args as { batch?: [string, number, number, number][] }).batch;
       if (!batch) {
