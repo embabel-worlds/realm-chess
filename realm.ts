@@ -127,7 +127,7 @@ page. The engine is GPL-3.0, and so is this realm.`,
 
   apis: {
     lichess: {
-      url: "lichess.json",
+      url: "lichess.yml",
       type: "openapi",
       name: "lichess",
       auth: "bearer",
@@ -137,7 +137,7 @@ page. The engine is GPL-3.0, and so is this realm.`,
       operations: { playerExplorer: { response: "ndjson" } },
     },
     wikibooks: {
-      url: "wikibooks.json",
+      url: "wikibooks.yml",
       type: "openapi",
       name: "wikibooks",
       // The wikibook is public: the host calls it with no credential, once the owner approves the API.

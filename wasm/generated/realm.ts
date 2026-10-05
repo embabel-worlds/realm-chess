@@ -442,7 +442,7 @@ export interface HostChannelGateway {
   position(request: { source: string }): Promise<{ position: string | null }>;
 }
 
-/** Operations from lichess.json. */
+/** Operations from lichess.yml. */
 interface LichessGateway {
   lichessExplorer(args?: Record<string, unknown>): Promise<unknown>;
   mastersExplorer(args?: Record<string, unknown>): Promise<unknown>;
@@ -450,7 +450,7 @@ interface LichessGateway {
   playerExplorer<T = unknown>(args?: Record<string, unknown>): Promise<{ records: T[]; truncated: boolean }>;
 }
 
-/** Operations from wikibooks.json. */
+/** Operations from wikibooks.yml. */
 interface WikibooksGateway {
   wikibooksQuery(args?: Record<string, unknown>): Promise<unknown>;
 }

@@ -39,6 +39,12 @@ const current: Fixture = {
 if (process.env.UPDATE_CONTRACT === "1") writeFileSync(FIXTURE, `${JSON.stringify(sortKeys(current), null, 2)}\n`);
 const fixture = JSON.parse(readFileSync(FIXTURE, "utf8")) as Fixture;
 
+/** Reads a vendored API document by its extension: YAML or JSON. */
+function readDocument(url: string): any {
+  const text = readFileSync(`apis/${url}`, "utf8");
+  return /\.ya?ml$/.test(url) ? parse(text) : JSON.parse(text);
+}
+
 describe("handler signatures", () => {
   it("has the ten public handlers, by name", () => {
     expect(fixture.handlers.map((h) => h.name)).toEqual(PUBLIC_HANDLERS);
@@ -82,15 +88,20 @@ describe("the public APIs", () => {
     expect(wikibooks).toMatchObject({ auth: "none" });
     expect(wikibooks).not.toHaveProperty("credential");
     expect(credentials.map((c) => c.id)).toEqual(["lichess"]);
-    const doc = JSON.parse(readFileSync(`apis/${wikibooks.url}`, "utf8"));
+    const doc = readDocument(wikibooks.url);
     expect(doc).not.toHaveProperty("security");
     expect(doc.components?.securitySchemes).toBeUndefined();
   });
 
   it("fix no header but an X- one, which is all the host lets a captured API fix", () => {
     for (const a of apis) {
-      const text = readFileSync(`apis/${a.url}`, "utf8");
-      const fixed = [...text.matchAll(/"in":\s*"header"[^}]*"name":\s*"([^"]+)"|"name":\s*"([^"]+)"[^}]*"in":\s*"header"/g)].map((m) => m[1] ?? m[2]);
+      const fixed: string[] = [];
+      const doc = readDocument(a.url);
+      for (const path of Object.values<any>(doc.paths ?? {})) {
+        for (const op of Object.values<any>(path)) {
+          for (const p of op?.parameters ?? []) if (p.in === "header") fixed.push(p.name);
+        }
+      }
       for (const h of fixed) expect(h, `${a.name} header ${h}`).toMatch(/^X-/i);
     }
   });

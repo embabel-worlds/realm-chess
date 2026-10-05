@@ -8,10 +8,10 @@
   responses:
     playerExplorer: application/x-ndjson
   type: openapi
-  url: lichess.json
+  url: lichess.yml
 - auth: none
   name: wikibooks
   operation-ids:
     - wikibooksQuery
   type: openapi
-  url: wikibooks.json
+  url: wikibooks.yml
