@@ -5,7 +5,7 @@
  *   APPLIANCE=http://127.0.0.1:11043 APPLIANCE_AUTH="Basic ..." node tests/live/views.mjs
  *
  * What is expected of each view:
- * - BestMoves, ImbalancesOf, OpeningOf, OpeningOfLine: the Node realm's recorded rows
+ * - BestMoves, ImbalancesOf, OpeningOf, OpeningOfLine: the recorded envelopes
  *   (tests/fixtures/envelopes.json), field by field. These depend only on the board, the book and
  *   the engine at depth 18. OpeningOf for the Exchange Ruy position is legitimately empty.
  * - MastersAtPosition, MasterGamesAtPosition, MovesByRating, MovesByTimeControl, PlayerAtPosition,

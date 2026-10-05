@@ -3,7 +3,7 @@ import { Chess } from "chess.js";
 /*
  * Explorer answers in the shapes Lichess sends them, for the tests' three positions: the start,
  * after 1.e4, and the Exchange Ruy past the book. The moves are each position's own legal moves
- * and the counts are fixed numbers, so every test and the Node realm read the same answers.
+ * and the counts are fixed numbers, so every test reads the same answers.
  * The player database's answer streams: each record a fuller version of the one before.
  */
 

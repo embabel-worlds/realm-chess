@@ -269,7 +269,7 @@ describe.skipIf(!hasTooling)("the app's calls, in the guest", () => {
       expect(JSON.parse(readFileSync("tests/fixtures/app-replies.json", "utf8"))).toEqual(replies);
     }, 120_000);
 
-    it("give the engine moves, imbalances and openings the Node realm's views returned", () => {
+    it("give the engine moves, imbalances and openings the recorded views returned", () => {
       const replies = JSON.parse(readFileSync("tests/fixtures/app-replies.json", "utf8")) as Record<string, Reply>;
       const envelopes = JSON.parse(readFileSync("tests/fixtures/envelopes.json", "utf8")) as Record<string, { data: unknown[] }>;
       const env = (name: string, args: Record<string, unknown>) => envelopes[`view:${name}:${JSON.stringify(Object.fromEntries(Object.entries(args).sort()))}`]?.data;
