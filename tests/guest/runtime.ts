@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
-import { cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { chmodSync, cpSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 
@@ -60,6 +60,32 @@ export function buildGuest(entry?: string, overrides: Record<string, string> = {
   const module = new WebAssembly.Module(readFileSync(cacheFile));
   built.set(key, module);
   return module;
+}
+
+/**
+ * The JavaScript the appliance's build hands to Javy for wasm/handlers.ts, as text. The build
+ * deletes it after compiling, so this runs the build with a thin Javy wrapper that keeps a copy
+ * of the file it is asked to compile. Never cached, so the text always matches the sources.
+ */
+export function bundleGuest(): string {
+  if (!hasTooling) throw new Error("EMBABEL_WASM_TOOLING is not set to the appliance's wasm-realm tooling folder");
+  const work = mkdtempSync(join(tmpdir(), "realm-chess-bundle-"));
+  const copy = join(work, "bundle.js");
+  const wrapper = join(work, "javy");
+  const real = process.env.EMBABEL_JAVY ?? "javy";
+  writeFileSync(wrapper, [
+    "#!/bin/sh",
+    `if [ "$1" = build ]; then prev=; for a in "$@"; do if [ "$a" = -o ]; then cp "$prev" '${copy}'; fi; prev=$a; done; fi`,
+    `exec '${real}' "$@"`,
+    "",
+  ].join("\n"));
+  chmodSync(wrapper, 0o755);
+  const run = spawnSync(process.execPath, [
+    join(TOOLING!, "build-handlers-wasm.mjs"), "--handlers", join(ROOT, "wasm", "handlers.ts"),
+    "--out", join(work, "out.wasm"), "--javy", wrapper, "--no-cache",
+  ], { encoding: "utf8" });
+  if (run.status !== 0) throw new Error(`guest build failed:\n${run.stdout}\n${run.stderr}`);
+  return readFileSync(copy, "utf8");
 }
 
 const CALL = "\u0000embabel:call\u0000";
