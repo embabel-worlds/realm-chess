@@ -18,7 +18,7 @@ const DAY = 24 * 60 * 60 * 1000;
 const SEARCH_MS = 3000;
 
 /* The public candidate record: every field a row carries. `mate` is left out when there is no mate. */
-const rodRecordFields = ["candidateId", "creates", "depth", "elapsedMs", "engine", "fen", "lossCp", "pvSan", "pvUci", "rank", "removes", "san", "scoreCp", "side", "uci", "whiteCp"];
+const recordFields = ["candidateId", "creates", "depth", "elapsedMs", "engine", "fen", "lossCp", "pvSan", "pvUci", "rank", "removes", "san", "scoreCp", "side", "uci", "whiteCp"];
 
 const PUBLIC = ["fen", "rank", "san", "scoreCp", "whiteCp", "lossCp", "pvSan", "pvUci", "depth", "creates", "removes"];
 
@@ -29,7 +29,7 @@ const candidates = (db: FakeDb, host: ReturnType<typeof chessHost>, keys: string
   fetchProducer({ module: buildGuest(), handler: "chess.rowsCandidates", keyArgument: "fens", keys, maxPages, db, host, clock });
 
 describe.skipIf(!hasTooling || !STOCKFISH)("with the real stockfish module", () => {
-  it("chess.analysePosition keeps the Node realm's contract: one flat list across positions, nothing for a checkmate", async () => {
+  it("chess.analysePosition returns one flat list across positions, and nothing for a checkmate", async () => {
     const db = new FakeDb();
     const host = chessHost(db, realEngine());
     const rows = run("analysePosition", { fens: [START, FOOLS_MATE] }, db, host) as Record<string, unknown>[];
@@ -37,7 +37,7 @@ describe.skipIf(!hasTooling || !STOCKFISH)("with the real stockfish module", () 
     expect(host.searches).toBe(1);
     for (const r of rows) {
       // Every declared field, apart from one with no value (no mate here), which is left out.
-      expect(Object.keys(r).sort()).toEqual(rodRecordFields.filter((f) => f !== "mate"));
+      expect(Object.keys(r).sort()).toEqual(recordFields.filter((f) => f !== "mate"));
       expect(r.fen).toBe(START);
       expect(r.depth).toBe(DEPTH_CAP);
     }
