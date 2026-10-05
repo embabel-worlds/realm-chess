@@ -122,7 +122,9 @@ page searches it again, which happens only once its rows are a week old.
 The graph's and the app's reads (BestMoves, `HAS_CANDIDATE`, Chesscalator) prefer a fresh
 deeper row; its rows say the depth and nodes they reached. `analysePosition`, which takes a depth
 cap, and the plans, which are kept by the analysis they were made from, read the page's own rows,
-so a tick never changes their answer or makes a kept plan miss.
+so a tick never changes their answer or makes a kept plan miss. After a tick, then, a position's
+`CandidateMove` rows carry the deeper analysis's `analysisId` and its `Plan` rows keep the one
+they were made from.
 
 The two ticks can be replayed by the host when another dispatch published first: the deepen tick
 reads the queue and the marks and writes only `deep_analyses` and `deep_failures`; the marking
@@ -166,8 +168,9 @@ The opening book is rows in SQLite too, loaded by migrations. `db/schema.sql` is
 is never edited once installed: a change to the tables is a new `db/NNNN-*.sql` file, added to the
 end of `migrations` in `realm.ts`. The appliance applies the ones it has not applied yet, in order,
 and records which. The book is `0001` and `0002`, ChessStatus `0003`, the Lichess spacing clock `0004`,
-the app's kept lines and imbalances `0005`, background deepening `0006`, `0007` and `0008`. A migration that changes the book's skeletons also
-empties `position_facts`, and one that changes the openings empties `game_lines`.
+the app's kept lines and imbalances `0005`, background deepening `0006`, `0007` and `0008`, and
+`0009` puts back the deepening queue `0007` dropped. A migration that changes the book's skeletons
+also empties `position_facts`, and one that changes the openings empties `game_lines`.
 
 ## When one read is not enough
 
@@ -229,9 +232,25 @@ npm run check        # typecheck, vendor chess.js, write the book, build the app
 ```
 
 `npm run check` needs Bun on the path (synth runs under it) and `npx playwright install
-chromium-headless-shell` once for the page tests. `@embabel/realm-types` is a `file:` dependency on
-an SDK checkout until the version with captured views, skills, apps, maturity, string
-dependencies, the typed model call and null-refusing output types is published; switch `package.json` to that version then.
+chromium-headless-shell` once for the page tests.
+
+The SDK is not on npm yet, so `@embabel/realm-types` and `@embabel/realm-synth` are vendored as
+tarballs in `vendor/sdk/`, packed from embabel-ts branch `feat/sdk-auth-none-typed-model`. A fresh
+clone installs with no SDK checkout. To refresh them from an embabel-ts checkout on that branch:
+
+```bash
+npm run vendor:sdk -- <embabel-ts checkout>
+npm install --save-dev ./vendor/sdk/embabel-realm-types-0.1.0.tgz ./vendor/sdk/embabel-realm-synth-0.1.0.tgz
+```
+
+The second command records the new tarballs' integrity in `package-lock.json`. A plain `npm
+install` keeps the old integrity, because the file names do not change.
+
+`scripts/vendor-sdk.mjs` copies each package's `package.json` and `src` to a temporary folder,
+limits `files` to `src`, replaces realm-synth's `workspace:*` dependency on realm-types with its
+version (npm cannot install the workspace protocol), and runs `npm pack --pack-destination
+vendor/sdk` there. If the version changes, name the new tarballs in the install command. When
+the SDK is published, switch both to the published version and delete `vendor/sdk/`.
 
 To install, put the realm in the world's `config/realms/chess` folder (or install it from the
 Store) and admit it. Copy without macOS `._` files: admission refuses a capture that has them. The
@@ -295,9 +314,11 @@ change the skill) between runs.
 - **Theory needs the `wikibooks` API approved.** The wikibook is public, so the API is declared
   with `auth: none` and no credential; the owner still approves it. Until then `HAS_THEORY` is
   empty and line plans are made without theory.
-- **Lichess is asked one request at a time, 1.1 s apart.** A rating comparison is nine requests,
-  about ten seconds the first time; answers are kept (masters and ratings 30 days, a player's
-  games a day, theory and plans a week). An empty or refused answer is never kept.
+- **Lichess is asked one request at a time, 1.1 s apart, within a dispatch.** Across dispatches
+  the spacing is best effort: two dispatches running at once can each ask straight away. A rating
+  comparison is nine requests, about ten seconds the first time; answers are kept (masters and
+  ratings 30 days, a player's games a day, theory and plans a week). An empty or refused answer is
+  never kept.
 - **Handler speed depends on the appliance's runtime.** The handlers are JavaScript compiled to
   Wasm. Under a JIT they take well under a second; on an interpreter they can take tens of seconds
   (imbalances alone took 26.9 s), which runs past the 30 second deadline. The appliance should run

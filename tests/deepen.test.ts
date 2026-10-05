@@ -4,10 +4,11 @@ import { join } from "node:path";
 import { Chess } from "chess.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { runView } from "../wasm/lib/cypher";
+import { configKey, DEEP, FULL } from "../wasm/lib/engine";
 import { DEADLINE_MS, DEEP_DEPTH_CAP, DEEP_NODES, DEEP_SEARCH_MS, DEEPEN_SLOTS, DEEPEN_TICK_MS, DEEPEN_WIDTH } from "../wasm/lib/config";
 import { VIEWS } from "../wasm/lib/views";
 import { fakeEngine, FOOLS_MATE, positions } from "./guest/fakes";
-import { FakeDb, realmHost } from "./guest/host";
+import { execSql, FakeDb, MIGRATIONS, realmHost } from "./guest/host";
 import { type Clock, fetchProducer } from "./guest/producer";
 import { replayRefusal } from "./guest/replay";
 import { buildGuest, dispatch, hasTooling, TOOLING } from "./guest/runtime";
@@ -98,6 +99,33 @@ describe("the deepen schedules, as declared", () => {
   it("the queue's slots are the first three hex digits of a hash", () => {
     expect(16 ** 3).toBe(DEEPEN_SLOTS);
   });
+
+  it("upgrading a version-6 database queues again what 0007 dropped: a fresh search nothing has deepened", () => {
+    const db = new FakeDb(MIGRATIONS.slice(0, MIGRATIONS.indexOf("db/0007-deepen-slots.sql")));
+    const at = (msAgo: number) => new Date(Date.now() - msAgo).toISOString();
+    const kept = (table: string, fen: string, key: string, created: string) =>
+      db.exec(
+        `INSERT INTO ${table} (fen, config_key, analysis_id, depth, nodes, lines_json, records_json, elapsed_ms, created_at) ` +
+          `VALUES ('${fen}', '${key}', 'id', 18, 1, '[]', '[]', 1, '${created}')`,
+      );
+    const [d4, c4, nf3] = ["d4", "c4", "Nf3"].map(fenAfter);
+    // E4 was searched an hour ago and queued under 0006; that queue is what 0007 drops.
+    kept("analyses", E4, configKey(FULL), at(60 * 60 * 1000));
+    db.exec(`INSERT INTO deepen_queue (fen, queued_at) VALUES ('${E4}', '${at(60 * 60 * 1000)}')`);
+    // D4 was deepened after its search, C4's search has expired, and Nf3 was searched to another depth.
+    kept("analyses", d4, configKey(FULL), at(2 * 60 * 60 * 1000));
+    kept("deep_analyses", d4, configKey(DEEP), at(60 * 60 * 1000));
+    kept("analyses", c4, configKey(FULL), at(8 * DAY));
+    kept("analyses", nf3, configKey({ ...FULL, depthCap: 12 }), at(60 * 60 * 1000));
+
+    for (const m of MIGRATIONS.slice(MIGRATIONS.indexOf("db/0007-deepen-slots.sql"))) db.sqlite.exec(readFileSync(m, "utf8"));
+
+    const queue = db.exec("SELECT slot, fen, queued_at FROM deepen_queue");
+    expect(queue.map((r) => r.fen)).toEqual([E4]);
+    expect(queue[0].slot).toMatch(/^[0-9a-f]{3}$/);
+    // Queued at the time it was searched, so the tick still takes the oldest first.
+    expect(queue[0].queued_at).toBe(db.exec(`SELECT created_at FROM analyses WHERE fen = '${E4}'`)[0].created_at);
+  });
 });
 
 describe.skipIf(!hasTooling)("deepening in the background, in the guest", () => {
@@ -182,7 +210,7 @@ describe.skipIf(!hasTooling)("deepening in the background, in the guest", () => 
     s.cost.ms = DEEP_SEARCH_MS;
     // The queue read returns 8 s into the dispatch: one more calibrated search would pass 12 s.
     const slowMount = (tool: string, args: unknown) => {
-      if (tool === "dep:db.exec" && /FROM deepen_queue/.test((args as { sql: string }).sql)) s.clock.now += 8_000;
+      if (tool === "dep:db.exec" && /FROM deepen_queue/.test(execSql(args))) s.clock.now += 8_000;
       return s.host(tool, args);
     };
     s.db.begin();

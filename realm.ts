@@ -87,7 +87,7 @@ page. The engine is GPL-3.0, and so is this realm.`,
       properties: {
         ...rodTypes.CandidateMove.properties,
         analysisId:
-          "What the line belongs to: the hash of the engine, how it searched and the lines it found. Plans made from these lines carry the same id.",
+          "What the line belongs to: the hash of the engine, how it searched and the lines it found. Once the background tick has searched the position deeper, the rows are the deeper search's and carry its id.",
         nodes: "Positions the engine searched for this analysis.",
       },
     },
@@ -95,7 +95,8 @@ page. The engine is GPL-3.0, and so is this realm.`,
       ...rodTypes.Plan,
       properties: {
         ...rodTypes.Plan.properties,
-        analysisId: "The engine analysis these plans were made from: the same id as the CandidateMove rows they describe.",
+        analysisId:
+          "The engine analysis these plans were made from: the position's own search at the full budget. It is the id of the position's CandidateMove rows until the background tick searches it deeper; then the candidates carry the deeper search's id and the plans keep the one they were made from, so the model is not asked again.",
       },
     },
     ChessStatus: {
@@ -153,7 +154,7 @@ page. The engine is GPL-3.0, and so is this realm.`,
       sha256: "9a5542e25e42fbbb48501bae0ab4295cdf0fd0f41219ec3b6c891c4a282e7779",
       persistent: true,
       init: "db/schema.sql",
-      migrations: ["db/0001-openings.sql", "db/0002-skeletons.sql", "db/0003-status.sql", "db/0004-lichess.sql", "db/0005-app.sql", "db/0006-deepen.sql", "db/0007-deepen-slots.sql", "db/0008-deep-failures.sql"],
+      migrations: ["db/0001-openings.sql", "db/0002-skeletons.sql", "db/0003-status.sql", "db/0004-lichess.sql", "db/0005-app.sql", "db/0006-deepen.sql", "db/0007-deepen-slots.sql", "db/0008-deep-failures.sql", "db/0009-requeue-deepen.sql"],
     },
     /** Stockfish 19 lite from the registry. How long it searches is in wasm/lib/config.ts. */
     engine: {

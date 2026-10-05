@@ -3,7 +3,7 @@
 
 /** One of the engine's best lines in a position (Stockfish 19, five lines, depth 18). Reached from Position via HAS_CANDIDATE. THE SCORE IS FOR THE SIDE TO MOVE; `whiteCp` is the same from White's side. `lossCp` is how much worse than the best line this one is, in centipawns — the ONLY field to filter on for 'moves within half a pawn of best' (lossCp <= 50; a pawn is 100). `rank` is the engine's order, 1 to 5. `creates` and `removes` say which imbalances the line changes once its exchanges settle — the best evidence of what a move is for. */
 export interface CandidateMove {
-  /** What the line belongs to: the hash of the engine, how it searched and the lines it found. Plans made from these lines carry the same id. */
+  /** What the line belongs to: the hash of the engine, how it searched and the lines it found. Once the background tick has searched the position deeper, the rows are the deeper search's and carry its id. */
   analysisId?: string;
   /** The FEN and the first move in UCI. Identity: stable across searches, where the rank is not. */
   candidateId?: string;
@@ -159,7 +159,7 @@ export interface OpeningTheory {
 
 /** A plan for one side in a position: what it should be trying to achieve and why, with its key moves, the imbalances it uses and which of the engine's candidate moves carry it. Decided by a model with the chess-plans skill, from the position's imbalances, opening and engine lines — a judgement, not a computation. Reached from Position via HAS_PLAN; up to three per side, `priority` 1 first. `summary` is the same on every plan of a position: who stands better and how the plans meet. Costs one engine search and one model call per new position. */
 export interface Plan {
-  /** The engine analysis these plans were made from: the same id as the CandidateMove rows they describe. */
+  /** The engine analysis these plans were made from: the position's own search at the full budget. It is the id of the position's CandidateMove rows until the background tick searches it deeper; then the candidates carry the deeper search's id and the plans keep the one they were made from, so the model is not asked again. */
   analysisId?: string;
   /** Which of the engine's candidate moves carry the plan. */
   engineEvidence?: string;
