@@ -4,7 +4,6 @@ import { parse } from "yaml";
 import { LICHESS_SPACING_MS, MASTERS_TTL_MS, PLAYER_TTL_MS, RATED_TTL_MS, THEORY_TTL_MS } from "../wasm/lib/config";
 import { explorerAnswer } from "../wasm/lib/explorer";
 import { LICENCE, pageUrl, theoryText, theoryTitles } from "../wasm/lib/theory";
-import { rodBundle } from "./baseline/rod-bundle";
 import { allWithValues } from "../wasm/lib/records";
 import {
   AFTER_E4, FIXTURE_FENS, mastersAnswer, ndjsonReply, ndjsonText, playerRecords, ratedAnswer, RUY, RUY_THEORY, START, wikibooksAnswers,
@@ -15,8 +14,8 @@ import { buildGuest, call, hasTooling } from "./guest/runtime";
 
 /*
  * Lichess practice and wikibook theory, dispatched into the built guest with the APIs answered
- * by fakes. Where the Node realm answered the same question, its own bundle at 86b5bb5 is handed
- * the same answers and the two are compared field by field.
+ * by fakes. The expected rows were recorded from the explorer handlers' reference implementation
+ * on the fixture answers in tests/fixtures/lichess.ts, and are compared field by field.
  */
 
 const T0 = Date.parse("2026-10-03T09:00:00Z");
@@ -45,15 +44,12 @@ function apis(clock: Clock, o: Fakes = {}): Record<string, Answer> {
   };
 }
 
-/** The Node realm's gateway over the same fixtures. The player database reached it as raw NDJSON text. */
-const rodCtx = {
-  lichess: {
-    mastersExplorer: async (a: Record<string, unknown>) => mastersAnswer(String(a.fen)),
-    playerExplorer: async (a: Record<string, unknown>) =>
-      ndjsonText(playerRecords(String(a.fen), String(a.player), String(a.color)), '{"white": 41, "dra'),
-    lichessExplorer: async (a: Record<string, unknown>) => ratedAnswer(String(a.fen), String(a.ratings), a.speeds as string | undefined),
-  },
-  wikibooks: { wikibooksQuery: async (a: Record<string, string>) => wikibooksAnswers(RUY_PAGES, RUY_THEORY)(a) },
+/** The rows recorded for a handler and its arguments, keyed "<handler>:<JSON args>" with sorted keys. */
+const answers = JSON.parse(readFileSync("tests/fixtures/explorer-answers.json", "utf8")) as Record<string, unknown>;
+const recordedFor = (handler: string, args: Record<string, unknown>): unknown => {
+  const key = `${handler}:${JSON.stringify(args)}`;
+  if (!(key in answers)) throw new Error(`no recorded answer for ${key}`);
+  return answers[key];
 };
 
 function setup(o: Fakes & { refuseLichess?: boolean } = {}) {
@@ -75,10 +71,10 @@ const ticking = () => {
 };
 
 /*
- * Rod's moves and games with their valueless fields left out: the host checks results against the
- * declared types, so a missing rating or year is absent, never null. That is the one difference.
+ * The recorded moves and games with their valueless fields left out: the host checks results against
+ * the declared types, so a missing rating or year is absent, never null.
  */
-const rodWithValues = (r: unknown) => {
+const withValues = (r: unknown) => {
   const x = r as { moves: object[]; games: object[] };
   return { moves: allWithValues(x.moves), games: allWithValues(x.games) };
 };
@@ -109,14 +105,14 @@ describe.skipIf(!hasTooling)("Lichess and theory, in the guest", () => {
       expect(lichessCalls(host)).toHaveLength(1);
     });
 
-    it("Rod's public handlers keep his contract and say Lichess refused", () => {
+    it("the public handlers keep their contract and say Lichess refused", () => {
       const { run } = setup({ refuseLichess: true });
       expect(() => run("mastersAtPosition", { fens: [START] })).toThrow(/refused/);
       expect(run("playerAtPosition", { fens: [START] })).toEqual({ moves: [], games: [] });
     });
   });
 
-  describe("the same rows as the Node realm, from the same answers", () => {
+  describe("the recorded rows, from the same answers", () => {
     beforeEach(() => {
       vi.spyOn(globalThis, "setTimeout").mockImplementation(((f: () => void) => {
         f();
@@ -126,14 +122,14 @@ describe.skipIf(!hasTooling)("Lichess and theory, in the guest", () => {
     afterEach(() => vi.restoreAllMocks());
 
     it("MastersAtPosition: moves and games for three positions, from one kept request per position", async () => {
-      const rod = rodWithValues(await rodBundle().mastersAtPosition(rodCtx, { fens: FIXTURE_FENS }));
+      const recorded = withValues(recordedFor("mastersAtPosition", { fens: FIXTURE_FENS }));
       const { fetch, host, run } = setup();
       const moves = await fetch("rowsMasterMoves", "fens", FIXTURE_FENS);
       const games = await fetch("rowsMasterGames", "fens", FIXTURE_FENS);
-      expect(moves.rows).toEqual(rod.moves);
-      expect(games.rows).toEqual(rod.games);
+      expect(moves.rows).toEqual(recorded.moves);
+      expect(games.rows).toEqual(recorded.games);
       expect(host.count("lichess_mastersExplorer")).toBe(3);
-      expect(run("mastersAtPosition", { fens: FIXTURE_FENS })).toEqual(rod);
+      expect(run("mastersAtPosition", { fens: FIXTURE_FENS })).toEqual(recorded);
       expect(host.count("lichess_mastersExplorer")).toBe(3);
     });
 
@@ -146,35 +142,35 @@ describe.skipIf(!hasTooling)("Lichess and theory, in the guest", () => {
 
     it("PlayerAtPosition: the player's moves and games for three positions, from the last complete NDJSON record", async () => {
       const filters = "player=DrNykterstein color=black";
-      const rod = rodWithValues(await rodBundle().playerAtPosition(rodCtx, { fens: FIXTURE_FENS, filters }));
+      const recorded = withValues(recordedFor("playerAtPosition", { fens: FIXTURE_FENS, filters }));
       const { fetch, run } = setup();
       const pin = { player: ["DrNykterstein"], color: ["black"] };
-      expect((await fetch("rowsPlayerMoves", "fens", FIXTURE_FENS, pin)).rows).toEqual(rod.moves);
-      expect((await fetch("rowsPlayerGames", "fens", FIXTURE_FENS, pin)).rows).toEqual(rod.games);
-      expect(run("playerAtPosition", { fens: FIXTURE_FENS, filters })).toEqual(rod);
+      expect((await fetch("rowsPlayerMoves", "fens", FIXTURE_FENS, pin)).rows).toEqual(recorded.moves);
+      expect((await fetch("rowsPlayerGames", "fens", FIXTURE_FENS, pin)).rows).toEqual(recorded.games);
+      expect(run("playerAtPosition", { fens: FIXTURE_FENS, filters })).toEqual(recorded);
     });
 
     it.each([["speed=blitz", { speed: ["blitz"] }], ["band=1600", { band: ["1600"] }], ["", {}], ["band=2200 speed=classical", { band: ["2200"], speed: ["classical"] }]])(
       "MovesByRating and MovesByTimeControl (%s): every cell's rows for three positions",
       async (filters, pin) => {
-        const rod = await rodBundle().ratedMoves(rodCtx, { fens: FIXTURE_FENS, filters });
+        const recorded = recordedFor("ratedMoves", { fens: FIXTURE_FENS, filters });
         const { fetch, run } = setup();
         const f = await fetch("rowsRatedMoves", "fens", FIXTURE_FENS, pin);
         expect(f.refused).toBeUndefined();
-        expect(f.rows).toEqual(rod);
-        expect(run("ratedMoves", { fens: FIXTURE_FENS, filters })).toEqual(rod);
+        expect(f.rows).toEqual(recorded);
+        expect(run("ratedMoves", { fens: FIXTURE_FENS, filters })).toEqual(recorded);
       },
     );
 
     it("TheoryOfLine: the attributed excerpt and its link", async () => {
-      const rod = await rodBundle().theoryOfGameLine(rodCtx, { lines: [RUY_LINE] });
+      const recorded = recordedFor("theoryOfGameLine", { lines: [RUY_LINE] });
       const { fetch, run } = setup();
       const f = await fetch("rowsTheory", "lines", [RUY_LINE]);
-      expect(f.rows).toEqual(rod);
+      expect(f.rows).toEqual(recorded);
       expect(f.rows[0]).toMatchObject({
         title: RUY_PAGES[6], url: pageUrl(RUY_PAGES[6]), theory: theoryText(RUY_THEORY), licence: LICENCE, pliesCovered: 7, pliesPast: 10,
       });
-      expect(run("theoryOfGameLine", { lines: [RUY_LINE] })).toEqual(rod);
+      expect(run("theoryOfGameLine", { lines: [RUY_LINE] })).toEqual(recorded);
     });
   });
 
@@ -185,7 +181,7 @@ describe.skipIf(!hasTooling)("Lichess and theory, in the guest", () => {
       expect(lichess).not.toHaveProperty("ndjson-operation-ids");
     });
 
-    it("a truncated stream is read as the Node realm reads it: from the last complete record", () => {
+    it("a truncated stream is read from the last complete record", () => {
       const records = playerRecords(START, "DrNykterstein", "white");
       const host = realmHost(new FakeDb(), { apis: { lichess_playerExplorer: () => ndjsonReply(records, true) } });
       const fromGuest = call(buildGuest(), "chess.playerAtPosition", { fens: [START], filters: "player=DrNykterstein" }, { host, clock: ticking() }) as { moves: { games: number }[] };
@@ -216,7 +212,7 @@ describe.skipIf(!hasTooling)("Lichess and theory, in the guest", () => {
       { what: "MovesByRating: speed pinned, every band", handler: "rowsRatedMoves", pin: { speed: ["blitz"] }, requests: rated(BANDS.map((b) => [b, "blitz"])) },
       { what: "MovesByRating with speed all", handler: "rowsRatedMoves", pin: { speed: ["all"] }, requests: rated(BANDS.map((b) => [b, "all"])) },
       { what: "MovesByTimeControl: band pinned, every time control", handler: "rowsRatedMoves", pin: { band: ["1600"] }, requests: rated(SPEEDS.map((s) => ["1600", s])) },
-      { what: "nothing pinned: Rod's default grid", handler: "rowsRatedMoves", pin: {}, requests: rated(BANDS.map((b) => [b, "all"])) },
+      { what: "nothing pinned: the default grid", handler: "rowsRatedMoves", pin: {}, requests: rated(BANDS.map((b) => [b, "all"])) },
       { what: "band and speed: one cell", handler: "rowsRatedMoves", pin: { band: ["2200"], speed: ["classical"] }, requests: rated([["2200", "classical"]]) },
       { what: "several bands and speeds: one request per cell", handler: "rowsRatedMoves", pin: { band: ["1600", "2200"], speed: ["blitz", "rapid"] }, requests: rated([["1600", "blitz"], ["1600", "rapid"], ["2200", "blitz"], ["2200", "rapid"]]) },
       { what: "MastersAtPosition: nothing to pin", handler: "rowsMasterMoves", pin: {}, requests: [{ moves: 12, topGames: 15 }] },
@@ -264,7 +260,7 @@ describe.skipIf(!hasTooling)("Lichess and theory, in the guest", () => {
       ["rowsMasterMoves", {}, MASTERS_TTL_MS, "lichess_mastersExplorer"],
       ["rowsPlayerMoves", { player: ["DrNykterstein"] }, PLAYER_TTL_MS, "lichess_playerExplorer"],
       ["rowsRatedMoves", { band: ["1600"], speed: ["blitz"] }, RATED_TTL_MS, "lichess_lichessExplorer"],
-    ] as const)("%s keeps its answer for the Node realm's time, then asks again", async (handler, pin, ttl, tool) => {
+    ] as const)("%s keeps its answer for its time, then asks again", async (handler, pin, ttl, tool) => {
       const { fetch, host, clock } = setup();
       const first = await fetch(handler, "fens", [START], pin);
       expect(host.count(tool)).toBe(1);
@@ -276,7 +272,7 @@ describe.skipIf(!hasTooling)("Lichess and theory, in the guest", () => {
       expect(host.count(tool)).toBe(2);
     });
 
-    it("an empty answer is not kept, as the Node realm's producers never cached one", async () => {
+    it("an empty answer is not kept, as empty answers are never cached", async () => {
       const empty = () => ({ white: 0, draws: 0, black: 0, moves: [], topGames: [] });
       const { fetch, host, db } = setup({ masters: empty });
       expect((await fetch("rowsMasterMoves", "fens", [START])).rows).toEqual([]);
