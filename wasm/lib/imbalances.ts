@@ -177,7 +177,7 @@ function sideImbalances(c: Chess, all: Placed[], s: Side, openFiles: string[]): 
   }
   outposts.sort((a, b) => Math.abs(3.5 - file(a.square)) - Math.abs(3.5 - file(b.square)));
 
-  const halfOpenFiles = [...FILES].filter((f, i) => filesWith(i, myPawns).length === 0 && filesWith(i, theirPawns).length > 0);
+  const halfOpenFiles = [...FILES].filter((_f, i) => filesWith(i, myPawns).length === 0 && filesWith(i, theirPawns).length > 0);
   const rooksOnOpenFiles = mine.filter((p) => (p.type === "r" || p.type === "q") && openFiles.includes(p.square[0]))
     .map((p) => `${PIECE_NAME[p.type]} ${p.square}`);
 

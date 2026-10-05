@@ -11,6 +11,8 @@
     "allowImportingTsExtensions": true,
     "allowJs": false,
     "noEmit": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
     "types": ["node", "vitest/globals"]
   },
   "include": ["realm.ts", "realm/**/*.ts", "wasm/**/*.ts", "tests/**/*.ts"]

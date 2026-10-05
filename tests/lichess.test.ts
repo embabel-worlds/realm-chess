@@ -6,7 +6,7 @@ import { explorerAnswer } from "../wasm/lib/explorer";
 import { LICENCE, pageUrl, theoryText, theoryTitles } from "../wasm/lib/theory";
 import { allWithValues } from "../wasm/lib/records";
 import {
-  AFTER_E4, FIXTURE_FENS, mastersAnswer, ndjsonReply, ndjsonText, playerRecords, ratedAnswer, RUY, RUY_THEORY, START, wikibooksAnswers,
+  AFTER_E4, FIXTURE_FENS, mastersAnswer, ndjsonReply, ndjsonText, playerRecords, ratedAnswer, RUY_THEORY, START, wikibooksAnswers,
 } from "./fixtures/lichess";
 import { type Answer, apiRefusal, FakeDb, realmHost } from "./guest/host";
 import { type Clock, fetchProducer } from "./guest/producer";
@@ -19,7 +19,6 @@ import { buildGuest, call, hasTooling } from "./guest/runtime";
  */
 
 const T0 = Date.parse("2026-10-03T09:00:00Z");
-const DAY = 24 * 60 * 60 * 1000;
 const TICK = 5;
 const RUY_LINE = "e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1";
 const RUY_PAGES = theoryTitles(RUY_LINE.split(" ")).slice(0, 7);

@@ -22,7 +22,7 @@ const rodRecordFields = ["candidateId", "creates", "depth", "elapsedMs", "engine
 
 const PUBLIC = ["fen", "rank", "san", "scoreCp", "whiteCp", "lossCp", "pvSan", "pvUci", "depth", "creates", "removes"];
 
-const run = (verb: string, args: unknown, db: FakeDb, host: ReturnType<typeof chessHost>, clock?: Clock) =>
+const run = (verb: string, args: unknown, _db: FakeDb, host: ReturnType<typeof chessHost>, clock?: Clock) =>
   call(buildGuest(), `chess.${verb}`, args, { host, clock: clock ? () => clock.now : undefined });
 
 const candidates = (db: FakeDb, host: ReturnType<typeof chessHost>, keys: string[], clock: Clock, maxPages = 16) =>

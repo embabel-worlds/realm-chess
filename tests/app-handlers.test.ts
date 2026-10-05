@@ -65,7 +65,7 @@ function setup(o: Options = {}) {
   const host = realmHost(db, {
     engine: o.engine === "real" ? realEngine() : engine.analyse,
     apis,
-    model: o.model === "none" ? undefined : (req) => {
+    model: o.model === "none" ? undefined : () => {
       clock.now += o.modelMs ?? 0;
       return { text: ANSWER, truncated: false };
     },

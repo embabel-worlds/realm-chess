@@ -5,7 +5,7 @@ import { parseView, runView } from "../wasm/lib/cypher";
 import { GRAPH_VIEWS, STATUS_VIEW, VIEWS, type ViewSpec } from "../wasm/lib/views";
 import { theoryTitles } from "../wasm/lib/theory";
 import {
-  AFTER_E4, mastersAnswer, ndjsonReply, ndjsonText, playerRecords, ratedAnswer, RUY, RUY_THEORY, START, wikibooksAnswers,
+  AFTER_E4, mastersAnswer, ndjsonReply, playerRecords, ratedAnswer, RUY, RUY_THEORY, START, wikibooksAnswers,
 } from "./fixtures/lichess";
 import { realEngine, STOCKFISH } from "./guest/engine";
 import { fakeEngine, FOOLS_MATE, STALEMATE } from "./guest/fakes";
@@ -279,7 +279,7 @@ describe.skipIf(!hasTooling)("each view over the realm's producers", () => {
     });
 
     it("the Lichess views without a token, and ChessStatus saying Lichess refused", async () => {
-      const { fetch, run } = setup({ lichess: "refused" });
+      const { fetch } = setup({ lichess: "refused" });
       expect(runView(view("MastersAtPosition"), { fen: START }, await fetch("rowsMasterMoves", "fens", [START]))).toEqual([]);
       expect(runView(view("MovesByRating"), { fen: START }, await fetch("rowsRatedMoves", "fens", [START], { speed: ["blitz"] }))).toEqual([]);
       const status = await fetch("status", "username", ["james"]);
@@ -287,7 +287,7 @@ describe.skipIf(!hasTooling)("each view over the realm's producers", () => {
     });
 
     it("PlansInPosition without the model grant, and ChessStatus saying not_granted", async () => {
-      const { fetch, run } = setup({ model: "none" });
+      const { fetch } = setup({ model: "none" });
       expect(runView(view("PlansInPosition"), { fen: RUY }, await fetch("rowsPositionPlans", "fens", [RUY]))).toEqual([]);
       const status = await fetch("status", "username", ["james"]);
       expect(runView(STATUS_VIEW, {}, status)[0]).toMatchObject({ model: "not_granted", lastRefusal: "MODEL_NOT_GRANTED" });
