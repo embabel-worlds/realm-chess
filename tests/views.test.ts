@@ -4,8 +4,6 @@ import { parse } from "yaml";
 import { parseView, runView } from "../wasm/lib/cypher";
 import { ROD_VIEWS, STATUS_VIEW, VIEWS, type ViewSpec } from "../wasm/lib/views";
 import { theoryTitles } from "../wasm/lib/theory";
-import { baselineYaml } from "./baseline/rod";
-import { rodBundle } from "./baseline/rod-bundle";
 import {
   AFTER_E4, mastersAnswer, ndjsonReply, ndjsonText, playerRecords, ratedAnswer, RUY, RUY_THEORY, START, wikibooksAnswers,
 } from "./fixtures/lichess";
@@ -19,11 +17,11 @@ import { buildGuest, call, hasTooling } from "./guest/runtime";
  * Every view, run over what the realm's producers return for the fixture positions.
  *
  * The views are run by wasm/lib/cypher.ts, the reader the app handlers use. It is checked first
- * against envelopes the Node realm's views returned on a live appliance (tests/fixtures/envelopes.json):
+ * against envelopes the views returned on a live appliance (tests/fixtures/envelopes.json):
  * where the realm's own inputs are deterministic (the board, the book, the engine at depth 18), the
  * rows must be those rows, field by field. Where the inputs come from outside (Lichess, the wikibook,
- * the model), the Node realm's own bundle at 86b5bb5 is handed the same answers, both sets of rows go
- * through the same view, and they must agree; the recorded envelope then fixes the columns.
+ * the model), the recorded explorer answers (tests/fixtures/explorer-answers.json) go through the same
+ * view, and the rows must agree; the recorded envelope then fixes the columns.
  *
  * tests/live/views.mjs runs the same views against an appliance and compares with the same envelopes.
  */
@@ -40,6 +38,7 @@ const columns = (v: ViewSpec) => parseView(v.cypher).columns.map((c) => c.alias)
 const T0 = Date.parse("2026-10-03T09:00:00Z");
 const TICK = 5;
 const EXCHANGE = "e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1";
+const explorerAnswers = JSON.parse(readFileSync("tests/fixtures/explorer-answers.json", "utf8")) as Record<string, unknown>;
 const PAGES = theoryTitles(EXCHANGE.split(" ")).slice(0, 7);
 
 /** A model answer naming plans for both sides, as the plan tests use. */
@@ -80,9 +79,8 @@ function setup(o: { engine?: "real"; lichess?: "refused"; model?: "none" } = {})
 }
 
 describe("the views the realm declares", () => {
-  it("are the Node realm's thirteen, as parsed YAML, and ChessStatus", () => {
-    expect(ROD_VIEWS).toEqual(baselineYaml<ViewSpec[]>("views/chess.yml"));
-    expect(parse(readFileSync("views/chess.yml", "utf8"))).toEqual(baselineYaml<ViewSpec[]>("views/chess.yml").concat([STATUS_VIEW]).map((v) => ({ ...v })));
+  it("are the thirteen in views/chess.yml, plus ChessStatus", () => {
+    expect(parse(readFileSync("views/chess.yml", "utf8"))).toEqual(ROD_VIEWS.concat([STATUS_VIEW]).map((v) => ({ ...v })));
   });
 
   it("can all be read by the reader the app handlers use", () => {
@@ -133,7 +131,7 @@ describe.skipIf(!hasTooling)("each view over the realm's producers", () => {
   });
   afterEach(() => vi.restoreAllMocks());
 
-  describe("against the Node realm's recorded rows", () => {
+  describe("against the recorded envelopes", () => {
     it("ImbalancesOf: one row per position, as recorded, for every recorded position", async () => {
       const { fetch } = setup();
       const cases = recorded.filter((r) => r.view === "ImbalancesOf");
@@ -178,14 +176,11 @@ describe.skipIf(!hasTooling)("each view over the realm's producers", () => {
     }, 120_000);
   });
 
-  describe("against the Node realm's own handlers, given the same answers", () => {
-    const rodCtx = {
-      lichess: {
-        mastersExplorer: async (a: Record<string, unknown>) => mastersAnswer(String(a.fen)),
-        playerExplorer: async (a: Record<string, unknown>) => ndjsonText(playerRecords(String(a.fen), String(a.player), String(a.color))),
-        lichessExplorer: async (a: Record<string, unknown>) => ratedAnswer(String(a.fen), String(a.ratings), a.speeds as string | undefined),
-      },
-      wikibooks: { wikibooksQuery: async (a: Record<string, string>) => wikibooksAnswers(PAGES, RUY_THEORY)(a) },
+  describe("against the recorded explorer answers", () => {
+    const recordedAnswer = (handler: string, args: Record<string, unknown>) => {
+      const key = `${handler}:${JSON.stringify(args)}`;
+      if (!(key in explorerAnswers)) throw new Error(`no recorded answer for ${key}`);
+      return explorerAnswers[key];
     };
     const columnsOf = (name: string) => {
       const env = recorded.find((r) => r.view === name && r.env.data.length);
@@ -194,13 +189,13 @@ describe.skipIf(!hasTooling)("each view over the realm's producers", () => {
 
     it.each([START, AFTER_E4, RUY])("MastersAtPosition and MasterGamesAtPosition at %s", async (fen) => {
       const { fetch } = setup();
-      const rod = (await rodBundle().mastersAtPosition(rodCtx, { fens: [fen] })) as { moves: Record<string, unknown>[]; games: Record<string, unknown>[] };
+      const recordedRows = recordedAnswer("mastersAtPosition", { fens: [fen] }) as { moves: Record<string, unknown>[]; games: Record<string, unknown>[] };
       const moves = runView(view("MastersAtPosition"), { fen }, await fetch("rowsMasterMoves", "fens", [fen]));
       const games = runView(view("MasterGamesAtPosition"), { fen }, await fetch("rowsMasterGames", "fens", [fen]));
       expect(moves.length).toBeGreaterThan(0);
       expect(games.length).toBeGreaterThan(0);
-      expect(moves).toEqual(runView(view("MastersAtPosition"), { fen }, rod.moves));
-      expect(games).toEqual(runView(view("MasterGamesAtPosition"), { fen }, rod.games));
+      expect(moves).toEqual(runView(view("MastersAtPosition"), { fen }, recordedRows.moves));
+      expect(games).toEqual(runView(view("MasterGamesAtPosition"), { fen }, recordedRows.games));
       expect(Object.keys(moves[0]).sort()).toEqual(columnsOf("MastersAtPosition"));
       expect(Object.keys(games[0]).sort()).toEqual(columnsOf("MasterGamesAtPosition"));
     });
@@ -209,15 +204,15 @@ describe.skipIf(!hasTooling)("each view over the realm's producers", () => {
       const { fetch } = setup();
       for (const color of ["white", "black"]) {
         const args = { fen: START, player: "DrNykterstein", color };
-        const rod = (await rodBundle().playerAtPosition(rodCtx, { fens: [START], filters: `player=DrNykterstein color=${color}` })) as {
+        const recordedRows = recordedAnswer("playerAtPosition", { fens: [START], filters: `player=DrNykterstein color=${color}` }) as {
           moves: Record<string, unknown>[]; games: Record<string, unknown>[];
         };
         const pushed = { player: ["DrNykterstein"], color: [color] };
         const moves = runView(view("PlayerAtPosition"), args, await fetch("rowsPlayerMoves", "fens", [START], pushed));
         const games = runView(view("PlayerGamesAtPosition"), args, await fetch("rowsPlayerGames", "fens", [START], pushed));
         expect(moves.length, color).toBeGreaterThan(0);
-        expect(moves).toEqual(runView(view("PlayerAtPosition"), args, rod.moves));
-        expect(games).toEqual(runView(view("PlayerGamesAtPosition"), args, rod.games));
+        expect(moves).toEqual(runView(view("PlayerAtPosition"), args, recordedRows.moves));
+        expect(games).toEqual(runView(view("PlayerGamesAtPosition"), args, recordedRows.games));
       }
     });
 
@@ -227,20 +222,20 @@ describe.skipIf(!hasTooling)("each view over the realm's producers", () => {
         const c = recorded.find((r) => r.view === name)!;
         const pin = name === "MovesByRating" ? { speed: [String(c.args.speed)] } : { band: [String(c.args.band)] };
         const filters = name === "MovesByRating" ? `speed=${c.args.speed}` : `band=${c.args.band}`;
-        const rod = (await rodBundle().ratedMoves(rodCtx, { fens: [AFTER_E4], filters })) as Record<string, unknown>[];
+        const recordedRows = recordedAnswer("ratedMoves", { fens: [AFTER_E4], filters }) as Record<string, unknown>[];
         const ours = runView(view(name), c.args, await fetch("rowsRatedMoves", "fens", [AFTER_E4], pin));
         expect(ours.length, name).toBeGreaterThan(0);
-        expect(ours, name).toEqual(runView(view(name), c.args, rod));
+        expect(ours, name).toEqual(runView(view(name), c.args, recordedRows));
         expect(Object.keys(ours[0]).sort(), name).toEqual(columnsOf(name));
       }
     });
 
     it("TheoryOfLine: the deepest wikibook page along the Exchange Ruy, and none for a line it has no page for", async () => {
       const { fetch } = setup();
-      const rod = (await rodBundle().theoryOfGameLine(rodCtx, { lines: [EXCHANGE] })) as Record<string, unknown>[];
+      const recordedRows = recordedAnswer("theoryOfGameLine", { lines: [EXCHANGE] }) as Record<string, unknown>[];
       const ours = runView(view("TheoryOfLine"), { moves: EXCHANGE }, await fetch("rowsTheory", "lines", [EXCHANGE]));
       expect(ours).toHaveLength(1);
-      expect(ours).toEqual(runView(view("TheoryOfLine"), { moves: EXCHANGE }, rod));
+      expect(ours).toEqual(runView(view("TheoryOfLine"), { moves: EXCHANGE }, recordedRows));
       expect(Object.keys(ours[0]).sort()).toEqual(columnsOf("TheoryOfLine"));
       expect(runView(view("TheoryOfLine"), { moves: "d4" }, await fetch("rowsTheory", "lines", ["d4"]))).toEqual([]);
     });
