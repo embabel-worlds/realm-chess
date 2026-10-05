@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { parse } from "yaml";
 import { parseView, runView } from "../wasm/lib/cypher";
-import { ROD_VIEWS, STATUS_VIEW, VIEWS, type ViewSpec } from "../wasm/lib/views";
+import { GRAPH_VIEWS, STATUS_VIEW, VIEWS, type ViewSpec } from "../wasm/lib/views";
 import { theoryTitles } from "../wasm/lib/theory";
 import {
   AFTER_E4, mastersAnswer, ndjsonReply, ndjsonText, playerRecords, ratedAnswer, RUY, RUY_THEORY, START, wikibooksAnswers,
@@ -80,7 +80,7 @@ function setup(o: { engine?: "real"; lichess?: "refused"; model?: "none" } = {})
 
 describe("the views the realm declares", () => {
   it("are the thirteen in views/chess.yml, plus ChessStatus", () => {
-    expect(parse(readFileSync("views/chess.yml", "utf8"))).toEqual(ROD_VIEWS.concat([STATUS_VIEW]).map((v) => ({ ...v })));
+    expect(parse(readFileSync("views/chess.yml", "utf8"))).toEqual(GRAPH_VIEWS.concat([STATUS_VIEW]).map((v) => ({ ...v })));
   });
 
   it("can all be read by the reader the app handlers use", () => {
