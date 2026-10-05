@@ -2,19 +2,32 @@ import { createHash } from "node:crypto";
 import { readFileSync, statSync } from "node:fs";
 import { Chess } from "chess.js";
 import { describe, expect, it } from "vitest";
-import { openingOfLine, structureOf, type Book, type Skeletons } from "../wasm/lib/openings";
-import { baselineJson } from "./baseline/rod";
+import { positionKey } from "../wasm/lib/openings";
 import { battery } from "./battery/battery";
 import { FakeDb } from "./guest/host";
 import { libs } from "./impl";
 
 /*
- * The book moved from JSON files beside the bundle to rows in the realm's SQLite. These hold the
- * move to the answers the Node realm gave at 86b5bb5, with its own built files as the reference.
+ * The book is rows in the realm's SQLite. These hold it to a recorded digest: a SHA-256 of its
+ * canonical JSON, its entry counts, and a few named entries, all kept in fixtures/book-digest.json.
  */
 
-const rodBook = baselineJson<Book>("dist/data/openings.json");
-const rodSkeletons = baselineJson<Skeletons>("dist/data/skeletons.json");
+type Digest = {
+  book: { entries: number; sha256: string };
+  skeletons: { entries: number; sha256: string };
+  structures: Record<string, unknown>;
+  lines: Record<string, unknown>;
+};
+const digest = JSON.parse(readFileSync("tests/fixtures/book-digest.json", "utf8")) as Digest;
+
+/* The same JSON with every object's keys in sorted order, so the hash does not depend on row order. */
+const sorted = (v: unknown): unknown =>
+  Array.isArray(v)
+    ? v.map(sorted)
+    : v && typeof v === "object"
+      ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, sorted((v as Record<string, unknown>)[k])]))
+      : v;
+const sha = (v: unknown) => createHash("sha256").update(JSON.stringify(sorted(v))).digest("hex");
 
 /* Every battery position, and every position along each battery line: openings, middlegames, endgames. */
 const positions = (() => {
@@ -70,36 +83,47 @@ describe("the book as migrations", () => {
     for (const f of ["db/0001-openings.sql", "db/0002-skeletons.sql"]) expect(statSync(f).size).toBeLessThan(800_000);
   });
 
-  it("holds every named position of the Node realm's book", () => {
+  it("holds the recorded book: its entry count and digest", () => {
     const db = new FakeDb();
     const rows = db.exec("SELECT position_key, eco, name, pgn FROM openings");
-    expect(rows).toHaveLength(Object.keys(rodBook).length);
+    expect(rows).toHaveLength(digest.book.entries);
     const book = Object.fromEntries(rows.map((r) => [r.position_key, { eco: r.eco, name: r.name, pgn: r.pgn }]));
-    expect(book).toEqual(rodBook);
+    expect(Object.keys(book)).toHaveLength(digest.book.entries);
+    expect(sha(book)).toBe(digest.book.sha256);
+  });
+
+  it("names the Ruy Lopez Exchange, the Najdorf, and nothing at the start position", () => {
+    const db = new FakeDb();
+    const named = (fen: string) => {
+      const key = positionKey(fen);
+      const rows = db.exec(`SELECT eco, name FROM openings WHERE position_key = '${key}'`);
+      return rows.length ? { eco: rows[0].eco, name: rows[0].name } : null;
+    };
+    expect(named("r1bqkbnr/1ppp1ppp/p1B5/4p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 0 4")).toEqual({ eco: "C68", name: "Ruy Lopez: Exchange Variation" });
+    expect(named("rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6")).toEqual({ eco: "B90", name: "Sicilian Defense: Najdorf Variation" });
+    expect(named(new Chess().fen())).toBeNull();
   });
 
   it("keeps every family and every name of each skeleton, so a shared skeleton is still seen as shared", () => {
     const db = new FakeDb();
     const rows = db.exec("SELECT pawns_key, families_json, names_json FROM skeletons");
-    expect(rows).toHaveLength(Object.keys(rodSkeletons).length);
-    for (const r of rows) {
-      const rod = rodSkeletons[r.pawns_key as string];
-      const families = JSON.parse(r.families_json as string) as string[];
-      const names = JSON.parse(r.names_json as string) as { name: string }[];
-      expect(families.length, r.pawns_key as string).toBe(rod.families);
-      expect(names.slice(0, 6)).toEqual(rod.openings);
-    }
+    expect(rows).toHaveLength(digest.skeletons.entries);
+    const skeletons = Object.fromEntries(
+      rows.map((r) => [r.pawns_key, { families: JSON.parse(r.families_json as string), names: JSON.parse(r.names_json as string) }]),
+    );
+    expect(sha(skeletons)).toBe(digest.skeletons.sha256);
   });
 });
 
-describe.each(libs)("$name: structure and line names answer as at 86b5bb5", ({ structureOf: structureFromBook, openingOfLine: lineFromBook }) => {
-  it(`structureOf matches the Node realm's over ${positions.length} positions, ambiguous skeletons and near matches included`, () => {
+describe.each(libs)("$name: structure and line names answer as recorded", ({ structureOf: structureFromBook, openingOfLine: lineFromBook }) => {
+  it(`structureOf gives the recorded answer over ${positions.length} positions, ambiguous skeletons and near matches included`, () => {
+    expect(Object.keys(digest.structures).sort()).toEqual([...positions].sort());
     let near = 0, none = 0;
     for (const fen of positions) {
-      const rod = structureOf(fen, rodSkeletons);
-      expect(structureFromBook(fen), fen).toEqual(rod);
-      if (rod === null) none++;
-      else if (rod.pawnsDifferent > 0) near++;
+      const expected = digest.structures[fen] as { pawnsDifferent: number } | null;
+      expect(structureFromBook(fen), fen).toEqual(expected);
+      if (expected === null) none++;
+      else if (expected.pawnsDifferent > 0) near++;
     }
     // The sample has to exercise every branch to mean anything.
     expect(near).toBeGreaterThan(0);
@@ -110,10 +134,9 @@ describe.each(libs)("$name: structure and line names answer as at 86b5bb5", ({ s
     expect(structureFromBook(new Chess().fen())).toBeNull();
   });
 
-  it("openingOfLine matches the Node realm's along every battery line", () => {
+  it("openingOfLine gives the recorded answer along every battery line", () => {
     for (const p of battery().filter((b) => b.moves)) {
-      const moves = p.moves!.split(/\s+/);
-      expect(lineFromBook(moves), p.id).toEqual(openingOfLine(moves, rodBook));
+      expect(lineFromBook(p.moves!.split(/\s+/)) ?? null, p.id).toEqual(digest.lines[p.id]);
     }
   });
 });
