@@ -94,7 +94,8 @@ describe("the skill digest", () => {
     const digest = hash.digest("hex");
     expect(skills.digest["chess-plans"]).toBe(digest);
     expect(JSON.parse(readFileSync("dist/skills.json", "utf8")).digest["chess-plans"]).toBe(digest);
-    expect(readFileSync("wasm/handlers.ts", "utf8")).toContain('import { skills } from "./generated/realm.ts";');
+    // The plan handlers key their kept plans on the digest, so their module is the one that reads it.
+    expect(readFileSync("wasm/handlers/plans.ts", "utf8")).toContain('import { skills } from "../generated/realm.ts";');
   });
 });
 

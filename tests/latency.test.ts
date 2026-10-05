@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { Chess } from "chess.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { runView } from "../wasm/lib/cypher";
@@ -30,6 +30,14 @@ export const GAME =
   "h5 Qxa2 O-O Qa6 Rb5 h6 Ne5 Kh8 d5 exd5 exd5 Bd6 Rc1 Qa4 Rc8 Rxc8 Nxf7+ Kh7 Nxd6 Rf8 Rb4 Qd7 Bf4 Na6 Qxa6 Rxf4 Rxf4 Qxd6 " +
   "Rd4 Rd8 g3 Qc5 Qd3+ Kh8 d6 Qxh5 d7 Qe5 Qc4 Qe7 Rd1 a5 Kh2 Kh7 Qc6 Qf6 Qe4+ Qg6 Qd5 a4";
 
+/*
+ * The profiled entry is the realm's own entry with one more verb appended, built together with
+ * the concern modules it imports exactly as they are on disk, so the profile times the code the
+ * appliance runs.
+ */
+const MODULES = Object.fromEntries(
+  readdirSync("wasm/handlers").filter((f) => f.endsWith(".ts")).sort().map((f) => [`handlers/${f}`, readFileSync(`wasm/handlers/${f}`, "utf8")]),
+);
 const PROFILED = `${readFileSync("wasm/handlers.ts", "utf8")}
 import { timing } from "./lib/timing.ts";
 export const profiledAppPosition = async (input, ctx) => {
@@ -76,7 +84,7 @@ function setup(engine: "real" | "fake") {
     // The wikibook has pages for the game's first six plies, and theory is kept like the rest.
     apis: { wikibooks_wikibooksQuery: wikibooksAnswers(titlesOfSans(GAME.split(" ").slice(0, 6)), RUY_THEORY) },
   });
-  const module = buildGuest(PROFILED);
+  const module = buildGuest(PROFILED, MODULES);
   const ask = (ply: number, fen: string, moves: string): Profile & { reply: Reply; statements: string[] } => {
     const before = db.statements.length;
     db.begin();
