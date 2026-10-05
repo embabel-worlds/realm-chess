@@ -1,7 +1,6 @@
 import { Chess } from "chess.js";
 import { describe, expect, it } from "vitest";
 import { ANALYSIS_TTL_MS, DEADLINE_MS, DEPTH_CAP, FULL_NODES, MULTI_PV, SEARCH_UNTIL, YIELD_AT } from "../wasm/lib/config";
-import { baselineJson } from "./baseline/rod";
 import { realEngine, STOCKFISH } from "./guest/engine";
 import { FOOLS_MATE, fakeEngine, positions, seedKept, STALEMATE } from "./guest/fakes";
 import { chessHost, FakeDb } from "./guest/host";
@@ -18,11 +17,8 @@ const START = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 const DAY = 24 * 60 * 60 * 1000;
 const SEARCH_MS = 3000;
 
-/* The public candidate record: the fields the Node realm's manifest declares for analysePosition's items. */
-const rodRecordFields = Object.keys(
-  (baselineJson<{ entries: { name: string; outputSchema: { items: { properties: Record<string, unknown> } } }[] }>("dist/manifest.json")
-    .entries.find((e) => e.name === "analysePosition")!.outputSchema.items.properties),
-).sort();
+/* The public candidate record: every field a row carries. `mate` is left out when there is no mate. */
+const rodRecordFields = ["candidateId", "creates", "depth", "elapsedMs", "engine", "fen", "lossCp", "pvSan", "pvUci", "rank", "removes", "san", "scoreCp", "side", "uci", "whiteCp"];
 
 const PUBLIC = ["fen", "rank", "san", "scoreCp", "whiteCp", "lossCp", "pvSan", "pvUci", "depth", "creates", "removes"];
 

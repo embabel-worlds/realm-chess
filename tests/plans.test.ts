@@ -6,7 +6,6 @@ import { imbalancesOf } from "../wasm/lib/imbalances";
 import { MODEL_OUTPUT_TOKENS, PLANS_TTL_MS } from "../wasm/lib/config";
 import { theoryText, theoryTitles } from "../wasm/lib/theory";
 import { skills } from "../wasm/generated/realm";
-import { atBaseline } from "./baseline/rod";
 import { battery } from "./battery/battery";
 import { RUY_THEORY, wikibooksAnswers } from "./fixtures/lichess";
 import { fakeEngine, FOOLS_MATE, positions, STALEMATE } from "./guest/fakes";
@@ -76,12 +75,12 @@ function setup(o: { engineMs?: number; modelMs?: number; texts?: string[]; model
 const plansOf = (s: ReturnType<typeof setup>, keys = [NAJDORF.fen], extra: Record<string, unknown> = {}, module?: WebAssembly.Module) =>
   s.fetch("rowsPositionPlans", "fens", keys, extra, module);
 
-describe("the prompt and the parser", () => {
-  it("are the Node realm's, unchanged, between the markers in wasm/lib/plans.ts", () => {
-    const mine = readFileSync("wasm/lib/plans.ts", "utf8");
-    const block = mine.slice(mine.indexOf("// ---- from src/api/chess.ts at 86b5bb5 ----\n") + 46, mine.indexOf("// ---- end ----"));
-    const rod = atBaseline("src/api/chess.ts").split("\n").slice(267, 406).join("\n");
-    expect(block.trimEnd()).toBe(rod.trimEnd());
+describe("the prompt", () => {
+  it("built for the Najdorf position at the default level is the recorded text in tests/fixtures/plan-prompt.txt", async () => {
+    const s = setup();
+    await plansOf(s);
+    const prompt = String(s.model.requests[0].prompt);
+    expect(prompt).toBe(readFileSync("tests/fixtures/plan-prompt.txt", "utf8"));
   });
 });
 
@@ -239,7 +238,7 @@ describe.skipIf(!hasTooling)("plans, in the guest", () => {
       expect(String(f.rows[0].planId)).toMatch(new RegExp(`^${NAJDORF_LINE}#intermediate#`));
     });
 
-    it("a theory lookup that fails is tolerated, as at 86b5bb5", async () => {
+    it("a theory lookup that fails is tolerated", async () => {
       const s = setup({ wikibooks: apiRefusal });
       const f = await s.fetch("rowsLinePlans", "lines", [NAJDORF_LINE]);
       expect(f.rows.length).toBeGreaterThan(0);

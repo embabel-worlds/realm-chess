@@ -3,12 +3,11 @@ import type { Imbalances } from "./imbalances.ts";
 import type { TheoryRecord } from "./theory.ts";
 
 /*
- * The plans prompt and the reading of the model's answer, exactly as the Node realm had them in
- * src/api/chess.ts at 86b5bb5. tests/plans.test.ts holds the text between the markers to that
- * file, so only the transport around them differs.
+ * What the plans verbs ask the model and how they read its answer: the prompt text, the plan
+ * record shape, and the parsing that turns the model's JSON into plan rows. The transport
+ * around the model call lives elsewhere.
  */
 
-// ---- from src/api/chess.ts at 86b5bb5 ----
 export interface PlanRecord {
   planId: string;
   fen: string;
@@ -148,7 +147,6 @@ function levelOf(v: string | undefined): Level {
   const t = (v ?? "").trim().toLowerCase();
   return (LEVELS as readonly string[]).includes(t) ? (t as Level) : "intermediate";
 }
-// ---- end ----
 
 export { asList, citable, citedImbalances, levelOf, MAX_PLANS, parseModelJson, promptFor, uncite };
 export type { ModelPlan, PlanArgs };
@@ -157,7 +155,7 @@ export type { ModelPlan, PlanArgs };
 export type ParsedPlans = ReturnType<typeof parseModelJson>;
 
 /**
- * The plan rows from a parsed answer, as the Node realm made them: plans for either side only,
+ * The plan rows from a parsed answer: plans for either side only,
  * most important first, at most the level's number per side, citations that name no fact
  * dropped, and citation numbers taken out of the prose. No plans at all is an error.
  */
@@ -191,6 +189,6 @@ export function planRecords(fen: string, x: Imbalances, parsed: ParsedPlans, tex
   });
 }
 
-/** The prompt for asking again after an answer that was not valid JSON, as the Node realm asked. */
+/** The prompt for asking again after an answer that was not valid JSON. */
 export const repairPrompt = (prompt: string, e: Error) =>
   `${prompt}\n\nYour previous answer was not valid JSON (${e.message}). Reply again with ONLY the JSON object.`;
