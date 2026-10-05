@@ -1,7 +1,7 @@
 import { defineRealm } from "@embabel/realm-types";
 import { handlers } from "./realm/handlers/index.ts";
 import { producers } from "./realm/producers.ts";
-import { rodTypes } from "./realm/types.ts";
+import { types } from "./realm/types.ts";
 import { views } from "./realm/views.ts";
 import { ENGINE_MODULE } from "./wasm/lib/config.ts";
 
@@ -78,37 +78,7 @@ page. The engine is GPL-3.0, and so is this realm.`,
     },
   },
 
-  types: {
-    ...rodTypes,
-    CandidateMove: {
-      ...rodTypes.CandidateMove,
-      properties: {
-        ...rodTypes.CandidateMove.properties,
-        analysisId:
-          "What the line belongs to: the hash of the engine, how it searched and the lines it found. Once the background tick has searched the position deeper, the rows are the deeper search's and carry its id.",
-        nodes: "Positions the engine searched for this analysis.",
-      },
-    },
-    Plan: {
-      ...rodTypes.Plan,
-      properties: {
-        ...rodTypes.Plan.properties,
-        analysisId:
-          "The engine analysis these plans were made from: the position's own search at the full budget. It is the id of the position's CandidateMove rows until the background tick searches it deeper; then the candidates carry the deeper search's id and the plans keep the one they were made from, so the model is not asked again.",
-      },
-    },
-    ChessStatus: {
-      description:
-        "What the realm could not do, as it last recorded it. Reached from the owner via HAS_CHESS_STATUS. It knows only what a finished call recorded: a call that died records nothing, and a refused Lichess call does not say why.",
-      properties: {
-        username: { description: "The owner. Identity.", metadata: { identity: "true" } },
-        lichess: "`ok`, `refused` or `unknown`: how the last Lichess call went.",
-        model: "`ok`, `not_granted` or `unknown`: whether the last model call was allowed.",
-        lastRefusal: "The code of the last refusal a handler saw, or empty.",
-        at: "When the last outcome was recorded.",
-      },
-    },
-  },
+  types,
 
   producers,
 
