@@ -21,7 +21,7 @@ export const ENGINE_MODULE = {
  */
 export const FULL_NODES = 3_500_000;
 
-/** The search stops at this depth even with budget left, as `go depth 18` did in the Node realm. */
+/** The search stops at this depth even with budget left (depth 18). */
 export const DEPTH_CAP = 18;
 
 /** Lines per position. */
@@ -36,7 +36,7 @@ export const SEARCH_UNTIL = 0.6;
 /** Past this share of the deadline a page stops and hands back a cursor, whatever is left. */
 export const YIELD_AT = 0.9;
 
-/** Kept analyses are searched again after seven days, as the Node realm's cache kept them. */
+/** Kept analyses are searched again after seven days. */
 export const ANALYSIS_TTL_MS = 7 * 24 * 60 * 60 * 1000;
 
 /** The most keys the host sends a producer at once. */
@@ -53,7 +53,7 @@ export const SEARCH_MS = 3_000;
 /** One API call: the host's transport gives up after 10 seconds. */
 export const API_CALL_MS = 10_000;
 
-/** Lichess asks for one request at a time on a token; the Node realm spaced them 1.1 s apart. */
+/** Lichess asks for one request at a time on a token; requests are spaced 1.1 s apart. */
 export const LICHESS_SPACING_MS = 1_100;
 
 /** One model call. The host bounds it only by the dispatch deadline, so this is the measured worst case. */
@@ -64,7 +64,7 @@ export const MODEL_OUTPUT_TOKENS = 2_048;
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-/* How long kept answers stay fresh, as the Node realm's producers cached them. */
+/* How long kept answers stay fresh. */
 export const MASTERS_TTL_MS = 30 * DAY_MS;
 export const RATED_TTL_MS = 30 * DAY_MS;
 export const PLAYER_TTL_MS = DAY_MS;

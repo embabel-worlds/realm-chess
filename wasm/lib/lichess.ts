@@ -11,7 +11,7 @@ import type { Db } from "./store.ts";
  *
  * Every answer is kept under its request: the operation, the position and every parameter sent.
  * A kept answer is reused while it is younger than its operation's time to live. An empty answer
- * is never kept, and neither is a refusal, as the Node realm's producers never cached either: a
+ * is never kept, and neither is a refusal: a
  * refused call (an unbound token, a rate limit) would otherwise read as "nothing here" for a month.
  *
  * Lichess wants one request at a time on a token. Requests are spaced 1.1 seconds apart within a

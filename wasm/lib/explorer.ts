@@ -141,11 +141,11 @@ export function checkedAnswer(raw: unknown): ExplorerAnswer {
   return out;
 }
 
-/** An answer with no moves and no games. The Node realm's producers never kept one. */
+/** An answer with no moves and no games. It is never kept, so a later call asks again. */
 export const isEmptyAnswer = (a: ExplorerAnswer): boolean =>
   (a.moves ?? []).length === 0 && (a.topGames ?? []).length === 0 && (a.recentGames ?? []).length === 0;
 
-/* ── The rows, as the Node realm made them (src/api/chess.ts at 86b5bb5) ── */
+/* ── The rows handed back to callers ── */
 
 const share = (n: number, of: number) => (of > 0 ? Math.round((1000 * n) / of) / 10 : null);
 
@@ -242,7 +242,7 @@ export function ratedRecords(fen: string, cell: { band: string; speed: string },
   });
 }
 
-/** The request one rated cell makes, as the Node realm made it. */
+/** The request one rated cell makes. */
 export const ratedRequest = (fen: string, cell: { band: string; speed: string }) => ({
   fen, ratings: cell.band, ...(cell.speed !== "all" ? { speeds: cell.speed } : {}), moves: 12, topGames: 0, recentGames: 0,
 });

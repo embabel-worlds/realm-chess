@@ -103,7 +103,7 @@ function recordFor(moves: string[], titles: string[], title: string, theory: str
  * The deepest page of the Chess Opening Theory wikibook along a line: one request asks which of
  * the line's prefix pages exist (the deepest 50), a second reads that one's text. Only a title the
  * realm asked about is believed, and only the excerpt is kept, never the whole page. A line with
- * no page is kept as a miss for the same week, as the Node realm cached it. A refused request
+ * no page is kept as a miss for the same week. A refused request
  * throws and keeps nothing.
  *
  * `mayFetch` is asked before each of the two requests. When it says there is no time, the
