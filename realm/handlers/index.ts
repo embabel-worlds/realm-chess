@@ -1,7 +1,6 @@
-/* Every handler the realm declares, gathered from the concern modules and the files not yet split into them. */
-import { appHandlers } from "../app-handlers.ts";
-import { producerHandlers } from "../handlers.ts";
-import { publicHandlers } from "../rod-handlers.ts";
+/* Every handler the realm declares, gathered from the concern modules. */
+import { appHandlers } from "./app.ts";
+import { backgroundHandlers } from "./background.ts";
 import { engineHandlers } from "./engine.ts";
 import { lichessHandlers } from "./lichess.ts";
 import { plansHandlers } from "./plans.ts";
@@ -14,7 +13,6 @@ export const handlers = {
   ...theoryHandlers,
   ...lichessHandlers,
   ...plansHandlers,
-  ...publicHandlers,
-  ...producerHandlers,
+  ...backgroundHandlers,
   ...appHandlers,
 };
