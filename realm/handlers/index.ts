@@ -3,6 +3,8 @@ import { appHandlers } from "../app-handlers.ts";
 import { producerHandlers } from "../handlers.ts";
 import { publicHandlers } from "../rod-handlers.ts";
 import { engineHandlers } from "./engine.ts";
+import { lichessHandlers } from "./lichess.ts";
+import { plansHandlers } from "./plans.ts";
 import { positionHandlers } from "./position.ts";
 import { theoryHandlers } from "./theory.ts";
 
@@ -10,6 +12,8 @@ export const handlers = {
   ...engineHandlers,
   ...positionHandlers,
   ...theoryHandlers,
+  ...lichessHandlers,
+  ...plansHandlers,
   ...publicHandlers,
   ...producerHandlers,
   ...appHandlers,
