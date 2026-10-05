@@ -34,46 +34,6 @@ const fens = keys("The Position FENs the host is fetching for.");
 const lines = keys("The GameLine move lists the host is fetching for: SAN from the start, space-separated.");
 
 export const producerHandlers = {
-  rowsImbalances: {
-    namespace: "chess",
-    description: "Silman's imbalances of each position the host names, as PositionImbalances rows.",
-    input: { type: "object", additionalProperties: false, properties: { fens }, required: ["fens"] },
-    output: rowList,
-  },
-  rowsOpeningOfPosition: {
-    namespace: "chess",
-    description: "The book's name for each position the host names, as Opening rows. A position the book does not name has none.",
-    input: { type: "object", additionalProperties: false, properties: { fens }, required: ["fens"] },
-    output: rowList,
-  },
-  rowsOpeningOfLine: {
-    namespace: "chess",
-    description: "The deepest book name along each game line the host names, as Opening rows.",
-    input: { type: "object", additionalProperties: false, properties: { lines }, required: ["lines"] },
-    output: rowList,
-  },
-  rowsCandidates: {
-    namespace: "chess",
-    description:
-      "The engine's best lines in each position the host names, as CandidateMove rows carrying the analysis they came from. Pages when there are more new positions than one dispatch can search.",
-    input: {
-      type: "object",
-      additionalProperties: false,
-      properties: {
-        fens,
-        cursor,
-      },
-      required: ["fens"],
-    },
-    output: rows,
-  },
-  rowsTheory: {
-    namespace: "chess",
-    description:
-      "What the Chess Opening Theory wikibook says along each game line the host names, as OpeningTheory rows: the deepest page the line reaches, as an attributed excerpt with its link.",
-    input: { type: "object", additionalProperties: false, properties: { lines, cursor }, required: ["lines"] },
-    output: rows,
-  },
   rowsPositionPlans: {
     namespace: "chess",
     description:

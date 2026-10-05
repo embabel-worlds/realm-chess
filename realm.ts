@@ -1,8 +1,6 @@
 import { defineRealm } from "@embabel/realm-types";
-import { appHandlers } from "./realm/app-handlers.ts";
-import { producerHandlers } from "./realm/handlers.ts";
+import { handlers } from "./realm/handlers/index.ts";
 import { producers } from "./realm/producers.ts";
-import { rodHandlers } from "./realm/rod-handlers.ts";
 import { rodTypes } from "./realm/types.ts";
 import { views } from "./realm/views.ts";
 import { ENGINE_MODULE } from "./wasm/lib/config.ts";
@@ -67,7 +65,7 @@ page. The engine is GPL-3.0, and so is this realm.`,
     "ChessStatus",
   ],
 
-  handlers: { ...rodHandlers, ...producerHandlers, ...appHandlers },
+  handlers,
 
   apps: {
     "chesscalator.html": {
