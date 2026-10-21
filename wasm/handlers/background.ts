@@ -5,7 +5,7 @@
 
 import type { Handler, StatusInput } from "../generated/realm.ts";
 import { elapsedMs } from "../lib/clock.ts";
-import { DEEP_SEARCH_MS, DEEPEN_PICK, DEEPEN_TICK_MS, DEEPEN_WIDTH, MARK_WINDOW_MS } from "../lib/config.ts";
+import { DEEP_POSITION_MS, DEEPEN_PICK, DEEPEN_TICK_MS, DEEPEN_WIDTH, MARK_WINDOW_MS } from "../lib/config.ts";
 import { allWithValues } from "../lib/records.ts";
 import { readStatus } from "../lib/status.ts";
 import { analysisIdOf, canBatch, candidateRecords, configKey, DEEP, searchAll } from "../lib/engine.ts";
@@ -21,12 +21,13 @@ interface Deepened { deepened: number; failed: number; rounds: number }
  * or given up on (or never were), oldest first, searches them at the deeper configuration, and
  * keeps each answer in deep_analyses, which the graph's and the app's reads prefer.
  *
- * Time: the first round is one search, so whatever the runtime, the tick spends at most one
- * search's time before it has a measurement. Before every round, the first included, it checks
- * the round still fits in DEEPEN_TICK_MS: the first by the calibration (DEEP_SEARCH_MS), the
- * second by the measured search, and every later one by the round before. With the engine's
- * batch call the later rounds are DEEPEN_WIDTH searches side by side. A host that ran a batch one
- * search after another would take at most one more search's time than the budget.
+ * Time: the first round is one position, so whatever the runtime, the tick spends at most one
+ * position's time before it has a measurement. Before every round, the first included, it checks
+ * the round still fits in DEEPEN_TICK_MS: the first by the calibration (DEEP_POSITION_MS), and
+ * every later one by the round before, its search and the reading of each position's lines
+ * measured apart. With the engine's batch call the later rounds are DEEPEN_WIDTH searches side by
+ * side, and their lines are read one position after another. A host that ran a batch one search
+ * after another would take at most one more search's time than the budget.
  *
  * A search that fails, or a queued FEN with no legal move, is written to deep_failures, which the
  * marking tick turns into a mark, so it leaves the queue until a page queues it again.
@@ -50,7 +51,7 @@ export const deepen: Handler<Record<string, never>, Deepened> = async (_input: u
   for (const fen of queued) {
     let playable = false;
     try {
-      playable = legal(fen).moves().length > 0;
+      playable = legal(fen).moveCount() > 0;
     } catch {
       playable = false;
     }
@@ -59,11 +60,12 @@ export const deepen: Handler<Record<string, never>, Deepened> = async (_input: u
   }
   const width = canBatch(ctx.deps.engine) ? DEEPEN_WIDTH : 1;
   const out: Deepened = { deepened: 0, failed: 0, rounds: 0 };
-  let estimate = DEEP_SEARCH_MS;
+  let estimate = DEEP_POSITION_MS;
   for (let i = 0; i < picked.length;) {
     if (elapsedMs() + estimate > DEEPEN_TICK_MS) break;
     const fens = picked.slice(i, i + (out.rounds === 0 ? 1 : width));
     i += fens.length;
+    const roundStarted = elapsedMs();
     const started = Date.now();
     let found: Awaited<ReturnType<typeof searchAll>>;
     try {
@@ -73,9 +75,7 @@ export const deepen: Handler<Record<string, never>, Deepened> = async (_input: u
       break;
     }
     const roundMs = Date.now() - started;
-    // After the one-search first round, the next round is estimated as side by side. After that,
-    // each round is estimated by the one before, however the host ran it.
-    estimate = roundMs;
+    const searched = elapsedMs();
     out.rounds++;
     for (const [k, fen] of fens.entries()) {
       const s = found[k];
@@ -92,6 +92,10 @@ export const deepen: Handler<Record<string, never>, Deepened> = async (_input: u
       }, "deep_analyses");
       out.deepened++;
     }
+    // The next round is estimated by this one: its search as side by side, however the host ran
+    // it, and its lines read once for each position the next round takes.
+    const readMs = (elapsedMs() - searched) / fens.length;
+    estimate = searched - roundStarted + Math.min(width, picked.length - i) * readMs;
   }
   return out;
 };

@@ -1,4 +1,6 @@
 import type { AiCompleteReply, AiCompleteRequest, HandlerContext, ModelRole } from "../generated/realm.ts";
+import { charge } from "./clock.ts";
+import { MODEL_CALL_MS } from "./config.ts";
 
 /*
  * The host's model call. A handler asks with `ai_complete` and gets `{ text, truncated }` back,
@@ -39,6 +41,7 @@ export function aiComplete(ctx: Pick<HandlerContext, "call">, request: ModelRequ
     if (code && (MODEL_REFUSALS as readonly string[]).includes(code)) throw new ModelRefused(code);
     throw e;
   }
+  charge(MODEL_CALL_MS);
   // The host's reply is checked all the same: a type says what it should be, not what arrived.
   const r = reply as Partial<ModelReply> | null;
   if (!r || typeof r.text !== "string" || typeof r.truncated !== "boolean") throw new Error("The model's reply was not { text, truncated }");

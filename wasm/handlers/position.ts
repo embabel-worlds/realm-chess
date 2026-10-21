@@ -46,7 +46,7 @@ export interface ImbalanceRecord {
 }
 
 export async function imbalanceRecords(db: Db, fens: string[]): Promise<ImbalanceRecord[]> {
-  const nearby: { byCount?: Map<number, Skeletons> } = {};
+  const nearby: { byPawns?: Map<string, Skeletons> } = {};
   const out: ImbalanceRecord[] = [];
   for (const raw of fens) {
     const fen = raw.trim();

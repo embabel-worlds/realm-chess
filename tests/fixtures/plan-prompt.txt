@@ -32,8 +32,6 @@ The engine's candidate moves for the side to move (Stockfish, within 50 centipaw
   line: Nc6 Nd5 b5 Bd2 Bh3 Be2 Qc7 Na5
   creates: Tactics: White's pawn on g2 is attacked and not defended. | Tactics: Black's queen on c7 is attacked and not defended. | Tactics: Black's bishop on h3 is attacked and not defended. | Key squares: White's knight on d5 stands on an outpost no pawn can challenge.
   removes: Key squares: White has outpost square on d5 (guarded by a pawn, beyond the reach of enemy pawns).
-- Qe7 (0.05 from White's side; 45 centipawns worse than best; depth 18)
-  line: Qe7 Nd5 h5 Bd2 h4 Be2 Qd8 Nb4
 
 First decide which row of the skill's structure table (section 4) this position is, from the
 pawn structure and imbalances above — or "none" — and let that row's plans lead unless the

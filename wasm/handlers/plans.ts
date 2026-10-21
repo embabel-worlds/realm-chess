@@ -6,7 +6,7 @@
 import { skills } from "../generated/realm.ts";
 import type { ExplainLinePlansOutput, ExplainPlansOutput, Handler, RowsLinePlansInput, RowsPositionPlansInput } from "../generated/realm.ts";
 import { fits } from "../lib/clock.ts";
-import { ANALYSIS_TTL_MS, API_CALL_MS, MODEL_CALL_MS, MODEL_OUTPUT_TOKENS, PLANS_TTL_MS, SEARCH_MS, THEORY_TTL_MS } from "../lib/config.ts";
+import { ANALYSIS_TTL_MS, API_CALL_MS, DEPTH_CAP, FULL_POSITION_MS, MODEL_CALL_MS, MODEL_OUTPUT_TOKENS, MULTI_PV, PLANS_TTL_MS, SEARCH_MS, THEORY_TTL_MS } from "../lib/config.ts";
 import { LEVEL, pinned } from "../lib/explorer.ts";
 import { allWithValues } from "../lib/records.ts";
 import type { WithValues } from "../lib/records.ts";
@@ -20,12 +20,11 @@ import { theoryFor } from "../lib/theory.ts";
 import type { TheoryRecord } from "../lib/theory.ts";
 import { FULL } from "../lib/engine.ts";
 import type { SearchConfig } from "../lib/engine.ts";
-import { imbalancesOf } from "../lib/imbalances.ts";
 import { lineKeys, openingOf, openingOfLine, pawnKey, positionAfter, positionKey, splitLine, structureOf, structureSentence } from "../lib/openings.ts";
 import { bookFor, skeletonsFor, sqlText } from "../lib/store.ts";
 import type { Db } from "../lib/store.ts";
 import { keptFor, linesFor } from "./engine.ts";
-import { clamp, cursorOf, fensOf, keysOf, legal } from "./shared.ts";
+import { clamp, cursorOf, fensOf, imbalancesFor, keysOf, legal } from "./shared.ts";
 import type { Ctx, Item, Page, Paged, Served } from "./shared.ts";
 
 /** A plan row as the graph sees it: the public record, and the analysis its lines came from. */
@@ -64,19 +63,19 @@ export async function plansFor(
   const db = ctx.deps.db;
   const { fen } = target;
   const withinCp = clamp(args.withinCp, 50, 0, 300);
-  const multiPv = clamp(args.multiPv, 5, 1, 8);
-  const depth = clamp(args.depth, 18, 6, 22);
+  const multiPv = clamp(args.multiPv, MULTI_PV, 1, 8);
+  const depth = clamp(args.depth, DEPTH_CAP, 6, 22);
   if (args.role !== undefined && args.role !== "" && !(ROLES as readonly string[]).includes(args.role)) {
     throw new Error(`The model role must be one of ${ROLES.join(", ")}`);
   }
   const role = (args.role || undefined) as ModelRole | undefined;
-  if (legal(fen).moves().length === 0) return [];
-  const x = imbalancesOf(fen);
+  if (legal(fen).moveCount() === 0) return [];
+  const x = imbalancesFor(fen);
   const structure = structureSentence(structureOf(fen, await skeletonsFor(db, pawnKey(fen))));
   const c: SearchConfig = { ...FULL, multiPv, depthCap: depth };
   const kept = (await keptFor(db, c, [fen], false)).get(fen);
   const fresh = kept !== undefined && Date.now() - kept.createdAt < ANALYSIS_TTL_MS;
-  if (!first && !fresh && !fits(SEARCH_MS + 2 * MODEL_CALL_MS)) return "later";
+  if (!first && !fresh && !fits(FULL_POSITION_MS + 2 * MODEL_CALL_MS)) return "later";
   const candidates = await linesFor(ctx, fen, c, kept);
   const analysisId = candidates[0]?.analysisId ?? "";
   const level = levelOf(args.level);
@@ -145,12 +144,13 @@ export async function lineOpening(db: Db, moves: string[]): Promise<string | nul
 }
 
 /**
- * Theory for line plans: kept, or looked up when the lookup and the plans after it both fit.
- * Theory is evidence, not a requirement: a lookup that fails or is skipped for time is no theory.
+ * Theory for line plans: kept, or looked up when the lookup, a search and the model call after it
+ * all fit. Theory is evidence, not a requirement: a lookup that fails or is skipped for time is no
+ * theory.
  */
 export async function lineTheory(ctx: Ctx, moves: string[]): Promise<TheoryRecord | null> {
   try {
-    const t = await theoryFor(ctx.deps.db, ctx.gateway, moves, THEORY_TTL_MS, () => fits(API_CALL_MS + SEARCH_MS + 2 * MODEL_CALL_MS));
+    const t = await theoryFor(ctx.deps.db, ctx.gateway, moves, THEORY_TTL_MS, () => fits(API_CALL_MS + SEARCH_MS + MODEL_CALL_MS));
     if (t === "later") ctx.log(`theory for "${moves.join(" ")}" was skipped for time; the plans are made without it`);
     return t === "later" ? null : t;
   } catch {
@@ -205,7 +205,7 @@ export const explainLinePlans: Handler<{ lines?: string[] } & PlanArgs, ExplainL
 };
 
 /** The fixed arguments the plan producers search and ask with; only the level comes from the query. */
-export const PRODUCER_PLAN_ARGS = { withinCp: 50, multiPv: 5, depth: 18, role: "best" } as const;
+export const PRODUCER_PLAN_ARGS = { withinCp: 50, multiPv: MULTI_PV, depth: DEPTH_CAP, role: "best" } as const;
 
 /** The levels a query pinned, or intermediate when it pinned none. */
 export const levelsOf = (level: unknown) => pinned(level, "level", LEVEL) ?? ["intermediate"];

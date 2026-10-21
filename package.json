@@ -8,12 +8,11 @@
   "scripts": {
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "vendor": "node scripts/vendor-chess.mjs",
     "vendor:sdk": "node scripts/vendor-sdk.mjs",
     "book": "node scripts/book.mjs",
     "app": "node scripts/app.mjs",
     "synth": "node scripts/synth.mjs",
-    "build": "npm run vendor && npm run book && npm run app && npm run synth",
+    "build": "npm run book && npm run app && npm run synth",
     "check": "npm run typecheck && npm run build && npm test && npm run test:app",
     "test:app": "playwright test"
   },

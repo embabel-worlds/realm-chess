@@ -34,7 +34,7 @@ describe.skipIf(!process.env.BATTERY || !hasTooling || !STOCKFISH)("engine batte
     const shown = results.reduce((n, r) => n + r.shown, 0);
     const total = results.reduce((n, r) => n + r.plans, 0);
     const lines = [`# Engine battery, ${new Date().toISOString()}`, "",
-      `Side to move's expected plans visible in the engine's five lines: **${shown} of ${total}**.`, "",
+      `Side to move's expected plans visible in the engine's lines: **${shown} of ${total}**.`, "",
       "| Position | Side | Depth | Nodes | Best | Score | Candidates | Plans shown | ms |", "|---|---|---|---|---|---|---|---|---|",
       ...results.map((r) => `| ${r.id} | ${r.side} | ${r.depth} | ${r.nodes} | ${r.best} | ${r.scoreCp} | ${r.candidates} | ${r.shown}/${r.plans} | ${r.ms} |`)];
     mkdirSync(join(__dirname, "results"), { recursive: true });

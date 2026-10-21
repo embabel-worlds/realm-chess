@@ -45,7 +45,7 @@ const ANSWER = JSON.stringify({
   ],
 });
 
-interface Options { engine?: "real"; engineMs?: number; modelMs?: number; latencyMs?: number; lichess?: "refused"; model?: "none" }
+interface Options { engine?: "real"; engineMs?: number; modelMs?: number; latencyMs?: number; lichess?: "refused"; model?: "none"; held?: boolean }
 
 function setup(o: Options = {}) {
   const clock: Clock = { now: T0 };
@@ -75,13 +75,13 @@ function setup(o: Options = {}) {
   const app = (verb: string, args: Record<string, unknown>) => {
     const started = clock.now;
     db.begin();
-    const d = dispatch(buildGuest(), `chess.${verb}`, args, { host, clock: () => (clock.now += TICK) });
+    const d = dispatch(buildGuest(), `chess.${verb}`, args, { host, clock: o.held ? () => clock.now : () => (clock.now += TICK) });
     if (d.error !== undefined) {
       db.rollback();
       throw new Error(d.error);
     }
     db.commit();
-    return { reply: d.result as Reply, ms: clock.now - started };
+    return { reply: d.result as Reply, ms: clock.now - started, logs: d.logs };
   };
   const fetch = async (handler: string, keyArgument: string, keys: string[], extra: Record<string, unknown> = {}) =>
     (await fetchProducer({ module: buildGuest(), handler: `chess.${handler}`, keyArgument, keys, db, host, clock, tickMs: TICK, extra })).rows;
@@ -120,6 +120,23 @@ describe.skipIf(!hasTooling)("the app's calls, in the guest", () => {
       expect(reply.views.TheoryOfLine.rows).toEqual(runView(view("TheoryOfLine"), { moves: EXCHANGE }, await s.fetch("rowsTheory", "lines", [EXCHANGE])));
       expect(reply.views.TheoryOfLine.rows).toHaveLength(1);
       expect(s.engine.calls).toHaveLength(1);
+    });
+
+    it("where the host holds the clock still, each call answers its views in one dispatch", () => {
+      const s = setup({ held: true });
+      const fen = fenAfter(EXCHANGE);
+      const position = s.app("appPosition", { fen, moves: EXCHANGE, withinCp: 100 });
+      for (const v of Object.values(position.reply.views)) expect(v.error).toBeUndefined();
+      expect(position.reply.views.BestMoves.rows.length).toBeGreaterThan(0);
+      // The two theory requests do not fit one held dispatch: the page found is kept, and the
+      // next look reads its text.
+      expect(position.reply.views.TheoryOfLine).toEqual({ rows: [], skipped: "time" });
+      expect(s.app("appPosition", { fen, moves: EXCHANGE, withinCp: 100 }).reply.views.TheoryOfLine.rows).toHaveLength(1);
+      expect(s.host.count("wikibooks_wikibooksQuery")).toBe(2);
+      const plans = s.app("appPlans", { fen, moves: EXCHANGE }).reply.views;
+      expect(plans.PlansInLine.rows.length).toBeGreaterThan(0);
+      const practice = s.app("appPractice", { fen: E4, filters: { masters: true } }).reply.views;
+      expect(practice.MastersAtPosition.rows.length).toBeGreaterThan(0);
     });
 
     it("appPosition from a FEN alone: the opening by position, and no theory", async () => {

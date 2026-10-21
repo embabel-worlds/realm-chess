@@ -4,7 +4,7 @@ import { join } from "node:path";
 import { Chess } from "chess.js";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { runView } from "../wasm/lib/cypher";
-import { configKey, DEEP, FULL } from "../wasm/lib/engine";
+import { configKey, DEEP } from "../wasm/lib/engine";
 import { DEADLINE_MS, DEEP_DEPTH_CAP, DEEP_NODES, DEEP_SEARCH_MS, DEEPEN_SLOTS, DEEPEN_TICK_MS, DEEPEN_WIDTH } from "../wasm/lib/config";
 import { VIEWS } from "../wasm/lib/views";
 import { fakeEngine, FOOLS_MATE, positions } from "./guest/fakes";
@@ -109,14 +109,16 @@ describe("the deepen schedules, as declared", () => {
           `VALUES ('${fen}', '${key}', 'id', 18, 1, '[]', '[]', 1, '${created}')`,
       );
     const [d4, c4, nf3] = ["d4", "c4", "Nf3"].map(fenAfter);
+    // The graph's configuration when the database was at version 6, which 0009 names.
+    const full6 = "stockfish 19.0.0 de1517a78b37ea79925b78124a6afb4e8eb20afa3695523131548883fddaed0a nodes=3500000 depth=18 multipv=5";
     // E4 was searched an hour ago and queued under 0006; that queue is what 0007 drops.
-    kept("analyses", E4, configKey(FULL), at(60 * 60 * 1000));
+    kept("analyses", E4, full6, at(60 * 60 * 1000));
     db.exec(`INSERT INTO deepen_queue (fen, queued_at) VALUES ('${E4}', '${at(60 * 60 * 1000)}')`);
     // D4 was deepened after its search, C4's search has expired, and Nf3 was searched to another depth.
-    kept("analyses", d4, configKey(FULL), at(2 * 60 * 60 * 1000));
+    kept("analyses", d4, full6, at(2 * 60 * 60 * 1000));
     kept("deep_analyses", d4, configKey(DEEP), at(60 * 60 * 1000));
-    kept("analyses", c4, configKey(FULL), at(8 * DAY));
-    kept("analyses", nf3, configKey({ ...FULL, depthCap: 12 }), at(60 * 60 * 1000));
+    kept("analyses", c4, full6, at(8 * DAY));
+    kept("analyses", nf3, full6.replace("depth=18", "depth=12"), at(60 * 60 * 1000));
 
     for (const m of MIGRATIONS.slice(MIGRATIONS.indexOf("db/0007-deepen-slots.sql"))) db.sqlite.exec(readFileSync(m, "utf8"));
 
@@ -195,20 +197,30 @@ describe.skipIf(!hasTooling)("deepening in the background, in the guest", () => 
     expect(replayRefusal(t.statements)).toBeNull();
   });
 
-  it.each([true, false])("on a runtime three times slower than the calibration, the first round is one search and the tick stops there (batch side by side: %s)", async (parallel) => {
+  it.each([true, false])("on a runtime half again slower than the calibration, the first round is one search and the tick stops there (batch side by side: %s)", async (parallel) => {
     const s = setup({ parallel });
     await s.fetch(positions(6, 5));
-    s.cost.ms = 3 * DEEP_SEARCH_MS;
+    s.cost.ms = 1.5 * DEEP_SEARCH_MS;
     const t = s.tick();
     expect(t.result).toEqual({ deepened: 1, failed: 0, rounds: 1 });
     expect(t.ms).toBeLessThan(DEADLINE_MS * 0.6);
+  });
+
+  it("where the host holds the clock still, a tick deepens one position by what its steps charge", async () => {
+    const s = setup();
+    await s.fetch(positions(6, 5));
+    s.db.begin();
+    const d = dispatch(buildGuest(), "chess.deepen", {}, { host: s.host, clock: () => s.clock.now });
+    s.db.commit();
+    expect(d.error).toBeUndefined();
+    expect(d.result).toEqual({ deepened: 1, failed: 0, rounds: 1 });
   });
 
   it("a tick whose start was slow (the mount waited) starts no search it cannot finish in its budget", async () => {
     const s = setup();
     await s.fetch(positions(3, 5));
     s.cost.ms = DEEP_SEARCH_MS;
-    // The queue read returns 8 s into the dispatch: one more calibrated search would pass 12 s.
+    // The queue read returns 8 s into the dispatch: one calibrated position would pass the tick.
     const slowMount = (tool: string, args: unknown) => {
       if (tool === "dep:db.exec" && /FROM deepen_queue/.test(execSql(args))) s.clock.now += 8_000;
       return s.host(tool, args);

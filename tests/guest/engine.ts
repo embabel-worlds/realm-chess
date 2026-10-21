@@ -7,17 +7,13 @@ import type { Analyse } from "./host";
 const ROOT = resolve(__dirname, "..", "..");
 
 /*
- * The stockfish module the realm declares, from its own repository: STOCKFISH_WASM, or the
- * SIMD build in a wasm-stockfish checkout beside realm-chess. The scalar build of the same
- * engine also loads; it gives the same lines at the same budget, only slower.
+ * The stockfish module the realm declares, which it carries at modules/<sha256>.wasm, or
+ * STOCKFISH_WASM. The SIMD build of the same engine (vendor/stockfish) also loads; it gives the
+ * same lines at the same budget, only faster.
  */
-const SCALAR_SHA256 = "b6e43bfbb09335610d64c93e343a2e42b03ebdf80aafa54db42a4dcc1f168056";
+const SIMD_SHA256 = "de1517a78b37ea79925b78124a6afb4e8eb20afa3695523131548883fddaed0a";
 function stockfishPath(): string | undefined {
-  const candidates = [
-    process.env.STOCKFISH_WASM,
-    resolve(ROOT, "..", "wasm-stockfish", "dist", "stockfish-lite-simd.wasm"),
-    resolve(ROOT, "..", "..", "..", "..", "wasm-stockfish", "dist", "stockfish-lite-simd.wasm"),
-  ];
+  const candidates = [process.env.STOCKFISH_WASM, resolve(ROOT, "modules", `${ENGINE_MODULE.sha256}.wasm`)];
   return candidates.find((p): p is string => !!p && existsSync(p));
 }
 
@@ -31,7 +27,7 @@ export function realEngine(): Analyse {
   if (!stockfishModule) {
     const bytes = readFileSync(STOCKFISH);
     const digest = createHash("sha256").update(bytes).digest("hex");
-    if (digest !== ENGINE_MODULE.sha256 && digest !== SCALAR_SHA256) throw new Error(`${STOCKFISH} has sha256 ${digest}, not a stockfish 19.0.0 build`);
+    if (digest !== ENGINE_MODULE.sha256 && digest !== SIMD_SHA256) throw new Error(`${STOCKFISH} has sha256 ${digest}, not a stockfish 19.0.0 build`);
     stockfishModule = new WebAssembly.Module(bytes);
   }
   const instance = new WebAssembly.Instance(stockfishModule, {});

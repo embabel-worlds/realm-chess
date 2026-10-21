@@ -1,7 +1,7 @@
 // Generated from realm.ts by @embabel/realm-synth. Do not edit.
 // Realm: chess (0.5.0)
 
-/** One of the engine's best lines in a position (Stockfish 19, five lines, depth 18). Reached from Position via HAS_CANDIDATE. THE SCORE IS FOR THE SIDE TO MOVE; `whiteCp` is the same from White's side. `lossCp` is how much worse than the best line this one is, in centipawns — the ONLY field to filter on for 'moves within half a pawn of best' (lossCp <= 50; a pawn is 100). `rank` is the engine's order, 1 to 5. `creates` and `removes` say which imbalances the line changes once its exchanges settle — the best evidence of what a move is for. */
+/** One of the engine's best lines in a position (Stockfish 19, three lines, searched to a fixed node budget, at most depth 18). Reached from Position via HAS_CANDIDATE. THE SCORE IS FOR THE SIDE TO MOVE; `whiteCp` is the same from White's side. `lossCp` is how much worse than the best line this one is, in centipawns — the ONLY field to filter on for 'moves within half a pawn of best' (lossCp <= 50; a pawn is 100). `rank` is the engine's order, 1 to 3. `creates` and `removes` say which imbalances the line changes once its exchanges settle — the best evidence of what a move is for. */
 export interface CandidateMove {
   /** What the line belongs to: the hash of the engine, how it searched and the lines it found. Once the background tick has searched the position deeper, the rows are the deeper search's and carry its id. */
   analysisId?: string;
@@ -487,7 +487,7 @@ export interface EngineBridge {
  */
 export const skills = {
   digest: {
-    "chess-plans": "165937bd01a1e0ed955f1da46f8d77afae8549eee668ee31be144ade5f6e43ee",
+    "chess-plans": "1a2672cfce166c99c3a9dd6a0f2754762928cba5b45e9f00f47648b53e5332d1",
   },
 } as const;
 

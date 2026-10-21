@@ -328,6 +328,15 @@ describe.skipIf(!hasTooling)("Lichess and theory, in the guest", () => {
       for (let i = 1; i < at.length; i++) expect(at[i] - at[i - 1]).toBeGreaterThanOrEqual(LICHESS_SPACING_MS + 200);
     });
 
+    it("where the host holds the clock still, a page asks once and the next pages ask for the rest, never dropped", async () => {
+      const { db, host, clock } = setup();
+      const f = await fetchProducer({ module: buildGuest(), handler: "chess.rowsMasterMoves", keyArgument: "fens", keys: FIXTURE_FENS, db, host, clock });
+      expect(f.refused).toBeUndefined();
+      expect(f.dispatches).toBe(FIXTURE_FENS.length);
+      expect(lichessCalls(host)).toHaveLength(FIXTURE_FENS.length);
+      expect(f.rows.length).toBeGreaterThan(0);
+    });
+
     it("the unfiltered nine-cell grid fits one dispatch at the latency the plumbing spike measured", async () => {
       const { fetch } = setup({ latencyMs: 150 });
       const f = await fetch("rowsRatedMoves", "fens", [START]);

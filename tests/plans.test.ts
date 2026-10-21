@@ -1,9 +1,9 @@
 import { createHash } from "node:crypto";
-import { readdirSync, readFileSync } from "node:fs";
+import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { imbalancesOf } from "../wasm/lib/imbalances";
-import { MODEL_OUTPUT_TOKENS, PLANS_TTL_MS } from "../wasm/lib/config";
+import { DEPTH_CAP, FULL_NODES, MODEL_OUTPUT_TOKENS, MULTI_PV, PLANS_TTL_MS } from "../wasm/lib/config";
 import { theoryText, theoryTitles } from "../wasm/lib/theory";
 import { skills } from "../wasm/generated/realm";
 import { battery } from "./battery/battery";
@@ -80,6 +80,7 @@ describe("the prompt", () => {
     const s = setup();
     await plansOf(s);
     const prompt = String(s.model.requests[0].prompt);
+    if (process.env.CAPTURE) writeFileSync("tests/fixtures/plan-prompt.txt", prompt);
     expect(prompt).toBe(readFileSync("tests/fixtures/plan-prompt.txt", "utf8"));
   });
 });
@@ -197,7 +198,7 @@ describe.skipIf(!hasTooling)("plans, in the guest", () => {
       expect(s.model.requests).toHaveLength(3);
       expect(s.engine.calls).toHaveLength(1);
       ask({ depth: 16 });
-      ask({ multiPv: 3 });
+      ask({ multiPv: 5 });
       expect(s.model.requests).toHaveLength(5);
       expect(s.engine.calls).toHaveLength(3);
       expect(s.model.requests[2].role).toBe("workhorse");
@@ -255,7 +256,7 @@ describe.skipIf(!hasTooling)("plans, in the guest", () => {
       expect(f.dispatches).toBe(1);
       expect(f.rows.length).toBeGreaterThan(0);
       expect(s.clock.now - T0).toBeLessThan(30_000);
-      expect(s.engine.calls[0]).toMatchObject({ nodes: 3_500_000, maxDepth: 18, multiPv: 5 });
+      expect(s.engine.calls[0]).toMatchObject({ nodes: FULL_NODES, maxDepth: DEPTH_CAP, multiPv: MULTI_PV });
     });
 
     it("line plans on a cold line, with theory and the repair retry, finish inside the page", async () => {
@@ -299,7 +300,7 @@ describe.skipIf(!hasTooling)("plans, in the guest", () => {
       expect(f.rows).toEqual([]);
       expect(f.dispatches).toBe(1);
       expect((s.run("status", { username: ["james"] }) as Record<string, string>[])[0]).toMatchObject({ model: "not_granted", lastRefusal: "MODEL_NOT_GRANTED" });
-      expect((await s.fetch("rowsCandidates", "fens", [NAJDORF.fen])).rows).toHaveLength(5);
+      expect((await s.fetch("rowsCandidates", "fens", [NAJDORF.fen])).rows).toHaveLength(MULTI_PV);
       expect(s.run("explainPlans", { fens: [NAJDORF.fen] })).toEqual([]);
     });
 

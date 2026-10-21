@@ -44,9 +44,9 @@ The same answers are REST calls, and they are what Chesscalator shows.
 
 ## How it is put together
 
-`realm.ts` declares the realm. Its handlers run as Wasm inside the appliance, the engine is a
-registry module the appliance mounts, and everything the realm works out is kept in its own
-SQLite.
+`realm.ts` declares the realm. Its handlers run as Wasm inside the appliance, the engine is a Wasm
+module the realm carries in `modules/` and the appliance mounts, and everything the realm works
+out is kept in its own SQLite.
 
 | Piece | What it is |
 |---|---|
@@ -64,7 +64,9 @@ SQLite.
 | `wasm/lib/config.ts` | Every number the realm runs by: the engine's identity, the budgets, the deadline marks, the TTLs, the deepening constants. |
 | `wasm/lib/store.ts` | The realm's SQLite: book reads, kept analyses. |
 | `wasm/lib/status.ts` | What the realm could not do, recorded for `ChessStatus`. |
-| `wasm/lib/chess.js` | chess.js, vendored by `scripts/vendor-chess.mjs`: the guest can import only from `wasm/`. |
+| `wasm/lib/board.ts` | The board the handlers play on: legal moves, SAN, check and mate, from chess.js's rules, with a test that holds it to chess.js move for move. Under an interpreter it is several times faster than chess.js itself. |
+| `wasm/lib/clock.ts` | Time inside one dispatch, and what each step charges where the host holds the clock still. |
+| `modules/<sha256>.wasm`, `vendor/stockfish/` | The engine the realm carries, and its source under the GPL: the pins, the patches and the script that builds it. |
 | `db/schema.sql`, `db/NNNN-*.sql` | The tables, then the migrations. `0001` and `0002` are the Lichess opening book (CC0) and its pawn skeletons, written by `scripts/book.mjs`. |
 | `realm.yml`, `credentials.yml`, `apis/apis.yml`, `producers/`, `types/`, `views/`, `dependencies/`, `dist/`, `apps/chesscalator.html.app.json` | Written by synth from `realm.ts`. Don't edit by hand. |
 | `apis/lichess.yml`, `apis/wikibooks.yml` | The OpenAPI documents for the two APIs. |
@@ -75,9 +77,13 @@ SQLite.
 
 ## The engine
 
-Stockfish 19 lite, single thread, built as a Wasm library with no imports, is the registry
-module `stockfish` 19.0.0. The realm declares it as its `engine` dependency with one method,
-`analyse(fen, nodes, maxDepth, multiPv)`, which answers JSON.
+Stockfish 19, single thread, with no SIMD and no imports, is built as a Wasm library and carried
+in the realm as `modules/b6e43bfb….wasm`. The realm declares it as its `engine` dependency
+(`stockfish` 19.0.0) with one method, `analyse(fen, nodes, maxDepth, multiPv)`, which answers
+JSON. An appliance that loads the realm puts the file into its module store under that digest, so
+nothing has to be installed first. `vendor/stockfish/` is its corresponding source under the GNU
+GPL version 3: the pinned Stockfish commit, the patches, the network's digest, and `build.sh`,
+which builds the module again (see `vendor/stockfish/README.md`).
 
 A search is timed by a node budget, the way a chess engine is timed without a clock: the same
 position with the same budget always gives the same lines. The numbers are in
@@ -85,30 +91,41 @@ position with the same budget always gives the same lines. The numbers are in
 
 | | |
 |---|---|
-| `full` budget | 3,500,000 nodes: about three seconds on the SIMD module under a native Wasm runtime |
+| `full` budget | 30,000 nodes: about 3.5 seconds where the appliance compiles the module itself |
 | depth cap | 18 |
-| lines | 5 |
+| lines | 3 |
 
-Under a native runtime `full` reaches depth 18 on every battery position (0.5 to 3.1 seconds
-each, measured under V8). On a slower runtime the same budget takes longer, so every row says the
-`depth` and `nodes` it reached.
+The budget is set for the slowest runtime the realm meets, a JVM that compiles the module, where
+the engine visits 8,500 to 10,000 nodes a second, and as few as 5,500 on a busy host. There
+`full` reaches depth 10 on the start position and 8 to 9 in a middlegame; across the battery it
+reaches depth 6 to 11. A faster runtime reaches the same depth sooner, since the budget is nodes,
+not time. Every row says the `depth` and `nodes` it reached. Five lines would cost two plies in
+the same budget, so there are three; `explainPlans` and `analysePosition` take more when asked.
 
 Lines are kept in SQLite for seven days, looked up by position and configuration: the module's
 hash, the budget, the depth cap and the number of lines. Each row carries `analysisId`, the hash
 of that configuration and the lines. Searching again after the lines expire finds the same lines
 and so the same `analysisId`; anything made from those lines still describes them.
 
-A single position always answers in one read. For many new positions at once, a page searches
-while it has spent under 60 percent of the 30 second dispatch deadline, about six at three
-seconds, and hands the rest to the next page; past 90 percent it stops even for kept lines.
+A single position always answers in one read. For many new positions at once, a page starts a
+search only while it has spent under 60 percent of the 30 second dispatch deadline and a whole
+position, searched and its lines read, still fits before 90 percent, and hands the rest to the
+next page; past 90 percent it stops even for kept lines. Where the clock runs, that is two or
+three new positions a page.
+
+An appliance may hold the guest's clock still for a whole dispatch, so that a replay sees the same
+time. The realm then cannot measure what a dispatch has spent, so every costly step charges its
+worst case (`wasm/lib/config.ts`): 6 s a search, 2 s for the imbalances, 3 s a line read, 10 s an
+API call, 6 s a model call. A page then searches one new position, a Lichess page asks once, and a
+theory lookup takes two looks: the first finds the page, the second reads it.
 The host bounds a fetch, and refuses past a bound with its own code:
 
 | Bound | Code | What it means here (measured) |
 |---|---|---|
 | 256 keys | `KEY_BOUND` | at most 256 positions in one query |
-| 1024 rows | `ROW_BOUND` | 204 positions at five lines each |
-| 1 MiB of rows | `RESULT_BYTES` | rows run to about 6 KB a position, so about 140 kept positions in one fetch; this bound comes first |
-| 16 pages | `PAGE_BOUND` | about 96 new positions at six a page |
+| 1024 rows | `ROW_BOUND` | out of reach: 256 positions at three lines are 768 rows |
+| 1 MiB of rows | `RESULT_BYTES` | rows run to about 2.5 KB a position, so about 340 kept positions in one fetch; only unusually long lines reach it |
+| 16 pages | `PAGE_BOUND` | 16 new positions where the clock is held still, about 40 where it runs |
 
 A refused fetch keeps what its pages searched, so asking again carries on from there.
 `MEASURE=1 npx vitest run tests/measure.test.ts` measures the row sizes again.
@@ -119,11 +136,12 @@ The first time a page searches a position at the graph's configuration, the posi
 in its slot of `deepen_queue` (4096 slots, by hash, so the queue never grows past them), with a
 keyed upsert. `chess.deepen` runs every minute on the host's schedule, in its background class.
 Each tick takes the queued positions that were queued after they were last deepened or given up
-on, oldest first, and searches them at 6,000,000 nodes and depth 22 (the graph's own search is
-3,500,000 and 18). Its first round is one search, which times the runtime; later rounds are two
-side by side through the engine's batch call where the host offers it, one where it does not.
-Before every round, the first included, it checks that the round still fits in 12 seconds: the
-first by the calibration (5 s a search), the rest by measurement. A search that fails, or a
+on, oldest first, and searches them at 50,000 nodes and depth 22 (the graph's own search is
+30,000 and 18), about a ply deeper. Its first round is one search, which times the runtime; later
+rounds are two side by side through the engine's batch call where the host offers it, one where
+it does not. Before every round, the first included, it checks that the round still fits in 24
+seconds: the first by the calibration (10 s a search and its lines read), the rest by measurement,
+or by what they charge where the clock is held still, which leaves one position a tick. A search that fails, or a
 queued position with no legal move, is written to `deep_failures`. Half a minute later
 `chess.markDeepened` records what was deepened or given up on, so the next tick skips it until a
 page searches it again, which happens only once its rows are a week old.
@@ -269,16 +287,15 @@ npx playwright install chromium-headless-shell   # once, for the page tests
 EMBABEL_WASM_TOOLING=<appliance checkout>/tooling/wasm-realm npm run check
 ```
 
-`npm run check` typechecks, vendors chess.js into the guest, writes the book, builds the app's
-assets, runs synth, runs the Vitest suites and then the page tests in Playwright. Synth runs
+`npm run check` typechecks, writes the book, builds the app's assets, runs synth, runs the Vitest suites and then the page tests in Playwright. Synth runs
 under Bun, so Bun must be on the path. After it, `git status` is clean: everything generated is
 reproducible.
 
 Most tests run the handlers inside the guest. They build `wasm/handlers.ts` the way the appliance
 does, with its own build script and Javy, then dispatch into it with the realm's SQLite and
 engine answered from the test. `EMBABEL_WASM_TOOLING` points at the appliance's
-`tooling/wasm-realm` folder; without it those tests are skipped. The real engine tests find a
-`wasm-stockfish` checkout beside this one, or the module named by `STOCKFISH_WASM`.
+`tooling/wasm-realm` folder; without it those tests are skipped. The real engine tests run the
+module in `modules/`, or the one named by `STOCKFISH_WASM`.
 
 What the tests hold the realm to:
 
@@ -343,9 +360,8 @@ the SDK is published, switch both entries in `package.json` to the published ver
 ### Installing
 
 Put the realm in the world's `config/realms/chess` folder (or install it from the Store) and
-admit it. Copy without macOS `._` files: admission refuses a capture that has them. The appliance
-needs the `stockfish` 19.0.0 module in its registry and must run it on a native runtime. Then, in
-the console:
+admit it. Copy without macOS `._` files: admission refuses a capture that has them. The engine
+comes with the realm, so nothing else needs installing. Then, in the console:
 
 - grant the realm the **model** capability, for plans;
 - bind a Lichess personal token (no scopes) as `lichess`, for masters, players and ratings;

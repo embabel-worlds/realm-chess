@@ -20,7 +20,7 @@ realm-chess gives you, for one position:
   tells you which structure and which known plans are in play — use it;
 - the **imbalances**, computed from the board and stated as sentences. They are correct; do not
   re-derive them, and do not invent ones that are not listed;
-- the **engine's candidate moves** for the side to move (Stockfish, depth 18): each with its
+- the **engine's candidate moves** for the side to move (Stockfish, at a fixed node budget; each line says its depth): each with its
   score, how much worse than the best it is, its line, and what imbalances it **creates** and
   **removes** once its exchanges settle.
 

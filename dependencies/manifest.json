@@ -34,7 +34,7 @@
       },
       "module": "stockfish",
       "name": "engine",
-      "sha256": "de1517a78b37ea79925b78124a6afb4e8eb20afa3695523131548883fddaed0a",
+      "sha256": "b6e43bfbb09335610d64c93e343a2e42b03ebdf80aafa54db42a4dcc1f168056",
       "version": "19.0.0"
     }
   ]

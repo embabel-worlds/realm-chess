@@ -4,8 +4,8 @@
  */
 
 import type { AnalysePositionOutput, Handlers, RowsCandidatesInput } from "../generated/realm.ts";
-import { spent } from "../lib/clock.ts";
-import { ANALYSIS_TTL_MS, SEARCH_UNTIL, YIELD_AT } from "../lib/config.ts";
+import { fits, spent } from "../lib/clock.ts";
+import { ANALYSIS_TTL_MS, DEPTH_CAP, FULL_POSITION_MS, MULTI_PV, SEARCH_UNTIL, YIELD_AT } from "../lib/config.ts";
 import { allWithValues } from "../lib/records.ts";
 import { sha256Hex } from "../lib/sha256.ts";
 import { timed, timedSync } from "../lib/timing.ts";
@@ -47,7 +47,7 @@ export async function keptFor(db: Db, c: SearchConfig, fens: string[], deeper: b
  * first: that page's analyses and queue rows are lost, and the next read searches again.
  */
 export async function linesFor(ctx: Ctx, fen: string, c: SearchConfig, kept: KeptAnalysis | undefined): Promise<CandidateRow[]> {
-  if (timedSync("legalMoves", () => legal(fen).moves().length === 0)) return [];
+  if (timedSync("legalMoves", () => legal(fen).moveCount() === 0)) return [];
   let a = kept && Date.now() - kept.createdAt < ANALYSIS_TTL_MS ? kept : undefined;
   if (!a) {
     const started = Date.now();
@@ -77,7 +77,7 @@ export async function linesFor(ctx: Ctx, fen: string, c: SearchConfig, kept: Kep
  * and `multiPv` is the number of lines; the node budget is the realm's own.
  */
 export const analysePosition: Handlers["analysePosition"] = async (input: { fens?: string[]; multiPv?: number; depth?: number }, ctx: Ctx) => {
-  const c: SearchConfig = { ...FULL, multiPv: clamp(input.multiPv, 5, 1, 8), depthCap: clamp(input.depth, 18, 6, 22) };
+  const c: SearchConfig = { ...FULL, multiPv: clamp(input.multiPv, MULTI_PV, 1, 8), depthCap: clamp(input.depth, DEPTH_CAP, 6, 22) };
   const fens = (input.fens ?? []).map((f) => f.trim());
   fens.forEach(legal);
   const kept = await keptFor(ctx.deps.db, c, fens, false);
@@ -90,8 +90,8 @@ export const analysePosition: Handlers["analysePosition"] = async (input: { fens
 
 /**
  * The producer behind HAS_CANDIDATE. Kept lines come back as they are; a position not yet
- * searched is searched while the page has spent less than 60 percent of the deadline, and the
- * rest are left to the next page, whose cursor is the index of the first key it owes. Every
+ * searched is searched while the page has spent less than 60 percent of the deadline and the
+ * search and its lines still fit before the page hands back, and the rest are left to the next page, whose cursor is the index of the first key it owes. Every
  * page serves at least one key, so a single position always answers in one read.
  */
 export const rowsCandidates: Paged<RowsCandidatesInput, Item<AnalysePositionOutput> & { analysisId: string; nodes: number }> = async (input: { fens?: unknown; cursor?: unknown }, ctx: Ctx) => {
@@ -112,7 +112,7 @@ export const rowsCandidates: Paged<RowsCandidatesInput, Item<AnalysePositionOutp
     const k = kept.get(fen);
     const fresh = k !== undefined && Date.now() - k.createdAt < ANALYSIS_TTL_MS;
     const first = i === start;
-    if (!first && (spent() >= YIELD_AT || (!fresh && spent() >= SEARCH_UNTIL))) return { rows: allWithValues(rows), next: String(i) };
+    if (!first && (spent() >= YIELD_AT || (!fresh && (spent() >= SEARCH_UNTIL || !fits(FULL_POSITION_MS))))) return { rows: allWithValues(rows), next: String(i) };
     rows.push(...(await linesFor(ctx, fen, FULL, k)));
   }
   return { rows: allWithValues(rows), next: null };

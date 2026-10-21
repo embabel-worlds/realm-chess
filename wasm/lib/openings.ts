@@ -1,4 +1,4 @@
-import { Chess } from "./chess.js";
+import { Board } from "./board.ts";
 
 /*
  * The opening book: every named line in the Lichess chess-openings list (CC0), keyed by the
@@ -19,19 +19,19 @@ export interface BookEntry { eco: string; name: string; pgn: string }
 export type Book = Record<string, BookEntry>;
 
 export function positionKey(fen: string): string {
-  return boardKey(new Chess(fen));
+  return boardKey(new Board(fen));
 }
 
 /** The book key of the position a board is in now, without reading its FEN back in. */
-export function boardKey(c: Chess): string {
+export function boardKey(c: Board): string {
   const [board, turn, castling, ep] = c.fen().split(" ");
-  const epLegal = ep !== "-" && c.moves({ verbose: true }).some((m) => m.flags.includes("e"));
+  const epLegal = ep !== "-" && c.hasEnPassant();
   return `${board} ${turn} ${castling} ${epLegal ? ep : "-"}`;
 }
 
 /** The position key of every position along a line, for reading its book rows in one go. */
 export function lineKeys(moves: string[]): string[] {
-  const c = new Chess();
+  const c = new Board();
   const keys: string[] = [];
   for (const m of moves) {
     try {
@@ -64,7 +64,7 @@ export interface LineOpening extends BookEntry {
  * is found too. `moves` is SAN from the starting position; an illegal move ends the line there.
  */
 export function openingOfLine(moves: string[], book: Book): LineOpening | null {
-  const c = new Chess();
+  const c = new Board();
   let best: LineOpening | null = null;
   let ply = 0;
   for (const m of moves) {
@@ -83,7 +83,7 @@ export function openingOfLine(moves: string[], book: Book): LineOpening | null {
 
 /** The position a line of SAN moves from the start reaches, or an error naming the bad move. */
 export function positionAfter(moves: string[]): string {
-  const c = new Chess();
+  const c = new Board();
   moves.forEach((m, i) => {
     try {
       c.move(m);
@@ -120,7 +120,7 @@ export function pawnKey(fen: string): string {
 }
 
 function pawnSet(fen: string): Set<string> {
-  const c = new Chess(fen);
+  const c = new Board(fen);
   const out = new Set<string>();
   for (const row of c.board()) for (const p of row) if (p && p.type === "p") out.add(p.color + p.square);
   return out;

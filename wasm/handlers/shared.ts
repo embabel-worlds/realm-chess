@@ -5,9 +5,9 @@
  */
 
 import type { Handler, HandlerContext } from "../generated/realm.ts";
-import { Chess } from "../lib/chess.js";
-import { spent } from "../lib/clock.ts";
-import { MAX_KEYS, YIELD_AT } from "../lib/config.ts";
+import { Board } from "../lib/board.ts";
+import { charge, spent } from "../lib/clock.ts";
+import { IMBALANCES_MS, MAX_KEYS, YIELD_AT } from "../lib/config.ts";
 import { allWithValues } from "../lib/records.ts";
 import type { WithValues } from "../lib/records.ts";
 import { timedSync } from "../lib/timing.ts";
@@ -18,9 +18,9 @@ import type { Imbalances } from "../lib/imbalances.ts";
 export type Ctx = HandlerContext;
 
 /** The position a FEN describes, or an error saying it is not a legal one. */
-export function legal(fen: string): Chess {
+export function legal(fen: string): Board {
   try {
-    return new Chess(fen.trim());
+    return new Board(fen.trim());
   } catch (e) {
     throw new Error(`Not a legal position: ${fen} (${(e as Error).message})`);
   }
@@ -57,6 +57,7 @@ export function imbalancesFor(fen: string): Imbalances {
   let x = imbalancesSeen.get(fen);
   if (!x) {
     x = timedSync("imbalances", () => imbalancesOf(fen));
+    charge(IMBALANCES_MS);
     imbalancesSeen.set(fen, x);
   }
   return x;

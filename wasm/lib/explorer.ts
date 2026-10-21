@@ -1,4 +1,4 @@
-import { Chess } from "./chess.js";
+import { Board } from "./board.ts";
 
 /*
  * Reading the Lichess opening explorer's answers, and the filters a query pushes down to it.
@@ -166,7 +166,7 @@ export interface ExplorerGameRecord {
 }
 
 export function moveRecords(fen: string, a: ExplorerAnswer, player = "", color = ""): ExplorerMoveRecord[] {
-  const mover = new Chess(fen).turn();
+  const mover = new Board(fen).turn();
   return (a.moves ?? []).map((m) => {
     const games = (m.white ?? 0) + (m.draws ?? 0) + (m.black ?? 0);
     const wins = mover === "w" ? m.white : m.black;
@@ -185,7 +185,7 @@ export function moveRecords(fen: string, a: ExplorerAnswer, player = "", color =
 function sanOf(fen: string, uci: string | undefined): string {
   if (!uci) return "";
   try {
-    return new Chess(fen).move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] }).san;
+    return new Board(fen).move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci[4] }).san;
   } catch {
     return uci;
   }
@@ -227,7 +227,7 @@ export interface RatedMoveRecord {
 
 /** One cell's rows: every move played in that band and time control, with its share and score. */
 export function ratedRecords(fen: string, cell: { band: string; speed: string }, a: ExplorerAnswer): RatedMoveRecord[] {
-  const mover = new Chess(fen).turn();
+  const mover = new Board(fen).turn();
   const total = (a.white ?? 0) + (a.draws ?? 0) + (a.black ?? 0);
   return (a.moves ?? []).map((m) => {
     const games = m.white + m.draws + m.black;

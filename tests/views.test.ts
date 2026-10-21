@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { parse } from "yaml";
 import { parseView, runView } from "../wasm/lib/cypher";
@@ -18,7 +18,7 @@ import { buildGuest, call, hasTooling } from "./guest/runtime";
  *
  * The views are run by wasm/lib/cypher.ts, the reader the app handlers use. It is checked first
  * against envelopes the views returned on a live appliance (tests/fixtures/envelopes.json):
- * where the realm's own inputs are deterministic (the board, the book, the engine at depth 18), the
+ * where the realm's own inputs are deterministic (the board, the book, the engine at a fixed node budget), the
  * rows must be those rows, field by field. Where the inputs come from outside (Lichess, the wikibook,
  * the model), the recorded explorer answers (tests/fixtures/explorer-answers.json) go through the same
  * view, and the rows must agree; the recorded envelope then fixes the columns.
@@ -162,7 +162,11 @@ describe.skipIf(!hasTooling)("each view over the realm's producers", () => {
       }
     });
 
-    it.skipIf(!STOCKFISH)("BestMoves: the engine's lines at depth 18, for every recorded position and tolerance, as recorded", async () => {
+    /*
+     * The engine's lines were recorded from the guest itself, with the module the realm carries,
+     * when the search budget last changed: CAPTURE=1 writes them back into the envelopes.
+     */
+    it.skipIf(!STOCKFISH)("BestMoves: the engine's lines at the full budget, for every recorded position and tolerance, as recorded", async () => {
       const { fetch } = setup({ engine: "real" });
       const cases = recorded.filter((r) => r.view === "BestMoves");
       expect(cases.length).toBeGreaterThanOrEqual(9);
@@ -171,8 +175,10 @@ describe.skipIf(!hasTooling)("each view over the realm's producers", () => {
         const fen = String(c.args.fen);
         if (!byFen.has(fen)) byFen.set(fen, await fetch("rowsCandidates", "fens", [fen]));
         const rows = runView(view("BestMoves"), c.args, byFen.get(fen)!);
-        expect(rows, `${fen} within ${c.args.withinCp}`).toEqual(c.env.data);
+        if (process.env.CAPTURE) c.env.data = rows;
+        else expect(rows, `${fen} within ${c.args.withinCp}`).toEqual(c.env.data);
       }
+      if (process.env.CAPTURE) writeFileSync("tests/fixtures/envelopes.json", JSON.stringify(envelopes, null, 1));
     }, 120_000);
   });
 

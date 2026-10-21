@@ -1,6 +1,6 @@
 import { Chess } from "chess.js";
 import { describe, expect, it } from "vitest";
-import { ANALYSIS_TTL_MS, DEADLINE_MS, DEPTH_CAP, FULL_NODES, MULTI_PV, SEARCH_UNTIL, YIELD_AT } from "../wasm/lib/config";
+import { ANALYSIS_TTL_MS, DEADLINE_MS, DEPTH_CAP, FULL_NODES, FULL_POSITION_MS, MAX_KEYS, MULTI_PV, SEARCH_UNTIL, YIELD_AT } from "../wasm/lib/config";
 import { realEngine, STOCKFISH } from "./guest/engine";
 import { FOOLS_MATE, fakeEngine, positions, seedKept, STALEMATE } from "./guest/fakes";
 import { chessHost, FakeDb } from "./guest/host";
@@ -33,16 +33,18 @@ describe.skipIf(!hasTooling || !STOCKFISH)("with the real stockfish module", () 
     const db = new FakeDb();
     const host = chessHost(db, realEngine());
     const rows = run("analysePosition", { fens: [START, FOOLS_MATE] }, db, host) as Record<string, unknown>[];
-    expect(rows).toHaveLength(5);
+    expect(rows).toHaveLength(MULTI_PV);
     expect(host.searches).toBe(1);
     for (const r of rows) {
       // Every declared field, apart from one with no value (no mate here), which is left out.
       expect(Object.keys(r).sort()).toEqual(recordFields.filter((f) => f !== "mate"));
       expect(r.fen).toBe(START);
-      expect(r.depth).toBe(DEPTH_CAP);
+      // The node budget runs out before the depth cap: 30,000 nodes reach depth 10 here.
+      expect(r.depth).toBe(10);
+      expect(r.depth).toBeLessThan(DEPTH_CAP);
     }
-    expect(rows.map((r) => r.rank)).toEqual([1, 2, 3, 4, 5]);
-    expect(rows[0]).toMatchObject({ san: "e4", scoreCp: 32, whiteCp: 32, lossCp: 0, side: "white" });
+    expect(rows.map((r) => r.rank)).toEqual([1, 2, 3]);
+    expect(rows[0]).toMatchObject({ san: "e4", scoreCp: 27, whiteCp: 27, lossCp: 0, side: "white" });
   });
 
   it("HAS_CANDIDATE answers a fresh position at full in one read, and the second read is the kept rows", async () => {
@@ -52,7 +54,7 @@ describe.skipIf(!hasTooling || !STOCKFISH)("with the real stockfish module", () 
     const first = await candidates(db, host, [START], clock);
     expect(first.refused).toBeUndefined();
     expect(first.dispatches).toBe(1);
-    expect(first.rows).toHaveLength(5);
+    expect(first.rows).toHaveLength(MULTI_PV);
     for (const r of first.rows) {
       for (const p of PUBLIC) expect(r, p).toHaveProperty(p);
       expect(r).not.toHaveProperty("cp");
@@ -90,6 +92,18 @@ describe.skipIf(!hasTooling)("with a fake engine and a fake clock", () => {
     expect(engine.calls).toHaveLength(0);
   });
 
+  it("where the host holds the clock still, a page searches one fresh position by what its steps charge, and the next pages the rest", async () => {
+    const db = new FakeDb();
+    const clock = { now: Date.now() };
+    const engine = fakeEngine(clock);
+    const keys = positions(3);
+    const f = await candidates(db, chessHost(db, engine.analyse), keys, clock);
+    expect(f.refused).toBeUndefined();
+    expect(f.rows).toHaveLength(3 * MULTI_PV);
+    expect(f.dispatches).toBe(3);
+    expect(engine.calls).toHaveLength(3);
+  });
+
   it("forty fresh positions complete across pages, each search started under 60 percent of the deadline", async () => {
     const db = new FakeDb();
     const clock = { now: Date.now() };
@@ -99,9 +113,11 @@ describe.skipIf(!hasTooling)("with a fake engine and a fake clock", () => {
     const f = await candidates(db, host, keys, clock);
     expect(f.refused).toBeUndefined();
     expect(f.rows).toHaveLength(40 * MULTI_PV);
-    // About six at three seconds a search.
-    const perPage = Math.ceil((SEARCH_UNTIL * DEADLINE_MS) / SEARCH_MS);
-    expect(perPage).toBe(6);
+    // A fresh position starts while the page has spent under 60 percent of the deadline and a
+    // whole position, searched and its lines read, still fits before 90 percent: four at three
+    // seconds a search.
+    const perPage = Math.min(Math.ceil((SEARCH_UNTIL * DEADLINE_MS) / SEARCH_MS), Math.floor((YIELD_AT * DEADLINE_MS - FULL_POSITION_MS) / SEARCH_MS) + 1);
+    expect(perPage).toBe(4);
     expect(f.dispatches).toBe(Math.ceil(40 / perPage));
     // Disjoint pages, in key order, the cursor the index of the first key a page owes.
     const served = f.pages.map((rows) => [...new Set(rows.map((r) => r.fen as string))]);
@@ -163,17 +179,16 @@ describe.skipIf(!hasTooling)("with a fake engine and a fake clock", () => {
       expect(engine.calls).toHaveLength(0);
     });
 
-    it("ROW_BOUND past 1024 rows, and a fetch inside the bound reads the kept rows", async () => {
+    it("ROW_BOUND is out of reach: the most keys a fetch sends, at three lines each, read back as kept rows", async () => {
+      expect(MAX_KEYS * MULTI_PV).toBeLessThan(1024);
       const db = new FakeDb();
       const clock = { now: Date.now() };
-      const keys = positions(210);
+      const keys = positions(MAX_KEYS);
       await seedKept(db, keys, clock.now, { bare: true });
       const engine = fakeEngine(clock);
-      const host = chessHost(db, engine.analyse);
-      expect((await candidates(db, host, keys, clock)).refused).toBe("ROW_BOUND");
-      const within = await candidates(db, host, keys.slice(0, 200), clock);
+      const within = await candidates(db, chessHost(db, engine.analyse), keys, clock);
       expect(within.refused).toBeUndefined();
-      const lines = keys.slice(0, 200).reduce((n, fen) => n + Math.min(MULTI_PV, new Chess(fen).moves().length), 0);
+      const lines = keys.reduce((n, fen) => n + Math.min(MULTI_PV, new Chess(fen).moves().length), 0);
       expect(within.rows).toHaveLength(lines);
       expect(engine.calls).toHaveLength(0);
     }, 60_000);
@@ -181,9 +196,9 @@ describe.skipIf(!hasTooling)("with a fake engine and a fake clock", () => {
     it("RESULT_BYTES past 1 MiB", async () => {
       const db = new FakeDb();
       const clock = { now: Date.now() };
-      // Rows of eight-ply lines run to about a kilobyte, so 200 kept positions pass 1 MiB first.
-      const keys = positions(200);
-      await seedKept(db, keys, clock.now);
+      // Rows of sixty-ply lines run to about two kilobytes, so the most keys a fetch sends pass 1 MiB.
+      const keys = positions(MAX_KEYS);
+      await seedKept(db, keys, clock.now, { plies: 60 });
       const f = await candidates(db, chessHost(db, fakeEngine(clock).analyse), keys, clock);
       expect(f.refused).toBe("RESULT_BYTES");
       expect(f.rows.length).toBeLessThanOrEqual(1024);
@@ -227,9 +242,9 @@ describe.skipIf(!hasTooling)("with a fake engine and a fake clock", () => {
       // The public defaults are the producer's configuration, so the graph reads the same kept lines.
       (await candidates(db, host, [START], clock));
       expect(engine.calls).toHaveLength(1);
-      run("analysePosition", { fens: [START], multiPv: 3 }, db, host, clock);
+      run("analysePosition", { fens: [START], multiPv: 5 }, db, host, clock);
       run("analysePosition", { fens: [START], depth: 12 }, db, host, clock);
-      expect(engine.calls.map((c) => [c.multiPv, c.maxDepth])).toEqual([[5, 18], [3, 18], [5, 12]]);
+      expect(engine.calls.map((c) => [c.multiPv, c.maxDepth])).toEqual([[3, 18], [5, 18], [3, 12]]);
       expect(db.exec("SELECT count(DISTINCT config_key) AS n FROM analyses")[0].n).toBe("3");
     });
 

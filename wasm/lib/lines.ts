@@ -1,5 +1,7 @@
-import { Chess } from "./chess.js";
-import type { Move } from "./chess.js";
+import { Board } from "./board.ts";
+import type { BoardMove } from "./board.ts";
+import { charge } from "./clock.ts";
+import { LINE_READ_MS } from "./config.ts";
 import { imbalanceChanges, imbalancesOf } from "./imbalances.ts";
 import type { Imbalances } from "./imbalances.ts";
 
@@ -24,7 +26,7 @@ export interface LineReading {
   lost: string[];
 }
 
-export function uciToMove(c: Chess, uci: string): Move | null {
+export function uciToMove(c: Board, uci: string): BoardMove | null {
   try {
     return c.move({ from: uci.slice(0, 2), to: uci.slice(2, 4), promotion: uci.length > 4 ? uci[4] : undefined });
   } catch {
@@ -33,23 +35,30 @@ export function uciToMove(c: Chess, uci: string): Move | null {
 }
 
 export function readLine(fen: string, pv: string[], before: Imbalances = imbalancesOf(fen)): LineReading {
-  const board = new Chess(fen);
-  const moves: Move[] = [];
-  const fens: string[] = [];
-  for (const u of pv) {
-    const m = uciToMove(board, u);
-    if (!m) break;
-    moves.push(m);
-    fens.push(board.fen());
-  }
+  const board = new Board(fen);
+  const moves: BoardMove[] = [];
   /*
    * A line cut off between a capture and its recapture would report a piece won or lost that is
    * neither, so the reading runs on while the next move is a capture. A line that ENDS on a
-   * capture is taken at its word: the engine stopped there.
+   * capture is taken at its word: the engine stopped there. The settled position is the first one
+   * from LINE_PLIES on whose next move takes nothing, so only the positions from there are written
+   * out as FEN, and only until a quiet move settles it.
    */
-  let settle = Math.min(LINE_PLIES, moves.length);
-  while (settle < moves.length && moves[settle].captured) settle++;
-  const settledFen = settle === 0 ? fen : fens[settle - 1];
-  const { gained, lost } = imbalanceChanges(before, imbalancesOf(settledFen));
+  let settle = -1;
+  let settledFen = fen;
+  for (const u of pv) {
+    const m = uciToMove(board, u);
+    if (!m) break;
+    if (settle < 0 && moves.length >= LINE_PLIES && !m.captured) settle = moves.length;
+    moves.push(m);
+    if (settle < 0 && moves.length >= LINE_PLIES) settledFen = board.fen();
+  }
+  if (settle < 0) {
+    settle = moves.length;
+    settledFen = settle === 0 ? fen : board.fen();
+  }
+  // Piece activity is one of the facts a line's changes leave out, so the settled position's mobility is not counted.
+  const { gained, lost } = imbalanceChanges(before, imbalancesOf(settledFen, { mobility: false }));
+  charge(LINE_READ_MS);
   return { pvSan: moves.map((m) => m.san), settledFen, settledPlies: settle, gained, lost };
 }

@@ -1,5 +1,5 @@
-import { waitUntil } from "./clock.ts";
-import { LICHESS_SPACING_MS } from "./config.ts";
+import { charge, waitUntil } from "./clock.ts";
+import { API_CALL_MS, LICHESS_SPACING_MS } from "./config.ts";
 import { checkedAnswer, isEmptyAnswer, ndjsonAnswer } from "./explorer.ts";
 import type { ExplorerAnswer } from "./explorer.ts";
 import { recordOutcome } from "./status.ts";
@@ -95,7 +95,10 @@ export async function explorerAnswerFor(
     const rows = await s.db.exec(`SELECT at FROM lichess_clock WHERE name = '${CLOCK_ROW}'`);
     s.lastAt = rows[0] ? num(rows[0].at) : 0;
   }
-  waitUntil(s.lastAt + LICHESS_SPACING_MS);
+  // A clock held still cannot space two requests. The first of a dispatch goes ahead, since the
+  // dispatch before it has had its answer, so requests are still one at a time; a second waits
+  // for the next dispatch.
+  if (!waitUntil(s.lastAt + LICHESS_SPACING_MS) && s.asked) return undefined;
   s.asked = true;
   let reply: unknown;
   try {
@@ -105,6 +108,7 @@ export async function explorerAnswerFor(
     s.refused = refused.code;
     throw refused;
   } finally {
+    charge(API_CALL_MS);
     s.lastAt = Date.now();
     await s.db.exec(
       `INSERT INTO lichess_clock (name, at) VALUES ('${CLOCK_ROW}', ${Math.trunc(s.lastAt)}) ON CONFLICT(name) DO UPDATE SET at = excluded.at`,

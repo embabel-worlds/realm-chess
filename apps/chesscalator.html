@@ -180,8 +180,8 @@
     to a virtual type whose rows come from the realm's own Wasm handlers:</p>
   <ul>
     <li><b>Engine lines</b> — <code>HAS_CANDIDATE</code> → <code>CandidateMove</code>, from
-      <code>chess.analysePosition</code>: Stockfish 19 (lite, WebAssembly) from the appliance's module registry, five
-      lines, searched to a fixed node budget of about three seconds and at most depth 18; each line says the depth it
+      <code>chess.analysePosition</code>: Stockfish 19 (lite, WebAssembly) carried by the realm, three
+      lines, searched to a fixed node budget and at most depth 18; each line says the depth it
       reached. Each line also carries the imbalances it creates and removes once its exchanges settle. Cached for
       seven days per position — a search is not repeatable, and the cache keeps the numbers steady.</li>
     <li><b>Imbalances</b> — <code>HAS_IMBALANCES</code> → <code>PositionImbalances</code>, from
@@ -734,7 +734,7 @@ const needsKey = (reason) => /lichess|not a world tool|no (such )?api|401|token/
 /*
  * One table for what to play: the engine's moves (within the chosen tolerance of best) and the
  * moves masters played here, merged by move. A move the engine likes that masters never played,
- * or one masters play that is not in the engine's top five, shows as such. What an engine line
+ * or one masters play that is not in the engine's top three, shows as such. What an engine line
  * changes about the imbalances opens under the row on request — always showing it buried the
  * table.
  */
@@ -765,7 +765,7 @@ function renderMovesTable(engineRows, masters, masterGames) {
     const e = r.engine;
     const lc = e && e.lossCp != null ? Number(e.lossCp) : null;
     const engCell = el("td", "eng" + (e ? "" : " absent"), e ? (e.mate != null ? `mate in ${Math.abs(e.mate)}` : fmt(e.whiteCp)) : "\u2014");
-    if (!e) engCell.title = "Not among the engine's top five moves";
+    if (!e) engCell.title = "Not among the engine's top three moves";
     const vsBest = el("td", e ? (Number(e.rank) === 1 ? "best" : lc != null && lc <= 20 ? "style" : "cost") : "absent",
       !e ? "" : Number(e.rank) === 1 ? "best" : lc == null ? "" : `\u2212${(lc / 100).toFixed(2)}`);
     const m = r.master;

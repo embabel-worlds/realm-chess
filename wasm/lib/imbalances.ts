@@ -1,5 +1,5 @@
-import { Chess } from "./chess.js";
-import type { Color, PieceSymbol, Square } from "./chess.js";
+import { Board } from "./board.ts";
+import type { Color, PieceSymbol, Square } from "./board.ts";
 
 /*
  * The imbalances of a position, in Jeremy Silman's sense: the differences between the two
@@ -71,7 +71,7 @@ export interface Imbalances {
   facts: string[];
 }
 
-function pieces(c: Chess): Placed[] {
+function pieces(c: Board): Placed[] {
   const out: Placed[] = [];
   for (const row of c.board()) for (const p of row) if (p) out.push({ type: p.type, color: p.color, square: p.square });
   return out;
@@ -97,7 +97,7 @@ function enemyPawnCanReach(enemyPawns: string[], enemy: Side, square: string): b
   });
 }
 
-function sideImbalances(c: Chess, all: Placed[], s: Side, openFiles: string[]): SideImbalances {
+function sideImbalances(c: Board, all: Placed[], s: Side, openFiles: string[], mobility: boolean): SideImbalances {
   const me = colourOf(s), them = other(s);
   const mine = all.filter((p) => p.color === me);
   const myPawns = pawnsOf(all, s);
@@ -214,20 +214,20 @@ function sideImbalances(c: Chess, all: Placed[], s: Side, openFiles: string[]): 
     majority, space, outposts: outposts.slice(0, 4), halfOpenFiles, rooksOnOpenFiles,
     development: { undeveloped, castled, kingInCentre },
     king: { square: kingSq, wing: kingWing, shield, openFilesNear, attackersNear: attackers.size },
-    mobility: mobilityOf(c, me),
+    mobility: mobility ? mobilityOf(c, me) : null,
   };
 }
 
 /* Legal moves for a side. For the side not to move, count them with the turn handed over — not
  * possible when that would leave the side to move in check, and then the count is omitted. */
-function mobilityOf(c: Chess, colour: Color): number | null {
-  if (c.turn() === colour) return c.moves().length;
+function mobilityOf(c: Board, colour: Color): number | null {
+  if (c.turn() === colour) return c.moveCount();
   const parts = c.fen().split(" ");
   parts[1] = colour;
   parts[3] = "-";
   try {
-    const flipped = new Chess(parts.join(" "));
-    return flipped.moves().length;
+    const flipped = new Board(parts.join(" "));
+    return flipped.moveCount();
   } catch {
     return null;
   }
@@ -268,7 +268,7 @@ function chainsOf(all: Placed[]): Imbalances["chains"] {
  * e5 pawn after 4...dxc6 with Nxe5, which ...Qd4 refutes; it cannot see a fork, so it must not
  * be asked what a side can win. That is the engine's question.
  */
-function exchangeOn(c: Chess, square: string): number {
+function exchangeOn(c: Board, square: string): number {
   const caps = c.moves({ verbose: true }).filter((m) => m.to === square && m.captured)
     .sort((a, b) => VALUE[a.piece] - VALUE[b.piece]);
   if (caps.length === 0) return 0;
@@ -282,7 +282,7 @@ function exchangeOn(c: Chess, square: string): number {
 
 /* The best single-square exchange for the side to move, and where. */
 export function recapture(fen: string): { gain: number; square: string | null; san: string | null } {
-  const c = new Chess(fen);
+  const c = new Board(fen);
   let best = { gain: 0, square: null as string | null, san: null as string | null };
   for (const m of c.moves({ verbose: true }).filter((x) => x.captured)) {
     c.move(m);
@@ -296,23 +296,22 @@ export function recapture(fen: string): { gain: number; square: string | null; s
 /* Mates in one: exact, cheap, and the first thing a beginner must see. `threat` asks it of the side
  * NOT to move, with the move handed over — not asked when the side to move is in check. */
 function mateInOne(fen: string, threat: boolean): string[] {
-  let c = new Chess(fen);
+  let c = new Board(fen);
   if (threat) {
     if (c.inCheck()) return [];
     const parts = fen.split(" ");
     parts[1] = parts[1] === "w" ? "b" : "w";
     parts[3] = "-";
-    try { c = new Chess(parts.join(" ")); } catch { return []; }
+    try { c = new Board(parts.join(" ")); } catch { return []; }
   }
-  // The plain move list has the same SAN in the same order, and skips building a move object,
-  // with its two FENs, for every legal move.
-  return c.moves().filter((san) => san.endsWith("#"));
+  // The same SAN, in the same order, as the moves that end in "#"; SAN is written for those only.
+  return c.mates();
 }
 
 /* A piece attacked and not defended, or attacked by something cheaper: facts a beginner must see
  * first. Whether taking it actually works is left to the engine. Kings are excluded — check is
  * reported on its own. */
-function exposedPieces(c: Chess, colour: Color): string[] {
+function exposedPieces(c: Board, colour: Color): string[] {
   const out: string[] = [];
   const enemy: Color = colour === "w" ? "b" : "w";
   for (const row of c.board()) for (const p of row) {
@@ -330,12 +329,17 @@ function exposedPieces(c: Chess, colour: Color): string[] {
   return out;
 }
 
-export function imbalancesOf(fen: string): Imbalances {
-  const c = new Chess(fen);
+/**
+ * The imbalances of a position. With `mobility: false` neither side's legal moves are counted:
+ * both mobilities are null and there is no piece activity fact, which saves two move lists when
+ * only the facts a line changes are wanted.
+ */
+export function imbalancesOf(fen: string, { mobility = true }: { mobility?: boolean } = {}): Imbalances {
+  const c = new Board(fen);
   const all = pieces(c);
   const openFiles = [...FILES].filter((f) => !all.some((p) => p.type === "p" && p.square[0] === f));
-  const white = sideImbalances(c, all, "white", openFiles);
-  const black = sideImbalances(c, all, "black", openFiles);
+  const white = sideImbalances(c, all, "white", openFiles, mobility);
+  const black = sideImbalances(c, all, "black", openFiles, mobility);
   const chains = chainsOf(all);
   const nonPawn = (s: SideImbalances) => s.material.points - s.material.pawns;
   const fullmove = Number(fen.split(" ")[5] ?? "1");
@@ -392,7 +396,7 @@ function factsOf(x: Imbalances): string[] {
   // sentence is about — king safety, pawn structure — before what it says.
   const add = (category: Category, sentence: string) => out.push(`${category}: ${sentence}`);
   const mover = x.sideToMove, other_ = mover === "white" ? "black" : "white";
-  const c = new Chess(x.fen);
+  const c = new Board(x.fen);
   if (c.inCheck()) add("Tactics", `${Cap(mover)} is in check.`);
   const mates = mateInOne(x.fen, false);
   if (mates.length) add("Tactics", `${Cap(mover)} can mate at once with ${list(mates.slice(0, 3))}.`);

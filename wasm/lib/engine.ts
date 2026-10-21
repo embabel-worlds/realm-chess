@@ -1,4 +1,5 @@
-import { DEEP_DEPTH_CAP, DEEP_NODES, DEPTH_CAP, ENGINE_MODULE, FULL_NODES, MULTI_PV } from "./config.ts";
+import { charge } from "./clock.ts";
+import { DEEP_DEPTH_CAP, DEEP_NODES, DEPTH_CAP, ENGINE_MODULE, ENGINE_NODES_PER_SECOND, FULL_NODES, MULTI_PV } from "./config.ts";
 import type { Imbalances } from "./imbalances.ts";
 import { readLine } from "./lines.ts";
 import { sha256Hex } from "./sha256.ts";
@@ -58,9 +59,16 @@ export const configKey = (c: SearchConfig): string =>
  */
 export const analysisIdOf = (key: string, linesJson: string): string => sha256Hex(`${key}\n${linesJson}`);
 
+/** What a search under this configuration can cost at worst, on the slowest host. */
+export const searchWorstMs = (c: SearchConfig): number => Math.ceil((c.nodes * 1000) / ENGINE_NODES_PER_SECOND);
+
 /** One search through the module. A refusal from the module is an error, never empty lines. */
 export async function search(engine: Engine, fen: string, c: SearchConfig): Promise<Search> {
-  return answerOf(fen, await engine.analyse(fen, c.nodes, c.depthCap, c.multiPv));
+  try {
+    return answerOf(fen, await engine.analyse(fen, c.nodes, c.depthCap, c.multiPv));
+  } finally {
+    charge(searchWorstMs(c));
+  }
 }
 
 /** Whether the host offers the engine's batch call. */
@@ -81,7 +89,12 @@ export async function searchAll(engine: Engine, fens: string[], c: SearchConfig)
   };
   const batch = engine.analyse.batch;
   if (typeof batch === "function") {
-    const texts = await batch.call(engine.analyse, fens.map((fen) => [fen, c.nodes, c.depthCap, c.multiPv] as const));
+    let texts: string[];
+    try {
+      texts = await batch.call(engine.analyse, fens.map((fen) => [fen, c.nodes, c.depthCap, c.multiPv] as const));
+    } finally {
+      charge(fens.length * searchWorstMs(c));
+    }
     if (!Array.isArray(texts) || texts.length !== fens.length) throw new Error("The engine's batch answered the wrong number of searches");
     return fens.map((fen, i) => settle(fen, texts[i]));
   }
@@ -91,6 +104,8 @@ export async function searchAll(engine: Engine, fens: string[], c: SearchConfig)
       out.push(settle(fen, await engine.analyse(fen, c.nodes, c.depthCap, c.multiPv)));
     } catch (e) {
       out.push(e as Error);
+    } finally {
+      charge(searchWorstMs(c));
     }
   }
   return out;

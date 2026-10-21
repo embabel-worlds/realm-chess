@@ -1,4 +1,4 @@
-import { Chess } from "./chess.js";
+import { Board } from "./board.ts";
 import { boardKey } from "./openings.ts";
 import type { BookEntry, LineOpening } from "./openings.ts";
 import { bookFor, sqlList, sqlText } from "./store.ts";
@@ -13,7 +13,7 @@ import type { Db } from "./store.ts";
  * move from the kept line before it; any other line is played from the start once and kept.
  *
  * A line is kept under its moves as the board writes them (its own SAN, single-spaced), never
- * under the text as sent: chess.js reads some loose spellings of a move, and each spelling would
+ * under the text as sent: the board reads some loose spellings of a move, and each spelling would
  * otherwise add a row of its own. A line sent in the board's SAN, which is what the app sends,
  * is found by its text; any other spelling is played from the start and kept under the board's
  * SAN, so it adds no row.
@@ -57,7 +57,7 @@ export async function gameLine(db: Db, moves: string[]): Promise<GameLine> {
   const prefix = rows.find((r) => r.line_key === shorter);
   const start: GameLine = prefix ? fromRow(prefix) : { fen: "", sans: [], opening: null };
   const from = prefix ? moves.length - 1 : 0;
-  const board = prefix ? new Chess(start.fen) : new Chess();
+  const board = prefix ? new Board(start.fen) : new Board();
   const sans = [...start.sans];
   const played: { fen: string; key: string }[] = [];
   for (let i = from; i < moves.length; i++) {

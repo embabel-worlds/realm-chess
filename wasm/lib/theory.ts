@@ -1,4 +1,6 @@
-import { Chess } from "./chess.js";
+import { Board } from "./board.ts";
+import { charge } from "./clock.ts";
+import { API_CALL_MS } from "./config.ts";
 import { sha256Hex } from "./sha256.ts";
 
 /*
@@ -12,7 +14,7 @@ const ROOT = "Chess Opening Theory";
 
 /* The page title for each prefix of a line, shortest first: "Chess Opening Theory/1. e4", … */
 export function theoryTitles(moves: string[]): string[] {
-  const c = new Chess();
+  const c = new Board();
   const parts: string[] = [];
   const titles: string[] = [];
   for (const m of moves) {
@@ -99,6 +101,11 @@ function recordFor(moves: string[], titles: string[], title: string, theory: str
   return { line: moves.join(" "), title, url: pageUrl(title), pliesCovered: covered, pliesPast: moves.length - covered, theory, licence: LICENCE };
 }
 
+/* What a kept theory row says: no page along the line, the page and its text, or the page alone. */
+const MISS = 0;
+const FOUND = 1;
+const PAGE_KNOWN = 2;
+
 /**
  * The deepest page of the Chess Opening Theory wikibook along a line: one request asks which of
  * the line's prefix pages exist (the deepest 50), a second reads that one's text. Only a title the
@@ -107,7 +114,8 @@ function recordFor(moves: string[], titles: string[], title: string, theory: str
  * throws and keeps nothing.
  *
  * `mayFetch` is asked before each of the two requests. When it says there is no time, the
- * lookup stops, keeps nothing, and answers "later". A caller that already has the line's titles
+ * lookup stops and answers "later", keeping the page the first request found, if it got that far,
+ * so that the next lookup reads only its text. A caller that already has the line's titles
  * (from titlesOfSans) passes them, and the line is not replayed.
  */
 export async function theoryFor(
@@ -123,31 +131,46 @@ export async function theoryFor(
   const line = moves.join(" ");
   const q = (s: string) => `'${s.replaceAll("'", "''")}'`;
   const kept = (await db.exec(`SELECT title, extract, fetched_at, found FROM theory WHERE line_key = ${q(line)}`))[0];
-  if (kept && Date.now() - Date.parse(String(kept.fetched_at)) < ttlMs) {
-    return String(kept.found) === "1" ? recordFor(moves, titles, String(kept.title), String(kept.extract)) : null;
+  const fresh = kept !== undefined && Date.now() - Date.parse(String(kept.fetched_at)) < ttlMs;
+  const pageKnown = fresh && String(kept.found) === String(PAGE_KNOWN);
+  if (fresh && !pageKnown) {
+    return String(kept.found) === String(FOUND) ? recordFor(moves, titles, String(kept.title), String(kept.extract)) : null;
   }
-  if (!mayFetch()) return "later";
-  const keep = (title: string, excerpt: string, found: boolean) =>
+  const keep = (title: string, excerpt: string, found: number) =>
     db.exec(
       `INSERT OR REPLACE INTO theory (line_key, title, extract, url, text_sha, fetched_at, found) VALUES (${q(line)}, ${q(title)}, ` +
-        `${q(excerpt)}, ${q(title ? pageUrl(title) : "")}, ${q(excerpt ? sha256Hex(excerpt) : "")}, ${q(new Date().toISOString())}, ${found ? 1 : 0})`,
+        `${q(excerpt)}, ${q(title ? pageUrl(title) : "")}, ${q(excerpt ? sha256Hex(excerpt) : "")}, ${q(new Date().toISOString())}, ${found})`,
     );
   const candidates = titles.slice(-50);
-  const info = await gateway.wikibooks.wikibooksQuery({ action: "query", format: "json", prop: "info", titles: candidates.join("|") });
-  const present = new Set(pagesOf(info).filter((p) => p.missing === undefined && typeof p.title === "string").map((p) => p.title as string));
-  const deepest = [...candidates].reverse().find((t) => present.has(t));
-  if (!deepest) {
-    await keep("", "", false);
-    return null;
+  const asked = async (request: Parameters<typeof gateway.wikibooks.wikibooksQuery>[0]) => {
+    try {
+      return await gateway.wikibooks.wikibooksQuery(request);
+    } finally {
+      charge(API_CALL_MS);
+    }
+  };
+  let deepest = pageKnown ? String(kept.title) : undefined;
+  if (deepest === undefined) {
+    if (!mayFetch()) return "later";
+    const info = await asked({ action: "query", format: "json", prop: "info", titles: candidates.join("|") });
+    const present = new Set(pagesOf(info).filter((p) => p.missing === undefined && typeof p.title === "string").map((p) => p.title as string));
+    deepest = [...candidates].reverse().find((t) => present.has(t));
+    if (!deepest) {
+      await keep("", "", MISS);
+      return null;
+    }
   }
-  if (!mayFetch()) return "later";
-  const page = await gateway.wikibooks.wikibooksQuery({ action: "query", format: "json", prop: "extracts", explaintext: "1", redirects: "1", titles: deepest });
+  if (!mayFetch()) {
+    await keep(deepest, "", PAGE_KNOWN);
+    return "later";
+  }
+  const page = await asked({ action: "query", format: "json", prop: "extracts", explaintext: "1", redirects: "1", titles: deepest });
   const extract = pagesOf(page).map((p) => p.extract).find((e): e is string => typeof e === "string") ?? "";
   const text = theoryText(extract.slice(0, MAX_EXTRACT));
   if (!text) {
-    await keep("", "", false);
+    await keep("", "", MISS);
     return null;
   }
-  await keep(deepest, text, true);
+  await keep(deepest, text, FOUND);
   return recordFor(moves, titles, deepest, text);
 }

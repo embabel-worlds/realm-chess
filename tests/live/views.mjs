@@ -7,7 +7,7 @@
  * What is expected of each view:
  * - BestMoves, ImbalancesOf, OpeningOf, OpeningOfLine: the recorded envelopes
  *   (tests/fixtures/envelopes.json), field by field. These depend only on the board, the book and
- *   the engine at depth 18. OpeningOf for the Exchange Ruy position is legitimately empty.
+ *   the engine at a fixed node budget. OpeningOf for the Exchange Ruy position is legitimately empty.
  * - MastersAtPosition, MasterGamesAtPosition, MovesByRating, MovesByTimeControl, PlayerAtPosition,
  *   PlayerGamesAtPosition: rows with the recorded columns when a Lichess token is bound; with no
  *   token, no rows and ChessStatus saying lichess=refused. Lichess's own numbers move daily, so
