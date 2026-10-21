@@ -1,0 +1,13 @@
+handler: chess.rowsCandidates
+joins:
+  - anchorLabel: Position
+    keyField: fen
+    recordKeyField: fen
+    relationship: HAS_CANDIDATE
+    targetLabel: CandidateMove
+keyArgument: fens
+name: candidate-lines
+page:
+  argument: cursor
+  maxPages: 16
+version: 1

@@ -1,0 +1,18 @@
+handler: chess.rowsPlayerMoves
+joins:
+  - anchorLabel: Position
+    keyField: fen
+    recordKeyField: fen
+    relationship: PLAYER_PLAYED
+    targetLabel: PlayerMove
+keyArgument: fens
+name: player-moves
+page:
+  argument: cursor
+  maxPages: 16
+pushdown:
+  - argument: player
+    property: player
+  - argument: color
+    property: color
+version: 1

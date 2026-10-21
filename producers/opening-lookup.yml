@@ -1,0 +1,10 @@
+handler: chess.rowsOpeningOfPosition
+joins:
+  - anchorLabel: Position
+    keyField: fen
+    recordKeyField: fen
+    relationship: IN_OPENING
+    targetLabel: Opening
+keyArgument: fens
+name: opening-lookup
+version: 1

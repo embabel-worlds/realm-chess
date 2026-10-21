@@ -1,0 +1,10 @@
+handler: chess.status
+joins:
+  - anchorLabel: AssistantUser
+    keyField: username
+    recordKeyField: username
+    relationship: HAS_CHESS_STATUS
+    targetLabel: ChessStatus
+keyArgument: username
+name: chess-status
+version: 1

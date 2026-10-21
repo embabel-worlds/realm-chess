@@ -1,0 +1,13 @@
+handler: chess.rowsTheory
+joins:
+  - anchorLabel: GameLine
+    keyField: moves
+    recordKeyField: line
+    relationship: HAS_THEORY
+    targetLabel: OpeningTheory
+keyArgument: lines
+name: theory-of-game-line
+page:
+  argument: cursor
+  maxPages: 16
+version: 1

@@ -1,67 +1,54 @@
 {
-  "version": 1,
-  "generatedAt": "2026-10-02T16:54:36.227Z",
   "entries": [
     {
-      "namespace": "chess",
-      "name": "analysePosition",
       "description": "The engine's best lines in each position, strongest first, each with what it changes about the position's imbalances. A position with no legal moves returns nothing: there is nothing to recommend in a checkmate or a stalemate, and the FEN says which.",
       "inputSchema": {
-        "type": "object",
         "properties": {
-          "fens": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "multiPv": {
+          "depth": {
             "type": "number"
           },
-          "depth": {
+          "fens": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "multiPv": {
             "type": "number"
           }
         },
         "required": [
           "fens"
-        ]
+        ],
+        "type": "object"
       },
+      "name": "analysePosition",
+      "namespace": "chess",
       "outputSchema": {
-        "type": "array",
         "items": {
-          "type": "object",
           "properties": {
             "candidateId": {
+              "type": "string"
+            },
+            "creates": {
+              "type": "string"
+            },
+            "depth": {
+              "type": "number"
+            },
+            "elapsedMs": {
+              "type": "number"
+            },
+            "engine": {
               "type": "string"
             },
             "fen": {
               "type": "string"
             },
-            "rank": {
-              "type": "number"
-            },
-            "uci": {
-              "type": "string"
-            },
-            "san": {
-              "type": "string"
-            },
-            "side": {
-              "type": "string"
-            },
-            "scoreCp": {
-              "type": "number"
-            },
-            "mate": {
-              "type": "number"
-            },
-            "whiteCp": {
-              "type": "number"
-            },
             "lossCp": {
               "type": "number"
             },
-            "depth": {
+            "mate": {
               "type": "number"
             },
             "pvSan": {
@@ -70,16 +57,25 @@
             "pvUci": {
               "type": "string"
             },
-            "creates": {
-              "type": "string"
+            "rank": {
+              "type": "number"
             },
             "removes": {
               "type": "string"
             },
-            "engine": {
+            "san": {
               "type": "string"
             },
-            "elapsedMs": {
+            "scoreCp": {
+              "type": "number"
+            },
+            "side": {
+              "type": "string"
+            },
+            "uci": {
+              "type": "string"
+            },
+            "whiteCp": {
               "type": "number"
             }
           },
@@ -97,63 +93,243 @@
             "removes",
             "engine",
             "elapsedMs"
-          ]
-        }
+          ],
+          "type": "object"
+        },
+        "type": "array"
       }
     },
     {
+      "description": "For Chesscalator, when the reader asks for plans: PlansInLine along `moves`, else PlansInPosition, at `level`. A new position costs an engine search and a model call.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "fen": {
+            "description": "The position, as a complete FEN.",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "level": {
+            "description": "Who the plans are for. intermediate when absent.",
+            "enum": [
+              "beginner",
+              "intermediate",
+              "expert"
+            ],
+            "type": "string"
+          },
+          "moves": {
+            "description": "The game's moves from the start in SAN, space-separated, when the game was played from the start. They must reach `fen`.",
+            "maxLength": 4096,
+            "type": "string"
+          }
+        },
+        "required": [
+          "fen"
+        ],
+        "type": "object"
+      },
+      "name": "appPlans",
       "namespace": "chess",
-      "name": "explainLinePlans",
+      "outputSchema": {
+        "description": "`views`: for each view the page shows, `{rows}` as the view returns them, or `{rows: [], error}` when the realm could not get them, or `{rows: [], skipped: \"time\"}` when there was no time left in the call. `status`: ChessStatus, which says why a column is empty.",
+        "type": "object"
+      }
+    },
+    {
+      "description": "For Chesscalator, on every step: ImbalancesOf, the opening (OpeningOfLine along `moves`, else OpeningOf), TheoryOfLine along `moves`, and BestMoves within `withinCp` of the best. A new position costs one engine search.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "fen": {
+            "description": "The position, as a complete FEN.",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "moves": {
+            "description": "The game's moves from the start in SAN, space-separated, when the game was played from the start. They must reach `fen`.",
+            "maxLength": 4096,
+            "type": "string"
+          },
+          "withinCp": {
+            "description": "Keep moves at most this many centipawns worse than the best. 50 when absent.",
+            "maximum": 1000,
+            "minimum": 0,
+            "type": "integer"
+          }
+        },
+        "required": [
+          "fen"
+        ],
+        "type": "object"
+      },
+      "name": "appPosition",
+      "namespace": "chess",
+      "outputSchema": {
+        "description": "`views`: for each view the page shows, `{rows}` as the view returns them, or `{rows: [], error}` when the realm could not get them, or `{rows: [], skipped: \"time\"}` when there was no time left in the call. `status`: ChessStatus, which says why a column is empty.",
+        "type": "object"
+      }
+    },
+    {
+      "description": "For Chesscalator: what Lichess says about a position. `masters` gives MastersAtPosition and MasterGamesAtPosition; `player` (and `color`, white when absent) gives PlayerAtPosition and PlayerGamesAtPosition; `speed` gives MovesByRating and `band` gives MovesByTimeControl, with `minShare`. Needs the Lichess token.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "fen": {
+            "description": "The position, as a complete FEN.",
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
+          },
+          "filters": {
+            "additionalProperties": false,
+            "properties": {
+              "band": {
+                "enum": [
+                  "0",
+                  "1000",
+                  "1200",
+                  "1400",
+                  "1600",
+                  "1800",
+                  "2000",
+                  "2200",
+                  "2500"
+                ],
+                "type": "string"
+              },
+              "color": {
+                "enum": [
+                  "white",
+                  "black"
+                ],
+                "type": "string"
+              },
+              "masters": {
+                "type": "boolean"
+              },
+              "minShare": {
+                "maximum": 100,
+                "minimum": 0,
+                "type": "integer"
+              },
+              "player": {
+                "maxLength": 30,
+                "type": "string"
+              },
+              "speed": {
+                "enum": [
+                  "ultraBullet",
+                  "bullet",
+                  "blitz",
+                  "rapid",
+                  "classical",
+                  "correspondence",
+                  "all"
+                ],
+                "type": "string"
+              }
+            },
+            "type": "object"
+          }
+        },
+        "required": [
+          "fen",
+          "filters"
+        ],
+        "type": "object"
+      },
+      "name": "appPractice",
+      "namespace": "chess",
+      "outputSchema": {
+        "description": "`views`: for each view the page shows, `{rows}` as the view returns them, or `{rows: [], error}` when the realm could not get them, or `{rows: [], skipped: \"time\"}` when there was no time left in the call. `status`: ChessStatus, which says why a column is empty.",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Searches the positions people have looked at again, deeper than a page can wait for, and keeps the answers, which later reads prefer. Runs every minute on its own.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {},
+        "type": "object"
+      },
+      "name": "deepen",
+      "namespace": "chess",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "deepened": {
+            "type": "integer"
+          },
+          "failed": {
+            "type": "integer"
+          },
+          "rounds": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "deepened",
+          "failed",
+          "rounds"
+        ],
+        "type": "object"
+      },
+      "schedule": "0 * * * * *"
+    },
+    {
       "description": "The plans in the position a game line reaches, told the line's deepest opening name — which a position looked up alone has lost once it is past the book.",
       "inputSchema": {},
+      "name": "explainLinePlans",
+      "namespace": "chess",
       "outputSchema": {
-        "type": "array",
         "items": {
-          "type": "object",
           "properties": {
-            "line": {
-              "type": "string"
-            },
-            "planId": {
+            "engineEvidence": {
               "type": "string"
             },
             "fen": {
               "type": "string"
             },
-            "side": {
-              "type": "string"
-            },
-            "priority": {
-              "type": "number"
-            },
-            "name": {
-              "type": "string"
-            },
             "idea": {
-              "type": "string"
-            },
-            "moves": {
               "type": "string"
             },
             "imbalances": {
               "type": "string"
             },
-            "engineEvidence": {
-              "type": "string"
-            },
-            "summary": {
-              "type": "string"
-            },
-            "structure": {
-              "type": "string"
-            },
             "level": {
+              "type": "string"
+            },
+            "line": {
+              "type": "string"
+            },
+            "model": {
+              "type": "string"
+            },
+            "moves": {
+              "type": "string"
+            },
+            "name": {
               "type": "string"
             },
             "opening": {
               "type": "string"
             },
-            "model": {
+            "planId": {
+              "type": "string"
+            },
+            "priority": {
+              "type": "number"
+            },
+            "side": {
+              "type": "string"
+            },
+            "structure": {
+              "type": "string"
+            },
+            "summary": {
               "type": "string"
             }
           },
@@ -173,60 +349,60 @@
             "level",
             "opening",
             "model"
-          ]
-        }
+          ],
+          "type": "object"
+        },
+        "type": "array"
       }
     },
     {
-      "namespace": "chess",
-      "name": "explainPlans",
       "description": "The plans for both sides in each position, decided by a model with the chess-plans skill from the position's imbalances, its opening-book name and the engine's candidate moves. The facts are computed; the judgement is the model's.",
       "inputSchema": {},
+      "name": "explainPlans",
+      "namespace": "chess",
       "outputSchema": {
-        "type": "array",
         "items": {
-          "type": "object",
           "properties": {
-            "planId": {
+            "engineEvidence": {
               "type": "string"
             },
             "fen": {
               "type": "string"
             },
-            "side": {
-              "type": "string"
-            },
-            "priority": {
-              "type": "number"
-            },
-            "name": {
-              "type": "string"
-            },
             "idea": {
-              "type": "string"
-            },
-            "moves": {
               "type": "string"
             },
             "imbalances": {
               "type": "string"
             },
-            "engineEvidence": {
-              "type": "string"
-            },
-            "summary": {
-              "type": "string"
-            },
-            "structure": {
-              "type": "string"
-            },
             "level": {
+              "type": "string"
+            },
+            "model": {
+              "type": "string"
+            },
+            "moves": {
+              "type": "string"
+            },
+            "name": {
               "type": "string"
             },
             "opening": {
               "type": "string"
             },
-            "model": {
+            "planId": {
+              "type": "string"
+            },
+            "priority": {
+              "type": "number"
+            },
+            "side": {
+              "type": "string"
+            },
+            "structure": {
+              "type": "string"
+            },
+            "summary": {
               "type": "string"
             }
           },
@@ -245,108 +421,89 @@
             "level",
             "opening",
             "model"
-          ]
-        }
+          ],
+          "type": "object"
+        },
+        "type": "array"
       }
     },
     {
+      "description": "Records which positions the background search has deepened, so the next search skips them until someone looks at them again. Runs every minute on its own.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {},
+        "type": "object"
+      },
+      "name": "markDeepened",
       "namespace": "chess",
-      "name": "mastersAtPosition",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "marked": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "marked"
+        ],
+        "type": "object"
+      },
+      "schedule": "30 * * * * *"
+    },
+    {
       "description": "What masters played from each position — every move with its game count and results — and the top master games through it. One request per position feeds both: the moves (MASTERS_PLAYED) and the games (MASTER_GAME). Needs the Lichess token.",
       "inputSchema": {
-        "type": "object",
         "properties": {
           "fens": {
-            "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "type": "array"
           }
         },
         "required": [
           "fens"
-        ]
+        ],
+        "type": "object"
       },
+      "name": "mastersAtPosition",
+      "namespace": "chess",
       "outputSchema": {
-        "type": "object",
         "properties": {
-          "moves": {
-            "type": "array",
+          "games": {
             "items": {
-              "type": "object",
               "properties": {
-                "moveId": {
+                "black": {
+                  "type": "string"
+                },
+                "blackElo": {
+                  "type": "number"
+                },
+                "color": {
                   "type": "string"
                 },
                 "fen": {
                   "type": "string"
                 },
-                "uci": {
+                "gameId": {
                   "type": "string"
                 },
-                "san": {
+                "month": {
                   "type": "string"
-                },
-                "games": {
-                  "type": "number"
-                },
-                "white": {
-                  "type": "number"
-                },
-                "draws": {
-                  "type": "number"
-                },
-                "black": {
-                  "type": "number"
-                },
-                "whiteWinPct": {
-                  "type": "number"
-                },
-                "drawPct": {
-                  "type": "number"
-                },
-                "blackWinPct": {
-                  "type": "number"
-                },
-                "scoreForMover": {
-                  "type": "number"
-                },
-                "averageRating": {
-                  "type": "number"
                 },
                 "player": {
                   "type": "string"
                 },
-                "color": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "moveId",
-                "fen",
-                "uci",
-                "san",
-                "games",
-                "white",
-                "draws",
-                "black",
-                "player",
-                "color"
-              ]
-            }
-          },
-          "games": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "gameId": {
+                "result": {
                   "type": "string"
                 },
-                "fen": {
+                "speed": {
                   "type": "string"
                 },
                 "uci": {
+                  "type": "string"
+                },
+                "url": {
                   "type": "string"
                 },
                 "white": {
@@ -355,32 +512,8 @@
                 "whiteElo": {
                   "type": "number"
                 },
-                "black": {
-                  "type": "string"
-                },
-                "blackElo": {
-                  "type": "number"
-                },
-                "result": {
-                  "type": "string"
-                },
                 "year": {
                   "type": "number"
-                },
-                "month": {
-                  "type": "string"
-                },
-                "speed": {
-                  "type": "string"
-                },
-                "url": {
-                  "type": "string"
-                },
-                "player": {
-                  "type": "string"
-                },
-                "color": {
-                  "type": "string"
                 }
               },
               "required": [
@@ -395,43 +528,109 @@
                 "url",
                 "player",
                 "color"
-              ]
-            }
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "moves": {
+            "items": {
+              "properties": {
+                "averageRating": {
+                  "type": "number"
+                },
+                "black": {
+                  "type": "number"
+                },
+                "blackWinPct": {
+                  "type": "number"
+                },
+                "color": {
+                  "type": "string"
+                },
+                "drawPct": {
+                  "type": "number"
+                },
+                "draws": {
+                  "type": "number"
+                },
+                "fen": {
+                  "type": "string"
+                },
+                "games": {
+                  "type": "number"
+                },
+                "moveId": {
+                  "type": "string"
+                },
+                "player": {
+                  "type": "string"
+                },
+                "san": {
+                  "type": "string"
+                },
+                "scoreForMover": {
+                  "type": "number"
+                },
+                "uci": {
+                  "type": "string"
+                },
+                "white": {
+                  "type": "number"
+                },
+                "whiteWinPct": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "moveId",
+                "fen",
+                "uci",
+                "san",
+                "games",
+                "white",
+                "draws",
+                "black",
+                "player",
+                "color"
+              ],
+              "type": "object"
+            },
+            "type": "array"
           }
         },
         "required": [
           "moves",
           "games"
-        ]
+        ],
+        "type": "object"
       }
     },
     {
-      "namespace": "chess",
-      "name": "openingLookup",
       "description": "The named opening each position is, from the Lichess opening book. A position the book does not name returns nothing.",
       "inputSchema": {
-        "type": "object",
         "properties": {
           "fens": {
-            "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "type": "array"
           }
         },
         "required": [
           "fens"
-        ]
+        ],
+        "type": "object"
       },
+      "name": "openingLookup",
+      "namespace": "chess",
       "outputSchema": {
-        "type": "array",
         "items": {
-          "type": "object",
           "properties": {
-            "fen": {
+            "eco": {
               "type": "string"
             },
-            "eco": {
+            "fen": {
               "type": "string"
             },
             "name": {
@@ -446,53 +645,53 @@
             "eco",
             "name",
             "pgn"
-          ]
-        }
+          ],
+          "type": "object"
+        },
+        "type": "array"
       }
     },
     {
-      "namespace": "chess",
-      "name": "openingOfGameLine",
       "description": "The deepest named opening along each game line (SAN from the start): the name a game keeps after it leaves the book. A line the book never names returns nothing.",
       "inputSchema": {
-        "type": "object",
         "properties": {
           "lines": {
-            "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "type": "array"
           }
         },
         "required": [
           "lines"
-        ]
+        ],
+        "type": "object"
       },
+      "name": "openingOfGameLine",
+      "namespace": "chess",
       "outputSchema": {
-        "type": "array",
         "items": {
-          "type": "object",
           "properties": {
-            "line": {
+            "eco": {
               "type": "string"
-            },
-            "namedAtPly": {
-              "type": "number"
-            },
-            "pliesPast": {
-              "type": "number"
             },
             "fen": {
               "type": "string"
             },
-            "eco": {
+            "line": {
               "type": "string"
             },
             "name": {
               "type": "string"
             },
+            "namedAtPly": {
+              "type": "number"
+            },
             "pgn": {
               "type": "string"
+            },
+            "pliesPast": {
+              "type": "number"
             }
           },
           "required": [
@@ -503,22 +702,21 @@
             "eco",
             "name",
             "pgn"
-          ]
-        }
+          ],
+          "type": "object"
+        },
+        "type": "array"
       }
     },
     {
-      "namespace": "chess",
-      "name": "playerAtPosition",
       "description": "What one Lichess player played from each position, as one colour — every move with its results — and their recent games through it (PLAYER_PLAYED, PLAYER_GAME). Covers the player's whole Lichess history in one request. Needs the Lichess token.",
       "inputSchema": {
-        "type": "object",
         "properties": {
           "fens": {
-            "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "type": "array"
           },
           "filters": {
             "type": "string"
@@ -526,88 +724,47 @@
         },
         "required": [
           "fens"
-        ]
+        ],
+        "type": "object"
       },
+      "name": "playerAtPosition",
+      "namespace": "chess",
       "outputSchema": {
-        "type": "object",
         "properties": {
-          "moves": {
-            "type": "array",
+          "games": {
             "items": {
-              "type": "object",
               "properties": {
-                "moveId": {
+                "black": {
+                  "type": "string"
+                },
+                "blackElo": {
+                  "type": "number"
+                },
+                "color": {
                   "type": "string"
                 },
                 "fen": {
                   "type": "string"
                 },
-                "uci": {
+                "gameId": {
                   "type": "string"
                 },
-                "san": {
+                "month": {
                   "type": "string"
-                },
-                "games": {
-                  "type": "number"
-                },
-                "white": {
-                  "type": "number"
-                },
-                "draws": {
-                  "type": "number"
-                },
-                "black": {
-                  "type": "number"
-                },
-                "whiteWinPct": {
-                  "type": "number"
-                },
-                "drawPct": {
-                  "type": "number"
-                },
-                "blackWinPct": {
-                  "type": "number"
-                },
-                "scoreForMover": {
-                  "type": "number"
-                },
-                "averageRating": {
-                  "type": "number"
                 },
                 "player": {
                   "type": "string"
                 },
-                "color": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "moveId",
-                "fen",
-                "uci",
-                "san",
-                "games",
-                "white",
-                "draws",
-                "black",
-                "player",
-                "color"
-              ]
-            }
-          },
-          "games": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "gameId": {
+                "result": {
                   "type": "string"
                 },
-                "fen": {
+                "speed": {
                   "type": "string"
                 },
                 "uci": {
+                  "type": "string"
+                },
+                "url": {
                   "type": "string"
                 },
                 "white": {
@@ -616,32 +773,8 @@
                 "whiteElo": {
                   "type": "number"
                 },
-                "black": {
-                  "type": "string"
-                },
-                "blackElo": {
-                  "type": "number"
-                },
-                "result": {
-                  "type": "string"
-                },
                 "year": {
                   "type": "number"
-                },
-                "month": {
-                  "type": "string"
-                },
-                "speed": {
-                  "type": "string"
-                },
-                "url": {
-                  "type": "string"
-                },
-                "player": {
-                  "type": "string"
-                },
-                "color": {
-                  "type": "string"
                 }
               },
               "required": [
@@ -656,88 +789,154 @@
                 "url",
                 "player",
                 "color"
-              ]
-            }
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "moves": {
+            "items": {
+              "properties": {
+                "averageRating": {
+                  "type": "number"
+                },
+                "black": {
+                  "type": "number"
+                },
+                "blackWinPct": {
+                  "type": "number"
+                },
+                "color": {
+                  "type": "string"
+                },
+                "drawPct": {
+                  "type": "number"
+                },
+                "draws": {
+                  "type": "number"
+                },
+                "fen": {
+                  "type": "string"
+                },
+                "games": {
+                  "type": "number"
+                },
+                "moveId": {
+                  "type": "string"
+                },
+                "player": {
+                  "type": "string"
+                },
+                "san": {
+                  "type": "string"
+                },
+                "scoreForMover": {
+                  "type": "number"
+                },
+                "uci": {
+                  "type": "string"
+                },
+                "white": {
+                  "type": "number"
+                },
+                "whiteWinPct": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "moveId",
+                "fen",
+                "uci",
+                "san",
+                "games",
+                "white",
+                "draws",
+                "black",
+                "player",
+                "color"
+              ],
+              "type": "object"
+            },
+            "type": "array"
           }
         },
         "required": [
           "moves",
           "games"
-        ]
+        ],
+        "type": "object"
       }
     },
     {
-      "namespace": "chess",
-      "name": "positionImbalances",
       "description": "Jeremy Silman's imbalances for each position: material, minor pieces, pawn structure, space, files, key squares, development and king safety.",
       "inputSchema": {
-        "type": "object",
         "properties": {
           "fens": {
-            "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "type": "array"
           }
         },
         "required": [
           "fens"
-        ]
+        ],
+        "type": "object"
       },
+      "name": "positionImbalances",
+      "namespace": "chess",
       "outputSchema": {
-        "type": "array",
         "items": {
-          "type": "object",
           "properties": {
-            "fen": {
-              "type": "string"
+            "bishopPairBlack": {
+              "type": "boolean"
             },
-            "sideToMove": {
-              "type": "string"
+            "bishopPairWhite": {
+              "type": "boolean"
             },
-            "phase": {
+            "detail": {
               "type": "string"
             },
             "facts": {
               "type": "string"
             },
-            "structure": {
+            "fen": {
               "type": "string"
             },
-            "materialWhite": {
-              "type": "number"
-            },
-            "materialBlack": {
-              "type": "number"
-            },
-            "bishopPairWhite": {
-              "type": "boolean"
-            },
-            "bishopPairBlack": {
+            "isolatedQueenPawnBlack": {
               "type": "boolean"
             },
             "isolatedQueenPawnWhite": {
               "type": "boolean"
             },
-            "isolatedQueenPawnBlack": {
-              "type": "boolean"
+            "materialBlack": {
+              "type": "number"
             },
-            "passedWhite": {
-              "type": "string"
-            },
-            "passedBlack": {
-              "type": "string"
+            "materialWhite": {
+              "type": "number"
             },
             "openFiles": {
               "type": "string"
             },
-            "oppositeSideCastling": {
-              "type": "boolean"
-            },
             "oppositeColouredBishops": {
               "type": "boolean"
             },
-            "detail": {
+            "oppositeSideCastling": {
+              "type": "boolean"
+            },
+            "passedBlack": {
+              "type": "string"
+            },
+            "passedWhite": {
+              "type": "string"
+            },
+            "phase": {
+              "type": "string"
+            },
+            "sideToMove": {
+              "type": "string"
+            },
+            "structure": {
               "type": "string"
             }
           },
@@ -759,22 +958,21 @@
             "oppositeSideCastling",
             "oppositeColouredBishops",
             "detail"
-          ]
-        }
+          ],
+          "type": "object"
+        },
+        "type": "array"
       }
     },
     {
-      "namespace": "chess",
-      "name": "ratedMoves",
       "description": "How often each move is played from a position by rating band and time control on Lichess, and how it scores.",
       "inputSchema": {
-        "type": "object",
         "properties": {
           "fens": {
-            "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "type": "array"
           },
           "filters": {
             "type": "string"
@@ -782,53 +980,54 @@
         },
         "required": [
           "fens"
-        ]
+        ],
+        "type": "object"
       },
+      "name": "ratedMoves",
+      "namespace": "chess",
       "outputSchema": {
-        "type": "array",
         "items": {
-          "type": "object",
           "properties": {
-            "rowId": {
-              "type": "string"
-            },
-            "fen": {
-              "type": "string"
-            },
             "band": {
               "type": "string"
+            },
+            "bandGames": {
+              "type": "number"
             },
             "bandLabel": {
               "type": "string"
             },
-            "speed": {
-              "type": "string"
-            },
-            "san": {
-              "type": "string"
-            },
-            "uci": {
-              "type": "string"
-            },
-            "games": {
-              "type": "number"
-            },
-            "share": {
-              "type": "number"
-            },
-            "whiteWinPct": {
+            "blackWinPct": {
               "type": "number"
             },
             "drawPct": {
               "type": "number"
             },
-            "blackWinPct": {
+            "fen": {
+              "type": "string"
+            },
+            "games": {
               "type": "number"
+            },
+            "rowId": {
+              "type": "string"
+            },
+            "san": {
+              "type": "string"
             },
             "scoreForMover": {
               "type": "number"
             },
-            "bandGames": {
+            "share": {
+              "type": "number"
+            },
+            "speed": {
+              "type": "string"
+            },
+            "uci": {
+              "type": "string"
+            },
+            "whiteWinPct": {
               "type": "number"
             }
           },
@@ -842,40 +1041,530 @@
             "uci",
             "games",
             "bandGames"
-          ]
-        }
+          ],
+          "type": "object"
+        },
+        "type": "array"
       }
     },
     {
-      "namespace": "chess",
-      "name": "theoryOfGameLine",
-      "description": "What opening theory says along each game line: the deepest page of the Chess Opening Theory wikibook the line reaches.",
+      "description": "The engine's best lines in each position the host names, as CandidateMove rows carrying the analysis they came from. Pages when there are more new positions than one dispatch can search.",
       "inputSchema": {
-        "type": "object",
+        "additionalProperties": false,
         "properties": {
-          "lines": {
-            "type": "array",
+          "cursor": {
+            "description": "This realm's own next cursor, resent by the host.",
+            "maxLength": 8,
+            "type": "string"
+          },
+          "fens": {
+            "description": "The Position FENs the host is fetching for.",
             "items": {
+              "maxLength": 2048,
+              "minLength": 1,
               "type": "string"
-            }
+            },
+            "maxItems": 256,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "fens"
+        ],
+        "type": "object"
+      },
+      "name": "rowsCandidates",
+      "namespace": "chess",
+      "outputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "description": "Silman's imbalances of each position the host names, as PositionImbalances rows.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "fens": {
+            "description": "The Position FENs the host is fetching for.",
+            "items": {
+              "maxLength": 2048,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 256,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "fens"
+        ],
+        "type": "object"
+      },
+      "name": "rowsImbalances",
+      "namespace": "chess",
+      "outputSchema": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "description": "The plans in the position each game line reaches, told the line's opening name and theory, as Plan rows. One line a page.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "cursor": {
+            "description": "This realm's own next cursor, resent by the host.",
+            "maxLength": 8,
+            "type": "string"
+          },
+          "level": {
+            "description": "The reader's levels the query pinned: beginner, intermediate or expert.",
+            "items": {
+              "maxLength": 64,
+              "type": "string"
+            },
+            "maxItems": 64,
+            "type": "array"
+          },
+          "lines": {
+            "description": "The GameLine move lists the host is fetching for: SAN from the start, space-separated.",
+            "items": {
+              "maxLength": 2048,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 256,
+            "minItems": 1,
+            "type": "array"
           }
         },
         "required": [
           "lines"
-        ]
+        ],
+        "type": "object"
       },
+      "name": "rowsLinePlans",
+      "namespace": "chess",
       "outputSchema": {
-        "type": "array",
+        "type": "object"
+      }
+    },
+    {
+      "description": "The top master games through each position the host names, as MasterGame rows. Shares one kept Lichess answer with rowsMasterMoves.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "cursor": {
+            "description": "This realm's own next cursor, resent by the host.",
+            "maxLength": 8,
+            "type": "string"
+          },
+          "fens": {
+            "description": "The Position FENs the host is fetching for.",
+            "items": {
+              "maxLength": 2048,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 256,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "fens"
+        ],
+        "type": "object"
+      },
+      "name": "rowsMasterGames",
+      "namespace": "chess",
+      "outputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "description": "What masters played from each position the host names, as MasterMove rows. Shares one kept Lichess answer with rowsMasterGames.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "cursor": {
+            "description": "This realm's own next cursor, resent by the host.",
+            "maxLength": 8,
+            "type": "string"
+          },
+          "fens": {
+            "description": "The Position FENs the host is fetching for.",
+            "items": {
+              "maxLength": 2048,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 256,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "fens"
+        ],
+        "type": "object"
+      },
+      "name": "rowsMasterMoves",
+      "namespace": "chess",
+      "outputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "description": "The deepest book name along each game line the host names, as Opening rows.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "lines": {
+            "description": "The GameLine move lists the host is fetching for: SAN from the start, space-separated.",
+            "items": {
+              "maxLength": 2048,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 256,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "lines"
+        ],
+        "type": "object"
+      },
+      "name": "rowsOpeningOfLine",
+      "namespace": "chess",
+      "outputSchema": {
         "items": {
-          "type": "object",
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "description": "The book's name for each position the host names, as Opening rows. A position the book does not name has none.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "fens": {
+            "description": "The Position FENs the host is fetching for.",
+            "items": {
+              "maxLength": 2048,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 256,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "fens"
+        ],
+        "type": "object"
+      },
+      "name": "rowsOpeningOfPosition",
+      "namespace": "chess",
+      "outputSchema": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "description": "The pinned Lichess players' recent games through each position, in the pinned colours (White when none is pinned), as PlayerGame rows.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "color": {
+            "description": "The colours the query pinned: white or black.",
+            "items": {
+              "maxLength": 64,
+              "type": "string"
+            },
+            "maxItems": 64,
+            "type": "array"
+          },
+          "cursor": {
+            "description": "This realm's own next cursor, resent by the host.",
+            "maxLength": 8,
+            "type": "string"
+          },
+          "fens": {
+            "description": "The Position FENs the host is fetching for.",
+            "items": {
+              "maxLength": 2048,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 256,
+            "minItems": 1,
+            "type": "array"
+          },
+          "player": {
+            "description": "The Lichess usernames the query pinned.",
+            "items": {
+              "maxLength": 64,
+              "type": "string"
+            },
+            "maxItems": 64,
+            "type": "array"
+          }
+        },
+        "required": [
+          "fens"
+        ],
+        "type": "object"
+      },
+      "name": "rowsPlayerGames",
+      "namespace": "chess",
+      "outputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "description": "What the pinned Lichess players played from each position, in the pinned colours (White when none is pinned), as PlayerMove rows.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "color": {
+            "description": "The colours the query pinned: white or black.",
+            "items": {
+              "maxLength": 64,
+              "type": "string"
+            },
+            "maxItems": 64,
+            "type": "array"
+          },
+          "cursor": {
+            "description": "This realm's own next cursor, resent by the host.",
+            "maxLength": 8,
+            "type": "string"
+          },
+          "fens": {
+            "description": "The Position FENs the host is fetching for.",
+            "items": {
+              "maxLength": 2048,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 256,
+            "minItems": 1,
+            "type": "array"
+          },
+          "player": {
+            "description": "The Lichess usernames the query pinned.",
+            "items": {
+              "maxLength": 64,
+              "type": "string"
+            },
+            "maxItems": 64,
+            "type": "array"
+          }
+        },
+        "required": [
+          "fens"
+        ],
+        "type": "object"
+      },
+      "name": "rowsPlayerMoves",
+      "namespace": "chess",
+      "outputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "description": "The plans for both sides in each position the host names, as Plan rows carrying the analysis they were made from. One position a page.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "cursor": {
+            "description": "This realm's own next cursor, resent by the host.",
+            "maxLength": 8,
+            "type": "string"
+          },
+          "fens": {
+            "description": "The Position FENs the host is fetching for.",
+            "items": {
+              "maxLength": 2048,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 256,
+            "minItems": 1,
+            "type": "array"
+          },
+          "level": {
+            "description": "The reader's levels the query pinned: beginner, intermediate or expert.",
+            "items": {
+              "maxLength": 64,
+              "type": "string"
+            },
+            "maxItems": 64,
+            "type": "array"
+          }
+        },
+        "required": [
+          "fens"
+        ],
+        "type": "object"
+      },
+      "name": "rowsPositionPlans",
+      "namespace": "chess",
+      "outputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "description": "How often each move is played from each position by rating band and time control on Lichess, one request per band and time control, as RatedMove rows.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "band": {
+            "description": "The rating band floors the query pinned: 0, 1000, 1200, 1400, 1600, 1800, 2000, 2200 or 2500.",
+            "items": {
+              "maxLength": 64,
+              "type": "string"
+            },
+            "maxItems": 64,
+            "type": "array"
+          },
+          "cursor": {
+            "description": "This realm's own next cursor, resent by the host.",
+            "maxLength": 8,
+            "type": "string"
+          },
+          "fens": {
+            "description": "The Position FENs the host is fetching for.",
+            "items": {
+              "maxLength": 2048,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 256,
+            "minItems": 1,
+            "type": "array"
+          },
+          "speed": {
+            "description": "The time controls the query pinned, or all.",
+            "items": {
+              "maxLength": 64,
+              "type": "string"
+            },
+            "maxItems": 64,
+            "type": "array"
+          }
+        },
+        "required": [
+          "fens"
+        ],
+        "type": "object"
+      },
+      "name": "rowsRatedMoves",
+      "namespace": "chess",
+      "outputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "description": "What the Chess Opening Theory wikibook says along each game line the host names, as OpeningTheory rows: the deepest page the line reaches, as an attributed excerpt with its link.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "cursor": {
+            "description": "This realm's own next cursor, resent by the host.",
+            "maxLength": 8,
+            "type": "string"
+          },
+          "lines": {
+            "description": "The GameLine move lists the host is fetching for: SAN from the start, space-separated.",
+            "items": {
+              "maxLength": 2048,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 256,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "lines"
+        ],
+        "type": "object"
+      },
+      "name": "rowsTheory",
+      "namespace": "chess",
+      "outputSchema": {
+        "type": "object"
+      }
+    },
+    {
+      "description": "What the realm could not do, as the guest last recorded it: whether Lichess and the model answered, the last refusal code and when.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "username": {
+            "description": "The AssistantUser usernames the host is fetching for.",
+            "items": {
+              "maxLength": 2048,
+              "minLength": 1,
+              "type": "string"
+            },
+            "maxItems": 256,
+            "minItems": 1,
+            "type": "array"
+          }
+        },
+        "required": [
+          "username"
+        ],
+        "type": "object"
+      },
+      "name": "status",
+      "namespace": "chess",
+      "outputSchema": {
+        "items": {
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "description": "What opening theory says along each game line: the deepest page of the Chess Opening Theory wikibook the line reaches.",
+      "inputSchema": {
+        "properties": {
+          "lines": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "lines"
+        ],
+        "type": "object"
+      },
+      "name": "theoryOfGameLine",
+      "namespace": "chess",
+      "outputSchema": {
+        "items": {
           "properties": {
+            "licence": {
+              "type": "string"
+            },
             "line": {
-              "type": "string"
-            },
-            "title": {
-              "type": "string"
-            },
-            "url": {
               "type": "string"
             },
             "pliesCovered": {
@@ -887,7 +1576,10 @@
             "theory": {
               "type": "string"
             },
-            "licence": {
+            "title": {
+              "type": "string"
+            },
+            "url": {
               "type": "string"
             }
           },
@@ -899,9 +1591,13 @@
             "pliesPast",
             "theory",
             "licence"
-          ]
-        }
+          ],
+          "type": "object"
+        },
+        "type": "array"
       }
     }
-  ]
+  ],
+  "generatedAt": "1970-01-01T00:00:00Z",
+  "version": 1
 }

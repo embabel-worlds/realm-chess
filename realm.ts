@@ -1,0 +1,133 @@
+import { defineRealm } from "@embabel/realm-types";
+import { handlers } from "./realm/handlers/index.ts";
+import { producers } from "./realm/producers.ts";
+import { types } from "./realm/types.ts";
+import { views } from "./realm/views.ts";
+import { ENGINE_MODULE } from "./wasm/lib/config.ts";
+
+/**
+ * Chess, as a captured realm: the handlers run as Wasm inside the appliance, the engine is the
+ * stockfish registry module, and what the realm computes is kept in its own SQLite.
+ *
+ * `npm run synth` writes realm.yml, credentials.yml, apis/apis.yml, producers/, types/, views/,
+ * dependencies/ and dist/manifest.json from this file. Edit this file, never those.
+ */
+export default defineRealm({
+  name: "chess",
+  host: "wasm",
+  execution: "captured",
+  version: "0.5.0",
+  maturity: "experimental",
+  description: `A chessboard, a strong engine, and the plans a position calls for.
+
+Stockfish 19, compiled to WebAssembly and running in the appliance's own sandbox, gives the best
+lines, each saying how deep it searched. The position's imbalances, in Jeremy Silman's sense, are
+computed from the board: material, the minor pieces, pawn structure, space, files, outposts,
+development, king safety. The Lichess opening book names it, along the game's moves, so a line
+keeps its name long after it leaves the book.
+
+Everything is a Virtual Cypher hop from a pinned Position (HAS_IMBALANCES, IN_OPENING,
+HAS_CANDIDATE) or GameLine (IN_OPENING), so the analysis is a query and a REST call, not only a
+page. The engine is GPL-3.0, and so is this realm.`,
+  url: "https://github.com/embabel-worlds/realm-chess",
+  author: "Rod Johnson",
+  tags: ["chess", "games", "engine", "virtual-cypher", "apps", "skills"],
+  capabilities: ["model"],
+  skills: ["chess-plans"],
+  exports: [
+    "chess",
+    "lichess",
+    "Position",
+    "GameLine",
+    "PositionImbalances",
+    "Opening",
+    "CandidateMove",
+    "Plan",
+    "OpeningTheory",
+    "MasterMove",
+    "MasterGame",
+    "PlayerMove",
+    "PlayerGame",
+    "RatedMove",
+    "BestMoves",
+    "ImbalancesOf",
+    "OpeningOf",
+    "PlansInPosition",
+    "OpeningOfLine",
+    "PlansInLine",
+    "TheoryOfLine",
+    "MastersAtPosition",
+    "MasterGamesAtPosition",
+    "PlayerAtPosition",
+    "PlayerGamesAtPosition",
+    "MovesByRating",
+    "MovesByTimeControl",
+    "ChessStatus",
+  ],
+
+  handlers,
+
+  apps: {
+    "chesscalator.html": {
+      handlers: ["chess.appPosition", "chess.appPractice", "chess.appPlans"],
+      resources: [
+        "apps/chesscalator.html.assets/board.css",
+        "apps/chesscalator.html.assets/chesscalator.css",
+        "apps/chesscalator.html.assets/board.js",
+      ],
+    },
+  },
+
+  types,
+
+  producers,
+
+  views,
+
+  credentials: {
+    lichess: {
+      kind: "bearer",
+      provider: "Lichess",
+      docs: "https://lichess.org/account/oauth/token",
+      description: "A Lichess personal API token, no scopes needed: master games and a player's own games by position.",
+    },
+  },
+
+  apis: {
+    lichess: {
+      url: "lichess.yml",
+      type: "openapi",
+      name: "lichess",
+      auth: "bearer",
+      credential: "lichess",
+      operationIds: ["mastersExplorer", "lichessExplorer", "playerExplorer"],
+      // playerExplorer streams NDJSON. The host reads an undeclared reply as JSON, so it is declared.
+      operations: { playerExplorer: { response: "ndjson" } },
+    },
+    wikibooks: {
+      url: "wikibooks.yml",
+      type: "openapi",
+      name: "wikibooks",
+      // The wikibook is public: the host calls it with no credential, once the owner approves the API.
+      auth: "none",
+      operationIds: ["wikibooksQuery"],
+    },
+  },
+
+  dependencies: {
+    /** The realm's own SQLite: the opening book and every result it keeps. Tables in db/schema.sql. */
+    db: {
+      module: "sqlite3-wasi",
+      version: "3.53",
+      sha256: "9a5542e25e42fbbb48501bae0ab4295cdf0fd0f41219ec3b6c891c4a282e7779",
+      persistent: true,
+      init: "db/schema.sql",
+      migrations: ["db/0001-openings.sql", "db/0002-skeletons.sql", "db/0003-status.sql", "db/0004-lichess.sql", "db/0005-app.sql", "db/0006-deepen.sql", "db/0007-deepen-slots.sql", "db/0008-deep-failures.sql", "db/0009-requeue-deepen.sql"],
+    },
+    /** Stockfish 19 lite from the registry. How long it searches is in wasm/lib/config.ts. */
+    engine: {
+      ...ENGINE_MODULE,
+      methods: { analyse: { args: ["string", "i32", "i32", "i32"], returns: "string" } },
+    },
+  },
+});

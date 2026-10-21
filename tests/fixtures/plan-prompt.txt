@@ -1,0 +1,52 @@
+Use the chess-plans skill. Read it before answering.
+
+Position (FEN): rn1qkb1r/1p3ppp/p2pbn2/4p3/4P3/1NN1BP2/PPP3PP/R2QKB1R b KQkq - 0 8
+Black to move.
+Opening: B90 Sicilian Defense: Najdorf Variation, English Attack (1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Be3 e5 7. Nb3 Be6 8. f3)
+Pawn structure: The pawn structure is the one reached in: Sicilian Defense: Najdorf Variation, English Attack (B90).
+
+Imbalances (computed from the board, numbered):
+[1] Material: the sides are level.
+[2] Minor pieces: White's dark-squared bishop on e3 is good: 2 of 7 white pawns stand on its colour.
+[3] Minor pieces: White's light-squared bishop on f1 is bad: 5 of 7 white pawns stand on its colour.
+[4] Pawn structure: Black has a backward pawn on d6.
+[5] Files: the d-file is half-open for White.
+[6] Key squares: White has outpost square on d5 (guarded by a pawn, beyond the reach of enemy pawns).
+[7] Files: the c-file is half-open for Black.
+[8] Development: White still has Bf1 undeveloped.
+[9] King safety: White's king is still in the centre, on e1.
+[10] Development: Black still has Nb8 and Bf8 undeveloped.
+[11] King safety: Black's king is still in the centre, on e8.
+[12] Piece activity: White has the freer pieces: 47 legal moves against 35.
+
+The engine's candidate moves for the side to move (Stockfish, within 50 centipawns of best):
+- Ra7 (-0.40 from White's side; the engine's best; depth 18)
+  line: Ra7 Nd5 g6 Bd2 Ng4 Be2 Qb6 Na5
+  creates: Tactics: Black can mate at once with Qf2#. | Tactics: White's pawn on b2 is attacked and not defended. | Tactics: Black's queen on b6 is attacked and not defended. | Tactics: Black's knight on g4 is attacked by a pawn. | Minor pieces: Black's dark-squared bishop on f8 is good: 2 of 7 black pawns stand on its colour. | Minor pieces: Black's light-squared bishop on e6 is bad: 5 of 7 black pawns stand on its colour. | Key squares: White's knight on d5 stands on an outpost no pawn can challenge.
+  removes: Key squares: White has outpost square on d5 (guarded by a pawn, beyond the reach of enemy pawns).
+- Nbd7 (-0.25 from White's side; 15 centipawns worse than best; depth 18)
+  line: Nbd7 Nd5 Nc5 f4 Nh5 Qxh5 Qc7 Bc4
+  creates: Tactics: White's pawn on e4 is attacked and not defended. | Tactics: Black's queen on c7 is attacked and not defended. | Material: White is 2 points up once Black recaptures on e4 — an exchange is under way. | Key squares: White's knight on d5 stands on an outpost no pawn can challenge.
+  removes: Material: the sides are level. | Minor pieces: White's dark-squared bishop on e3 is good: 2 of 7 white pawns stand on its colour. | Minor pieces: White's light-squared bishop on f1 is bad: 5 of 7 white pawns stand on its colour. | Key squares: White has outpost square on d5 (guarded by a pawn, beyond the reach of enemy pawns).
+- Nc6 (-0.10 from White's side; 30 centipawns worse than best; depth 18)
+  line: Nc6 Nd5 b5 Bd2 Bh3 Be2 Qc7 Na5
+  creates: Tactics: White's pawn on g2 is attacked and not defended. | Tactics: Black's queen on c7 is attacked and not defended. | Tactics: Black's bishop on h3 is attacked and not defended. | Key squares: White's knight on d5 stands on an outpost no pawn can challenge.
+  removes: Key squares: White has outpost square on d5 (guarded by a pawn, beyond the reach of enemy pawns).
+- Qe7 (0.05 from White's side; 45 centipawns worse than best; depth 18)
+  line: Qe7 Nd5 h5 Bd2 h4 Be2 Qd8 Nb4
+
+First decide which row of the skill's structure table (section 4) this position is, from the
+pawn structure and imbalances above — or "none" — and let that row's plans lead unless the
+engine's moves show they do not work here.
+Write for an INTERMEDIATE player: plans from the imbalances, the structure named and its known plans, the engine's moves tied to the plans, what each plan concedes. Tactics that are there come first. Explain an uncommon term once, briefly. (Section 8 of the skill says more.)
+Name the plans for BOTH sides — up to 3 each, most important first — as the skill describes.
+Ground every plan in the numbered imbalances and, for the side to move, in the candidate moves.
+Cite imbalances by number, in the "imbalances" field ONLY — never write the numbers in the
+summary or the ideas; a reader does not see the list. Do not state any imbalance that is not in
+the numbered list: if a file, pawn weakness or outpost is not listed, it is not there.
+Reply with ONLY this JSON, no prose outside it:
+{"structure": "<the matching row's name exactly as the first column of the skill's structure table gives it, e.g. Carlsbad (QGD Exchange) — or none>",
+ "summary": "<3-6 sentences: who stands better and why, and how the two sides' plans meet>",
+ "plans": [{"side": "white|black", "priority": 1, "name": "<short name>", "idea": "<2-4 sentences>",
+            "moves": ["<key moves in SAN>"], "imbalances": [<numbers of the imbalances it uses>],
+            "engineEvidence": "<which candidate moves carry it, or 'none of the engine's top moves'>"}]}

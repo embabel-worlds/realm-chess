@@ -1,0 +1,1507 @@
+{
+  "handlers": [
+    {
+      "description": "The engine's best lines in each position, strongest first, each with what it changes about the position's imbalances. A position with no legal moves returns nothing: there is nothing to recommend in a checkmate or a stalemate, and the FEN says which.",
+      "inputSchema": {
+        "properties": {
+          "depth": {
+            "type": "number"
+          },
+          "fens": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "multiPv": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "fens"
+        ],
+        "type": "object"
+      },
+      "name": "analysePosition",
+      "namespace": "chess",
+      "outputSchema": {
+        "items": {
+          "properties": {
+            "candidateId": {
+              "type": "string"
+            },
+            "creates": {
+              "type": "string"
+            },
+            "depth": {
+              "type": "number"
+            },
+            "elapsedMs": {
+              "type": "number"
+            },
+            "engine": {
+              "type": "string"
+            },
+            "fen": {
+              "type": "string"
+            },
+            "lossCp": {
+              "type": "number"
+            },
+            "mate": {
+              "type": "number"
+            },
+            "pvSan": {
+              "type": "string"
+            },
+            "pvUci": {
+              "type": "string"
+            },
+            "rank": {
+              "type": "number"
+            },
+            "removes": {
+              "type": "string"
+            },
+            "san": {
+              "type": "string"
+            },
+            "scoreCp": {
+              "type": "number"
+            },
+            "side": {
+              "type": "string"
+            },
+            "uci": {
+              "type": "string"
+            },
+            "whiteCp": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "candidateId",
+            "fen",
+            "rank",
+            "uci",
+            "san",
+            "side",
+            "depth",
+            "pvSan",
+            "pvUci",
+            "creates",
+            "removes",
+            "engine",
+            "elapsedMs"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "description": "The plans in the position a game line reaches, told the line's deepest opening name — which a position looked up alone has lost once it is past the book.",
+      "inputSchema": {},
+      "name": "explainLinePlans",
+      "namespace": "chess",
+      "outputSchema": {
+        "items": {
+          "properties": {
+            "engineEvidence": {
+              "type": "string"
+            },
+            "fen": {
+              "type": "string"
+            },
+            "idea": {
+              "type": "string"
+            },
+            "imbalances": {
+              "type": "string"
+            },
+            "level": {
+              "type": "string"
+            },
+            "line": {
+              "type": "string"
+            },
+            "model": {
+              "type": "string"
+            },
+            "moves": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "opening": {
+              "type": "string"
+            },
+            "planId": {
+              "type": "string"
+            },
+            "priority": {
+              "type": "number"
+            },
+            "side": {
+              "type": "string"
+            },
+            "structure": {
+              "type": "string"
+            },
+            "summary": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "line",
+            "planId",
+            "fen",
+            "side",
+            "priority",
+            "name",
+            "idea",
+            "moves",
+            "imbalances",
+            "engineEvidence",
+            "summary",
+            "structure",
+            "level",
+            "opening",
+            "model"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "description": "The plans for both sides in each position, decided by a model with the chess-plans skill from the position's imbalances, its opening-book name and the engine's candidate moves. The facts are computed; the judgement is the model's.",
+      "inputSchema": {},
+      "name": "explainPlans",
+      "namespace": "chess",
+      "outputSchema": {
+        "items": {
+          "properties": {
+            "engineEvidence": {
+              "type": "string"
+            },
+            "fen": {
+              "type": "string"
+            },
+            "idea": {
+              "type": "string"
+            },
+            "imbalances": {
+              "type": "string"
+            },
+            "level": {
+              "type": "string"
+            },
+            "model": {
+              "type": "string"
+            },
+            "moves": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "opening": {
+              "type": "string"
+            },
+            "planId": {
+              "type": "string"
+            },
+            "priority": {
+              "type": "number"
+            },
+            "side": {
+              "type": "string"
+            },
+            "structure": {
+              "type": "string"
+            },
+            "summary": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "planId",
+            "fen",
+            "side",
+            "priority",
+            "name",
+            "idea",
+            "moves",
+            "imbalances",
+            "engineEvidence",
+            "summary",
+            "structure",
+            "level",
+            "opening",
+            "model"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "description": "What masters played from each position — every move with its game count and results — and the top master games through it. One request per position feeds both: the moves (MASTERS_PLAYED) and the games (MASTER_GAME). Needs the Lichess token.",
+      "inputSchema": {
+        "properties": {
+          "fens": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "fens"
+        ],
+        "type": "object"
+      },
+      "name": "mastersAtPosition",
+      "namespace": "chess",
+      "outputSchema": {
+        "properties": {
+          "games": {
+            "items": {
+              "properties": {
+                "black": {
+                  "type": "string"
+                },
+                "blackElo": {
+                  "type": "number"
+                },
+                "color": {
+                  "type": "string"
+                },
+                "fen": {
+                  "type": "string"
+                },
+                "gameId": {
+                  "type": "string"
+                },
+                "month": {
+                  "type": "string"
+                },
+                "player": {
+                  "type": "string"
+                },
+                "result": {
+                  "type": "string"
+                },
+                "speed": {
+                  "type": "string"
+                },
+                "uci": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "white": {
+                  "type": "string"
+                },
+                "whiteElo": {
+                  "type": "number"
+                },
+                "year": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "gameId",
+                "fen",
+                "uci",
+                "white",
+                "black",
+                "result",
+                "month",
+                "speed",
+                "url",
+                "player",
+                "color"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "moves": {
+            "items": {
+              "properties": {
+                "averageRating": {
+                  "type": "number"
+                },
+                "black": {
+                  "type": "number"
+                },
+                "blackWinPct": {
+                  "type": "number"
+                },
+                "color": {
+                  "type": "string"
+                },
+                "drawPct": {
+                  "type": "number"
+                },
+                "draws": {
+                  "type": "number"
+                },
+                "fen": {
+                  "type": "string"
+                },
+                "games": {
+                  "type": "number"
+                },
+                "moveId": {
+                  "type": "string"
+                },
+                "player": {
+                  "type": "string"
+                },
+                "san": {
+                  "type": "string"
+                },
+                "scoreForMover": {
+                  "type": "number"
+                },
+                "uci": {
+                  "type": "string"
+                },
+                "white": {
+                  "type": "number"
+                },
+                "whiteWinPct": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "moveId",
+                "fen",
+                "uci",
+                "san",
+                "games",
+                "white",
+                "draws",
+                "black",
+                "player",
+                "color"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "moves",
+          "games"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "description": "The named opening each position is, from the Lichess opening book. A position the book does not name returns nothing.",
+      "inputSchema": {
+        "properties": {
+          "fens": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "fens"
+        ],
+        "type": "object"
+      },
+      "name": "openingLookup",
+      "namespace": "chess",
+      "outputSchema": {
+        "items": {
+          "properties": {
+            "eco": {
+              "type": "string"
+            },
+            "fen": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "pgn": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "fen",
+            "eco",
+            "name",
+            "pgn"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "description": "The deepest named opening along each game line (SAN from the start): the name a game keeps after it leaves the book. A line the book never names returns nothing.",
+      "inputSchema": {
+        "properties": {
+          "lines": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "lines"
+        ],
+        "type": "object"
+      },
+      "name": "openingOfGameLine",
+      "namespace": "chess",
+      "outputSchema": {
+        "items": {
+          "properties": {
+            "eco": {
+              "type": "string"
+            },
+            "fen": {
+              "type": "string"
+            },
+            "line": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "namedAtPly": {
+              "type": "number"
+            },
+            "pgn": {
+              "type": "string"
+            },
+            "pliesPast": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "line",
+            "namedAtPly",
+            "pliesPast",
+            "fen",
+            "eco",
+            "name",
+            "pgn"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "description": "What one Lichess player played from each position, as one colour — every move with its results — and their recent games through it (PLAYER_PLAYED, PLAYER_GAME). Covers the player's whole Lichess history in one request. Needs the Lichess token.",
+      "inputSchema": {
+        "properties": {
+          "fens": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "filters": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fens"
+        ],
+        "type": "object"
+      },
+      "name": "playerAtPosition",
+      "namespace": "chess",
+      "outputSchema": {
+        "properties": {
+          "games": {
+            "items": {
+              "properties": {
+                "black": {
+                  "type": "string"
+                },
+                "blackElo": {
+                  "type": "number"
+                },
+                "color": {
+                  "type": "string"
+                },
+                "fen": {
+                  "type": "string"
+                },
+                "gameId": {
+                  "type": "string"
+                },
+                "month": {
+                  "type": "string"
+                },
+                "player": {
+                  "type": "string"
+                },
+                "result": {
+                  "type": "string"
+                },
+                "speed": {
+                  "type": "string"
+                },
+                "uci": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": "string"
+                },
+                "white": {
+                  "type": "string"
+                },
+                "whiteElo": {
+                  "type": "number"
+                },
+                "year": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "gameId",
+                "fen",
+                "uci",
+                "white",
+                "black",
+                "result",
+                "month",
+                "speed",
+                "url",
+                "player",
+                "color"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "moves": {
+            "items": {
+              "properties": {
+                "averageRating": {
+                  "type": "number"
+                },
+                "black": {
+                  "type": "number"
+                },
+                "blackWinPct": {
+                  "type": "number"
+                },
+                "color": {
+                  "type": "string"
+                },
+                "drawPct": {
+                  "type": "number"
+                },
+                "draws": {
+                  "type": "number"
+                },
+                "fen": {
+                  "type": "string"
+                },
+                "games": {
+                  "type": "number"
+                },
+                "moveId": {
+                  "type": "string"
+                },
+                "player": {
+                  "type": "string"
+                },
+                "san": {
+                  "type": "string"
+                },
+                "scoreForMover": {
+                  "type": "number"
+                },
+                "uci": {
+                  "type": "string"
+                },
+                "white": {
+                  "type": "number"
+                },
+                "whiteWinPct": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "moveId",
+                "fen",
+                "uci",
+                "san",
+                "games",
+                "white",
+                "draws",
+                "black",
+                "player",
+                "color"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "moves",
+          "games"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "description": "Jeremy Silman's imbalances for each position: material, minor pieces, pawn structure, space, files, key squares, development and king safety.",
+      "inputSchema": {
+        "properties": {
+          "fens": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "fens"
+        ],
+        "type": "object"
+      },
+      "name": "positionImbalances",
+      "namespace": "chess",
+      "outputSchema": {
+        "items": {
+          "properties": {
+            "bishopPairBlack": {
+              "type": "boolean"
+            },
+            "bishopPairWhite": {
+              "type": "boolean"
+            },
+            "detail": {
+              "type": "string"
+            },
+            "facts": {
+              "type": "string"
+            },
+            "fen": {
+              "type": "string"
+            },
+            "isolatedQueenPawnBlack": {
+              "type": "boolean"
+            },
+            "isolatedQueenPawnWhite": {
+              "type": "boolean"
+            },
+            "materialBlack": {
+              "type": "number"
+            },
+            "materialWhite": {
+              "type": "number"
+            },
+            "openFiles": {
+              "type": "string"
+            },
+            "oppositeColouredBishops": {
+              "type": "boolean"
+            },
+            "oppositeSideCastling": {
+              "type": "boolean"
+            },
+            "passedBlack": {
+              "type": "string"
+            },
+            "passedWhite": {
+              "type": "string"
+            },
+            "phase": {
+              "type": "string"
+            },
+            "sideToMove": {
+              "type": "string"
+            },
+            "structure": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "fen",
+            "sideToMove",
+            "phase",
+            "facts",
+            "structure",
+            "materialWhite",
+            "materialBlack",
+            "bishopPairWhite",
+            "bishopPairBlack",
+            "isolatedQueenPawnWhite",
+            "isolatedQueenPawnBlack",
+            "passedWhite",
+            "passedBlack",
+            "openFiles",
+            "oppositeSideCastling",
+            "oppositeColouredBishops",
+            "detail"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "description": "How often each move is played from a position by rating band and time control on Lichess, and how it scores.",
+      "inputSchema": {
+        "properties": {
+          "fens": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "filters": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fens"
+        ],
+        "type": "object"
+      },
+      "name": "ratedMoves",
+      "namespace": "chess",
+      "outputSchema": {
+        "items": {
+          "properties": {
+            "band": {
+              "type": "string"
+            },
+            "bandGames": {
+              "type": "number"
+            },
+            "bandLabel": {
+              "type": "string"
+            },
+            "blackWinPct": {
+              "type": "number"
+            },
+            "drawPct": {
+              "type": "number"
+            },
+            "fen": {
+              "type": "string"
+            },
+            "games": {
+              "type": "number"
+            },
+            "rowId": {
+              "type": "string"
+            },
+            "san": {
+              "type": "string"
+            },
+            "scoreForMover": {
+              "type": "number"
+            },
+            "share": {
+              "type": "number"
+            },
+            "speed": {
+              "type": "string"
+            },
+            "uci": {
+              "type": "string"
+            },
+            "whiteWinPct": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "rowId",
+            "fen",
+            "band",
+            "bandLabel",
+            "speed",
+            "san",
+            "uci",
+            "games",
+            "bandGames"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    },
+    {
+      "description": "What opening theory says along each game line: the deepest page of the Chess Opening Theory wikibook the line reaches.",
+      "inputSchema": {
+        "properties": {
+          "lines": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "lines"
+        ],
+        "type": "object"
+      },
+      "name": "theoryOfGameLine",
+      "namespace": "chess",
+      "outputSchema": {
+        "items": {
+          "properties": {
+            "licence": {
+              "type": "string"
+            },
+            "line": {
+              "type": "string"
+            },
+            "pliesCovered": {
+              "type": "number"
+            },
+            "pliesPast": {
+              "type": "number"
+            },
+            "theory": {
+              "type": "string"
+            },
+            "title": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "line",
+            "title",
+            "url",
+            "pliesCovered",
+            "pliesPast",
+            "theory",
+            "licence"
+          ],
+          "type": "object"
+        },
+        "type": "array"
+      }
+    }
+  ],
+  "joins": [
+    {
+      "anchorLabel": "AssistantUser",
+      "keyField": "username",
+      "recordKeyField": "username",
+      "relationship": "HAS_CHESS_STATUS",
+      "targetLabel": "ChessStatus"
+    },
+    {
+      "anchorLabel": "GameLine",
+      "keyField": "moves",
+      "recordKeyField": "line",
+      "relationship": "HAS_PLAN",
+      "targetLabel": "Plan"
+    },
+    {
+      "anchorLabel": "GameLine",
+      "keyField": "moves",
+      "recordKeyField": "line",
+      "relationship": "HAS_THEORY",
+      "targetLabel": "OpeningTheory"
+    },
+    {
+      "anchorLabel": "GameLine",
+      "keyField": "moves",
+      "recordKeyField": "line",
+      "relationship": "IN_OPENING",
+      "targetLabel": "Opening"
+    },
+    {
+      "anchorLabel": "Position",
+      "keyField": "fen",
+      "recordKeyField": "fen",
+      "relationship": "HAS_CANDIDATE",
+      "targetLabel": "CandidateMove"
+    },
+    {
+      "anchorLabel": "Position",
+      "keyField": "fen",
+      "recordKeyField": "fen",
+      "relationship": "HAS_IMBALANCES",
+      "targetLabel": "PositionImbalances"
+    },
+    {
+      "anchorLabel": "Position",
+      "keyField": "fen",
+      "recordKeyField": "fen",
+      "relationship": "HAS_PLAN",
+      "targetLabel": "Plan"
+    },
+    {
+      "anchorLabel": "Position",
+      "keyField": "fen",
+      "recordKeyField": "fen",
+      "relationship": "IN_OPENING",
+      "targetLabel": "Opening"
+    },
+    {
+      "anchorLabel": "Position",
+      "keyField": "fen",
+      "recordKeyField": "fen",
+      "relationship": "MASTERS_PLAYED",
+      "targetLabel": "MasterMove"
+    },
+    {
+      "anchorLabel": "Position",
+      "keyField": "fen",
+      "recordKeyField": "fen",
+      "relationship": "MASTER_GAME",
+      "targetLabel": "MasterGame"
+    },
+    {
+      "anchorLabel": "Position",
+      "keyField": "fen",
+      "recordKeyField": "fen",
+      "relationship": "PLAYED_AT_RATING",
+      "targetLabel": "RatedMove"
+    },
+    {
+      "anchorLabel": "Position",
+      "keyField": "fen",
+      "recordKeyField": "fen",
+      "relationship": "PLAYER_GAME",
+      "targetLabel": "PlayerGame"
+    },
+    {
+      "anchorLabel": "Position",
+      "keyField": "fen",
+      "recordKeyField": "fen",
+      "relationship": "PLAYER_PLAYED",
+      "targetLabel": "PlayerMove"
+    }
+  ],
+  "types": [
+    {
+      "description": "One of the engine's best lines in a position (Stockfish 19, five lines, depth 18). Reached from Position via HAS_CANDIDATE. THE SCORE IS FOR THE SIDE TO MOVE; `whiteCp` is the same from White's side. `lossCp` is how much worse than the best line this one is, in centipawns — the ONLY field to filter on for 'moves within half a pawn of best' (lossCp <= 50; a pawn is 100). `rank` is the engine's order, 1 to 5. `creates` and `removes` say which imbalances the line changes once its exchanges settle — the best evidence of what a move is for.",
+      "name": "CandidateMove",
+      "properties": {
+        "analysisId": "What the line belongs to: the hash of the engine, how it searched and the lines it found. Once the background tick has searched the position deeper, the rows are the deeper search's and carry its id.",
+        "candidateId": {
+          "description": "The FEN and the first move in UCI. Identity: stable across searches, where the rank is not.",
+          "metadata": {
+            "identity": "true"
+          }
+        },
+        "creates": "Imbalances the line creates once its exchanges settle, one sentence per line.",
+        "depth": "Search depth reached, in plies.",
+        "elapsedMs": "Engine time for the position, in milliseconds.",
+        "engine": "Which engine produced the line.",
+        "fen": "The position this line was computed in.",
+        "lossCp": "Centipawns worse than the best line; 0 for the best. 'Within half a pawn' is lossCp <= 50. Null when the best line is a mate and this one is not.",
+        "mate": "Moves to mate, positive when the side to move mates. Null otherwise.",
+        "nodes": "Positions the engine searched for this analysis.",
+        "pvSan": "The whole line in SAN, space-separated.",
+        "pvUci": "The whole line in UCI.",
+        "rank": "The engine's order: 1 is its best, up to 5. Sort by it; never filter on it for 'within N pawns of best' — that is lossCp.",
+        "removes": "Imbalances the line removes.",
+        "san": "First move in standard notation, e.g. `g4`.",
+        "scoreCp": "Centipawns for the side to move (100 = a pawn). Null when the line is a forced mate.",
+        "side": "`white` or `black`: who plays this move.",
+        "uci": "First move in UCI, e.g. `g2g4`.",
+        "whiteCp": "The same score from White's point of view. Null for mates."
+      }
+    },
+    {
+      "description": "What the realm could not do, as it last recorded it. Reached from the owner via HAS_CHESS_STATUS. It knows only what a finished call recorded: a call that died records nothing, and a refused Lichess call does not say why.",
+      "name": "ChessStatus",
+      "properties": {
+        "at": "When the last outcome was recorded.",
+        "lastRefusal": "The code of the last refusal a handler saw, or empty.",
+        "lichess": "`ok`, `refused` or `unknown`: how the last Lichess call went.",
+        "model": "`ok`, `not_granted` or `unknown`: whether the last model call was allowed.",
+        "username": {
+          "description": "The owner. Identity.",
+          "metadata": {
+            "identity": "true"
+          }
+        }
+      }
+    },
+    {
+      "description": "A game as its moves from the starting position, in SAN, space-separated — e.g. `e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6`. Pin one with `MATCH (g:GameLine {moves: $moves})`. A line keeps the name of the deepest book position it passed through, which a position looked up alone loses once it leaves the book: this is how a game twenty moves into the Exchange Ruy Lopez is still called that.",
+      "name": "GameLine",
+      "properties": {
+        "moves": {
+          "description": "SAN moves from the start, space-separated. Identity.",
+          "metadata": {
+            "identity": "true"
+          }
+        }
+      }
+    },
+    {
+      "description": "A top master game through a position, from the Lichess masters database: who played it, when, the result, and the move played from the position. Reached from Position via MASTER_GAME.",
+      "name": "MasterGame",
+      "properties": {
+        "black": "Black's name.",
+        "blackElo": "Black's rating.",
+        "fen": "The position the game passed through.",
+        "gameId": {
+          "description": "The position and the Lichess game id. Identity.",
+          "metadata": {
+            "identity": "true"
+          }
+        },
+        "month": "Month played, YYYY-MM.",
+        "result": "1-0, 0-1 or ½-½.",
+        "speed": "Time control class, for a Lichess game.",
+        "uci": "The move played from it in this game, in notation (e.g. Ba4).",
+        "url": "The game on Lichess.",
+        "white": "White's name.",
+        "whiteElo": "White's rating.",
+        "year": "Year played."
+      }
+    },
+    {
+      "description": "A move masters played from a position, with how often and how it scored — from the Lichess masters database (over-the-board games, players rated 2200+). Reached from Position via MASTERS_PLAYED. `scoreForMover` is the side-that-played-it's points per game. This is practice, not analysis: compare it with the engine's CandidateMove lines, and where they disagree, both are worth saying.",
+      "name": "MasterMove",
+      "properties": {
+        "averageRating": "Average rating of the players (masters), or of the opponents (a player's games).",
+        "black": "Won by Black.",
+        "blackWinPct": "Percent won by Black.",
+        "drawPct": "Percent drawn.",
+        "draws": "Drawn.",
+        "fen": "The position.",
+        "games": "Games in which it was played here.",
+        "moveId": {
+          "description": "The position and the move. Identity.",
+          "metadata": {
+            "identity": "true"
+          }
+        },
+        "san": "The move in notation.",
+        "scoreForMover": "Points per game for the side that played the move (1 a win, 0.5 a draw): how the move has scored for whoever chose it.",
+        "uci": "The move in UCI.",
+        "white": "Of those, won by White.",
+        "whiteWinPct": "Percent won by White."
+      }
+    },
+    {
+      "description": "The named opening a position is, from the Lichess opening book (3,815 named lines, CC0). Only a position that IS a book position has one — a position deeper than the book returns none. Reached from Position via IN_OPENING.",
+      "name": "Opening",
+      "properties": {
+        "eco": "ECO code, e.g. `C68`.",
+        "fen": {
+          "description": "The position. Identity.",
+          "metadata": {
+            "identity": "true"
+          }
+        },
+        "line": "For an opening reached from a GameLine: the line's moves.",
+        "name": "The opening's name, e.g. `Ruy Lopez: Exchange Variation`.",
+        "namedAtPly": "For a GameLine: the ply at which the book last named the line.",
+        "pgn": "The moves that reach it.",
+        "pliesPast": "For a GameLine: how many plies the line has gone past that name."
+      }
+    },
+    {
+      "description": "What opening theory says along a game line: the text of the deepest page of the Chess Opening Theory wikibook (CC BY-SA 4.0) that the line reaches — the wikibook keeps a page per move sequence, deep into the main lines, and its prose says what each side is playing for. Reached from GameLine via HAS_THEORY. A line the wikibook has no page for returns nothing. Quote it with its title and licence.",
+      "name": "OpeningTheory",
+      "properties": {
+        "licence": "Attribution and licence to show with the text.",
+        "line": {
+          "description": "The game line. Identity.",
+          "metadata": {
+            "identity": "true"
+          }
+        },
+        "pliesCovered": "How many plies of the line the page covers.",
+        "pliesPast": "How many plies the line has gone past the page.",
+        "theory": "The page's theory as plain text, up to about 3,000 characters.",
+        "title": "The wikibook page, e.g. `Chess Opening Theory/1. e4/1...e5/2. Nf3/2...Nc6/3. Bb5/3...a6/4. Bxc6`.",
+        "url": "Link to the page."
+      }
+    },
+    {
+      "description": "A plan for one side in a position: what it should be trying to achieve and why, with its key moves, the imbalances it uses and which of the engine's candidate moves carry it. Decided by a model with the chess-plans skill, from the position's imbalances, opening and engine lines — a judgement, not a computation. Reached from Position via HAS_PLAN; up to three per side, `priority` 1 first. `summary` is the same on every plan of a position: who stands better and how the plans meet. Costs one engine search and one model call per new position.",
+      "name": "Plan",
+      "properties": {
+        "analysisId": "The engine analysis these plans were made from: the position's own search at the full budget. It is the id of the position's CandidateMove rows until the background tick searches it deeper; then the candidates carry the deeper search's id and the plans keep the one they were made from, so the model is not asked again.",
+        "engineEvidence": "Which of the engine's candidate moves carry the plan.",
+        "fen": "The position.",
+        "idea": "What the plan achieves and why the position calls for it.",
+        "imbalances": "The imbalances the plan exploits or repairs, one per line.",
+        "level": "Who the plans were written for: `beginner`, `intermediate` or `expert`. Filter on it — `WHERE pl.level = 'beginner'` — to ask for that level; it is passed to the model, and each level is judged and cached separately.",
+        "line": "For plans reached from a GameLine: the line's moves.",
+        "model": "The model role that judged it.",
+        "moves": "Key moves and manoeuvres, in notation.",
+        "name": "The plan in a few words.",
+        "opening": "The book name of the position, if it has one.",
+        "planId": {
+          "description": "The position, side, priority and plan name. Identity.",
+          "metadata": {
+            "identity": "true"
+          }
+        },
+        "priority": "1 is the side's most important plan.",
+        "side": "`white` or `black`.",
+        "structure": "The row of the chess-plans skill's structure table the model judged this to be, or `none`.",
+        "summary": "Who stands better and why, and how the two sides' plans meet."
+      }
+    },
+    {
+      "description": "A recent game of one Lichess player through a position, as one colour. Reached from Position via PLAYER_GAME; asked with the player and colour, like PlayerMove.",
+      "name": "PlayerGame",
+      "properties": {
+        "black": "Black's name.",
+        "blackElo": "Black's rating.",
+        "color": "The colour the player had.",
+        "fen": "The position the game passed through.",
+        "gameId": {
+          "description": "The position, player, colour and game id. Identity.",
+          "metadata": {
+            "identity": "true"
+          }
+        },
+        "month": "Month played, YYYY-MM.",
+        "player": "The Lichess username asked about.",
+        "result": "1-0, 0-1 or ½-½.",
+        "speed": "Time control class, for a Lichess game.",
+        "uci": "The move played from it in this game, in notation (e.g. Ba4).",
+        "url": "The game on Lichess.",
+        "white": "White's name.",
+        "whiteElo": "White's rating.",
+        "year": "Year played."
+      }
+    },
+    {
+      "description": "A move one Lichess player chose from a position, as one colour, with how it scored for them — from the Lichess player explorer, across their whole Lichess history. Reached from Position via PLAYER_PLAYED, and ALWAYS asked with the player and colour: `WHERE m.player = 'DrNykterstein' AND m.color = 'white'`. Without a player the hop returns nothing.",
+      "name": "PlayerMove",
+      "properties": {
+        "averageRating": "Average rating of the players (masters), or of the opponents (a player's games).",
+        "black": "Won by Black.",
+        "blackWinPct": "Percent won by Black.",
+        "color": "`white` or `black`: the colour the player had. Filter on it.",
+        "drawPct": "Percent drawn.",
+        "draws": "Drawn.",
+        "fen": "The position.",
+        "games": "Games in which it was played here.",
+        "moveId": {
+          "description": "The position, player, colour and move. Identity.",
+          "metadata": {
+            "identity": "true"
+          }
+        },
+        "player": "The Lichess username asked about. Filter on it.",
+        "san": "The move in notation.",
+        "scoreForMover": "Points per game for the side that played the move (1 a win, 0.5 a draw): how the move has scored for whoever chose it.",
+        "uci": "The move in UCI.",
+        "white": "Of those, won by White.",
+        "whiteWinPct": "Percent won by White."
+      }
+    },
+    {
+      "description": "A chess position, identified by its FEN. Rarely stored: pin one with `MATCH (p:Position {fen: $fen})` and its imbalances, opening, engine lines and plans are computed on demand. The FEN must be complete — six fields — because who is to move changes every score.",
+      "name": "Position",
+      "properties": {
+        "fen": {
+          "description": "Full FEN, e.g. `rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1`. Identity.",
+          "metadata": {
+            "identity": "true"
+          }
+        }
+      }
+    },
+    {
+      "description": "Jeremy Silman's imbalances of a position — material, the minor pieces (bishop pair, good and bad bishops), pawn structure (doubled, isolated, backward, passed, hanging, isolated queen's pawn, majorities, locked chains and the wing they point to), space, open and half-open files, outposts, development and king safety. Computed from the board, not judged. Reached from Position via HAS_IMBALANCES. `facts` is one plain sentence per imbalance and is what to read.",
+      "name": "PositionImbalances",
+      "properties": {
+        "bishopPairBlack": "Whether Black has the bishop pair.",
+        "bishopPairWhite": "Whether White has the bishop pair.",
+        "detail": "The whole computation as JSON.",
+        "facts": "Every imbalance, one sentence per line, White's then Black's then shared. Quote these.",
+        "fen": {
+          "description": "The position. Identity.",
+          "metadata": {
+            "identity": "true"
+          }
+        },
+        "isolatedQueenPawnBlack": "Whether Black has an isolated d-pawn.",
+        "isolatedQueenPawnWhite": "Whether White has an isolated d-pawn.",
+        "materialBlack": "Black's material in points.",
+        "materialWhite": "White's material in points (pawn 1, knight and bishop 3, rook 5, queen 9).",
+        "openFiles": "Files with no pawns, space-separated.",
+        "oppositeColouredBishops": "Whether each side has one bishop, on different colours, and no knights.",
+        "oppositeSideCastling": "Whether the kings stand on opposite wings.",
+        "passedBlack": "Black's passed pawns.",
+        "passedWhite": "White's passed pawns, space-separated squares.",
+        "phase": "`opening`, `middlegame` or `endgame`.",
+        "sideToMove": "`white` or `black`.",
+        "structure": "Which named opening's pawn structure this is — matched on the pawns alone against every line in the opening book, exactly or within two pawns. Empty when nothing is that close."
+      }
+    },
+    {
+      "description": "How often a move is played from a position on Lichess, in one rating band and one time control, and how it scores — for comparing what players at different levels or speeds choose. Reached from Position via PLAYED_AT_RATING. Pin ONE dimension and the other is compared across: `WHERE m.speed = 'blitz'` returns every rating band in blitz; `WHERE m.band = '1600'` returns every time control at 1600; pin neither and every band over all time controls comes back (speed `all`). `share` is the move's percent of the games from the position in that band and time control — compare shares, not raw game counts, across bands.",
+      "name": "RatedMove",
+      "properties": {
+        "band": "Rating band floor as Lichess names it: 0, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2500. Filter on it.",
+        "bandGames": "All games from the position in this band and time control.",
+        "bandLabel": "The band as a person reads it: under 1000, 1000-1199, …, 2500+.",
+        "blackWinPct": "Percent won by Black.",
+        "drawPct": "Percent drawn.",
+        "fen": "The position.",
+        "games": "Games in which it was played, in this band and time control.",
+        "rowId": {
+          "description": "Position, band, time control and move. Identity.",
+          "metadata": {
+            "identity": "true"
+          }
+        },
+        "san": "The move in notation.",
+        "scoreForMover": "Points per game for the side that played it.",
+        "share": "Its percent of all games from the position in this band and time control.",
+        "speed": "Time control: ultraBullet, bullet, blitz, rapid, classical, correspondence — or all. Filter on it.",
+        "uci": "The move in UCI.",
+        "whiteWinPct": "Percent won by White."
+      }
+    }
+  ],
+  "views": [
+    {
+      "cypher": "MATCH (p:Position {fen: $fen})-[:HAS_CANDIDATE]->(c:CandidateMove)\nWHERE toInteger(c.rank) = 1 OR (c.lossCp IS NOT NULL AND toInteger(c.lossCp) <= $withinCp)\nRETURN toInteger(c.rank) AS rank, c.san AS move, c.uci AS uci, c.side AS side,\n       c.scoreCp AS scoreCp, c.mate AS mate, c.whiteCp AS whiteCp, c.lossCp AS lossCp,\n       c.pvSan AS line, c.pvUci AS lineUci, toInteger(c.depth) AS depth,\n       c.creates AS creates, c.removes AS removes\nORDER BY rank\nLIMIT $maxLines\n",
+      "description": "The engine's best moves in a position, strongest first: every move within `withinCp` centipawns of the best, and always the best itself, each with its line, its score, how much worse than best it is, and which imbalances it creates and removes. Answers 'what are the best moves here', 'which moves are within half a pawn of best', 'what should White play'.",
+      "name": "BestMoves",
+      "params": {
+        "fen": {
+          "default": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+          "description": "The position, as a complete FEN (six fields).",
+          "type": "string"
+        },
+        "maxLines": {
+          "default": 5,
+          "description": "At most this many moves, best first. The engine computes five.",
+          "type": "int"
+        },
+        "withinCp": {
+          "default": 50,
+          "description": "Keep moves at most this many CENTIPAWNS worse than the best (100 = one pawn): 'within half a pawn' is 50, 'within a pawn' is 100. Always a whole number of centipawns.",
+          "type": "int"
+        }
+      }
+    },
+    {
+      "cypher": "MATCH (p:Position {fen: $fen})-[:HAS_IMBALANCES]->(i:PositionImbalances)\nRETURN i.sideToMove AS sideToMove, i.phase AS phase, i.facts AS facts, i.structure AS structure,\n       i.materialWhite AS materialWhite, i.materialBlack AS materialBlack,\n       i.bishopPairWhite AS bishopPairWhite, i.bishopPairBlack AS bishopPairBlack,\n       i.passedWhite AS passedWhite, i.passedBlack AS passedBlack, i.openFiles AS openFiles,\n       i.oppositeSideCastling AS oppositeSideCastling, i.oppositeColouredBishops AS oppositeColouredBishops\n",
+      "description": "Jeremy Silman's imbalances of a position, computed from the board: material, bishop pair and good/bad bishops, pawn structure (doubled, isolated, backward, passed, hanging, isolated queen's pawn, majorities, locked chains and the wing they point to), space, open and half-open files, outposts, development and king safety. Answers 'what are the imbalances', 'who has the better pawn structure', 'is there an outpost'.",
+      "name": "ImbalancesOf",
+      "params": {
+        "fen": {
+          "default": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+          "description": "The position, as a complete FEN.",
+          "type": "string"
+        }
+      }
+    },
+    {
+      "cypher": "MATCH (p:Position {fen: $fen})-[:IN_OPENING]->(o:Opening)\nRETURN o.eco AS eco, o.name AS name, o.pgn AS moves\n",
+      "description": "The named opening a position is, from the Lichess opening book — ECO code, name and moves. A position deeper than the book has none, and the view returns no row. Answers 'what opening is this', 'what is this position called'.",
+      "name": "OpeningOf",
+      "params": {
+        "fen": {
+          "default": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1",
+          "description": "The position, as a complete FEN.",
+          "type": "string"
+        }
+      }
+    },
+    {
+      "cypher": "MATCH (p:Position {fen: $fen})-[:HAS_PLAN]->(pl:Plan)\nWHERE pl.level = $level\nRETURN pl.side AS side, toInteger(pl.priority) AS priority, pl.name AS plan, pl.idea AS idea,\n       pl.moves AS moves, pl.imbalances AS imbalances, pl.engineEvidence AS engineEvidence,\n       pl.summary AS summary, pl.structure AS structure, pl.opening AS opening, pl.level AS level\nORDER BY side DESC, priority\n",
+      "description": "The plans for BOTH sides in a position — what each should be trying to do and why, with key moves, the imbalances each plan uses and which of the engine's candidate moves carry it — plus a summary of who stands better and how the plans meet. Judged by a model with the chess-plans skill from the position's imbalances, opening and engine lines. Costs an engine search and a model call per new position (tens of seconds); cached for a week. Answers 'what's the plan here', 'what should Black be aiming for', 'explain the engine's moves'.",
+      "name": "PlansInPosition",
+      "params": {
+        "fen": {
+          "default": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+          "description": "The position, as a complete FEN.",
+          "type": "string"
+        },
+        "level": {
+          "default": "intermediate",
+          "description": "Who the plans are for: `beginner` (tactics first — threats, loose pieces, checks — and the basic principles, in plain words), `intermediate` (plans from the imbalances, structures by name), or `expert` (full strategic depth, move-order nuance, no hand-holding).",
+          "type": "string"
+        }
+      }
+    },
+    {
+      "cypher": "MATCH (g:GameLine {moves: $moves})-[:IN_OPENING]->(o:Opening)\nRETURN o.eco AS eco, o.name AS name, o.pgn AS bookMoves,\n       toInteger(o.namedAtPly) AS namedAtPly, toInteger(o.pliesPast) AS pliesPast\n",
+      "description": "The opening a game became: the deepest named book position along its moves, and how far past it the game has gone. A game keeps its name after it leaves the book — twenty moves into the Exchange Ruy Lopez it is still the Exchange Ruy Lopez. Answers 'what opening is this game', 'what variation did we play'.",
+      "name": "OpeningOfLine",
+      "params": {
+        "moves": {
+          "default": "e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1",
+          "description": "The game's moves from the start in SAN, space-separated.",
+          "type": "string"
+        }
+      }
+    },
+    {
+      "cypher": "MATCH (g:GameLine {moves: $moves})-[:HAS_PLAN]->(pl:Plan)\nWHERE pl.level = $level\nRETURN pl.side AS side, toInteger(pl.priority) AS priority, pl.name AS plan, pl.idea AS idea,\n       pl.moves AS moves, pl.imbalances AS imbalances, pl.engineEvidence AS engineEvidence,\n       pl.summary AS summary, pl.structure AS structure, pl.opening AS opening, pl.level AS level\nORDER BY side DESC, priority\n",
+      "description": "The plans for both sides in the position a game has reached, judged by a model with the chess-plans skill knowing the game's opening name — which the position alone loses once it leaves the book. Same shape as PlansInPosition. Costs an engine search and a model call per new line; cached for a week.",
+      "name": "PlansInLine",
+      "params": {
+        "level": {
+          "default": "intermediate",
+          "description": "Who the plans are for: `beginner` (tactics first — threats, loose pieces, checks — and the basic principles, in plain words), `intermediate` (plans from the imbalances, structures by name), or `expert` (full strategic depth, move-order nuance, no hand-holding).",
+          "type": "string"
+        },
+        "moves": {
+          "default": "e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O f6 d4 exd4 Nxd4 c5 Nb3 Qxd1 Rxd1",
+          "description": "The game's moves from the start in SAN, space-separated.",
+          "type": "string"
+        }
+      }
+    },
+    {
+      "cypher": "MATCH (g:GameLine {moves: $moves})-[:HAS_THEORY]->(t:OpeningTheory)\nRETURN t.title AS page, t.url AS url, t.theory AS theory, toInteger(t.pliesCovered) AS pliesCovered,\n       toInteger(t.pliesPast) AS pliesPast, t.licence AS licence\n",
+      "description": "What opening theory says about a game line: the deepest page of the Chess Opening Theory wikibook the line reaches, its text (CC BY-SA 4.0), and how far past it the game has gone. Answers 'what does theory say here', 'what is the idea behind this variation', 'why is this move played'.",
+      "name": "TheoryOfLine",
+      "params": {
+        "moves": {
+          "default": "e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O",
+          "description": "The game's moves from the start in SAN, space-separated.",
+          "type": "string"
+        }
+      }
+    },
+    {
+      "cypher": "MATCH (p:Position {fen: $fen})-[:MASTERS_PLAYED]->(m:MasterMove)\nRETURN m.san AS move, m.uci AS uci, toInteger(m.games) AS games, m.whiteWinPct AS whiteWinPct,\n       m.drawPct AS drawPct, m.blackWinPct AS blackWinPct, m.scoreForMover AS scoreForMover,\n       toInteger(m.averageRating) AS averageRating\nORDER BY games DESC\n",
+      "description": "What masters played from a position — each move with its number of games, how often White won, drew and lost, and how it scored for the side that chose it — from the Lichess masters database (over-the-board, 2200+). Answers 'what do masters play here', 'what's the most popular move', 'how does this move score'. Needs the Lichess key.",
+      "name": "MastersAtPosition",
+      "params": {
+        "fen": {
+          "default": "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+          "description": "The position, as a complete FEN.",
+          "type": "string"
+        }
+      }
+    },
+    {
+      "cypher": "MATCH (p:Position {fen: $fen})-[:MASTER_GAME]->(g:MasterGame)\nRETURN g.white AS white, toInteger(g.whiteElo) AS whiteElo, g.black AS black, toInteger(g.blackElo) AS blackElo,\n       g.result AS result, toInteger(g.year) AS year, g.uci AS movePlayed, g.url AS url\nORDER BY year DESC\n",
+      "description": "Top master games that reached a position: players, ratings, year, result, the move played from the position, and a link. Answers 'show me master games from here', 'who has played this'. Needs the Lichess key.",
+      "name": "MasterGamesAtPosition",
+      "params": {
+        "fen": {
+          "default": "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+          "description": "The position, as a complete FEN.",
+          "type": "string"
+        }
+      }
+    },
+    {
+      "cypher": "MATCH (p:Position {fen: $fen})-[:PLAYER_PLAYED]->(m:PlayerMove)\nWHERE m.player = $player AND m.color = $color\nRETURN m.san AS move, toInteger(m.games) AS games, m.scoreForMover AS scoreForPlayer,\n       m.whiteWinPct AS whiteWinPct, m.drawPct AS drawPct, m.blackWinPct AS blackWinPct,\n       toInteger(m.averageRating) AS averageOpponentRating\nORDER BY games DESC\n",
+      "description": "What one Lichess player chose from a position, as White or as Black, across their whole Lichess history — each move with games played and how it scored for them. Answers 'what does DrNykterstein play here', 'what does X play against the Sicilian as White'. Needs the Lichess key.",
+      "name": "PlayerAtPosition",
+      "params": {
+        "color": {
+          "default": "white",
+          "description": "`white` or `black`: the colour the player had.",
+          "type": "string"
+        },
+        "fen": {
+          "default": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+          "description": "The position, as a complete FEN.",
+          "type": "string"
+        },
+        "player": {
+          "default": "DrNykterstein",
+          "description": "The Lichess username.",
+          "type": "string"
+        }
+      }
+    },
+    {
+      "cypher": "MATCH (p:Position {fen: $fen})-[:PLAYER_GAME]->(g:PlayerGame)\nWHERE g.player = $player AND g.color = $color\nRETURN g.white AS white, toInteger(g.whiteElo) AS whiteElo, g.black AS black, toInteger(g.blackElo) AS blackElo,\n       g.result AS result, g.speed AS speed, g.month AS month, g.uci AS movePlayed, g.url AS url\nORDER BY month DESC\n",
+      "description": "A Lichess player's recent games through a position, as White or as Black: opponent, ratings, result, speed and a link. Needs the Lichess key.",
+      "name": "PlayerGamesAtPosition",
+      "params": {
+        "color": {
+          "default": "white",
+          "description": "`white` or `black`.",
+          "type": "string"
+        },
+        "fen": {
+          "default": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+          "description": "The position, as a complete FEN.",
+          "type": "string"
+        },
+        "player": {
+          "default": "DrNykterstein",
+          "description": "The Lichess username.",
+          "type": "string"
+        }
+      }
+    },
+    {
+      "cypher": "MATCH (p:Position {fen: $fen})-[:PLAYED_AT_RATING]->(m:RatedMove)\nWHERE m.speed = $speed AND toFloat(m.share) >= $minShare\nRETURN toInteger(m.band) AS band, m.bandLabel AS rating, m.san AS move, toFloat(m.share) AS pctOfGames,\n       toInteger(m.games) AS games, m.scoreForMover AS scored\nORDER BY band, pctOfGames DESC\n",
+      "description": "How the moves played from a position change with rating: for one time control, each move's share of games in every Lichess rating band, from under 1000 to 2500+, with how it scored. Answers 'what do 1600s play here compared with 2200s', 'is Bxc6 a club-player move'. `speed` is a time control, or `all`. Needs the Lichess key; a new position takes several seconds (one request per band), then it is cached.",
+      "name": "MovesByRating",
+      "params": {
+        "fen": {
+          "default": "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+          "description": "The position, as a complete FEN.",
+          "type": "string"
+        },
+        "minShare": {
+          "default": 3,
+          "description": "Leave out moves under this percent of games in a band.",
+          "type": "int"
+        },
+        "speed": {
+          "default": "blitz",
+          "description": "ultraBullet, bullet, blitz, rapid, classical, correspondence — or all.",
+          "type": "string"
+        }
+      }
+    },
+    {
+      "cypher": "MATCH (p:Position {fen: $fen})-[:PLAYED_AT_RATING]->(m:RatedMove)\nWHERE m.band = $band AND toFloat(m.share) >= $minShare\nRETURN m.speed AS timeControl, m.san AS move, toFloat(m.share) AS pctOfGames,\n       toInteger(m.games) AS games, m.scoreForMover AS scored\nORDER BY timeControl, pctOfGames DESC\n",
+      "description": "How the moves played from a position change with time control: for one Lichess rating band, each move's share of games in every time control from ultrabullet to correspondence, with how it scored. Answers 'do people play this differently in blitz and classical'. Needs the Lichess key.",
+      "name": "MovesByTimeControl",
+      "params": {
+        "band": {
+          "default": "1600",
+          "description": "The rating band's floor: 0, 1000, 1200, 1400, 1600, 1800, 2000, 2200 or 2500.",
+          "type": "string"
+        },
+        "fen": {
+          "default": "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4",
+          "description": "The position, as a complete FEN.",
+          "type": "string"
+        },
+        "minShare": {
+          "default": 3,
+          "description": "Leave out moves under this percent of games in a time control.",
+          "type": "int"
+        }
+      }
+    },
+    {
+      "cypher": "MATCH (u:AssistantUser)-[:HAS_CHESS_STATUS]->(s:ChessStatus)\nRETURN s.lichess AS lichess, s.model AS model, s.lastRefusal AS lastRefusal, s.at AS at\n",
+      "description": "What the chess realm could not do: whether Lichess and the model answered the last time they were asked, the last refusal and when. Answers 'why are there no master games', 'why are there no plans'.",
+      "name": "ChessStatus"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+handler: chess.rowsPositionPlans
+joins:
+  - anchorLabel: Position
+    keyField: fen
+    recordKeyField: fen
+    relationship: HAS_PLAN
+    targetLabel: Plan
+keyArgument: fens
+name: position-plans
+page:
+  argument: cursor
+  maxPages: 16
+pushdown:
+  - argument: level
+    property: level
+version: 1

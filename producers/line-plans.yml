@@ -1,0 +1,16 @@
+handler: chess.rowsLinePlans
+joins:
+  - anchorLabel: GameLine
+    keyField: moves
+    recordKeyField: line
+    relationship: HAS_PLAN
+    targetLabel: Plan
+keyArgument: lines
+name: line-plans
+page:
+  argument: cursor
+  maxPages: 16
+pushdown:
+  - argument: level
+    property: level
+version: 1
