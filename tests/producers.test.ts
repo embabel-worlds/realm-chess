@@ -19,7 +19,7 @@ import { buildGuest, dispatch, hasTooling } from "./guest/runtime";
  */
 
 interface Entry { name: string; outputSchema: { type?: string; items?: { type?: string } } }
-const manifest = JSON.parse(readFileSync("dist/manifest.json", "utf8")) as { entries: Entry[] };
+const manifest = JSON.parse(readFileSync(".synth/dist/manifest.json", "utf8")) as { entries: Entry[] };
 const PRODUCERS = declaredProducers() as (ProducerDeclaration & { joins: { anchorLabel: string; relationship: string }[]; pushdown?: { argument: string; property: string }[] })[];
 const handlerName = (p: ProducerDeclaration) => p.handler.replace(/^chess\./, "");
 

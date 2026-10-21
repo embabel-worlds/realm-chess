@@ -9,8 +9,10 @@ import { ENGINE_MODULE } from "./wasm/lib/config.ts";
  * Chess, as a captured realm: the handlers run as Wasm inside the appliance, the engine is the
  * stockfish registry module, and what the realm computes is kept in its own SQLite.
  *
- * `npm run synth` writes realm.yml, credentials.yml, apis/apis.yml, producers/, types/, views/,
- * dependencies/ and dist/manifest.json from this file. Edit this file, never those.
+ * A host reads this file itself, and links zod from the lock to read the handler schemas. The
+ * realm ships no realm.yml or dist/manifest.json. `npm run synth` writes them, and the rest of
+ * what synth writes, into .synth/ for the tests, and writes the handler types to
+ * wasm/generated/realm.ts.
  */
 export default defineRealm({
   name: "chess",

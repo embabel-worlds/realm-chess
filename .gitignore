@@ -1,4 +1,5 @@
 node_modules/
+.synth/
 tests/live/last-run.png
 test-results/
 playwright-report/

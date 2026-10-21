@@ -21,7 +21,7 @@ import { buildGuest, call, hasTooling } from "./guest/runtime";
  */
 
 interface Entry { namespace: string; name: string; inputSchema: object; outputSchema: object }
-const manifest = JSON.parse(readFileSync("dist/manifest.json", "utf8")) as { entries: Entry[] };
+const manifest = JSON.parse(readFileSync(".synth/dist/manifest.json", "utf8")) as { entries: Entry[] };
 const entry = (name: string) => manifest.entries.find((e) => e.name === name)!;
 const ajv = new Ajv({ strict: false, allErrors: true });
 const itemOf = (name: string, path: "moves" | "games" | null = null) => {

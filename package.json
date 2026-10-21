@@ -13,11 +13,13 @@
     "app": "node scripts/app.mjs",
     "synth": "node scripts/synth.mjs",
     "build": "npm run book && npm run app && npm run synth",
-    "check": "npm run typecheck && npm run build && npm test && npm run test:app",
-    "test:app": "playwright test"
+    "check": "npm run typecheck && npm run book && npm run app && npm test && npm run test:app",
+    "test:app": "playwright test",
+    "pretest": "node scripts/synth.mjs"
   },
   "dependencies": {
-    "chess.js": "1.4.0"
+    "chess.js": "1.4.0",
+    "zod": "4.6.5"
   },
   "devDependencies": {
     "@embabel/realm-synth": "file:vendor/sdk/embabel-realm-synth-0.1.0.tgz",
@@ -29,7 +31,6 @@
     "esbuild": "^0.28.2",
     "typescript": "^5.4.0",
     "vitest": "^3.2.7",
-    "yaml": "^2.9.1",
-    "zod": "^4.6.5"
+    "yaml": "^2.9.1"
   }
 }

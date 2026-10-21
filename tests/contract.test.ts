@@ -23,17 +23,17 @@ const sortKeys = (v: unknown): unknown =>
     : v && typeof v === "object" ? Object.fromEntries(Object.keys(v).sort().map((k) => [k, sortKeys((v as Record<string, unknown>)[k])]))
       : v;
 
-const ourManifest = JSON.parse(readFileSync("dist/manifest.json", "utf8")) as { entries: Entry[] };
-const ourProducers = readdirSync("producers").map((f) => parse(readFileSync(`producers/${f}`, "utf8")) as { name: string; handler: string; joins: Join[] });
+const ourManifest = JSON.parse(readFileSync(".synth/dist/manifest.json", "utf8")) as { entries: Entry[] };
+const ourProducers = readdirSync(".synth/producers").map((f) => parse(readFileSync(`.synth/producers/${f}`, "utf8")) as { name: string; handler: string; joins: Join[] });
 
 const current: Fixture = {
   handlers: PUBLIC_HANDLERS.map((n) => {
     const e = ourManifest.entries.find((x) => x.name === n);
     return { name: n, namespace: e?.namespace, description: e?.description, inputSchema: e?.inputSchema, outputSchema: e?.outputSchema } as Entry;
   }),
-  types: parse(readFileSync("types/chess.yml", "utf8")) as unknown[],
+  types: parse(readFileSync(".synth/types/chess.yml", "utf8")) as unknown[],
   joins: ourProducers.flatMap((p) => p.joins ?? []).sort((a, b) => (JSON.stringify(sortKeys(a)) < JSON.stringify(sortKeys(b)) ? -1 : 1)),
-  views: parse(readFileSync("views/chess.yml", "utf8")) as unknown[],
+  views: parse(readFileSync(".synth/views/chess.yml", "utf8")) as unknown[],
 };
 
 if (process.env.UPDATE_CONTRACT === "1") writeFileSync(FIXTURE, `${JSON.stringify(sortKeys(current), null, 2)}\n`);
@@ -80,8 +80,8 @@ describe("views", () => {
 });
 
 describe("the public APIs", () => {
-  const apis = parse(readFileSync("apis/apis.yml", "utf8")) as { name: string; auth: string; credential?: string; url: string }[];
-  const credentials = parse(readFileSync("credentials.yml", "utf8")) as { id: string }[];
+  const apis = parse(readFileSync(".synth/apis/apis.yml", "utf8")) as { name: string; auth: string; credential?: string; url: string }[];
+  const credentials = parse(readFileSync(".synth/credentials.yml", "utf8")) as { id: string }[];
 
   it("read the wikibook with no credential, as the host reads a public API", () => {
     const wikibooks = apis.find((a) => a.name === "wikibooks")!;

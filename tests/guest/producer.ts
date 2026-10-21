@@ -25,9 +25,9 @@ export interface ProducerDeclaration {
   page?: { argument: string; maxPages: number };
 }
 
-/** Every producer the realm declares, as synth wrote them into producers/. */
+/** Every producer the realm declares, as synth writes them into .synth/producers/. */
 export function declaredProducers(): ProducerDeclaration[] {
-  const dir = resolve(__dirname, "..", "..", "producers");
+  const dir = resolve(__dirname, "..", "..", ".synth", "producers");
   return readdirSync(dir).filter((f) => f.endsWith(".yml")).sort().map((f) => parse(readFileSync(join(dir, f), "utf8")) as ProducerDeclaration);
 }
 

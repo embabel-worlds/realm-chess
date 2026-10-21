@@ -94,7 +94,7 @@ describe("the skill digest", () => {
     for (const f of files) hash.update(`${f}\0${createHash("sha256").update(readFileSync(join(folder, f))).digest("hex")}\n`);
     const digest = hash.digest("hex");
     expect(skills.digest["chess-plans"]).toBe(digest);
-    expect(JSON.parse(readFileSync("dist/skills.json", "utf8")).digest["chess-plans"]).toBe(digest);
+    expect(JSON.parse(readFileSync(".synth/dist/skills.json", "utf8")).digest["chess-plans"]).toBe(digest);
     // The plan handlers key their kept plans on the digest, so their module is the one that reads it.
     expect(readFileSync("wasm/handlers/plans.ts", "utf8")).toContain('import { skills } from "../generated/realm.ts";');
   });

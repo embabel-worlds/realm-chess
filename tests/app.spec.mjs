@@ -17,7 +17,7 @@ import { fileURLToPath } from "node:url";
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..");
 const replies = JSON.parse(readFileSync(join(here, "fixtures/app-replies.json"), "utf8"));
-const app = JSON.parse(readFileSync(join(root, "apps/chesscalator.html.app.json"), "utf8"));
+const app = JSON.parse(readFileSync(join(root, ".synth/apps/chesscalator.html.app.json"), "utf8"));
 const html = readFileSync(join(root, "apps/chesscalator.html"), "utf8");
 const assets = app.resources.map((path) => {
   const text = readFileSync(join(root, path), "utf8");

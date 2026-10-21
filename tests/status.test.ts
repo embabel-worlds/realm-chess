@@ -104,7 +104,7 @@ describe.skipIf(!hasTooling)("chess.status, in the guest", () => {
 
 describe("the declaration", () => {
   it("is user keyed: AssistantUser by username, the username returned as the record key", () => {
-    const p = parse(readFileSync("producers/chess-status.yml", "utf8"));
+    const p = parse(readFileSync(".synth/producers/chess-status.yml", "utf8"));
     expect(p).toEqual({
       version: 1, name: "chess-status", handler: "chess.status", keyArgument: "username",
       joins: [{ anchorLabel: "AssistantUser", keyField: "username", recordKeyField: "username", relationship: "HAS_CHESS_STATUS", targetLabel: "ChessStatus" }],
@@ -112,7 +112,7 @@ describe("the declaration", () => {
   });
 
   it("has a ChessStatus view with no params", () => {
-    const views = parse(readFileSync("views/chess.yml", "utf8")) as { name: string; params?: unknown; cypher: string }[];
+    const views = parse(readFileSync(".synth/views/chess.yml", "utf8")) as { name: string; params?: unknown; cypher: string }[];
     const v = views.find((x) => x.name === "ChessStatus")!;
     expect(v.params).toBeUndefined();
     expect(v.cypher).toContain("[:HAS_CHESS_STATUS]->(s:ChessStatus)");

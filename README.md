@@ -50,8 +50,8 @@ out is kept in its own SQLite.
 
 | Piece | What it is |
 |---|---|
-| `realm.ts` | The definition: metadata, the app, the credential, the two APIs, the two dependencies and the migrations. It gathers the rest from `realm/`. |
-| `realm/handlers/` | The 28 handlers, declared in Zod, one file per concern: `engine`, `position`, `theory`, `lichess`, `plans`, `background`, `app`. `index.ts` gathers them. Synth turns each schema into JSON Schema. |
+| `realm.ts` | The definition: metadata, the app, the credential, the two APIs, the two dependencies and the migrations. It gathers the rest from `realm/`. A host reads it directly, so the realm ships no `realm.yml` or `dist/manifest.json`. |
+| `realm/handlers/` | The 28 handlers, declared in Zod, one file per concern: `engine`, `position`, `theory`, `lichess`, `plans`, `background`, `app`. `index.ts` gathers them. A host, like synth, turns each schema into JSON Schema through Zod's Standard JSON Schema exporter, which is why Zod is a runtime dependency: the host links the version `package-lock.json` pins. |
 | `realm/types.ts`, `realm/producers.ts`, `realm/views.ts` | The graph's labels, the 13 producers that join them, and the views. |
 | `wasm/handlers.ts` | The guest's entry. It names every verb and holds each to the type synth generated for it. |
 | `wasm/handlers/` | The verbs, one file per concern, matching `realm/handlers/`. The ten public ones answer a reader's questions; the `rows*` ones serve the producers; `deepen` and `markDeepened` are the scheduled ticks; `status` serves ChessStatus; the `app*` ones serve Chesscalator. `shared.ts` holds the context, the input checks, paging and the per-dispatch imbalance cache. |
@@ -68,7 +68,7 @@ out is kept in its own SQLite.
 | `wasm/lib/clock.ts` | Time inside one dispatch, and what each step charges where the host holds the clock still. |
 | `modules/<sha256>.wasm`, `vendor/stockfish/` | The engine the realm carries, and its source under the GPL: the pins, the patches and the script that builds it. |
 | `db/schema.sql`, `db/NNNN-*.sql` | The tables, then the migrations. `0001` and `0002` are the Lichess opening book (CC0) and its pawn skeletons, written by `scripts/book.mjs`. |
-| `realm.yml`, `credentials.yml`, `apis/apis.yml`, `producers/`, `types/`, `views/`, `dependencies/`, `dist/`, `apps/chesscalator.html.app.json` | Written by synth from `realm.ts`. Don't edit by hand. |
+| `.synth/` | Not committed. `npm run synth` writes `realm.yml`, `credentials.yml`, `apis/apis.yml`, `producers/`, `types/`, `views/`, `dependencies/`, `dist/` and `apps/chesscalator.html.app.json` here from `realm.ts`, and the tests read them. |
 | `apis/lichess.yml`, `apis/wikibooks.yml` | The OpenAPI documents for the two APIs. |
 | `skills/chess-plans/` | The plan knowledge: Silman's method, what each imbalance calls for, a table of pawn structures and their plans, how to use the engine. |
 | `apps/chesscalator.html`, `apps/chesscalator.html.assets/` | The board, as a captured app. `chesscalator.css` is the page's own styles; `board.css` and `board.js` (cm-chessboard, chess.js and the sprites) are written by `scripts/app.mjs`. |
@@ -374,7 +374,8 @@ Everything else works without the grants, and `ChessStatus` says which one is mi
 ## Changing a declaration
 
 Edit `realm.ts` or a file under `realm/`, then run `npm run synth`. It writes the declaration
-files and `wasm/generated/realm.ts`. Never edit those by hand.
+files into `.synth/` and the handler types into `wasm/generated/realm.ts`. Never edit those by hand.
+`npm test` runs synth first.
 
 - **A handler.** Change its Zod schema in `realm/handlers/<concern>.ts` and its code in
   `wasm/handlers/<concern>.ts`. A new handler is also added to the object in `wasm/handlers.ts`,

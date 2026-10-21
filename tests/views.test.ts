@@ -80,7 +80,7 @@ function setup(o: { engine?: "real"; lichess?: "refused"; model?: "none" } = {})
 
 describe("the views the realm declares", () => {
   it("are the thirteen in views/chess.yml, plus ChessStatus", () => {
-    expect(parse(readFileSync("views/chess.yml", "utf8"))).toEqual(GRAPH_VIEWS.concat([STATUS_VIEW]).map((v) => ({ ...v })));
+    expect(parse(readFileSync(".synth/views/chess.yml", "utf8"))).toEqual(GRAPH_VIEWS.concat([STATUS_VIEW]).map((v) => ({ ...v })));
   });
 
   it("can all be read by the reader the app handlers use", () => {

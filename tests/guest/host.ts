@@ -10,8 +10,8 @@ import type { HostCall } from "./runtime";
  */
 
 const ROOT = resolve(__dirname, "..", "..");
-/** The migrations the host applies, in order: the ones synth wrote into dependencies/manifest.json. */
-export const MIGRATIONS: string[] = JSON.parse(readFileSync(join(ROOT, "dependencies/manifest.json"), "utf8"))
+/** The migrations the host applies, in order: the ones synth writes into .synth/dependencies/manifest.json. */
+export const MIGRATIONS: string[] = JSON.parse(readFileSync(join(ROOT, ".synth/dependencies/manifest.json"), "utf8"))
   .entries.find((e: { name: string }) => e.name === "db").migrations;
 
 export type Rows = Record<string, string | null>[];

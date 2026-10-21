@@ -80,7 +80,7 @@ function setup(o: { parallel?: boolean } = {}) {
 const writes = (statements: string[]) => statements.filter((q) => !/^\s*SELECT\b/i.test(q));
 
 describe("the deepen schedules, as declared", () => {
-  const entries = JSON.parse(readFileSync("dist/manifest.json", "utf8")).entries as Record<string, unknown>[];
+  const entries = JSON.parse(readFileSync(".synth/dist/manifest.json", "utf8")).entries as Record<string, unknown>[];
   it.each([["deepen", "0 * * * * *"], ["markDeepened", "30 * * * * *"]])("%s runs every minute, at %s, with no arguments", (name, schedule) => {
     const entry = entries.find((e) => e.name === name)!;
     expect(entry.schedule).toBe(schedule);

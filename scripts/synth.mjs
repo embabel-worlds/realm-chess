@@ -2,10 +2,13 @@
  * Writes the realm's declaration files from realm.ts with the SDK's synth, the realm-synth command
  * from the installed @embabel/realm-synth package. It runs from TypeScript source under Bun.
  *
+ * The realm ships realm.ts, not these files: a host reads realm.ts itself. They are written to
+ * .synth/, which git ignores, so the tests can hold them to the public contract and read the
+ * declarations as a host that reads YAML would.
+ *
  * Synth clears the directory it writes to, so it writes to a fresh temporary one and only the
- * files it generates are copied back here. Pointing it at the realm itself would delete the
- * realm's sources and its .git. Synth also leaves a record of what it wrote in its output
- * (.realm-synth-output.json); that stays in the temporary directory with everything else.
+ * files it generates are copied into .synth/. Synth also leaves a record of what it wrote in its
+ * output (.realm-synth-output.json); that stays in the temporary directory with everything else.
  *
  * The generated types go to wasm/generated/realm.ts. It is a .ts file because it carries a value
  * as well as types: the digest of each skill folder, which the plan handlers key their kept plans on.
@@ -22,6 +25,7 @@ const GENERATED = [
   "apps/chesscalator.html.app.json",
 ];
 const TYPES = "wasm/generated/realm.ts";
+const SYNTH = ".synth";
 
 const manifest = createRequire(import.meta.url).resolve("@embabel/realm-synth/package.json");
 const cli = join(dirname(manifest), JSON.parse(readFileSync(manifest, "utf8")).bin["realm-synth"]);
@@ -31,11 +35,11 @@ try {
     stdio: ["inherit", "ignore", "inherit"],
   });
   if (run.status !== 0) process.exit(run.status ?? 1);
-  for (const dir of ["producers", "types", "views", "dependencies"]) rmSync(dir, { recursive: true, force: true });
-  for (const path of GENERATED) cpSync(join(out, "realm", path), path, { recursive: true });
+  rmSync(SYNTH, { recursive: true, force: true });
+  for (const path of GENERATED) cpSync(join(out, "realm", path), join(SYNTH, path), { recursive: true });
   mkdirSync(dirname(TYPES), { recursive: true });
   cpSync(join(out, "realm.ts"), TYPES);
-  console.log(`synth: ${[...GENERATED, TYPES].join(", ")}`);
+  console.log(`synth: ${GENERATED.map((path) => join(SYNTH, path)).join(", ")}, ${TYPES}`);
 } finally {
   rmSync(out, { recursive: true, force: true });
 }
