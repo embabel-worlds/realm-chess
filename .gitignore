@@ -1,5 +1,9 @@
 node_modules/
+.synth/
 tests/live/last-run.png
 test-results/
 playwright-report/
 tests/battery/results/
+vendor/stockfish/build/
+vendor/stockfish/net/
+vendor/stockfish/dist/

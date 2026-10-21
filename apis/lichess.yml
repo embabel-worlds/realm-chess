@@ -5,6 +5,8 @@ info:
   description: >
     The two explorer databases realm-chess reads by position: master games (over-the-board,
     2200+), and one Lichess player's own games. Both need a Lichess personal API token.
+security:
+  - lichessToken: []
 servers:
   - url: https://explorer.lichess.ovh
 paths:
@@ -54,3 +56,9 @@ paths:
           content:
             application/x-ndjson:
               schema: { type: string }
+components:
+  securitySchemes:
+    lichessToken:
+      type: http
+      scheme: bearer
+      description: A Lichess personal API token. No scopes are needed.

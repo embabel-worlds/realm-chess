@@ -1,0 +1,3458 @@
+{
+ "book": {
+  "entries": 3815,
+  "sha256": "537f85bdb60836aa6c2e8d2054c1f14872a384aa50eeb9cfa74fa0ac828b0602"
+ },
+ "skeletons": {
+  "entries": 1926,
+  "sha256": "780b28be68b3eb37af15d821359514375f7c04105f231952b9293216f6117f23"
+ },
+ "structures": {
+  "r1bq1rk1/pppnnpbp/3p2p1/3Pp3/2P1P3/2N5/PP2BPPP/R1BQNRK1 w - - 3 10": {
+   "openings": [
+    {
+     "eco": "E92",
+     "name": "King's Indian Defense: Petrosian Variation"
+    },
+    {
+     "eco": "E97",
+     "name": "King's Indian Defense: Orthodox Variation, Modern System"
+    },
+    {
+     "eco": "E93",
+     "name": "King's Indian Defense: Petrosian Variation, Normal Defense"
+    },
+    {
+     "eco": "E97",
+     "name": "King's Indian Defense: Orthodox Variation, Korchnoi Attack"
+    },
+    {
+     "eco": "E98",
+     "name": "King's Indian Defense: Orthodox Variation, Classical System"
+    },
+    {
+     "eco": "E94",
+     "name": "King's Indian Defense: Orthodox Variation, Positional Defense, Closed Line"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/pppppppp/8/8/3P4/8/PPP1PPPP/RNBQKBNR b KQkq - 0 1": null,
+  "rnbqkb1r/pppppppp/5n2/8/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 1 2": null,
+  "rnbqkb1r/pppppppp/5n2/8/2PP4/8/PP2PPPP/RNBQKBNR b KQkq - 0 2": {
+   "openings": [
+    {
+     "eco": "A50",
+     "name": "Mexican Defense"
+    },
+    {
+     "eco": "A50",
+     "name": "Indian Defense: Normal Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pppppp1p/5np1/8/2PP4/8/PP2PPPP/RNBQKBNR w KQkq - 0 3": null,
+  "rnbqkb1r/pppppp1p/5np1/8/2PP4/2N5/PP2PPPP/R1BQKBNR b KQkq - 1 3": null,
+  "rnbqk2r/ppppppbp/5np1/8/2PP4/2N5/PP2PPPP/R1BQKBNR w KQkq - 2 4": null,
+  "rnbqk2r/ppppppbp/5np1/8/2PPP3/2N5/PP3PPP/R1BQKBNR b KQkq - 0 4": {
+   "openings": [
+    {
+     "eco": "E70",
+     "name": "King's Indian Defense: Normal Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqk2r/ppp1ppbp/3p1np1/8/2PPP3/2N5/PP3PPP/R1BQKBNR w KQkq - 0 5": null,
+  "rnbqk2r/ppp1ppbp/3p1np1/8/2PPP3/2N2N2/PP3PPP/R1BQKB1R b KQkq - 1 5": null,
+  "rnbq1rk1/ppp1ppbp/3p1np1/8/2PPP3/2N2N2/PP3PPP/R1BQKB1R w KQ - 2 6": null,
+  "rnbq1rk1/ppp1ppbp/3p1np1/8/2PPP3/2N2N2/PP2BPPP/R1BQK2R b KQ - 3 6": null,
+  "rnbq1rk1/ppp2pbp/3p1np1/4p3/2PPP3/2N2N2/PP2BPPP/R1BQK2R w KQ - 0 7": {
+   "openings": [
+    {
+     "eco": "E92",
+     "name": "King's Indian Defense: Orthodox Variation"
+    },
+    {
+     "eco": "E94",
+     "name": "King's Indian Defense: Orthodox Variation, Glek Defense"
+    },
+    {
+     "eco": "E94",
+     "name": "King's Indian Defense: Orthodox Variation, Positional Defense"
+    },
+    {
+     "eco": "E97",
+     "name": "King's Indian Defense: Orthodox Variation, Aronin-Taimanov Defense"
+    },
+    {
+     "eco": "E92",
+     "name": "King's Indian Defense: Orthodox Variation, Gligoric-Taimanov System"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbq1rk1/ppp2pbp/3p1np1/4p3/2PPP3/2N2N2/PP2BPPP/R1BQ1RK1 b - - 1 7": {
+   "openings": [
+    {
+     "eco": "E92",
+     "name": "King's Indian Defense: Orthodox Variation"
+    },
+    {
+     "eco": "E94",
+     "name": "King's Indian Defense: Orthodox Variation, Glek Defense"
+    },
+    {
+     "eco": "E94",
+     "name": "King's Indian Defense: Orthodox Variation, Positional Defense"
+    },
+    {
+     "eco": "E97",
+     "name": "King's Indian Defense: Orthodox Variation, Aronin-Taimanov Defense"
+    },
+    {
+     "eco": "E92",
+     "name": "King's Indian Defense: Orthodox Variation, Gligoric-Taimanov System"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bq1rk1/ppp2pbp/2np1np1/4p3/2PPP3/2N2N2/PP2BPPP/R1BQ1RK1 w - - 2 8": {
+   "openings": [
+    {
+     "eco": "E92",
+     "name": "King's Indian Defense: Orthodox Variation"
+    },
+    {
+     "eco": "E94",
+     "name": "King's Indian Defense: Orthodox Variation, Glek Defense"
+    },
+    {
+     "eco": "E94",
+     "name": "King's Indian Defense: Orthodox Variation, Positional Defense"
+    },
+    {
+     "eco": "E97",
+     "name": "King's Indian Defense: Orthodox Variation, Aronin-Taimanov Defense"
+    },
+    {
+     "eco": "E92",
+     "name": "King's Indian Defense: Orthodox Variation, Gligoric-Taimanov System"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bq1rk1/ppp2pbp/2np1np1/3Pp3/2P1P3/2N2N2/PP2BPPP/R1BQ1RK1 b - - 0 8": {
+   "openings": [
+    {
+     "eco": "E92",
+     "name": "King's Indian Defense: Petrosian Variation"
+    },
+    {
+     "eco": "E97",
+     "name": "King's Indian Defense: Orthodox Variation, Modern System"
+    },
+    {
+     "eco": "E93",
+     "name": "King's Indian Defense: Petrosian Variation, Normal Defense"
+    },
+    {
+     "eco": "E97",
+     "name": "King's Indian Defense: Orthodox Variation, Korchnoi Attack"
+    },
+    {
+     "eco": "E98",
+     "name": "King's Indian Defense: Orthodox Variation, Classical System"
+    },
+    {
+     "eco": "E94",
+     "name": "King's Indian Defense: Orthodox Variation, Positional Defense, Closed Line"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bq1rk1/ppp1npbp/3p1np1/3Pp3/2P1P3/2N2N2/PP2BPPP/R1BQ1RK1 w - - 1 9": {
+   "openings": [
+    {
+     "eco": "E92",
+     "name": "King's Indian Defense: Petrosian Variation"
+    },
+    {
+     "eco": "E97",
+     "name": "King's Indian Defense: Orthodox Variation, Modern System"
+    },
+    {
+     "eco": "E93",
+     "name": "King's Indian Defense: Petrosian Variation, Normal Defense"
+    },
+    {
+     "eco": "E97",
+     "name": "King's Indian Defense: Orthodox Variation, Korchnoi Attack"
+    },
+    {
+     "eco": "E98",
+     "name": "King's Indian Defense: Orthodox Variation, Classical System"
+    },
+    {
+     "eco": "E94",
+     "name": "King's Indian Defense: Orthodox Variation, Positional Defense, Closed Line"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bq1rk1/ppp1npbp/3p1np1/3Pp3/2P1P3/2N5/PP2BPPP/R1BQNRK1 b - - 2 9": {
+   "openings": [
+    {
+     "eco": "E92",
+     "name": "King's Indian Defense: Petrosian Variation"
+    },
+    {
+     "eco": "E97",
+     "name": "King's Indian Defense: Orthodox Variation, Modern System"
+    },
+    {
+     "eco": "E93",
+     "name": "King's Indian Defense: Petrosian Variation, Normal Defense"
+    },
+    {
+     "eco": "E97",
+     "name": "King's Indian Defense: Orthodox Variation, Korchnoi Attack"
+    },
+    {
+     "eco": "E98",
+     "name": "King's Indian Defense: Orthodox Variation, Classical System"
+    },
+    {
+     "eco": "E94",
+     "name": "King's Indian Defense: Orthodox Variation, Positional Defense, Closed Line"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "1rbq1rk1/1pp1ppbp/p1np1np1/8/2PPP3/2N1BP2/PP1QN1PP/R3KB1R w KQ - 2 9": {
+   "openings": [
+    {
+     "eco": "E83",
+     "name": "King's Indian Defense: Sämisch Variation, Panno Formation"
+    },
+    {
+     "eco": "E84",
+     "name": "King's Indian Defense: Sämisch Variation, Panno Main Line"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqk2r/ppp1ppbp/3p1np1/8/2PPP3/2N2P2/PP4PP/R1BQKBNR b KQkq - 0 5": {
+   "openings": [
+    {
+     "eco": "E81",
+     "name": "King's Indian Defense: Steiner Attack"
+    },
+    {
+     "eco": "E80",
+     "name": "King's Indian Defense: Sämisch Variation"
+    },
+    {
+     "eco": "A42",
+     "name": "Modern Defense: Averbakh Variation, Pseudo-Sämisch"
+    },
+    {
+     "eco": "E83",
+     "name": "King's Indian Defense: Sämisch Variation, Yates Defense"
+    },
+    {
+     "eco": "E81",
+     "name": "King's Indian Defense: Sämisch Variation, Normal Defense"
+    },
+    {
+     "eco": "E83",
+     "name": "King's Indian Defense: Sämisch Variation, Ruban Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbq1rk1/ppp1ppbp/3p1np1/8/2PPP3/2N2P2/PP4PP/R1BQKBNR w KQ - 1 6": {
+   "openings": [
+    {
+     "eco": "E81",
+     "name": "King's Indian Defense: Steiner Attack"
+    },
+    {
+     "eco": "E80",
+     "name": "King's Indian Defense: Sämisch Variation"
+    },
+    {
+     "eco": "A42",
+     "name": "Modern Defense: Averbakh Variation, Pseudo-Sämisch"
+    },
+    {
+     "eco": "E83",
+     "name": "King's Indian Defense: Sämisch Variation, Yates Defense"
+    },
+    {
+     "eco": "E81",
+     "name": "King's Indian Defense: Sämisch Variation, Normal Defense"
+    },
+    {
+     "eco": "E83",
+     "name": "King's Indian Defense: Sämisch Variation, Ruban Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbq1rk1/ppp1ppbp/3p1np1/8/2PPP3/2N1BP2/PP4PP/R2QKBNR b KQ - 2 6": {
+   "openings": [
+    {
+     "eco": "E81",
+     "name": "King's Indian Defense: Steiner Attack"
+    },
+    {
+     "eco": "E80",
+     "name": "King's Indian Defense: Sämisch Variation"
+    },
+    {
+     "eco": "A42",
+     "name": "Modern Defense: Averbakh Variation, Pseudo-Sämisch"
+    },
+    {
+     "eco": "E83",
+     "name": "King's Indian Defense: Sämisch Variation, Yates Defense"
+    },
+    {
+     "eco": "E81",
+     "name": "King's Indian Defense: Sämisch Variation, Normal Defense"
+    },
+    {
+     "eco": "E83",
+     "name": "King's Indian Defense: Sämisch Variation, Ruban Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bq1rk1/ppp1ppbp/2np1np1/8/2PPP3/2N1BP2/PP4PP/R2QKBNR w KQ - 3 7": {
+   "openings": [
+    {
+     "eco": "E81",
+     "name": "King's Indian Defense: Steiner Attack"
+    },
+    {
+     "eco": "E80",
+     "name": "King's Indian Defense: Sämisch Variation"
+    },
+    {
+     "eco": "A42",
+     "name": "Modern Defense: Averbakh Variation, Pseudo-Sämisch"
+    },
+    {
+     "eco": "E83",
+     "name": "King's Indian Defense: Sämisch Variation, Yates Defense"
+    },
+    {
+     "eco": "E81",
+     "name": "King's Indian Defense: Sämisch Variation, Normal Defense"
+    },
+    {
+     "eco": "E83",
+     "name": "King's Indian Defense: Sämisch Variation, Ruban Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bq1rk1/ppp1ppbp/2np1np1/8/2PPP3/2N1BP2/PP1Q2PP/R3KBNR b KQ - 4 7": {
+   "openings": [
+    {
+     "eco": "E81",
+     "name": "King's Indian Defense: Steiner Attack"
+    },
+    {
+     "eco": "E80",
+     "name": "King's Indian Defense: Sämisch Variation"
+    },
+    {
+     "eco": "A42",
+     "name": "Modern Defense: Averbakh Variation, Pseudo-Sämisch"
+    },
+    {
+     "eco": "E83",
+     "name": "King's Indian Defense: Sämisch Variation, Yates Defense"
+    },
+    {
+     "eco": "E81",
+     "name": "King's Indian Defense: Sämisch Variation, Normal Defense"
+    },
+    {
+     "eco": "E83",
+     "name": "King's Indian Defense: Sämisch Variation, Ruban Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bq1rk1/1pp1ppbp/p1np1np1/8/2PPP3/2N1BP2/PP1Q2PP/R3KBNR w KQ - 0 8": {
+   "openings": [
+    {
+     "eco": "E83",
+     "name": "King's Indian Defense: Sämisch Variation, Panno Formation"
+    },
+    {
+     "eco": "E84",
+     "name": "King's Indian Defense: Sämisch Variation, Panno Main Line"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bq1rk1/1pp1ppbp/p1np1np1/8/2PPP3/2N1BP2/PP1QN1PP/R3KB1R b KQ - 1 8": {
+   "openings": [
+    {
+     "eco": "E83",
+     "name": "King's Indian Defense: Sämisch Variation, Panno Formation"
+    },
+    {
+     "eco": "E84",
+     "name": "King's Indian Defense: Sämisch Variation, Panno Main Line"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9": {
+   "openings": [
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange, Alekhine Variation"
+    },
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange Variation, Alekhine Variation"
+    }
+   ],
+   "pawnsDifferent": 2
+  },
+  "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1": null,
+  "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2": null,
+  "rnbqkbnr/pppp1ppp/8/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2": null,
+  "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3": null,
+  "r1bqkbnr/pppp1ppp/2n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3": null,
+  "r1bqkbnr/1ppp1ppp/p1n5/1B2p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 4": {
+   "openings": [
+    {
+     "eco": "C84",
+     "name": "Ruy Lopez: Closed"
+    },
+    {
+     "eco": "C70",
+     "name": "Ruy Lopez: Morphy Defense"
+    },
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange Variation"
+    },
+    {
+     "eco": "C84",
+     "name": "Ruy Lopez: Closed, Morphy Attack"
+    },
+    {
+     "eco": "C86",
+     "name": "Ruy Lopez: Closed, Worrall Attack"
+    },
+    {
+     "eco": "C70",
+     "name": "Ruy Lopez: Bird's Defense Deferred"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkbnr/1ppp1ppp/p1B5/4p3/4P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 0 4": {
+   "openings": [
+    {
+     "eco": "C84",
+     "name": "Ruy Lopez: Closed"
+    },
+    {
+     "eco": "C70",
+     "name": "Ruy Lopez: Morphy Defense"
+    },
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange Variation"
+    },
+    {
+     "eco": "C84",
+     "name": "Ruy Lopez: Closed, Morphy Attack"
+    },
+    {
+     "eco": "C86",
+     "name": "Ruy Lopez: Closed, Worrall Attack"
+    },
+    {
+     "eco": "C70",
+     "name": "Ruy Lopez: Bird's Defense Deferred"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkbnr/1pp2ppp/p1p5/4p3/4P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 0 5": {
+   "openings": [
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange Variation, Keres Variation"
+    },
+    {
+     "eco": "C69",
+     "name": "Ruy Lopez: Exchange Variation, Normal Variation"
+    },
+    {
+     "eco": "C69",
+     "name": "Ruy Lopez: Exchange Variation, Bronstein Variation"
+    },
+    {
+     "eco": "C69",
+     "name": "Ruy Lopez: Exchange Variation, King's Bishop Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkbnr/1pp2ppp/p1p5/4p3/4P3/5N2/PPPP1PPP/RNBQ1RK1 b kq - 1 5": {
+   "openings": [
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange Variation, Keres Variation"
+    },
+    {
+     "eco": "C69",
+     "name": "Ruy Lopez: Exchange Variation, Normal Variation"
+    },
+    {
+     "eco": "C69",
+     "name": "Ruy Lopez: Exchange Variation, Bronstein Variation"
+    },
+    {
+     "eco": "C69",
+     "name": "Ruy Lopez: Exchange Variation, King's Bishop Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkbnr/1pp3pp/p1p2p2/4p3/4P3/5N2/PPPP1PPP/RNBQ1RK1 w kq - 0 6": {
+   "openings": [
+    {
+     "eco": "C69",
+     "name": "Ruy Lopez: Exchange Variation, Gligoric Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkbnr/1pp3pp/p1p2p2/4p3/3PP3/5N2/PPP2PPP/RNBQ1RK1 b kq - 0 6": {
+   "openings": [
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange Variation, Romanovsky Variation"
+    }
+   ],
+   "pawnsDifferent": 1
+  },
+  "r1bqkbnr/1pp3pp/p1p2p2/8/3pP3/5N2/PPP2PPP/RNBQ1RK1 w kq - 0 7": {
+   "openings": [
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange, Alekhine Variation"
+    },
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange Variation, Alekhine Variation"
+    }
+   ],
+   "pawnsDifferent": 2
+  },
+  "r1bqkbnr/1pp3pp/p1p2p2/8/3NP3/8/PPP2PPP/RNBQ1RK1 b kq - 0 7": {
+   "openings": [
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange, Alekhine Variation"
+    },
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange Variation, Alekhine Variation"
+    }
+   ],
+   "pawnsDifferent": 1
+  },
+  "r1bqkbnr/1pp3pp/p4p2/2p5/3NP3/8/PPP2PPP/RNBQ1RK1 w kq - 0 8": {
+   "openings": [
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange, Alekhine Variation"
+    },
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange Variation, Alekhine Variation"
+    }
+   ],
+   "pawnsDifferent": 2
+  },
+  "r1bqkbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBQ1RK1 b kq - 1 8": {
+   "openings": [
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange, Alekhine Variation"
+    },
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange Variation, Alekhine Variation"
+    }
+   ],
+   "pawnsDifferent": 2
+  },
+  "r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBq1RK1 w kq - 0 9": {
+   "openings": [
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange, Alekhine Variation"
+    },
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange Variation, Alekhine Variation"
+    }
+   ],
+   "pawnsDifferent": 2
+  },
+  "r1b2rk1/2q1bppp/p2p1n2/npp1p3/3PP3/2P2N1P/PPBN1PP1/R1BQR1K1 b - - 2 12": {
+   "openings": [
+    {
+     "eco": "C96",
+     "name": "Ruy Lopez: Closed, Keres Defense"
+    },
+    {
+     "eco": "C95",
+     "name": "Ruy Lopez: Closed, Breyer Defense"
+    },
+    {
+     "eco": "C97",
+     "name": "Ruy Lopez: Closed, Chigorin Defense"
+    },
+    {
+     "eco": "C96",
+     "name": "Ruy Lopez: Closed, Borisenko Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkbnr/1ppp1ppp/p1n5/4p3/B3P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 1 4": {
+   "openings": [
+    {
+     "eco": "C84",
+     "name": "Ruy Lopez: Closed"
+    },
+    {
+     "eco": "C70",
+     "name": "Ruy Lopez: Morphy Defense"
+    },
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange Variation"
+    },
+    {
+     "eco": "C84",
+     "name": "Ruy Lopez: Closed, Morphy Attack"
+    },
+    {
+     "eco": "C86",
+     "name": "Ruy Lopez: Closed, Worrall Attack"
+    },
+    {
+     "eco": "C70",
+     "name": "Ruy Lopez: Bird's Defense Deferred"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkb1r/1ppp1ppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 2 5": {
+   "openings": [
+    {
+     "eco": "C84",
+     "name": "Ruy Lopez: Closed"
+    },
+    {
+     "eco": "C70",
+     "name": "Ruy Lopez: Morphy Defense"
+    },
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange Variation"
+    },
+    {
+     "eco": "C84",
+     "name": "Ruy Lopez: Closed, Morphy Attack"
+    },
+    {
+     "eco": "C86",
+     "name": "Ruy Lopez: Closed, Worrall Attack"
+    },
+    {
+     "eco": "C70",
+     "name": "Ruy Lopez: Bird's Defense Deferred"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkb1r/1ppp1ppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQ1RK1 b kq - 3 5": {
+   "openings": [
+    {
+     "eco": "C84",
+     "name": "Ruy Lopez: Closed"
+    },
+    {
+     "eco": "C70",
+     "name": "Ruy Lopez: Morphy Defense"
+    },
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange Variation"
+    },
+    {
+     "eco": "C84",
+     "name": "Ruy Lopez: Closed, Morphy Attack"
+    },
+    {
+     "eco": "C86",
+     "name": "Ruy Lopez: Closed, Worrall Attack"
+    },
+    {
+     "eco": "C70",
+     "name": "Ruy Lopez: Bird's Defense Deferred"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqk2r/1pppbppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQ1RK1 w kq - 4 6": {
+   "openings": [
+    {
+     "eco": "C84",
+     "name": "Ruy Lopez: Closed"
+    },
+    {
+     "eco": "C70",
+     "name": "Ruy Lopez: Morphy Defense"
+    },
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange Variation"
+    },
+    {
+     "eco": "C84",
+     "name": "Ruy Lopez: Closed, Morphy Attack"
+    },
+    {
+     "eco": "C86",
+     "name": "Ruy Lopez: Closed, Worrall Attack"
+    },
+    {
+     "eco": "C70",
+     "name": "Ruy Lopez: Bird's Defense Deferred"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqk2r/1pppbppp/p1n2n2/4p3/B3P3/5N2/PPPP1PPP/RNBQR1K1 b kq - 5 6": {
+   "openings": [
+    {
+     "eco": "C84",
+     "name": "Ruy Lopez: Closed"
+    },
+    {
+     "eco": "C70",
+     "name": "Ruy Lopez: Morphy Defense"
+    },
+    {
+     "eco": "C68",
+     "name": "Ruy Lopez: Exchange Variation"
+    },
+    {
+     "eco": "C84",
+     "name": "Ruy Lopez: Closed, Morphy Attack"
+    },
+    {
+     "eco": "C86",
+     "name": "Ruy Lopez: Closed, Worrall Attack"
+    },
+    {
+     "eco": "C70",
+     "name": "Ruy Lopez: Bird's Defense Deferred"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqk2r/2ppbppp/p1n2n2/1p2p3/B3P3/5N2/PPPP1PPP/RNBQR1K1 w kq - 0 7": {
+   "openings": [
+    {
+     "eco": "C88",
+     "name": "Ruy Lopez: Closed"
+    },
+    {
+     "eco": "C70",
+     "name": "Ruy Lopez: Morphy Defense, Caro Variation"
+    },
+    {
+     "eco": "C70",
+     "name": "Ruy Lopez: Morphy Defense, Graz Variation"
+    },
+    {
+     "eco": "C88",
+     "name": "Ruy Lopez: Closed, Trajkovic Counterattack"
+    },
+    {
+     "eco": "C70",
+     "name": "Ruy Lopez: Morphy Defense, Norwegian Variation"
+    },
+    {
+     "eco": "C78",
+     "name": "Ruy Lopez: Morphy Defense, Arkhangelsk Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqk2r/2ppbppp/p1n2n2/1p2p3/4P3/1B3N2/PPPP1PPP/RNBQR1K1 b kq - 1 7": {
+   "openings": [
+    {
+     "eco": "C88",
+     "name": "Ruy Lopez: Closed"
+    },
+    {
+     "eco": "C70",
+     "name": "Ruy Lopez: Morphy Defense, Caro Variation"
+    },
+    {
+     "eco": "C70",
+     "name": "Ruy Lopez: Morphy Defense, Graz Variation"
+    },
+    {
+     "eco": "C88",
+     "name": "Ruy Lopez: Closed, Trajkovic Counterattack"
+    },
+    {
+     "eco": "C70",
+     "name": "Ruy Lopez: Morphy Defense, Norwegian Variation"
+    },
+    {
+     "eco": "C78",
+     "name": "Ruy Lopez: Morphy Defense, Arkhangelsk Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqk2r/2p1bppp/p1np1n2/1p2p3/4P3/1B3N2/PPPP1PPP/RNBQR1K1 w kq - 0 8": {
+   "openings": [
+    {
+     "eco": "C78",
+     "name": "Ruy Lopez: Morphy Defense"
+    },
+    {
+     "eco": "C86",
+     "name": "Ruy Lopez: Closed, Worrall Attack, Delayed Castling Line"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqk2r/2p1bppp/p1np1n2/1p2p3/4P3/1BP2N2/PP1P1PPP/RNBQR1K1 b kq - 0 8": {
+   "openings": [
+    {
+     "eco": "C90",
+     "name": "Ruy Lopez: Closed"
+    },
+    {
+     "eco": "C90",
+     "name": "Ruy Lopez: Closed, Lutikov Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bq1rk1/2p1bppp/p1np1n2/1p2p3/4P3/1BP2N2/PP1P1PPP/RNBQR1K1 w - - 1 9": {
+   "openings": [
+    {
+     "eco": "C90",
+     "name": "Ruy Lopez: Closed"
+    },
+    {
+     "eco": "C90",
+     "name": "Ruy Lopez: Closed, Lutikov Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bq1rk1/2p1bppp/p1np1n2/1p2p3/4P3/1BP2N1P/PP1P1PP1/RNBQR1K1 b - - 0 9": {
+   "openings": [
+    {
+     "eco": "C92",
+     "name": "Ruy Lopez: Closed"
+    },
+    {
+     "eco": "C92",
+     "name": "Ruy Lopez: Closed, Flohr System"
+    },
+    {
+     "eco": "C92",
+     "name": "Ruy Lopez: Closed, Zaitsev System"
+    },
+    {
+     "eco": "C94",
+     "name": "Ruy Lopez: Closed, Breyer Defense"
+    },
+    {
+     "eco": "C92",
+     "name": "Ruy Lopez: Closed, Karpov Variation"
+    },
+    {
+     "eco": "C96",
+     "name": "Ruy Lopez: Closed, Chigorin Defense"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bq1rk1/2p1bppp/p2p1n2/np2p3/4P3/1BP2N1P/PP1P1PP1/RNBQR1K1 w - - 1 10": {
+   "openings": [
+    {
+     "eco": "C92",
+     "name": "Ruy Lopez: Closed"
+    },
+    {
+     "eco": "C92",
+     "name": "Ruy Lopez: Closed, Flohr System"
+    },
+    {
+     "eco": "C92",
+     "name": "Ruy Lopez: Closed, Zaitsev System"
+    },
+    {
+     "eco": "C94",
+     "name": "Ruy Lopez: Closed, Breyer Defense"
+    },
+    {
+     "eco": "C92",
+     "name": "Ruy Lopez: Closed, Karpov Variation"
+    },
+    {
+     "eco": "C96",
+     "name": "Ruy Lopez: Closed, Chigorin Defense"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bq1rk1/2p1bppp/p2p1n2/np2p3/4P3/2P2N1P/PPBP1PP1/RNBQR1K1 b - - 2 10": {
+   "openings": [
+    {
+     "eco": "C92",
+     "name": "Ruy Lopez: Closed"
+    },
+    {
+     "eco": "C92",
+     "name": "Ruy Lopez: Closed, Flohr System"
+    },
+    {
+     "eco": "C92",
+     "name": "Ruy Lopez: Closed, Zaitsev System"
+    },
+    {
+     "eco": "C94",
+     "name": "Ruy Lopez: Closed, Breyer Defense"
+    },
+    {
+     "eco": "C92",
+     "name": "Ruy Lopez: Closed, Karpov Variation"
+    },
+    {
+     "eco": "C96",
+     "name": "Ruy Lopez: Closed, Chigorin Defense"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bq1rk1/4bppp/p2p1n2/npp1p3/4P3/2P2N1P/PPBP1PP1/RNBQR1K1 w - - 0 11": {
+   "openings": [
+    {
+     "eco": "C96",
+     "name": "Ruy Lopez: Closed, Chigorin Defense"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bq1rk1/4bppp/p2p1n2/npp1p3/3PP3/2P2N1P/PPB2PP1/RNBQR1K1 b - - 0 11": {
+   "openings": [
+    {
+     "eco": "C96",
+     "name": "Ruy Lopez: Closed, Keres Defense"
+    },
+    {
+     "eco": "C95",
+     "name": "Ruy Lopez: Closed, Breyer Defense"
+    },
+    {
+     "eco": "C97",
+     "name": "Ruy Lopez: Closed, Chigorin Defense"
+    },
+    {
+     "eco": "C96",
+     "name": "Ruy Lopez: Closed, Borisenko Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1b2rk1/2q1bppp/p2p1n2/npp1p3/3PP3/2P2N1P/PPB2PP1/RNBQR1K1 w - - 1 12": {
+   "openings": [
+    {
+     "eco": "C96",
+     "name": "Ruy Lopez: Closed, Keres Defense"
+    },
+    {
+     "eco": "C95",
+     "name": "Ruy Lopez: Closed, Breyer Defense"
+    },
+    {
+     "eco": "C97",
+     "name": "Ruy Lopez: Closed, Chigorin Defense"
+    },
+    {
+     "eco": "C96",
+     "name": "Ruy Lopez: Closed, Borisenko Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqrnk1/pp2bppp/2p2n2/3p2B1/3P4/2NBPN2/PPQ2PPP/R4RK1 w - - 8 11": {
+   "openings": [
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Exchange Variation"
+    },
+    {
+     "eco": "D36",
+     "name": "Queen's Gambit Declined: Exchange Variation, Reshevsky Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2": null,
+  "rnbqkbnr/ppp1pppp/8/3p4/2PP4/8/PP2PPPP/RNBQKBNR b KQkq - 0 2": {
+   "openings": [
+    {
+     "eco": "D06",
+     "name": "Queen's Gambit"
+    },
+    {
+     "eco": "D06",
+     "name": "Queen's Gambit Declined: Baltic Defense"
+    },
+    {
+     "eco": "D06",
+     "name": "Queen's Gambit Declined: Marshall Defense"
+    },
+    {
+     "eco": "D07",
+     "name": "Queen's Gambit Declined: Chigorin Defense"
+    },
+    {
+     "eco": "D07",
+     "name": "Queen's Gambit Declined: Chigorin Defense, Main Line"
+    },
+    {
+     "eco": "D06",
+     "name": "Queen's Gambit Declined: Baltic Defense, Queen Attack"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/8/PP2PPPP/RNBQKBNR w KQkq - 0 3": {
+   "openings": [
+    {
+     "eco": "D30",
+     "name": "Queen's Gambit Declined"
+    },
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Normal Defense"
+    },
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Harrwitz Attack"
+    },
+    {
+     "eco": "D37",
+     "name": "Queen's Gambit Declined: Miles Variation"
+    },
+    {
+     "eco": "D38",
+     "name": "Queen's Gambit Declined: Ragozin Defense"
+    },
+    {
+     "eco": "D30",
+     "name": "Queen's Gambit Declined: Vienna Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/ppp2ppp/4p3/3p4/2PP4/2N5/PP2PPPP/R1BQKBNR b KQkq - 1 3": {
+   "openings": [
+    {
+     "eco": "D30",
+     "name": "Queen's Gambit Declined"
+    },
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Normal Defense"
+    },
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Harrwitz Attack"
+    },
+    {
+     "eco": "D37",
+     "name": "Queen's Gambit Declined: Miles Variation"
+    },
+    {
+     "eco": "D38",
+     "name": "Queen's Gambit Declined: Ragozin Defense"
+    },
+    {
+     "eco": "D30",
+     "name": "Queen's Gambit Declined: Vienna Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/ppp2ppp/4pn2/3p4/2PP4/2N5/PP2PPPP/R1BQKBNR w KQkq - 2 4": {
+   "openings": [
+    {
+     "eco": "D30",
+     "name": "Queen's Gambit Declined"
+    },
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Normal Defense"
+    },
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Harrwitz Attack"
+    },
+    {
+     "eco": "D37",
+     "name": "Queen's Gambit Declined: Miles Variation"
+    },
+    {
+     "eco": "D38",
+     "name": "Queen's Gambit Declined: Ragozin Defense"
+    },
+    {
+     "eco": "D30",
+     "name": "Queen's Gambit Declined: Vienna Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/ppp2ppp/4pn2/3P4/3P4/2N5/PP2PPPP/R1BQKBNR b KQkq - 0 4": {
+   "openings": [
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Exchange Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/ppp2ppp/5n2/3p4/3P4/2N5/PP2PPPP/R1BQKBNR w KQkq - 0 5": {
+   "openings": [
+    {
+     "eco": "E35",
+     "name": "Nimzo-Indian Defense: Classical Variation, Noa Variation"
+    },
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Exchange Variation, Sämisch Variation"
+    },
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Exchange Variation, Positional Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/ppp2ppp/5n2/3p2B1/3P4/2N5/PP2PPPP/R2QKBNR b KQkq - 1 5": {
+   "openings": [
+    {
+     "eco": "E35",
+     "name": "Nimzo-Indian Defense: Classical Variation, Noa Variation"
+    },
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Exchange Variation, Sämisch Variation"
+    },
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Exchange Variation, Positional Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqk2r/ppp1bppp/5n2/3p2B1/3P4/2N5/PP2PPPP/R2QKBNR w KQkq - 2 6": {
+   "openings": [
+    {
+     "eco": "E35",
+     "name": "Nimzo-Indian Defense: Classical Variation, Noa Variation"
+    },
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Exchange Variation, Sämisch Variation"
+    },
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Exchange Variation, Positional Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqk2r/ppp1bppp/5n2/3p2B1/3P4/2N1P3/PP3PPP/R2QKBNR b KQkq - 0 6": {
+   "openings": [
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Exchange Variation, Chameleon Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqk2r/pp2bppp/2p2n2/3p2B1/3P4/2N1P3/PP3PPP/R2QKBNR w KQkq - 0 7": {
+   "openings": [
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Exchange Variation"
+    },
+    {
+     "eco": "D36",
+     "name": "Queen's Gambit Declined: Exchange Variation, Reshevsky Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqk2r/pp2bppp/2p2n2/3p2B1/3P4/2NBP3/PP3PPP/R2QK1NR b KQkq - 1 7": {
+   "openings": [
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Exchange Variation"
+    },
+    {
+     "eco": "D36",
+     "name": "Queen's Gambit Declined: Exchange Variation, Reshevsky Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqk2r/pp1nbppp/2p2n2/3p2B1/3P4/2NBP3/PP3PPP/R2QK1NR w KQkq - 2 8": {
+   "openings": [
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Exchange Variation"
+    },
+    {
+     "eco": "D36",
+     "name": "Queen's Gambit Declined: Exchange Variation, Reshevsky Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqk2r/pp1nbppp/2p2n2/3p2B1/3P4/2NBP3/PPQ2PPP/R3K1NR b KQkq - 3 8": {
+   "openings": [
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Exchange Variation"
+    },
+    {
+     "eco": "D36",
+     "name": "Queen's Gambit Declined: Exchange Variation, Reshevsky Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bq1rk1/pp1nbppp/2p2n2/3p2B1/3P4/2NBP3/PPQ2PPP/R3K1NR w KQ - 4 9": {
+   "openings": [
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Exchange Variation"
+    },
+    {
+     "eco": "D36",
+     "name": "Queen's Gambit Declined: Exchange Variation, Reshevsky Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bq1rk1/pp1nbppp/2p2n2/3p2B1/3P4/2NBPN2/PPQ2PPP/R3K2R b KQ - 5 9": {
+   "openings": [
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Exchange Variation"
+    },
+    {
+     "eco": "D36",
+     "name": "Queen's Gambit Declined: Exchange Variation, Reshevsky Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqr1k1/pp1nbppp/2p2n2/3p2B1/3P4/2NBPN2/PPQ2PPP/R3K2R w KQ - 6 10": {
+   "openings": [
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Exchange Variation"
+    },
+    {
+     "eco": "D36",
+     "name": "Queen's Gambit Declined: Exchange Variation, Reshevsky Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqr1k1/pp1nbppp/2p2n2/3p2B1/3P4/2NBPN2/PPQ2PPP/R4RK1 b - - 7 10": {
+   "openings": [
+    {
+     "eco": "D35",
+     "name": "Queen's Gambit Declined: Exchange Variation"
+    },
+    {
+     "eco": "D36",
+     "name": "Queen's Gambit Declined: Exchange Variation, Reshevsky Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bq1rk1/pp2bppp/2n1p3/3n4/3P4/2NB1N2/PP3PPP/R1BQR1K1 b - - 5 10": {
+   "openings": [
+    {
+     "eco": "E54",
+     "name": "Nimzo-Indian Defense: Normal Variation, Gligoric System, Exchange Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/pp1ppppp/2p5/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2": {
+   "openings": [
+    {
+     "eco": "B10",
+     "name": "Caro-Kann Defense"
+    },
+    {
+     "eco": "B10",
+     "name": "Caro-Kann Defense: Hillbilly Attack"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/pp1ppppp/2p5/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2": {
+   "openings": [
+    {
+     "eco": "B12",
+     "name": "Caro-Kann Defense"
+    },
+    {
+     "eco": "B12",
+     "name": "Caro-Kann Defense: Masi Variation"
+    },
+    {
+     "eco": "B12",
+     "name": "Caro-Kann Defense: De Bruycker Defense"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/pp2pppp/2p5/3p4/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3": {
+   "openings": [
+    {
+     "eco": "B12",
+     "name": "Caro-Kann Defense"
+    },
+    {
+     "eco": "B12",
+     "name": "Caro-Kann Defense: Mieses Gambit"
+    },
+    {
+     "eco": "B12",
+     "name": "Caro-Kann Defense: Modern Variation"
+    },
+    {
+     "eco": "B15",
+     "name": "Caro-Kann Defense: Campomanes Attack"
+    },
+    {
+     "eco": "B12",
+     "name": "Caro-Kann Defense: Edinburgh Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/pp2pppp/2p5/3P4/3P4/8/PPP2PPP/RNBQKBNR b KQkq - 0 3": {
+   "openings": [
+    {
+     "eco": "B13",
+     "name": "Caro-Kann Defense: Exchange Variation"
+    },
+    {
+     "eco": "B01",
+     "name": "Scandinavian Defense: Portuguese Gambit, Elbow Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/pp2pppp/8/3p4/3P4/8/PPP2PPP/RNBQKBNR w KQkq - 0 4": {
+   "openings": [
+    {
+     "eco": "B13",
+     "name": "Caro-Kann Defense: Exchange Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/pp2pppp/8/3p4/2PP4/8/PP3PPP/RNBQKBNR b KQkq - 0 4": {
+   "openings": [
+    {
+     "eco": "B13",
+     "name": "Caro-Kann Defense: Panov Attack"
+    },
+    {
+     "eco": "B13",
+     "name": "Caro-Kann Defense: Panov Attack, Modern Defense"
+    },
+    {
+     "eco": "B13",
+     "name": "Caro-Kann Defense: Panov Attack, Modern Defense, Mieses Line"
+    },
+    {
+     "eco": "B13",
+     "name": "Caro-Kann Defense: Panov Attack, Modern Defense, Czerniak Line"
+    },
+    {
+     "eco": "B13",
+     "name": "Caro-Kann Defense: Panov Attack, Modern Defense, Reifir-Spielmann Line"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pp2pppp/5n2/3p4/2PP4/8/PP3PPP/RNBQKBNR w KQkq - 1 5": {
+   "openings": [
+    {
+     "eco": "B13",
+     "name": "Caro-Kann Defense: Panov Attack"
+    },
+    {
+     "eco": "B13",
+     "name": "Caro-Kann Defense: Panov Attack, Modern Defense"
+    },
+    {
+     "eco": "B13",
+     "name": "Caro-Kann Defense: Panov Attack, Modern Defense, Mieses Line"
+    },
+    {
+     "eco": "B13",
+     "name": "Caro-Kann Defense: Panov Attack, Modern Defense, Czerniak Line"
+    },
+    {
+     "eco": "B13",
+     "name": "Caro-Kann Defense: Panov Attack, Modern Defense, Reifir-Spielmann Line"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pp2pppp/5n2/3p4/2PP4/2N5/PP3PPP/R1BQKBNR b KQkq - 2 5": {
+   "openings": [
+    {
+     "eco": "B13",
+     "name": "Caro-Kann Defense: Panov Attack"
+    },
+    {
+     "eco": "B13",
+     "name": "Caro-Kann Defense: Panov Attack, Modern Defense"
+    },
+    {
+     "eco": "B13",
+     "name": "Caro-Kann Defense: Panov Attack, Modern Defense, Mieses Line"
+    },
+    {
+     "eco": "B13",
+     "name": "Caro-Kann Defense: Panov Attack, Modern Defense, Czerniak Line"
+    },
+    {
+     "eco": "B13",
+     "name": "Caro-Kann Defense: Panov Attack, Modern Defense, Reifir-Spielmann Line"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pp3ppp/4pn2/3p4/2PP4/2N5/PP3PPP/R1BQKBNR w KQkq - 0 6": {
+   "openings": [
+    {
+     "eco": "B14",
+     "name": "Caro-Kann Defense: Panov Attack"
+    },
+    {
+     "eco": "B14",
+     "name": "Caro-Kann Defense: Panov Attack, Main Line"
+    },
+    {
+     "eco": "B13",
+     "name": "Caro-Kann Defense: Panov Attack, Modern Defense, Carlsbad Line"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pp3ppp/4pn2/3p4/2PP4/2N2N2/PP3PPP/R1BQKB1R b KQkq - 1 6": {
+   "openings": [
+    {
+     "eco": "B14",
+     "name": "Caro-Kann Defense: Panov Attack"
+    },
+    {
+     "eco": "B14",
+     "name": "Caro-Kann Defense: Panov Attack, Main Line"
+    },
+    {
+     "eco": "B13",
+     "name": "Caro-Kann Defense: Panov Attack, Modern Defense, Carlsbad Line"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqk2r/pp2bppp/4pn2/3p4/2PP4/2N2N2/PP3PPP/R1BQKB1R w KQkq - 2 7": {
+   "openings": [
+    {
+     "eco": "B14",
+     "name": "Caro-Kann Defense: Panov Attack"
+    },
+    {
+     "eco": "B14",
+     "name": "Caro-Kann Defense: Panov Attack, Main Line"
+    },
+    {
+     "eco": "B13",
+     "name": "Caro-Kann Defense: Panov Attack, Modern Defense, Carlsbad Line"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqk2r/pp2bppp/4pn2/3P4/3P4/2N2N2/PP3PPP/R1BQKB1R b KQkq - 0 7": {
+   "openings": [
+    {
+     "eco": "C01",
+     "name": "French Defense: Exchange Variation"
+    },
+    {
+     "eco": "C12",
+     "name": "French Defense: McCutcheon Variation, Exchange Variation"
+    },
+    {
+     "eco": "C15",
+     "name": "French Defense: Winawer Variation, Delayed Exchange Variation"
+    },
+    {
+     "eco": "C11",
+     "name": "French Defense: Classical Variation, Delayed Exchange Variation"
+    }
+   ],
+   "pawnsDifferent": 1
+  },
+  "rnbqk2r/pp2bppp/4p3/3n4/3P4/2N2N2/PP3PPP/R1BQKB1R w KQkq - 0 8": {
+   "openings": [
+    {
+     "eco": "E54",
+     "name": "Nimzo-Indian Defense: Normal Variation, Gligoric System, Exchange Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqk2r/pp2bppp/4p3/3n4/3P4/2NB1N2/PP3PPP/R1BQK2R b KQkq - 1 8": {
+   "openings": [
+    {
+     "eco": "E54",
+     "name": "Nimzo-Indian Defense: Normal Variation, Gligoric System, Exchange Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqk2r/pp2bppp/2n1p3/3n4/3P4/2NB1N2/PP3PPP/R1BQK2R w KQkq - 2 9": {
+   "openings": [
+    {
+     "eco": "E54",
+     "name": "Nimzo-Indian Defense: Normal Variation, Gligoric System, Exchange Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqk2r/pp2bppp/2n1p3/3n4/3P4/2NB1N2/PP3PPP/R1BQ1RK1 b kq - 3 9": {
+   "openings": [
+    {
+     "eco": "E54",
+     "name": "Nimzo-Indian Defense: Normal Variation, Gligoric System, Exchange Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bq1rk1/pp2bppp/2n1p3/3n4/3P4/2NB1N2/PP3PPP/R1BQ1RK1 w - - 4 10": {
+   "openings": [
+    {
+     "eco": "E54",
+     "name": "Nimzo-Indian Defense: Normal Variation, Gligoric System, Exchange Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1b1kbnr/pp3ppp/1qn1p3/2ppP3/3P4/2P2N2/PP3PPP/RNBQKB1R w KQkq - 3 6": {
+   "openings": [
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation"
+    },
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation, Euwe Variation"
+    },
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation, Paulsen Attack"
+    },
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation, Wade Variation"
+    },
+    {
+     "eco": "C05",
+     "name": "French Defense: Tarrasch Variation, Closed Variation"
+    },
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation, Milner-Barry Gambit"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/pppp1ppp/4p3/8/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2": {
+   "openings": [
+    {
+     "eco": "C00",
+     "name": "French Defense"
+    },
+    {
+     "eco": "C00",
+     "name": "French Defense: Queen's Knight"
+    },
+    {
+     "eco": "C00",
+     "name": "French Defense: Bird Invitation"
+    },
+    {
+     "eco": "C00",
+     "name": "French Defense: Knight Variation"
+    },
+    {
+     "eco": "C00",
+     "name": "French Defense: Chigorin Variation"
+    },
+    {
+     "eco": "B00",
+     "name": "Nimzowitsch Defense: French Connection"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/pppp1ppp/4p3/8/3PP3/8/PPP2PPP/RNBQKBNR b KQkq - 0 2": {
+   "openings": [
+    {
+     "eco": "C00",
+     "name": "French Defense: Normal Variation"
+    },
+    {
+     "eco": "C00",
+     "name": "French Defense: Mediterranean Defense"
+    },
+    {
+     "eco": "A45",
+     "name": "Trompowsky Attack: Classical Defense, Big Center Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/ppp2ppp/4p3/3p4/3PP3/8/PPP2PPP/RNBQKBNR w KQkq - 0 3": {
+   "openings": [
+    {
+     "eco": "C00",
+     "name": "French Defense"
+    },
+    {
+     "eco": "C00",
+     "name": "French Defense: Alapin Gambit"
+    },
+    {
+     "eco": "C00",
+     "name": "French Defense: Morphy Gambit"
+    },
+    {
+     "eco": "C00",
+     "name": "French Defense: Perseus Gambit"
+    },
+    {
+     "eco": "C10",
+     "name": "French Defense: Paulsen Variation"
+    },
+    {
+     "eco": "C15",
+     "name": "French Defense: Winawer Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/ppp2ppp/4p3/3pP3/3P4/8/PPP2PPP/RNBQKBNR b KQkq - 0 3": {
+   "openings": [
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation"
+    },
+    {
+     "eco": "C14",
+     "name": "French Defense: Classical Variation"
+    },
+    {
+     "eco": "C11",
+     "name": "French Defense: Steinitz Variation, Gledhill Attack"
+    },
+    {
+     "eco": "C13",
+     "name": "French Defense: Classical Variation, Richter Attack"
+    },
+    {
+     "eco": "C16",
+     "name": "French Defense: Winawer Variation, Advance Variation"
+    },
+    {
+     "eco": "C14",
+     "name": "French Defense: Classical Variation, Alapin Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/pp3ppp/4p3/2ppP3/3P4/8/PPP2PPP/RNBQKBNR w KQkq - 0 4": {
+   "openings": [
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation"
+    },
+    {
+     "eco": "C17",
+     "name": "French Defense: Winawer Variation, Advance Variation"
+    },
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation, Nimzowitsch Attack"
+    },
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation, Nimzowitsch System"
+    },
+    {
+     "eco": "C17",
+     "name": "French Defense: Winawer Variation, Bogoljubow Variation"
+    },
+    {
+     "eco": "C17",
+     "name": "French Defense: Winawer Variation, Advance Variation, Moscow Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/pp3ppp/4p3/2ppP3/3P4/2P5/PP3PPP/RNBQKBNR b KQkq - 0 4": {
+   "openings": [
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation"
+    },
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation, Euwe Variation"
+    },
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation, Paulsen Attack"
+    },
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation, Wade Variation"
+    },
+    {
+     "eco": "C05",
+     "name": "French Defense: Tarrasch Variation, Closed Variation"
+    },
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation, Milner-Barry Gambit"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkbnr/pp3ppp/2n1p3/2ppP3/3P4/2P5/PP3PPP/RNBQKBNR w KQkq - 1 5": {
+   "openings": [
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation"
+    },
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation, Euwe Variation"
+    },
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation, Paulsen Attack"
+    },
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation, Wade Variation"
+    },
+    {
+     "eco": "C05",
+     "name": "French Defense: Tarrasch Variation, Closed Variation"
+    },
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation, Milner-Barry Gambit"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkbnr/pp3ppp/2n1p3/2ppP3/3P4/2P2N2/PP3PPP/RNBQKB1R b KQkq - 2 5": {
+   "openings": [
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation"
+    },
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation, Euwe Variation"
+    },
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation, Paulsen Attack"
+    },
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation, Wade Variation"
+    },
+    {
+     "eco": "C05",
+     "name": "French Defense: Tarrasch Variation, Closed Variation"
+    },
+    {
+     "eco": "C02",
+     "name": "French Defense: Advance Variation, Milner-Barry Gambit"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rn1qkb1r/1p3ppp/p2pbn2/4p3/4P3/1NN1BP2/PPP3PP/R2QKB1R b KQkq - 0 8": {
+   "openings": [
+    {
+     "eco": "B90",
+     "name": "Sicilian Defense: Najdorf Variation, English Attack"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2": {
+   "openings": [
+    {
+     "eco": "B20",
+     "name": "Sicilian Defense"
+    },
+    {
+     "eco": "B23",
+     "name": "Sicilian Defense: Closed"
+    },
+    {
+     "eco": "B30",
+     "name": "Sicilian Defense: Old Sicilian"
+    },
+    {
+     "eco": "B20",
+     "name": "Sicilian Defense: Amazon Attack"
+    },
+    {
+     "eco": "B20",
+     "name": "Sicilian Defense: Bowdler Attack"
+    },
+    {
+     "eco": "B20",
+     "name": "Sicilian Defense: Brick Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/pp1ppppp/8/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R b KQkq - 1 2": {
+   "openings": [
+    {
+     "eco": "B20",
+     "name": "Sicilian Defense"
+    },
+    {
+     "eco": "B23",
+     "name": "Sicilian Defense: Closed"
+    },
+    {
+     "eco": "B30",
+     "name": "Sicilian Defense: Old Sicilian"
+    },
+    {
+     "eco": "B20",
+     "name": "Sicilian Defense: Amazon Attack"
+    },
+    {
+     "eco": "B20",
+     "name": "Sicilian Defense: Bowdler Attack"
+    },
+    {
+     "eco": "B20",
+     "name": "Sicilian Defense: Brick Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/pp2pppp/3p4/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 0 3": {
+   "openings": [
+    {
+     "eco": "B50",
+     "name": "Sicilian Defense: Kopec System"
+    },
+    {
+     "eco": "B51",
+     "name": "Sicilian Defense: Moscow Variation"
+    },
+    {
+     "eco": "B50",
+     "name": "Sicilian Defense: Modern Variations"
+    },
+    {
+     "eco": "B52",
+     "name": "Sicilian Defense: Moscow Variation, Main Line"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/pp2pppp/3p4/2p5/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 3": {
+   "openings": [
+    {
+     "eco": "B50",
+     "name": "Sicilian Defense"
+    },
+    {
+     "eco": "B50",
+     "name": "Sicilian Defense: Modern Variations, Anti-Qxd4 Move Order"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/pp2pppp/3p4/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4": {
+   "openings": [
+    {
+     "eco": "B50",
+     "name": "Sicilian Defense"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/pp2pppp/3p4/8/3NP3/8/PPP2PPP/RNBQKB1R b KQkq - 0 4": {
+   "openings": [
+    {
+     "eco": "B53",
+     "name": "Sicilian Defense: Chekhover Variation"
+    },
+    {
+     "eco": "B56",
+     "name": "Sicilian Defense: Classical Variation"
+    },
+    {
+     "eco": "B56",
+     "name": "Sicilian Defense: Spielmann Variation"
+    },
+    {
+     "eco": "B56",
+     "name": "Sicilian Defense: Kupreichik Variation"
+    },
+    {
+     "eco": "B60",
+     "name": "Sicilian Defense: Richter-Rauzer Variation"
+    },
+    {
+     "eco": "B23",
+     "name": "Sicilian Defense: Closed, Carlsen Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pp2pppp/3p1n2/8/3NP3/8/PPP2PPP/RNBQKB1R w KQkq - 1 5": {
+   "openings": [
+    {
+     "eco": "B53",
+     "name": "Sicilian Defense: Chekhover Variation"
+    },
+    {
+     "eco": "B56",
+     "name": "Sicilian Defense: Classical Variation"
+    },
+    {
+     "eco": "B56",
+     "name": "Sicilian Defense: Spielmann Variation"
+    },
+    {
+     "eco": "B56",
+     "name": "Sicilian Defense: Kupreichik Variation"
+    },
+    {
+     "eco": "B60",
+     "name": "Sicilian Defense: Richter-Rauzer Variation"
+    },
+    {
+     "eco": "B23",
+     "name": "Sicilian Defense: Closed, Carlsen Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pp2pppp/3p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R b KQkq - 2 5": {
+   "openings": [
+    {
+     "eco": "B53",
+     "name": "Sicilian Defense: Chekhover Variation"
+    },
+    {
+     "eco": "B56",
+     "name": "Sicilian Defense: Classical Variation"
+    },
+    {
+     "eco": "B56",
+     "name": "Sicilian Defense: Spielmann Variation"
+    },
+    {
+     "eco": "B56",
+     "name": "Sicilian Defense: Kupreichik Variation"
+    },
+    {
+     "eco": "B60",
+     "name": "Sicilian Defense: Richter-Rauzer Variation"
+    },
+    {
+     "eco": "B23",
+     "name": "Sicilian Defense: Closed, Carlsen Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6": {
+   "openings": [
+    {
+     "eco": "B90",
+     "name": "Sicilian Defense: Najdorf Variation"
+    },
+    {
+     "eco": "B90",
+     "name": "Sicilian Defense: Najdorf Variation, English Attack"
+    },
+    {
+     "eco": "B90",
+     "name": "Sicilian Defense: Najdorf Variation, Petronić Attack"
+    },
+    {
+     "eco": "B90",
+     "name": "Sicilian Defense: Najdorf Variation, Yates Variation"
+    },
+    {
+     "eco": "B90",
+     "name": "Sicilian Defense: Najdorf Variation, Lipnitsky Attack"
+    },
+    {
+     "eco": "B92",
+     "name": "Sicilian Defense: Najdorf Variation, Opocensky Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/1p2pppp/p2p1n2/8/3NP3/2N1B3/PPP2PPP/R2QKB1R b KQkq - 1 6": {
+   "openings": [
+    {
+     "eco": "B90",
+     "name": "Sicilian Defense: Najdorf Variation"
+    },
+    {
+     "eco": "B90",
+     "name": "Sicilian Defense: Najdorf Variation, English Attack"
+    },
+    {
+     "eco": "B90",
+     "name": "Sicilian Defense: Najdorf Variation, Petronić Attack"
+    },
+    {
+     "eco": "B90",
+     "name": "Sicilian Defense: Najdorf Variation, Yates Variation"
+    },
+    {
+     "eco": "B90",
+     "name": "Sicilian Defense: Najdorf Variation, Lipnitsky Attack"
+    },
+    {
+     "eco": "B92",
+     "name": "Sicilian Defense: Najdorf Variation, Opocensky Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/1p3ppp/p2p1n2/4p3/3NP3/2N1B3/PPP2PPP/R2QKB1R w KQkq - 0 7": {
+   "openings": [
+    {
+     "eco": "B92",
+     "name": "Sicilian Defense: Najdorf Variation, Opocensky Variation"
+    },
+    {
+     "eco": "B33",
+     "name": "Sicilian Defense: Lasker-Pelikan Variation, Bird Variation"
+    },
+    {
+     "eco": "B92",
+     "name": "Sicilian Defense: Najdorf Variation, Opocensky Variation, Modern Line"
+    },
+    {
+     "eco": "B92",
+     "name": "Sicilian Defense: Najdorf Variation, Opocensky Variation, Traditional Line"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/1p3ppp/p2p1n2/4p3/4P3/1NN1B3/PPP2PPP/R2QKB1R b KQkq - 1 7": {
+   "openings": [
+    {
+     "eco": "B92",
+     "name": "Sicilian Defense: Najdorf Variation, Opocensky Variation"
+    },
+    {
+     "eco": "B33",
+     "name": "Sicilian Defense: Lasker-Pelikan Variation, Bird Variation"
+    },
+    {
+     "eco": "B92",
+     "name": "Sicilian Defense: Najdorf Variation, Opocensky Variation, Modern Line"
+    },
+    {
+     "eco": "B92",
+     "name": "Sicilian Defense: Najdorf Variation, Opocensky Variation, Traditional Line"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rn1qkb1r/1p3ppp/p2pbn2/4p3/4P3/1NN1B3/PPP2PPP/R2QKB1R w KQkq - 2 8": {
+   "openings": [
+    {
+     "eco": "B92",
+     "name": "Sicilian Defense: Najdorf Variation, Opocensky Variation"
+    },
+    {
+     "eco": "B33",
+     "name": "Sicilian Defense: Lasker-Pelikan Variation, Bird Variation"
+    },
+    {
+     "eco": "B92",
+     "name": "Sicilian Defense: Najdorf Variation, Opocensky Variation, Modern Line"
+    },
+    {
+     "eco": "B92",
+     "name": "Sicilian Defense: Najdorf Variation, Opocensky Variation, Traditional Line"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bq1rk1/pp2ppbp/2np1np1/8/3NP3/2N1BP2/PPPQ2PP/R3KB1R w KQ - 3 9": {
+   "openings": [
+    {
+     "eco": "B76",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack"
+    },
+    {
+     "eco": "B78",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Old Line"
+    },
+    {
+     "eco": "B77",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Main Line"
+    },
+    {
+     "eco": "B76",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Modern Line"
+    },
+    {
+     "eco": "B75",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Belezky Line"
+    },
+    {
+     "eco": "B78",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Chinese Dragon"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pp2pp1p/3p1np1/8/3NP3/2N5/PPP2PPP/R1BQKB1R w KQkq - 0 6": {
+   "openings": [
+    {
+     "eco": "B70",
+     "name": "Sicilian Defense: Dragon Variation"
+    },
+    {
+     "eco": "B54",
+     "name": "Sicilian Defense: Dragon Variation, Accelerated Dragon"
+    },
+    {
+     "eco": "B58",
+     "name": "Sicilian Defense: Classical Variation, Dragon Transfer"
+    },
+    {
+     "eco": "B70",
+     "name": "Sicilian Defense: Dragon Variation, Classical Variation"
+    },
+    {
+     "eco": "B35",
+     "name": "Sicilian Defense: Dragon Variation, Modern Bc4 Variation"
+    },
+    {
+     "eco": "B60",
+     "name": "Sicilian Defense: Richter-Rauzer Variation, Dragon Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pp2pp1p/3p1np1/8/3NP3/2N1B3/PPP2PPP/R2QKB1R b KQkq - 1 6": {
+   "openings": [
+    {
+     "eco": "B70",
+     "name": "Sicilian Defense: Dragon Variation"
+    },
+    {
+     "eco": "B54",
+     "name": "Sicilian Defense: Dragon Variation, Accelerated Dragon"
+    },
+    {
+     "eco": "B58",
+     "name": "Sicilian Defense: Classical Variation, Dragon Transfer"
+    },
+    {
+     "eco": "B70",
+     "name": "Sicilian Defense: Dragon Variation, Classical Variation"
+    },
+    {
+     "eco": "B35",
+     "name": "Sicilian Defense: Dragon Variation, Modern Bc4 Variation"
+    },
+    {
+     "eco": "B60",
+     "name": "Sicilian Defense: Richter-Rauzer Variation, Dragon Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqk2r/pp2ppbp/3p1np1/8/3NP3/2N1B3/PPP2PPP/R2QKB1R w KQkq - 2 7": {
+   "openings": [
+    {
+     "eco": "B70",
+     "name": "Sicilian Defense: Dragon Variation"
+    },
+    {
+     "eco": "B54",
+     "name": "Sicilian Defense: Dragon Variation, Accelerated Dragon"
+    },
+    {
+     "eco": "B58",
+     "name": "Sicilian Defense: Classical Variation, Dragon Transfer"
+    },
+    {
+     "eco": "B70",
+     "name": "Sicilian Defense: Dragon Variation, Classical Variation"
+    },
+    {
+     "eco": "B35",
+     "name": "Sicilian Defense: Dragon Variation, Modern Bc4 Variation"
+    },
+    {
+     "eco": "B60",
+     "name": "Sicilian Defense: Richter-Rauzer Variation, Dragon Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqk2r/pp2ppbp/3p1np1/8/3NP3/2N1BP2/PPP3PP/R2QKB1R b KQkq - 0 7": {
+   "openings": [
+    {
+     "eco": "B76",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack"
+    },
+    {
+     "eco": "B78",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Old Line"
+    },
+    {
+     "eco": "B77",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Main Line"
+    },
+    {
+     "eco": "B76",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Modern Line"
+    },
+    {
+     "eco": "B75",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Belezky Line"
+    },
+    {
+     "eco": "B78",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Chinese Dragon"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbq1rk1/pp2ppbp/3p1np1/8/3NP3/2N1BP2/PPP3PP/R2QKB1R w KQ - 1 8": {
+   "openings": [
+    {
+     "eco": "B76",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack"
+    },
+    {
+     "eco": "B78",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Old Line"
+    },
+    {
+     "eco": "B77",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Main Line"
+    },
+    {
+     "eco": "B76",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Modern Line"
+    },
+    {
+     "eco": "B75",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Belezky Line"
+    },
+    {
+     "eco": "B78",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Chinese Dragon"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbq1rk1/pp2ppbp/3p1np1/8/3NP3/2N1BP2/PPPQ2PP/R3KB1R b KQ - 2 8": {
+   "openings": [
+    {
+     "eco": "B76",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack"
+    },
+    {
+     "eco": "B78",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Old Line"
+    },
+    {
+     "eco": "B77",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Main Line"
+    },
+    {
+     "eco": "B76",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Modern Line"
+    },
+    {
+     "eco": "B75",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Belezky Line"
+    },
+    {
+     "eco": "B78",
+     "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack, Chinese Dragon"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bq1rk1/pp2ppbp/3p1np1/8/2PQP3/2N1B3/PP2BPPP/R3K2R w KQ - 3 10": {
+   "openings": [
+    {
+     "eco": "B37",
+     "name": "Sicilian Defense: Accelerated Dragon, Simagin Variation"
+    },
+    {
+     "eco": "B36",
+     "name": "Sicilian Defense: Accelerated Dragon, Maróczy Bind, Gurgenidze Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkbnr/pp1ppppp/2n5/2p5/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3": {
+   "openings": [
+    {
+     "eco": "B20",
+     "name": "Sicilian Defense"
+    },
+    {
+     "eco": "B23",
+     "name": "Sicilian Defense: Closed"
+    },
+    {
+     "eco": "B30",
+     "name": "Sicilian Defense: Old Sicilian"
+    },
+    {
+     "eco": "B20",
+     "name": "Sicilian Defense: Amazon Attack"
+    },
+    {
+     "eco": "B20",
+     "name": "Sicilian Defense: Bowdler Attack"
+    },
+    {
+     "eco": "B20",
+     "name": "Sicilian Defense: Brick Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkbnr/pp1ppppp/2n5/2p5/3PP3/5N2/PPP2PPP/RNBQKB1R b KQkq - 0 3": {
+   "openings": [
+    {
+     "eco": "B32",
+     "name": "Sicilian Defense: Open"
+    },
+    {
+     "eco": "B21",
+     "name": "Sicilian Defense: Smith-Morra Gambit"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkbnr/pp1ppppp/2n5/8/3pP3/5N2/PPP2PPP/RNBQKB1R w KQkq - 0 4": {
+   "openings": [
+    {
+     "eco": "B32",
+     "name": "Sicilian Defense: Open"
+    },
+    {
+     "eco": "B21",
+     "name": "Sicilian Defense: Morphy Gambit"
+    },
+    {
+     "eco": "B20",
+     "name": "Sicilian Defense: Kronberger Variation, Nemeth Gambit"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkbnr/pp1ppppp/2n5/8/3NP3/8/PPP2PPP/RNBQKB1R b KQkq - 0 4": {
+   "openings": [
+    {
+     "eco": "B32",
+     "name": "Sicilian Defense: Open"
+    },
+    {
+     "eco": "B32",
+     "name": "Sicilian Defense: Flohr Variation"
+    },
+    {
+     "eco": "B32",
+     "name": "Sicilian Defense: Godiva Variation"
+    },
+    {
+     "eco": "B21",
+     "name": "Sicilian Defense: Coles Sicilian Gambit"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkbnr/pp1ppp1p/2n3p1/8/3NP3/8/PPP2PPP/RNBQKB1R w KQkq - 0 5": {
+   "openings": [
+    {
+     "eco": "B32",
+     "name": "Sicilian Defense: Accelerated Dragon"
+    },
+    {
+     "eco": "B06",
+     "name": "Pterodactyl Defense: Western, Siroccopteryx"
+    },
+    {
+     "eco": "B34",
+     "name": "Sicilian Defense: Accelerated Dragon, Modern Variation"
+    },
+    {
+     "eco": "B34",
+     "name": "Sicilian Defense: Accelerated Dragon, Exchange Variation"
+    },
+    {
+     "eco": "B35",
+     "name": "Sicilian Defense: Accelerated Dragon, Modern Bc4 Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkbnr/pp1ppp1p/2n3p1/8/2PNP3/8/PP3PPP/RNBQKB1R b KQkq - 0 5": {
+   "openings": [
+    {
+     "eco": "B36",
+     "name": "Sicilian Defense: Accelerated Dragon, Maróczy Bind"
+    },
+    {
+     "eco": "B39",
+     "name": "Sicilian Defense: Accelerated Dragon, Maróczy Bind, Breyer Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkb1r/pp1ppp1p/2n2np1/8/2PNP3/8/PP3PPP/RNBQKB1R w KQkq - 1 6": {
+   "openings": [
+    {
+     "eco": "B36",
+     "name": "Sicilian Defense: Accelerated Dragon, Maróczy Bind"
+    },
+    {
+     "eco": "B39",
+     "name": "Sicilian Defense: Accelerated Dragon, Maróczy Bind, Breyer Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkb1r/pp1ppp1p/2n2np1/8/2PNP3/2N5/PP3PPP/R1BQKB1R b KQkq - 2 6": {
+   "openings": [
+    {
+     "eco": "B36",
+     "name": "Sicilian Defense: Accelerated Dragon, Maróczy Bind"
+    },
+    {
+     "eco": "B39",
+     "name": "Sicilian Defense: Accelerated Dragon, Maróczy Bind, Breyer Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkb1r/pp2pp1p/2np1np1/8/2PNP3/2N5/PP3PPP/R1BQKB1R w KQkq - 0 7": {
+   "openings": [
+    {
+     "eco": "B37",
+     "name": "Sicilian Defense: Accelerated Dragon, Simagin Variation"
+    },
+    {
+     "eco": "B36",
+     "name": "Sicilian Defense: Accelerated Dragon, Maróczy Bind, Gurgenidze Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkb1r/pp2pp1p/2np1np1/8/2PNP3/2N5/PP2BPPP/R1BQK2R b KQkq - 1 7": {
+   "openings": [
+    {
+     "eco": "B37",
+     "name": "Sicilian Defense: Accelerated Dragon, Simagin Variation"
+    },
+    {
+     "eco": "B36",
+     "name": "Sicilian Defense: Accelerated Dragon, Maróczy Bind, Gurgenidze Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkb1r/pp2pp1p/3p1np1/8/2PnP3/2N5/PP2BPPP/R1BQK2R w KQkq - 0 8": {
+   "openings": [
+    {
+     "eco": "B37",
+     "name": "Sicilian Defense: Accelerated Dragon, Simagin Variation"
+    },
+    {
+     "eco": "B36",
+     "name": "Sicilian Defense: Accelerated Dragon, Maróczy Bind, Gurgenidze Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqkb1r/pp2pp1p/3p1np1/8/2PQP3/2N5/PP2BPPP/R1B1K2R b KQkq - 0 8": {
+   "openings": [
+    {
+     "eco": "B37",
+     "name": "Sicilian Defense: Accelerated Dragon, Simagin Variation"
+    },
+    {
+     "eco": "B36",
+     "name": "Sicilian Defense: Accelerated Dragon, Maróczy Bind, Gurgenidze Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqk2r/pp2ppbp/3p1np1/8/2PQP3/2N5/PP2BPPP/R1B1K2R w KQkq - 1 9": {
+   "openings": [
+    {
+     "eco": "B37",
+     "name": "Sicilian Defense: Accelerated Dragon, Simagin Variation"
+    },
+    {
+     "eco": "B36",
+     "name": "Sicilian Defense: Accelerated Dragon, Maróczy Bind, Gurgenidze Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "r1bqk2r/pp2ppbp/3p1np1/8/2PQP3/2N1B3/PP2BPPP/R3K2R b KQkq - 2 9": {
+   "openings": [
+    {
+     "eco": "B37",
+     "name": "Sicilian Defense: Accelerated Dragon, Simagin Variation"
+    },
+    {
+     "eco": "B36",
+     "name": "Sicilian Defense: Accelerated Dragon, Maróczy Bind, Gurgenidze Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbq1rk1/pp3pbp/3p1np1/2pP4/4P3/2N2N2/PP2BPPP/R1BQ1RK1 b - - 5 9": {
+   "openings": [
+    {
+     "eco": "A70",
+     "name": "Benoni Defense: Classical Variation"
+    },
+    {
+     "eco": "A40",
+     "name": "Benoni Defense: Franco-Sicilian Hybrid"
+    },
+    {
+     "eco": "A73",
+     "name": "Benoni Defense: Classical Variation, Main Line"
+    },
+    {
+     "eco": "A76",
+     "name": "Benoni Defense: Classical Variation, Czerniak Defense"
+    },
+    {
+     "eco": "A70",
+     "name": "Benoni Defense: Classical Variation, Traditional Variation"
+    },
+    {
+     "eco": "A71",
+     "name": "Benoni Defense: Classical Variation, Averbakh-Grivas Attack"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pp1ppppp/5n2/2p5/2PP4/8/PP2PPPP/RNBQKBNR w KQkq - 0 3": {
+   "openings": [
+    {
+     "eco": "A56",
+     "name": "Benoni Defense"
+    },
+    {
+     "eco": "A31",
+     "name": "English Opening: Symmetrical Variation, Anti-Benoni Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pp1ppppp/5n2/2pP4/2P5/8/PP2PPPP/RNBQKBNR b KQkq - 0 3": {
+   "openings": [
+    {
+     "eco": "A56",
+     "name": "Vulture Defense"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pp1p1ppp/4pn2/2pP4/2P5/8/PP2PPPP/RNBQKBNR w KQkq - 0 4": {
+   "openings": [
+    {
+     "eco": "A60",
+     "name": "Benoni Defense: Modern Variation"
+    },
+    {
+     "eco": "E21",
+     "name": "Nimzo-Indian Defense: Three Knights Variation, Euwe Variation"
+    },
+    {
+     "eco": "E21",
+     "name": "Nimzo-Indian Defense: Three Knights Variation, Korchnoi Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pp1p1ppp/4pn2/2pP4/2P5/2N5/PP2PPPP/R1BQKBNR b KQkq - 1 4": {
+   "openings": [
+    {
+     "eco": "A60",
+     "name": "Benoni Defense: Modern Variation"
+    },
+    {
+     "eco": "E21",
+     "name": "Nimzo-Indian Defense: Three Knights Variation, Euwe Variation"
+    },
+    {
+     "eco": "E21",
+     "name": "Nimzo-Indian Defense: Three Knights Variation, Korchnoi Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pp1p1ppp/5n2/2pp4/2P5/2N5/PP2PPPP/R1BQKBNR w KQkq - 0 5": {
+   "openings": [
+    {
+     "eco": "A30",
+     "name": "English Opening: Symmetrical Variation"
+    },
+    {
+     "eco": "A34",
+     "name": "English Opening: Symmetrical Variation, Normal Variation"
+    },
+    {
+     "eco": "A35",
+     "name": "English Opening: Symmetrical Variation, Two Knights Variation"
+    },
+    {
+     "eco": "A35",
+     "name": "English Opening: Symmetrical Variation, Four Knights Variation"
+    },
+    {
+     "eco": "A34",
+     "name": "English Opening: Symmetrical Variation, Three Knights Variation"
+    }
+   ],
+   "pawnsDifferent": 2
+  },
+  "rnbqkb1r/pp1p1ppp/5n2/2pP4/8/2N5/PP2PPPP/R1BQKBNR b KQkq - 0 5": {
+   "openings": [
+    {
+     "eco": "A60",
+     "name": "Benoni Defense: Modern Variation, Snake Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pp3ppp/3p1n2/2pP4/8/2N5/PP2PPPP/R1BQKBNR w KQkq - 0 6": {
+   "openings": [
+    {
+     "eco": "A43",
+     "name": "Benoni Defense: Old Benoni"
+    }
+   ],
+   "pawnsDifferent": 1
+  },
+  "rnbqkb1r/pp3ppp/3p1n2/2pP4/4P3/2N5/PP3PPP/R1BQKBNR b KQkq - 0 6": {
+   "openings": [
+    {
+     "eco": "A65",
+     "name": "Benoni Defense: King's Pawn Line"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pp3p1p/3p1np1/2pP4/4P3/2N5/PP3PPP/R1BQKBNR w KQkq - 0 7": {
+   "openings": [
+    {
+     "eco": "A70",
+     "name": "Benoni Defense: Classical Variation"
+    },
+    {
+     "eco": "A40",
+     "name": "Benoni Defense: Franco-Sicilian Hybrid"
+    },
+    {
+     "eco": "A73",
+     "name": "Benoni Defense: Classical Variation, Main Line"
+    },
+    {
+     "eco": "A76",
+     "name": "Benoni Defense: Classical Variation, Czerniak Defense"
+    },
+    {
+     "eco": "A70",
+     "name": "Benoni Defense: Classical Variation, Traditional Variation"
+    },
+    {
+     "eco": "A71",
+     "name": "Benoni Defense: Classical Variation, Averbakh-Grivas Attack"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pp3p1p/3p1np1/2pP4/4P3/2N2N2/PP3PPP/R1BQKB1R b KQkq - 1 7": {
+   "openings": [
+    {
+     "eco": "A70",
+     "name": "Benoni Defense: Classical Variation"
+    },
+    {
+     "eco": "A40",
+     "name": "Benoni Defense: Franco-Sicilian Hybrid"
+    },
+    {
+     "eco": "A73",
+     "name": "Benoni Defense: Classical Variation, Main Line"
+    },
+    {
+     "eco": "A76",
+     "name": "Benoni Defense: Classical Variation, Czerniak Defense"
+    },
+    {
+     "eco": "A70",
+     "name": "Benoni Defense: Classical Variation, Traditional Variation"
+    },
+    {
+     "eco": "A71",
+     "name": "Benoni Defense: Classical Variation, Averbakh-Grivas Attack"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqk2r/pp3pbp/3p1np1/2pP4/4P3/2N2N2/PP3PPP/R1BQKB1R w KQkq - 2 8": {
+   "openings": [
+    {
+     "eco": "A70",
+     "name": "Benoni Defense: Classical Variation"
+    },
+    {
+     "eco": "A40",
+     "name": "Benoni Defense: Franco-Sicilian Hybrid"
+    },
+    {
+     "eco": "A73",
+     "name": "Benoni Defense: Classical Variation, Main Line"
+    },
+    {
+     "eco": "A76",
+     "name": "Benoni Defense: Classical Variation, Czerniak Defense"
+    },
+    {
+     "eco": "A70",
+     "name": "Benoni Defense: Classical Variation, Traditional Variation"
+    },
+    {
+     "eco": "A71",
+     "name": "Benoni Defense: Classical Variation, Averbakh-Grivas Attack"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqk2r/pp3pbp/3p1np1/2pP4/4P3/2N2N2/PP2BPPP/R1BQK2R b KQkq - 3 8": {
+   "openings": [
+    {
+     "eco": "A70",
+     "name": "Benoni Defense: Classical Variation"
+    },
+    {
+     "eco": "A40",
+     "name": "Benoni Defense: Franco-Sicilian Hybrid"
+    },
+    {
+     "eco": "A73",
+     "name": "Benoni Defense: Classical Variation, Main Line"
+    },
+    {
+     "eco": "A76",
+     "name": "Benoni Defense: Classical Variation, Czerniak Defense"
+    },
+    {
+     "eco": "A70",
+     "name": "Benoni Defense: Classical Variation, Traditional Variation"
+    },
+    {
+     "eco": "A71",
+     "name": "Benoni Defense: Classical Variation, Averbakh-Grivas Attack"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbq1rk1/pp3pbp/3p1np1/2pP4/4P3/2N2N2/PP2BPPP/R1BQK2R w KQ - 4 9": {
+   "openings": [
+    {
+     "eco": "A70",
+     "name": "Benoni Defense: Classical Variation"
+    },
+    {
+     "eco": "A40",
+     "name": "Benoni Defense: Franco-Sicilian Hybrid"
+    },
+    {
+     "eco": "A73",
+     "name": "Benoni Defense: Classical Variation, Main Line"
+    },
+    {
+     "eco": "A76",
+     "name": "Benoni Defense: Classical Variation, Czerniak Defense"
+    },
+    {
+     "eco": "A70",
+     "name": "Benoni Defense: Classical Variation, Traditional Variation"
+    },
+    {
+     "eco": "A71",
+     "name": "Benoni Defense: Classical Variation, Averbakh-Grivas Attack"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnb2rk1/pp2q1pp/2pbpn2/3p1p2/2PP4/1P3NP1/PB2PPBP/RN1Q1RK1 w - - 3 9": {
+   "openings": [
+    {
+     "eco": "A94",
+     "name": "Dutch Defense: Stonewall Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/ppppp1pp/8/5p2/3P4/8/PPP1PPPP/RNBQKBNR w KQkq - 0 2": {
+   "openings": [
+    {
+     "eco": "A80",
+     "name": "Dutch Defense"
+    },
+    {
+     "eco": "A80",
+     "name": "Dutch Defense: Hopton Attack"
+    },
+    {
+     "eco": "A80",
+     "name": "Dutch Defense: Alapin Variation"
+    },
+    {
+     "eco": "A80",
+     "name": "Dutch Defense: Raphael Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkbnr/ppppp1pp/8/5p2/2PP4/8/PP2PPPP/RNBQKBNR b KQkq - 0 2": {
+   "openings": [
+    {
+     "eco": "A84",
+     "name": "Dutch Defense"
+    },
+    {
+     "eco": "A84",
+     "name": "Dutch Defense: Normal Variation"
+    },
+    {
+     "eco": "A85",
+     "name": "Dutch Defense: Queen's Knight Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/ppppp1pp/5n2/5p2/2PP4/8/PP2PPPP/RNBQKBNR w KQkq - 1 3": {
+   "openings": [
+    {
+     "eco": "A84",
+     "name": "Dutch Defense"
+    },
+    {
+     "eco": "A84",
+     "name": "Dutch Defense: Normal Variation"
+    },
+    {
+     "eco": "A85",
+     "name": "Dutch Defense: Queen's Knight Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/ppppp1pp/5n2/5p2/2PP4/6P1/PP2PP1P/RNBQKBNR b KQkq - 0 3": {
+   "openings": [
+    {
+     "eco": "A86",
+     "name": "Dutch Defense: Fianchetto Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pppp2pp/4pn2/5p2/2PP4/6P1/PP2PP1P/RNBQKBNR w KQkq - 0 4": {
+   "openings": [
+    {
+     "eco": "A92",
+     "name": "Dutch Defense: Alekhine Variation"
+    },
+    {
+     "eco": "A90",
+     "name": "Dutch Defense: Classical Variation"
+    },
+    {
+     "eco": "A90",
+     "name": "Dutch Defense: Nimzo-Dutch Variation"
+    },
+    {
+     "eco": "A91",
+     "name": "Dutch Defense: Classical Variation, Blackburne Attack"
+    },
+    {
+     "eco": "A90",
+     "name": "Dutch Defense: Nimzo-Dutch Variation, Alekhine Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pppp2pp/4pn2/5p2/2PP4/6P1/PP2PPBP/RNBQK1NR b KQkq - 1 4": {
+   "openings": [
+    {
+     "eco": "A92",
+     "name": "Dutch Defense: Alekhine Variation"
+    },
+    {
+     "eco": "A90",
+     "name": "Dutch Defense: Classical Variation"
+    },
+    {
+     "eco": "A90",
+     "name": "Dutch Defense: Nimzo-Dutch Variation"
+    },
+    {
+     "eco": "A91",
+     "name": "Dutch Defense: Classical Variation, Blackburne Attack"
+    },
+    {
+     "eco": "A90",
+     "name": "Dutch Defense: Nimzo-Dutch Variation, Alekhine Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/ppp3pp/4pn2/3p1p2/2PP4/6P1/PP2PPBP/RNBQK1NR w KQkq - 0 5": {
+   "openings": [
+    {
+     "eco": "A90",
+     "name": "Dutch Defense: Classical Variation"
+    },
+    {
+     "eco": "A92",
+     "name": "Dutch Defense: Stonewall Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/ppp3pp/4pn2/3p1p2/2PP4/5NP1/PP2PPBP/RNBQK2R b KQkq - 1 5": {
+   "openings": [
+    {
+     "eco": "A90",
+     "name": "Dutch Defense: Classical Variation"
+    },
+    {
+     "eco": "A92",
+     "name": "Dutch Defense: Stonewall Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pp4pp/2p1pn2/3p1p2/2PP4/5NP1/PP2PPBP/RNBQK2R w KQkq - 0 6": {
+   "openings": [
+    {
+     "eco": "A95",
+     "name": "Dutch Defense: Stonewall Variation"
+    },
+    {
+     "eco": "A90",
+     "name": "Dutch Defense: Stonewall Variation, Modern Variation"
+    },
+    {
+     "eco": "A95",
+     "name": "Dutch Defense: Stonewall Variation, Chekhover Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/pp4pp/2p1pn2/3p1p2/2PP4/5NP1/PP2PPBP/RNBQ1RK1 b kq - 1 6": {
+   "openings": [
+    {
+     "eco": "A95",
+     "name": "Dutch Defense: Stonewall Variation"
+    },
+    {
+     "eco": "A90",
+     "name": "Dutch Defense: Stonewall Variation, Modern Variation"
+    },
+    {
+     "eco": "A95",
+     "name": "Dutch Defense: Stonewall Variation, Chekhover Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqk2r/pp4pp/2pbpn2/3p1p2/2PP4/5NP1/PP2PPBP/RNBQ1RK1 w kq - 2 7": {
+   "openings": [
+    {
+     "eco": "A95",
+     "name": "Dutch Defense: Stonewall Variation"
+    },
+    {
+     "eco": "A90",
+     "name": "Dutch Defense: Stonewall Variation, Modern Variation"
+    },
+    {
+     "eco": "A95",
+     "name": "Dutch Defense: Stonewall Variation, Chekhover Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqk2r/pp4pp/2pbpn2/3p1p2/2PP4/1P3NP1/P3PPBP/RNBQ1RK1 b kq - 0 7": {
+   "openings": [
+    {
+     "eco": "A94",
+     "name": "Dutch Defense: Stonewall Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnb1k2r/pp2q1pp/2pbpn2/3p1p2/2PP4/1P3NP1/P3PPBP/RNBQ1RK1 w kq - 1 8": {
+   "openings": [
+    {
+     "eco": "A94",
+     "name": "Dutch Defense: Stonewall Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnb1k2r/pp2q1pp/2pbpn2/3p1p2/2PP4/1P3NP1/PB2PPBP/RN1Q1RK1 b kq - 2 8": {
+   "openings": [
+    {
+     "eco": "A94",
+     "name": "Dutch Defense: Stonewall Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rn1q1rk1/1bp1bppp/p3pn2/1p6/3P4/5NP1/PPQ1PPBP/RNB2RK1 w - - 2 10": {
+   "openings": [
+    {
+     "eco": "E03",
+     "name": "Catalan Opening: Open Defense, Alekhine Variation"
+    }
+   ],
+   "pawnsDifferent": 1
+  },
+  "rnbqkb1r/pppp1ppp/4pn2/8/2PP4/8/PP2PPPP/RNBQKBNR w KQkq - 0 3": null,
+  "rnbqkb1r/pppp1ppp/4pn2/8/2PP4/6P1/PP2PP1P/RNBQKBNR b KQkq - 0 3": {
+   "openings": [
+    {
+     "eco": "E00",
+     "name": "Catalan Opening"
+    },
+    {
+     "eco": "E20",
+     "name": "Nimzo-Indian Defense: Romanishin Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/ppp2ppp/4pn2/3p4/2PP4/6P1/PP2PP1P/RNBQKBNR w KQkq - 0 4": {
+   "openings": [
+    {
+     "eco": "E00",
+     "name": "Catalan Opening"
+    },
+    {
+     "eco": "E06",
+     "name": "Catalan Opening: Closed"
+    },
+    {
+     "eco": "E01",
+     "name": "Catalan Opening: Open Defense"
+    },
+    {
+     "eco": "E11",
+     "name": "Bogo-Indian Defense: Retreat Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqkb1r/ppp2ppp/4pn2/3p4/2PP4/6P1/PP2PPBP/RNBQK1NR b KQkq - 1 4": {
+   "openings": [
+    {
+     "eco": "E00",
+     "name": "Catalan Opening"
+    },
+    {
+     "eco": "E06",
+     "name": "Catalan Opening: Closed"
+    },
+    {
+     "eco": "E01",
+     "name": "Catalan Opening: Open Defense"
+    },
+    {
+     "eco": "E11",
+     "name": "Bogo-Indian Defense: Retreat Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqk2r/ppp1bppp/4pn2/3p4/2PP4/6P1/PP2PPBP/RNBQK1NR w KQkq - 2 5": {
+   "openings": [
+    {
+     "eco": "E00",
+     "name": "Catalan Opening"
+    },
+    {
+     "eco": "E06",
+     "name": "Catalan Opening: Closed"
+    },
+    {
+     "eco": "E01",
+     "name": "Catalan Opening: Open Defense"
+    },
+    {
+     "eco": "E11",
+     "name": "Bogo-Indian Defense: Retreat Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbqk2r/ppp1bppp/4pn2/3p4/2PP4/5NP1/PP2PPBP/RNBQK2R b KQkq - 3 5": {
+   "openings": [
+    {
+     "eco": "E00",
+     "name": "Catalan Opening"
+    },
+    {
+     "eco": "E06",
+     "name": "Catalan Opening: Closed"
+    },
+    {
+     "eco": "E01",
+     "name": "Catalan Opening: Open Defense"
+    },
+    {
+     "eco": "E11",
+     "name": "Bogo-Indian Defense: Retreat Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbq1rk1/ppp1bppp/4pn2/3p4/2PP4/5NP1/PP2PPBP/RNBQK2R w KQ - 4 6": {
+   "openings": [
+    {
+     "eco": "E00",
+     "name": "Catalan Opening"
+    },
+    {
+     "eco": "E06",
+     "name": "Catalan Opening: Closed"
+    },
+    {
+     "eco": "E01",
+     "name": "Catalan Opening: Open Defense"
+    },
+    {
+     "eco": "E11",
+     "name": "Bogo-Indian Defense: Retreat Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbq1rk1/ppp1bppp/4pn2/3p4/2PP4/5NP1/PP2PPBP/RNBQ1RK1 b - - 5 6": {
+   "openings": [
+    {
+     "eco": "E00",
+     "name": "Catalan Opening"
+    },
+    {
+     "eco": "E06",
+     "name": "Catalan Opening: Closed"
+    },
+    {
+     "eco": "E01",
+     "name": "Catalan Opening: Open Defense"
+    },
+    {
+     "eco": "E11",
+     "name": "Bogo-Indian Defense: Retreat Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbq1rk1/ppp1bppp/4pn2/8/2pP4/5NP1/PP2PPBP/RNBQ1RK1 w - - 0 7": {
+   "openings": [
+    {
+     "eco": "E02",
+     "name": "Catalan Opening: Open Defense"
+    },
+    {
+     "eco": "E05",
+     "name": "Catalan Opening: Open Defense, Classical Line"
+    },
+    {
+     "eco": "E04",
+     "name": "Catalan Opening: Open Defense, Modern Sharp Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbq1rk1/ppp1bppp/4pn2/8/2pP4/5NP1/PPQ1PPBP/RNB2RK1 b - - 1 7": {
+   "openings": [
+    {
+     "eco": "E02",
+     "name": "Catalan Opening: Open Defense"
+    },
+    {
+     "eco": "E05",
+     "name": "Catalan Opening: Open Defense, Classical Line"
+    },
+    {
+     "eco": "E04",
+     "name": "Catalan Opening: Open Defense, Modern Sharp Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbq1rk1/1pp1bppp/p3pn2/8/2pP4/5NP1/PPQ1PPBP/RNB2RK1 w - - 0 8": {
+   "openings": [
+    {
+     "eco": "E02",
+     "name": "Catalan Opening: Open Defense"
+    },
+    {
+     "eco": "E05",
+     "name": "Catalan Opening: Open Defense, Classical Line"
+    },
+    {
+     "eco": "E04",
+     "name": "Catalan Opening: Open Defense, Modern Sharp Variation"
+    }
+   ],
+   "pawnsDifferent": 1
+  },
+  "rnbq1rk1/1pp1bppp/p3pn2/8/2QP4/5NP1/PP2PPBP/RNB2RK1 b - - 0 8": {
+   "openings": [
+    {
+     "eco": "E03",
+     "name": "Catalan Opening: Open Defense, Alekhine Variation"
+    }
+   ],
+   "pawnsDifferent": 0
+  },
+  "rnbq1rk1/2p1bppp/p3pn2/1p6/2QP4/5NP1/PP2PPBP/RNB2RK1 w - - 0 9": {
+   "openings": [
+    {
+     "eco": "E03",
+     "name": "Catalan Opening: Open Defense, Alekhine Variation"
+    }
+   ],
+   "pawnsDifferent": 1
+  },
+  "rnbq1rk1/2p1bppp/p3pn2/1p6/3P4/5NP1/PPQ1PPBP/RNB2RK1 b - - 1 9": {
+   "openings": [
+    {
+     "eco": "E03",
+     "name": "Catalan Opening: Open Defense, Alekhine Variation"
+    }
+   ],
+   "pawnsDifferent": 1
+  },
+  "1K1k4/1P6/8/8/8/8/r7/2R5 w - - 0 1": null,
+  "r4rk1/pp2qppp/2p5/2b5/4P3/1B3Q2/PPP3PP/R4R1K w - - 0 1": {
+   "openings": [
+    {
+     "eco": "B07",
+     "name": "Lion Defense: Anti-Philidor, Lion's Cave, Lion Claw Gambit"
+    }
+   ],
+   "pawnsDifferent": 1
+  }
+ },
+ "lines": {
+  "kid-classical-mar-del-plata": {
+   "eco": "E98",
+   "name": "King's Indian Defense: Orthodox Variation, Classical System",
+   "pgn": "1. d4 Nf6 2. c4 g6 3. Nc3 Bg7 4. e4 d6 5. Nf3 O-O 6. Be2 e5 7. O-O Nc6 8. d5 Ne7 9. Ne1",
+   "fen": "r1bq1rk1/ppp1npbp/3p1np1/3Pp3/2P1P3/2N5/PP2BPPP/R1BQNRK1 b - - 2 9",
+   "namedAtPly": 17,
+   "pliesPast": 1
+  },
+  "kid-samisch": {
+   "eco": "E84",
+   "name": "King's Indian Defense: Sämisch Variation, Panno Main Line",
+   "pgn": "1. d4 Nf6 2. c4 g6 3. Nc3 Bg7 4. e4 d6 5. f3 O-O 6. Be3 Nc6 7. Nge2 a6 8. Qd2 Rb8",
+   "fen": "1rbq1rk1/1pp1ppbp/p1np1np1/8/2PPP3/2N1BP2/PP1QN1PP/R3KB1R w KQ - 2 9",
+   "namedAtPly": 16,
+   "pliesPast": 0
+  },
+  "ruy-lopez-exchange": {
+   "eco": "C69",
+   "name": "Ruy Lopez: Exchange Variation, Gligoric Variation",
+   "pgn": "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. O-O f6",
+   "fen": "r1bqkbnr/1pp3pp/p1p2p2/4p3/4P3/5N2/PPPP1PPP/RNBQ1RK1 w kq - 0 6",
+   "namedAtPly": 10,
+   "pliesPast": 7
+  },
+  "ruy-lopez-closed": {
+   "eco": "C97",
+   "name": "Ruy Lopez: Closed, Chigorin Defense",
+   "pgn": "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 Na5 10. Bc2 c5 11. d4 Qc7",
+   "fen": "r1b2rk1/2q1bppp/p2p1n2/npp1p3/3PP3/2P2N1P/PPB2PP1/RNBQR1K1 w - - 1 12",
+   "namedAtPly": 22,
+   "pliesPast": 1
+  },
+  "carlsbad": {
+   "eco": "D36",
+   "name": "Queen's Gambit Declined: Exchange Variation, Reshevsky Variation",
+   "pgn": "1. d4 Nf6 2. c4 e6 3. Nc3 d5 4. cxd5 exd5 5. Bg5 c6 6. Qc2 Be7 7. e3 Nbd7 8. Bd3",
+   "fen": "r1bqk2r/pp1nbppp/2p2n2/3p2B1/3P4/2NBP3/PPQ2PPP/R3K1NR b KQkq - 3 8",
+   "namedAtPly": 15,
+   "pliesPast": 5
+  },
+  "iqp-panov": {
+   "eco": "B14",
+   "name": "Caro-Kann Defense: Panov Attack",
+   "pgn": "1. e4 c6 2. d4 d5 3. exd5 cxd5 4. c4 Nf6 5. Nc3 e6",
+   "fen": "rnbqkb1r/pp3ppp/4pn2/3p4/2PP4/2N5/PP3PPP/R1BQKBNR w KQkq - 0 6",
+   "namedAtPly": 10,
+   "pliesPast": 9
+  },
+  "french-advance": {
+   "eco": "C02",
+   "name": "French Defense: Advance Variation, Paulsen Attack",
+   "pgn": "1. e4 e6 2. d4 d5 3. e5 c5 4. c3 Nc6 5. Nf3",
+   "fen": "r1bqkbnr/pp3ppp/2n1p3/2ppP3/3P4/2P2N2/PP3PPP/RNBQKB1R b KQkq - 2 5",
+   "namedAtPly": 9,
+   "pliesPast": 1
+  },
+  "najdorf-english-attack": {
+   "eco": "B90",
+   "name": "Sicilian Defense: Najdorf Variation, English Attack",
+   "pgn": "1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6 6. Be3 e5 7. Nb3 Be6 8. f3",
+   "fen": "rn1qkb1r/1p3ppp/p2pbn2/4p3/4P3/1NN1BP2/PPP3PP/R2QKB1R b KQkq - 0 8",
+   "namedAtPly": 15,
+   "pliesPast": 0
+  },
+  "yugoslav-attack": {
+   "eco": "B76",
+   "name": "Sicilian Defense: Dragon Variation, Yugoslav Attack",
+   "pgn": "1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 g6 6. Be3 Bg7 7. f3 O-O 8. Qd2 Nc6",
+   "fen": "r1bq1rk1/pp2ppbp/2np1np1/8/3NP3/2N1BP2/PPPQ2PP/R3KB1R w KQ - 3 9",
+   "namedAtPly": 16,
+   "pliesPast": 0
+  },
+  "maroczy-bind": {
+   "eco": "B36",
+   "name": "Sicilian Defense: Accelerated Dragon, Maróczy Bind",
+   "pgn": "1. e4 c5 2. Nf3 Nc6 3. d4 cxd4 4. Nxd4 g6 5. c4",
+   "fen": "r1bqkbnr/pp1ppp1p/2n3p1/8/2PNP3/8/PP3PPP/RNBQKB1R b KQkq - 0 5",
+   "namedAtPly": 9,
+   "pliesPast": 9
+  },
+  "modern-benoni": {
+   "eco": "A73",
+   "name": "Benoni Defense: Classical Variation, Main Line",
+   "pgn": "1. d4 Nf6 2. c4 c5 3. d5 e6 4. Nc3 exd5 5. cxd5 d6 6. e4 g6 7. Nf3 Bg7 8. Be2 O-O 9. O-O",
+   "fen": "rnbq1rk1/pp3pbp/3p1np1/2pP4/4P3/2N2N2/PP2BPPP/R1BQ1RK1 b - - 5 9",
+   "namedAtPly": 17,
+   "pliesPast": 0
+  },
+  "stonewall-dutch": {
+   "eco": "A90",
+   "name": "Dutch Defense: Stonewall Variation, Modern Variation",
+   "pgn": "1. d4 f5 2. c4 e6 3. Nf3 Nf6 4. g3 c6 5. Bg2 d5 6. O-O Bd6",
+   "fen": "rnbqk2r/pp4pp/2pbpn2/3p1p2/2PP4/5NP1/PP2PPBP/RNBQ1RK1 w kq - 2 7",
+   "namedAtPly": 12,
+   "pliesPast": 4
+  },
+  "catalan-open": {
+   "eco": "E05",
+   "name": "Catalan Opening: Open Defense, Classical Line",
+   "pgn": "1. d4 Nf6 2. c4 e6 3. Nf3 d5 4. g3 Be7 5. Bg2 O-O 6. O-O dxc4",
+   "fen": "rnbq1rk1/ppp1bppp/4pn2/8/2pP4/5NP1/PP2PPBP/RNBQ1RK1 w - - 0 7",
+   "namedAtPly": 12,
+   "pliesPast": 6
+  }
+ }
+}
