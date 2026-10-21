@@ -1,0 +1,1621 @@
+diff -ruN --ex sfup/src/engine.cpp sfjs/src/engine.cpp
+--- sfup/src/engine.cpp	2026-10-03 00:40:40
++++ sfjs/src/engine.cpp	2026-10-03 00:40:22
+@@ -66,6 +66,7 @@
+ 
+     pos.set(StartFEN, false, &states->back());
+ 
++#ifndef __EMSCRIPTEN__
+     options.add(  //
+       "Debug Log File", Option("", [](const Option& o) {
+           start_logger(path_from_utf8(std::string(o)));
+@@ -79,11 +80,21 @@
+           return numa_config_information_as_string() + "\n"
+                + thread_allocation_information_as_string();
+       }));
++#endif
+ 
+     options.add(  //
++#ifdef __EMSCRIPTEN_SINGLE_THREADED__
++      "Threads", Option(1, 1, 1, [](const Option&) {
++          return std::nullopt;
++#elif defined(__EMSCRIPTEN__)
++      "Threads", Option(1, 1, 32, [this](const Option&) {
++          resize_threads();
++          return std::nullopt;
++#else
+       "Threads", Option(1, 1, MaxThreads, [this](const Option&) {
+           resize_threads();
+           return thread_allocation_information_as_string();
++#endif
+       }));
+ 
+     options.add(  //
+@@ -120,6 +131,7 @@
+ 
+     options.add("UCI_ShowWDL", Option(false));
+ 
++#ifndef __NO_SYZYGY__
+     options.add(  //
+       "SyzygyPath", Option("", [](const Option& o) {
+           Tablebases::init(o);
+@@ -131,6 +143,7 @@
+     options.add("Syzygy50MoveRule", Option(true));
+ 
+     options.add("SyzygyProbeLimit", Option(7, 0, 7));
++#endif
+ 
+     options.add(  //
+       "EvalFile", Option(EvalFileDefaultName, [this](const Option& o) {
+@@ -164,8 +177,10 @@
+     tt.clear(threads);
+     threads.clear();
+ 
++#ifndef __NO_SYZYGY__
+     // TODO: does not work with multiple instances
+     Tablebases::init(options["SyzygyPath"]);  // Free mapped files
++#endif
+ }
+ 
+ void Engine::set_on_update_no_moves(std::function<void(const Engine::InfoShort&)>&& f) {
+@@ -213,6 +228,12 @@
+ 
+     return std::nullopt;
+ }
++
++#ifdef __EMSCRIPTEN__
++bool Engine::validate_position() const {
++    return pos.pos_is_ok();
++}
++#endif
+ 
+ // modifiers
+ 
+diff -ruN --ex sfup/src/engine.h sfjs/src/engine.h
+--- sfup/src/engine.h	2026-10-03 00:40:40
++++ sfjs/src/engine.h	2026-10-03 00:40:22
+@@ -76,6 +76,9 @@
+     // set a new position, moves are in UCI format
+     std::optional<PositionSetError> set_position(const std::string&              fen,
+                                                  const std::vector<std::string>& moves);
++#ifdef __EMSCRIPTEN__
++    bool validate_position() const;
++#endif
+ 
+     // modifiers
+ 
+diff -ruN --ex sfup/src/evaluate.h sfjs/src/evaluate.h
+--- sfup/src/evaluate.h	2026-10-03 00:40:40
++++ sfjs/src/evaluate.h	2026-10-03 00:40:22
+@@ -35,6 +35,15 @@
+ // in the Makefile/Fishtest.
+ #define EvalFileDefaultName "nn-1a298aa575a0.nnue"
+ 
++// Smaller network for Lite mode (mirrored piece-square features only).
++#define EvalFileLiteName "nn-61e7af4bb97d.nnue"
++
++// In Lite builds the default name aliases the lite network.
++#ifdef USE_LITE_NET
++#undef EvalFileDefaultName
++#define EvalFileDefaultName EvalFileLiteName
++#endif
++
+ namespace NNUE {
+ class Network;
+ struct AccumulatorCaches;
+diff -ruN --ex sfup/src/main.cpp sfjs/src/main.cpp
+--- sfup/src/main.cpp	2026-10-03 00:40:40
++++ sfjs/src/main.cpp	2026-10-03 00:40:22
+@@ -28,6 +28,13 @@
+ 
+ using namespace Stockfish;
+ 
++#ifdef __EMSCRIPTEN__
++UCIEngine* uciP; // Create a global pointer to the UCI object
++    #ifndef __EMSCRIPTEN_SINGLE_THREADED__
++        bool ready = false;
++    #endif
++#endif
++
+ #ifdef UNIVERSAL_BINARY
+ namespace Stockfish {
+ 
+@@ -42,12 +49,20 @@
+     Attacks::init();
+     Position::init();
+ 
++#ifndef __EMSCRIPTEN__
+     auto cli = CommandLine(argc, argv);
+     auto uci = std::make_unique<UCIEngine>(std::move(cli));
+ 
+     Tune::init(uci->engine_options());
+ 
+-    uci->loop();
++    uci.loop();
++#else
++    uciP = new UCIEngine(argc, argv); // initialize the UCI object
++    Tune::init(uciP->engine_options());
++    #ifndef __EMSCRIPTEN_SINGLE_THREADED__
++        ready = true;
++    #endif
++#endif
+ 
+     return 0;
+ }
+@@ -57,5 +72,16 @@
+ 
+     #ifdef UNIVERSAL_NEEDS_MAIN_SHIM
+ int main(int argc, char* argv[]) { return Stockfish::main(argc, argv); }
++    #endif
++#endif
++
++#ifdef __EMSCRIPTEN__
++extern "C" void command(const char *cmd) {
++    uciP->process_command(cmd);
++}
++    #ifndef __EMSCRIPTEN_SINGLE_THREADED__
++    extern "C" bool isReady() {
++        return ready;
++    }
+     #endif
+ #endif
+diff -ruN --ex sfup/src/misc.cpp sfjs/src/misc.cpp
+--- sfup/src/misc.cpp	2026-10-03 00:40:40
++++ sfjs/src/misc.cpp	2026-10-03 00:40:22
+@@ -54,7 +54,11 @@
+ namespace {
+ 
+ // Version number or dev.
++#ifndef __ENGINE_VERSION__
+ constexpr std::string_view version = "19";
++#else
++constexpr std::string_view version = __ENGINE_VERSION__;
++#endif
+ 
+ // Our fancy logging facility. The trick here is to replace cin.rdbuf() and
+ // cout.rdbuf() with two Tie objects that tie cin and cout to a file stream. We
+@@ -142,6 +146,8 @@
+     std::stringstream ss;
+     ss << "Stockfish " << version << std::setfill('0');
+ 
++#ifndef __ENGINE_VERSION__
++
+     if constexpr (version == "dev")
+     {
+         ss << "-";
+@@ -170,6 +176,7 @@
+         ss << "nogit";
+ #endif
+     }
++#endif // __ENGINE_VERSION__
+ 
+     return ss.str();
+ }
+diff -ruN --ex sfup/src/nnue/features/p_hm.cpp sfjs/src/nnue/features/p_hm.cpp
+--- sfup/src/nnue/features/p_hm.cpp	1969-12-31 19:00:00
++++ sfjs/src/nnue/features/p_hm.cpp	2026-10-03 00:40:22
+@@ -0,0 +1,100 @@
++/*
++  Stockfish, a UCI chess playing engine derived from Glaurung 2.1
++  Copyright (C) 2004-2026 The Stockfish developers (see AUTHORS file)
++
++  Stockfish is free software: you can redistribute it and/or modify
++  it under the terms of the GNU General Public License as published by
++  the Free Software Foundation, either version 3 of the License, or
++  (at your option) any later version.
++
++  Stockfish is distributed in the hope that it will be useful,
++  but WITHOUT ANY WARRANTY; without even the implied warranty of
++  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++  GNU General Public License for more details.
++
++  You should have received a copy of the GNU General Public License
++  along with this program.  If not, see <http://www.gnu.org/licenses/>.
++*/
++
++// Definition of input features P_hm of NNUE evaluation function
++
++#include "p_hm.h"
++
++#include "../../types.h"
++#include "../nnue_common.h"
++
++#if defined(USE_AVX512ICL)
++    #include "../../bitboard.h"
++#endif
++
++namespace Stockfish::Eval::NNUE::Features {
++
++#if defined(USE_AVX512ICL)
++void P_hm::write_indices(const std::array<Piece, SQUARE_NB>& oldPieces,
++                         const std::array<Piece, SQUARE_NB>& newPieces,
++                         Bitboard                            removedBB,
++                         Bitboard                            addedBB,
++                         Color                               perspective,
++                         Square                              ksq,
++                         IndexList&                          removed,
++                         IndexList&                          added) {
++
++    auto* write_removed = removed.make_space(popcount(removedBB));
++    auto* write_added   = added.make_space(popcount(addedBB));
++
++    const __m512i vecOldPieces = _mm512_loadu_si512(oldPieces.data());
++    const __m512i vecNewPieces = _mm512_loadu_si512(newPieces.data());
++
++    // PieceSquareIndex entries are multiples of 64, while s and orient use
++    // only the low six bits. Therefore no carry crosses bit 6, and
++    // (s ^ orient) + psi[pc] == s ^ (psi[pc] + orient), allowing the
++    // orientation to be folded into the per-piece lookup offset.
++    const u16     flip   = 56 * perspective;
++    const u16     orient = u16(OrientTBL[ksq]) ^ flip;
++    const __m512i psi =
++      _mm512_castsi256_si512(_mm256_loadu_si256((const __m256i*) PieceSquareIndex[perspective]));
++    const __m512i psi_plus_offset = _mm512_add_epi16(psi, _mm512_set1_epi16(orient));
++
++    __m512i removed_squares = _mm512_maskz_compress_epi8(removedBB, AllSquares);
++    __m512i added_squares   = _mm512_maskz_compress_epi8(addedBB, AllSquares);
++    __m512i removed_pieces  = _mm512_maskz_compress_epi8(removedBB, vecOldPieces);
++    __m512i added_pieces    = _mm512_maskz_compress_epi8(addedBB, vecNewPieces);
++
++    removed_squares = _mm512_cvtepi8_epi16(_mm512_castsi512_si256(removed_squares));
++    added_squares   = _mm512_cvtepi8_epi16(_mm512_castsi512_si256(added_squares));
++    removed_pieces  = _mm512_cvtepi8_epi16(_mm512_castsi512_si256(removed_pieces));
++    added_pieces    = _mm512_cvtepi8_epi16(_mm512_castsi512_si256(added_pieces));
++
++    const __m512i removed_indices =
++      _mm512_xor_si512(removed_squares, _mm512_permutexvar_epi16(removed_pieces, psi_plus_offset));
++    const __m512i added_indices =
++      _mm512_xor_si512(added_squares, _mm512_permutexvar_epi16(added_pieces, psi_plus_offset));
++
++    _mm512_storeu_si512(write_removed, removed_indices);
++    _mm512_storeu_si512(write_added, added_indices);
++}
++#endif
++
++IndexType P_hm::make_index(Color perspective, Square s, Piece pc, Square ksq) {
++    const IndexType flip = 56 * perspective;
++    return (IndexType(s) ^ OrientTBL[ksq] ^ flip) + PieceSquareIndex[perspective][pc];
++}
++
++void P_hm::append_changed_indices(
++  Color perspective, Square ksq, const DiffType& diff, IndexList& removed, IndexList& added) {
++    removed.push_back(make_index(perspective, diff.from, diff.pc, ksq));
++    if (diff.to != SQ_NONE)
++        added.push_back(make_index(perspective, diff.to, diff.pc, ksq));
++
++    if (diff.remove_sq != SQ_NONE)
++        removed.push_back(make_index(perspective, diff.remove_sq, diff.remove_pc, ksq));
++
++    if (diff.add_sq != SQ_NONE)
++        added.push_back(make_index(perspective, diff.add_sq, diff.add_pc, ksq));
++}
++
++bool P_hm::requires_refresh(const DiffType& diff, Color perspective) {
++    return diff.pc == make_piece(perspective, KING) && OrientTBL[diff.from] != OrientTBL[diff.to];
++}
++
++}  // namespace Stockfish::Eval::NNUE::Features
+diff -ruN --ex sfup/src/nnue/features/p_hm.h sfjs/src/nnue/features/p_hm.h
+--- sfup/src/nnue/features/p_hm.h	1969-12-31 19:00:00
++++ sfjs/src/nnue/features/p_hm.h	2026-10-03 00:40:22
+@@ -0,0 +1,103 @@
++/*
++  Stockfish, a UCI chess playing engine derived from Glaurung 2.1
++  Copyright (C) 2004-2026 The Stockfish developers (see AUTHORS file)
++
++  Stockfish is free software: you can redistribute it and/or modify
++  it under the terms of the GNU General Public License as published by
++  the Free Software Foundation, either version 3 of the License, or
++  (at your option) any later version.
++
++  Stockfish is distributed in the hope that it will be useful,
++  but WITHOUT ANY WARRANTY; without even the implied warranty of
++  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++  GNU General Public License for more details.
++
++  You should have received a copy of the GNU General Public License
++  along with this program.  If not, see <http://www.gnu.org/licenses/>.
++*/
++
++// Definition of input features P_hm of NNUE evaluation function
++
++#ifndef NNUE_FEATURES_P_HM_H_INCLUDED
++#define NNUE_FEATURES_P_HM_H_INCLUDED
++
++#include "../../misc.h"
++#include "../../types.h"
++#include "../nnue_common.h"
++
++namespace Stockfish::Eval::NNUE::Features {
++
++// Feature P_hm: The color-relative piece and its square. The position is
++// mirrored horizontally such that the friendly king is always on e..h files.
++class P_hm {
++
++    enum {
++        PS_NONE     = 0,
++        PS_W_PAWN   = 0,
++        PS_W_KNIGHT = 1 * SQUARE_NB,
++        PS_W_BISHOP = 2 * SQUARE_NB,
++        PS_W_ROOK   = 3 * SQUARE_NB,
++        PS_W_QUEEN  = 4 * SQUARE_NB,
++        PS_W_KING   = 5 * SQUARE_NB,
++        PS_B_PAWN   = 6 * SQUARE_NB,
++        PS_B_KNIGHT = 7 * SQUARE_NB,
++        PS_B_BISHOP = 8 * SQUARE_NB,
++        PS_B_ROOK   = 9 * SQUARE_NB,
++        PS_B_QUEEN  = 10 * SQUARE_NB,
++        PS_B_KING   = 11 * SQUARE_NB,
++        PS_NB       = 12 * SQUARE_NB
++    };
++
++    alignas(64) static constexpr u16 PieceSquareIndex[COLOR_NB][PIECE_NB] = {
++      // Convention: W - us, B - them. Viewed from the other side, W and B are reversed.
++      {PS_NONE, PS_W_PAWN, PS_W_KNIGHT, PS_W_BISHOP, PS_W_ROOK, PS_W_QUEEN, PS_W_KING, PS_NONE,
++       PS_NONE, PS_B_PAWN, PS_B_KNIGHT, PS_B_BISHOP, PS_B_ROOK, PS_B_QUEEN, PS_B_KING, PS_NONE},
++      {PS_NONE, PS_B_PAWN, PS_B_KNIGHT, PS_B_BISHOP, PS_B_ROOK, PS_B_QUEEN, PS_B_KING, PS_NONE,
++       PS_NONE, PS_W_PAWN, PS_W_KNIGHT, PS_W_BISHOP, PS_W_ROOK, PS_W_QUEEN, PS_W_KING, PS_NONE}};
++
++   public:
++    // Hash value embedded in the evaluation file
++    static constexpr u32 HashValue = 0x6f234cb8u;
++
++    // One feature for each of 12 color-relative piece types on each square.
++    static constexpr IndexType Dimensions = PS_NB;
++
++    // Horizontal orientation according to the friendly king square.
++    // Perspective rotation is applied separately.
++    static constexpr IndexType OrientTBL[SQUARE_NB] = {
++      SQ_H1, SQ_H1, SQ_H1, SQ_H1, SQ_A1, SQ_A1, SQ_A1, SQ_A1, SQ_H1, SQ_H1, SQ_H1, SQ_H1, SQ_A1,
++      SQ_A1, SQ_A1, SQ_A1, SQ_H1, SQ_H1, SQ_H1, SQ_H1, SQ_A1, SQ_A1, SQ_A1, SQ_A1, SQ_H1, SQ_H1,
++      SQ_H1, SQ_H1, SQ_A1, SQ_A1, SQ_A1, SQ_A1, SQ_H1, SQ_H1, SQ_H1, SQ_H1, SQ_A1, SQ_A1, SQ_A1,
++      SQ_A1, SQ_H1, SQ_H1, SQ_H1, SQ_H1, SQ_A1, SQ_A1, SQ_A1, SQ_A1, SQ_H1, SQ_H1, SQ_H1, SQ_H1,
++      SQ_A1, SQ_A1, SQ_A1, SQ_A1, SQ_H1, SQ_H1, SQ_H1, SQ_H1, SQ_A1, SQ_A1, SQ_A1, SQ_A1};
++
++    static constexpr IndexType MaxActiveDimensions = 32;
++    using IndexList                                = ValueList<u16, MaxActiveDimensions>;
++    using DiffType                                 = DirtyPiece;
++
++#if defined(USE_AVX512ICL)
++    static void write_indices(const std::array<Piece, SQUARE_NB>& oldPieces,
++                              const std::array<Piece, SQUARE_NB>& newPieces,
++                              Bitboard                            removedBB,
++                              Bitboard                            addedBB,
++                              Color                               perspective,
++                              Square                              ksq,
++                              IndexList&                          removed,
++                              IndexList&                          added);
++#endif
++
++    static IndexType make_index(Color perspective, Square s, Piece pc, Square ksq);
++
++    static void append_changed_indices(
++      Color perspective, Square ksq, const DiffType& diff, IndexList& removed, IndexList& added);
++
++    static bool requires_refresh(const DiffType& diff, Color perspective);
++
++    static constexpr IndexType refresh_bucket(Square ksq) { return OrientTBL[ksq] == SQ_H1; }
++};
++
++static_assert(P_hm::Dimensions == 12 * SQUARE_NB);
++
++}  // namespace Stockfish::Eval::NNUE::Features
++
++#endif  // #ifndef NNUE_FEATURES_P_HM_H_INCLUDED
+diff -ruN --ex sfup/src/nnue/network.cpp sfjs/src/nnue/network.cpp
+--- sfup/src/nnue/network.cpp	2026-10-03 00:40:40
++++ sfjs/src/nnue/network.cpp	2026-10-03 00:40:22
+@@ -46,19 +46,37 @@
+ //     const unsigned char *const gEmbeddedNNUEEnd;     // a marker to the end
+ //     const unsigned int         gEmbeddedNNUESize;    // the size of the embedded file
+ // Note that this does not work in Microsoft Visual Studio.
++#ifdef __EMSCRIPTEN__
++#ifdef USE_LITE_NET
++    #include "../emscripten/wasm_embedded_lite_network.h"
++#else
++    #include "../emscripten/wasm_embedded_networks.h"
++#endif
++#else
+ #if !defined(UNIVERSAL_BINARY) && !defined(_MSC_VER) && !defined(NNUE_EMBEDDING_OFF)
+ INCBIN(EmbeddedNNUE, EvalFileDefaultName);
+-#elif defined(UNIVERSAL_BINARY_MACOS_X86_SLICE)
+-// Determined at runtime, see universal/nnue_embed.cpp
+-extern const unsigned char* const gEmbeddedNNUEData;
+-extern const unsigned int         gEmbeddedNNUESize;
+ #elif defined(UNIVERSAL_BINARY)
+-extern const unsigned char gEmbeddedNNUEData[];
+-extern const unsigned int  gEmbeddedNNUESize;
++    // When building for the universal binary, use C++26 #embed with weak symbols so that a
++    // separate, non-LTO nnue_embed.o (with strong symbols) can override them during the LTO link,
++    // (INCBIN can't deduplicate.)
++    #define WEAK_SYM __attribute__((weak))
++extern const unsigned char gEmbeddedNNUEData[] WEAK_SYM =
++    #ifdef __has_embed
++  {
++        #embed EvalFileDefaultName
++};
++const int padding = 0;
++    #else
++        #include "../universal/network_dump.inc"
++  ;
++const int padding = 1;  // trailing NUL byte
++    #endif
++extern const unsigned int gEmbeddedNNUESize WEAK_SYM = sizeof(gEmbeddedNNUEData) - padding;
+ #else
+ const unsigned char gEmbeddedNNUEData[1] = {0x0};
+ const unsigned int  gEmbeddedNNUESize    = 1;
+ #endif
++#endif // __EMSCRIPTEN__
+ 
+ 
+ namespace Stockfish::Eval::NNUE {
+@@ -249,11 +267,6 @@
+             setp(p, p + n);
+         }
+     };
+-
+-#ifdef UNIVERSAL_BINARY_MACOS_X86_SLICE
+-    if (gEmbeddedNNUEData == nullptr)  // failed embedded load
+-        return;
+-#endif
+ 
+     MemoryBuffer buffer(const_cast<char*>(reinterpret_cast<const char*>(gEmbeddedNNUEData)),
+                         usize(gEmbeddedNNUESize));
+diff -ruN --ex sfup/src/nnue/nnue_accumulator.cpp sfjs/src/nnue/nnue_accumulator.cpp
+--- sfup/src/nnue/nnue_accumulator.cpp	2026-10-03 00:40:40
++++ sfjs/src/nnue/nnue_accumulator.cpp	2026-10-03 00:40:22
+@@ -56,12 +56,14 @@
+                                       AccumulatorState&         accumulatorState,
+                                       AccumulatorCaches&        cache);
+ 
++#ifndef USE_LITE_NET
+ void update_accumulator_hybrid(Color                     perspective,
+                                const Position&           pos,
+                                const FeatureTransformer& featureTransformer,
+                                AccumulatorState&         target,
+                                const AccumulatorState&   computed,
+                                AccumulatorCaches&        cache);
++#endif
+ }
+ 
+ const AccumulatorState& AccumulatorStack::latest() const noexcept { return accumulators[size - 1]; }
+@@ -113,6 +115,9 @@
+                                      AccumulatorCaches&        cache,
+                                      usize                     last_usable_accum) noexcept {
+ 
++#ifdef USE_LITE_NET
++    [[maybe_unused]]
++#endif
+     constexpr int MIN_PC_COUNT_HYBRID = 15;
+ 
+     if (accumulators[last_usable_accum].computed[perspective])
+@@ -120,6 +125,10 @@
+ 
+     else
+     {
++#ifndef USE_LITE_NET
++        // The hybrid king-move update is only useful for the full feature
++        // sets: in Lite mode a king move that stays on the same side of the
++        // board is a regular incremental update.
+         const auto& dirtyPiece = latest().dirtyPiece;
+ 
+         if (dirtyPiece.pc == make_piece(perspective, KING)
+@@ -133,6 +142,7 @@
+                                       accumulators[size - 2], cache);
+             return;
+         }
++#endif
+ 
+         update_accumulator_refresh_cache(perspective, featureTransformer, pos, mut_latest(), cache);
+         backward_update_incremental(perspective, pos, featureTransformer, last_usable_accum);
+@@ -148,8 +158,8 @@
+         if (accumulators[curr_idx].computed[perspective])
+             return curr_idx;
+ 
+-        // Threat feature set refreshes require a king move across the center, i.e.,
+-        // a subset of halfka refreshes
++        // The feature set requires a refresh when the king crosses the center
++        // of the board (any king move in the full build).
+         if (PSQFeatureSet::requires_refresh(accumulators[curr_idx].dirtyPiece, perspective))
+             return curr_idx;
+     }
+@@ -286,6 +296,7 @@
+     return acc;
+ }
+ 
++#ifndef USE_LITE_NET
+ template<int sign>
+ sf_always_inline Tile apply_threat_features(IndexType                          j,
+                                             Tile                               acc,
+@@ -305,6 +316,7 @@
+     }
+     return acc;
+ }
++#endif
+ 
+ #else  // VECTOR or non VECTOR
+ 
+@@ -376,6 +388,7 @@
+ 
+ sf_always_inline void increment_psqt_index(IndexType& j) { j += Tiling::PsqtTileHeight; }
+ 
++#ifndef USE_LITE_NET
+ template<int sign>
+ sf_always_inline Tile apply_threat_features(IndexType                          j,
+                                             Tile                               acc,
+@@ -428,6 +441,7 @@
+ 
+     return acc;
+ }
++#endif
+ 
+ template<int sign>
+ sf_always_inline Tile apply(IndexType j, Tile acc, const i16* data) {
+@@ -488,9 +502,12 @@
+                     const AccumulatorState&            from,
+                     AccumulatorState&                  to,
+                     const PSQFeatureSet::IndexList&    psqAdded,
+-                    const PSQFeatureSet::IndexList&    psqRemoved,
+-                    const ThreatFeatureSet::IndexList& thrAdded,
+-                    const ThreatFeatureSet::IndexList& thrRemoved) {
++                    const PSQFeatureSet::IndexList&    psqRemoved
++#ifndef USE_LITE_NET
++                    , const ThreatFeatureSet::IndexList& thrAdded
++                    , const ThreatFeatureSet::IndexList& thrRemoved
++#endif
++                ) {
+ 
+     const auto& fromAcc = from.accumulation[perspective];
+     auto&       toAcc   = to.accumulation[perspective];
+@@ -508,9 +525,10 @@
+         acc = apply_psq_features<-1, true>(j, acc, psqRemoved, featureTransformer);
+         acc = apply_psq_features<+1, true>(j, acc, psqAdded, featureTransformer);
+ 
++#ifndef USE_LITE_NET
+         acc = apply_threat_features<-1>(j, acc, thrRemoved, featureTransformer);
+         acc = apply_threat_features<+1>(j, acc, thrAdded, featureTransformer);
+-
++#endif
+         store_tile(j, toAcc.data(), acc);
+     }
+ 
+@@ -521,9 +539,11 @@
+         psqt = apply_psqt<-1>(j, psqt, psqRemoved, featureTransformer.psqtWeights.data());
+         psqt = apply_psqt<+1>(j, psqt, psqAdded, featureTransformer.psqtWeights.data());
+ 
++#ifndef USE_LITE_NET
+         psqt =
+           apply_psqt<-1>(j, psqt, thrRemoved, featureTransformer.threatAndPpPsqtWeights.data());
+         psqt = apply_psqt<+1>(j, psqt, thrAdded, featureTransformer.threatAndPpPsqtWeights.data());
++#endif
+ 
+         store_psqt(j, toPsqtAcc.data(), psqt);
+     }
+@@ -544,6 +564,7 @@
+     // feature set's update cost calculation to be correct and never allow
+     // updates with more added/removed features than MaxActiveDimensions.
+     PSQFeatureSet::IndexList    psqRemoved, psqAdded;
++#ifndef USE_LITE_NET
+     ThreatFeatureSet::IndexList thrRemoved, thrAdded;
+ 
+     const auto& dirtyPiece     = Forward ? target_state.dirtyPiece : computed.dirtyPiece;
+@@ -553,26 +574,36 @@
+     // Used solely for prefetching
+     const auto* threatPpBase = &featureTransformer.threatAndPpWeights[0];
+     IndexType   pfStride     = FeatureTransformer::OutputDimensions;
++#else
++    const auto& dirtyPiece = Forward ? target_state.dirtyPiece : computed.dirtyPiece;
++#endif
+ 
+     if constexpr (Forward)
+     {
++#ifndef USE_LITE_NET
+         ThreatFeatureSet::append_changed_indices(perspective, ksq, dirtyThreats, thrRemoved,
+                                                  thrAdded, threatPpBase, pfStride);
+         PairFeatureSet::append_changed_indices(perspective, ksq, dirtyPawnPairs, thrRemoved,
+                                                thrAdded, threatPpBase, pfStride);
++#endif
+         PSQFeatureSet::append_changed_indices(perspective, ksq, dirtyPiece, psqRemoved, psqAdded);
+     }
+     else
+     {
++#ifndef USE_LITE_NET
+         ThreatFeatureSet::append_changed_indices(perspective, ksq, dirtyThreats, thrAdded,
+                                                  thrRemoved, threatPpBase, pfStride);
+         PairFeatureSet::append_changed_indices(perspective, ksq, dirtyPawnPairs, thrAdded,
+                                                thrRemoved, threatPpBase, pfStride);
++#endif
+         PSQFeatureSet::append_changed_indices(perspective, ksq, dirtyPiece, psqAdded, psqRemoved);
+     }
+ 
+-    apply_combined(perspective, featureTransformer, computed, target_state, psqAdded, psqRemoved,
+-                   thrAdded, thrRemoved);
++    apply_combined(perspective, featureTransformer, computed, target_state, psqAdded, psqRemoved
++#ifndef USE_LITE_NET
++                   , thrAdded, thrRemoved
++#endif
++                );
+ 
+     target_state.computed[perspective] = true;
+ }
+@@ -589,6 +620,7 @@
+     assert(!target_state.computed[BLACK]);
+ 
+     PSQFeatureSet::IndexList    psq_removed[COLOR_NB], psq_added[COLOR_NB];
++#ifndef USE_LITE_NET
+     ThreatFeatureSet::IndexList thr_removed[COLOR_NB], thr_added[COLOR_NB];
+ 
+     const auto* threat_pp_base = &featureTransformer.threatAndPpWeights[0];
+@@ -600,15 +632,24 @@
+     PairFeatureSet::append_changed_indices_both(
+       white_ksq, black_ksq, target_state.dirtyPawnPairs, thr_removed[WHITE], thr_added[WHITE],
+       thr_removed[BLACK], thr_added[BLACK], threat_pp_base, pf_stride);
++#endif
+     PSQFeatureSet::append_changed_indices(WHITE, white_ksq, target_state.dirtyPiece,
+                                           psq_removed[WHITE], psq_added[WHITE]);
+     PSQFeatureSet::append_changed_indices(BLACK, black_ksq, target_state.dirtyPiece,
+                                           psq_removed[BLACK], psq_added[BLACK]);
+ 
+     apply_combined(WHITE, featureTransformer, computed, target_state, psq_added[WHITE],
+-                   psq_removed[WHITE], thr_added[WHITE], thr_removed[WHITE]);
++                   psq_removed[WHITE]
++#ifndef USE_LITE_NET
++                   , thr_added[WHITE], thr_removed[WHITE]
++#endif
++                );
+     apply_combined(BLACK, featureTransformer, computed, target_state, psq_added[BLACK],
+-                   psq_removed[BLACK], thr_added[BLACK], thr_removed[BLACK]);
++                   psq_removed[BLACK]
++#ifndef USE_LITE_NET
++                   , thr_added[BLACK], thr_removed[BLACK]
++#endif
++                );
+ 
+     target_state.computed[WHITE] = true;
+     target_state.computed[BLACK] = true;
+@@ -717,6 +758,7 @@
+ #endif
+ }
+ 
++#ifndef USE_LITE_NET
+ // Updates accumulator for a king move, and also updates the accumulator cache
+ // for the new king position.
+ void update_accumulator_hybrid(Color                     perspective,
+@@ -874,6 +916,7 @@
+ 
+     target.computed[perspective] = true;
+ }
++#endif
+ 
+ // HalfKA data comes from the Finny table entry, while the threats are built
+ // from the active threat features
+@@ -884,7 +927,11 @@
+                                       AccumulatorCaches&        cache) {
+ 
+     const Square             ksq   = pos.square<KING>(perspective);
++#ifdef USE_LITE_NET
++    auto&                    entry = cache[FeatureSet::refresh_bucket(ksq)][perspective];
++#else
+     auto&                    entry = cache[ksq][perspective];
++#endif
+     PSQFeatureSet::IndexList removed, added;
+ 
+     const Bitboard changedBB = get_changed_pieces(entry.pieces, pos.piece_array());
+@@ -910,9 +957,11 @@
+     entry.pieceBB = pos.pieces();
+     entry.pieces  = pos.piece_array();
+ 
++#ifndef USE_LITE_NET
+     ThreatFeatureSet::IndexList active;
+     ThreatFeatureSet::append_active_indices(perspective, pos, active);
+     PairFeatureSet::append_active_indices(perspective, pos, active);
++#endif
+ 
+     accumulator.computed[perspective] = true;
+ 
+@@ -928,7 +977,9 @@
+ 
+         store_tile(j, &entry.accumulation[0], acc);
+ 
++#ifndef USE_LITE_NET
+         acc = apply_threat_features<+1>(j, acc, active, featureTransformer);
++#endif
+ 
+         store_tile(j, accumulator.accumulation[perspective].data(), acc);
+     }
+@@ -942,7 +993,9 @@
+ 
+         store_psqt(j, entry.psqtAccumulation.data(), psqt);
+ 
++#ifndef USE_LITE_NET
+         psqt = apply_psqt<+1>(j, psqt, active, featureTransformer.threatAndPpPsqtWeights.data());
++#endif
+ 
+         store_psqt(j, accumulator.psqtAccumulation[perspective].data(), psqt);
+     }
+diff -ruN --ex sfup/src/nnue/nnue_accumulator.h sfjs/src/nnue/nnue_accumulator.h
+--- sfup/src/nnue/nnue_accumulator.h	2026-10-03 00:40:40
++++ sfjs/src/nnue/nnue_accumulator.h	2026-10-03 00:40:22
+@@ -83,9 +83,16 @@
+                 entry.clear(network.featureTransformer.biases);
+     }
+ 
++#ifdef USE_LITE_NET
++    // Lite mode only has two orientations (king on e..h or a..d files).
++    std::array<Entry, COLOR_NB>& operator[](IndexType bucket) { return entries[bucket]; }
++
++    std::array<std::array<Entry, COLOR_NB>, 2> entries;
++#else
+     std::array<Entry, COLOR_NB>& operator[](Square sq) { return entries[sq]; }
+ 
+     std::array<std::array<Entry, COLOR_NB>, SQUARE_NB> entries;
++#endif
+ };
+ 
+ 
+diff -ruN --ex sfup/src/nnue/nnue_architecture.h sfjs/src/nnue/nnue_architecture.h
+--- sfup/src/nnue/nnue_architecture.h	2026-10-03 00:40:40
++++ sfjs/src/nnue/nnue_architecture.h	2026-10-03 00:40:22
+@@ -24,9 +24,13 @@
+ #include <cstdint>
+ #include <iosfwd>
+ 
++#ifdef USE_LITE_NET
++#include "features/p_hm.h"
++#else
+ #include "features/half_ka_v2_hm.h"
+ #include "features/full_threats.h"
+ #include "features/pp_3wide.h"
++#endif
+ #include "layers/affine_transform.h"
+ #include "layers/affine_transform_sparse_input.h"
+ #include "layers/clipped_relu.h"
+@@ -37,9 +41,16 @@
+ namespace Stockfish::Eval::NNUE {
+ 
+ // Input features used in evaluation function
++#ifdef USE_LITE_NET
++// Lite mode: a single small feature set. It is aliased to PSQFeatureSet so
++// that the accumulator code stays identical to the full build.
++using FeatureSet    = Features::P_hm;
++using PSQFeatureSet = FeatureSet;
++#else
+ using ThreatFeatureSet = Features::FullThreats;
+ using PairFeatureSet   = Features::PP_3Wide;
+ using PSQFeatureSet    = Features::HalfKAv2_hm;
++#endif
+ 
+ // Number of input feature dimensions after conversion
+ constexpr IndexType L1 = 1024;
+diff -ruN --ex sfup/src/nnue/nnue_feature_transformer.h sfjs/src/nnue/nnue_feature_transformer.h
+--- sfup/src/nnue/nnue_feature_transformer.h	2026-10-03 00:40:40
++++ sfjs/src/nnue/nnue_feature_transformer.h	2026-10-03 00:40:22
+@@ -86,6 +86,14 @@
+     using OutputType = TransformedFeatureType;
+ 
+     // Number of input/output dimensions
++#ifdef USE_LITE_NET
++    static constexpr IndexType InputDimensions  = PSQFeatureSet::Dimensions;
++    static constexpr IndexType OutputDimensions = HalfDimensions;
++
++    using BiasesArray     = std::array<BiasType, HalfDimensions>;
++    using WeightArray     = std::array<WeightType, HalfDimensions * InputDimensions>;
++    using PsqtWeightArray = std::array<PSQTWeightType, PSQTBuckets * InputDimensions>;
++#else
+     static constexpr IndexType ThreatInputDimensions = ThreatFeatureSet::Dimensions;
+     static constexpr IndexType PairInputDimensions   = PairFeatureSet::Dimensions;
+     static constexpr IndexType PsqDimensions         = PSQFeatureSet::Dimensions;
+@@ -104,6 +112,7 @@
+     using ThreatAndPpWeightArray = std::array<ThreatWeightType, ThreatAndPpWeightSize>;
+     using PsqtWeightArray        = std::array<PSQTWeightType, PSQTBuckets * PsqDimensions>;
+     using ThreatAndPpPsqtArray   = std::array<PSQTWeightType, ThreatAndPpPsqtSize>;
++#endif
+ 
+     // Size of forward propagation buffer
+     static constexpr usize BufferSize = OutputDimensions * sizeof(OutputType);
+@@ -143,38 +152,50 @@
+ 
+     // Hash value embedded in the evaluation file
+     static constexpr u32 get_hash_value() {
++#ifdef USE_LITE_NET
++        return FeatureSet::HashValue ^ (OutputDimensions * 2);
++#else
+         return combine_hash(
+                  {ThreatFeatureSet::HashValue, PairFeatureSet::HashValue, PSQFeatureSet::HashValue})
+              ^ (OutputDimensions * 2);
++#endif
+     }
+ 
+     void permute_weights() {
+         permute<16>(biases, PackusEpi16Order);
+         permute<16>(weights, PackusEpi16Order);
+ 
++#ifndef USE_LITE_NET
+         permute<8>(threatAndPpWeights, PackusEpi16Order);
++#endif
+     }
+ 
+     void unpermute_weights() {
+         permute<16>(biases, InversePackusEpi16Order);
+         permute<16>(weights, InversePackusEpi16Order);
++#ifndef USE_LITE_NET
+         permute<8>(threatAndPpWeights, InversePackusEpi16Order);
++#endif
+     }
+ 
++#ifndef USE_LITE_NET
+     ThreatWeightType* threatWeightData() { return threatAndPpWeights.data(); }
+     ThreatWeightType* pawnPairWeightData() { return threatWeightData() + ThreatWeightSize; }
+     PSQTWeightType*   threatPsqtData() { return threatAndPpPsqtWeights.data(); }
+     PSQTWeightType*   pawnPairPsqtData() { return threatPsqtData() + ThreatPsqtWeightSize; }
++#endif
+ 
+ 
+     // Read network parameters
+     bool read_parameters(std::istream& stream) {
+         read_leb_128(stream, biases);
+ 
++#ifndef USE_LITE_NET
+         read_little_endian(stream, threatWeightData(), ThreatWeightSize);
+         read_leb_128(stream, threatPsqtData(), ThreatPsqtWeightSize);
+         read_little_endian(stream, pawnPairWeightData(), PairWeightSize);
+         read_leb_128(stream, pawnPairPsqtData(), PairPsqtWeightSize);
++#endif
+ 
+         read_leb_128(stream, weights);
+         read_leb_128(stream, psqtWeights);
+@@ -193,10 +214,12 @@
+         write_leb_128<BiasType>(stream, copy->biases);
+ 
+ 
++#ifndef USE_LITE_NET
+         write_little_endian(stream, copy->threatWeightData(), ThreatWeightSize);
+         write_leb_128(stream, copy->threatPsqtData(), ThreatPsqtWeightSize);
+         write_little_endian(stream, copy->pawnPairWeightData(), PairWeightSize);
+         write_leb_128(stream, copy->pawnPairPsqtData(), PairPsqtWeightSize);
++#endif
+ 
+         write_leb_128<WeightType>(stream, copy->weights);
+         write_leb_128<PSQTWeightType>(stream, copy->psqtWeights);
+@@ -211,8 +234,10 @@
+         hash_combine(h, get_raw_data_hash(weights));
+         hash_combine(h, get_raw_data_hash(psqtWeights));
+ 
++#ifndef USE_LITE_NET
+         hash_combine(h, get_raw_data_hash(threatAndPpWeights));
+         hash_combine(h, get_raw_data_hash(threatAndPpPsqtWeights));
++#endif
+ 
+         hash_combine(h, get_hash_value());
+ 
+@@ -418,13 +443,17 @@
+     alignas(CacheLineSize) BiasesArray biases;
+     alignas(CacheLineSize) WeightArray weights;
+ 
++#ifndef USE_LITE_NET
+     // Threats and pawn-pair features are concatenated into one array to allow for a single index to address either.
+     // The first pawn-pair feature is at index ThreatFeatureSet::Dimensions.
+     static_assert(PairFeatureSet::IndexBase == ThreatFeatureSet::Dimensions);
+ 
+     alignas(CacheLineSize) ThreatAndPpWeightArray threatAndPpWeights;
++#endif
+     alignas(CacheLineSize) PsqtWeightArray psqtWeights;
++#ifndef USE_LITE_NET
+     alignas(CacheLineSize) ThreatAndPpPsqtArray threatAndPpPsqtWeights;
++#endif
+ };
+ 
+ }  // namespace Stockfish::Eval::NNUE
+diff -ruN --ex sfup/src/numa.h sfjs/src/numa.h
+--- sfup/src/numa.h	2026-10-03 00:40:40
++++ sfjs/src/numa.h	2026-10-03 00:40:22
+@@ -42,7 +42,7 @@
+ 
+ // We support linux very well, but we explicitly do NOT support Android,
+ // because there is no affected systems, not worth maintaining.
+-#if defined(__linux__) && !defined(__ANDROID__)
++#if defined(__linux__) && !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
+     #if !defined(_GNU_SOURCE)
+         #define _GNU_SOURCE
+     #endif
+@@ -419,7 +419,7 @@
+ 
+ #endif
+ 
+-#if defined(__linux__) && !defined(__ANDROID__)
++#if defined(__linux__) && !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
+ 
+ inline std::set<CpuIndex> get_process_affinity() {
+ 
+@@ -546,7 +546,8 @@
+                                   bool respectProcessAffinity = true) {
+         NumaConfig cfg = empty();
+ 
+-#if !((defined(__linux__) && !defined(__ANDROID__)) || defined(_WIN64))
++
++#if !((defined(__linux__) && !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)) || defined(_WIN64))
+         // Fallback for unsupported systems.
+         for (CpuIndex c = 0; c < SYSTEM_THREADS_NB; ++c)
+             cfg.add_cpu_to_node(NumaIndex{0}, c);
+@@ -837,7 +838,7 @@
+         if (n >= nodes.size() || nodes[n].empty())
+             std::exit(EXIT_FAILURE);
+ 
+-#if defined(__linux__) && !defined(__ANDROID__)
++#if defined(__linux__) && !defined(__ANDROID__) && !defined(__EMSCRIPTEN__)
+ 
+         cpu_set_t* mask = CPU_ALLOC(highestCpuIndex + 1);
+         if (mask == nullptr)
+diff -ruN --ex sfup/src/position.cpp sfjs/src/position.cpp
+--- sfup/src/position.cpp	2026-10-03 00:40:40
++++ sfjs/src/position.cpp	2026-10-03 00:40:22
+@@ -86,6 +86,7 @@
+     for (Bitboard b = pos.checkers(); b;)
+         os << UCIEngine::square(pop_lsb(b)) << " ";
+ 
++#ifndef __NO_SYZYGY__
+     if (Tablebases::MaxCardinality >= popcount(pos.pieces()) && !pos.can_castle(ANY_CASTLING))
+     {
+         StateInfo st;
+@@ -98,6 +99,7 @@
+         os << "\nTablebases WDL: " << std::setw(4) << wdl << " (" << s1 << ")"
+            << "\nTablebases DTZ: " << std::setw(4) << dtz << " (" << s2 << ")";
+     }
++#endif
+ 
+     return os;
+ }
+@@ -1614,14 +1616,25 @@
+     if ((sideToMove != WHITE && sideToMove != BLACK) || piece_on(square<KING>(WHITE)) != W_KING
+         || piece_on(square<KING>(BLACK)) != B_KING
+         || (ep_square() != SQ_NONE && relative_rank(sideToMove, ep_square()) != RANK_6))
++#ifdef __EMSCRIPTEN__
++        return false;
++#else
+         assert(0 && "pos_is_ok: Default");
+-
++#endif
+     if (count<KING>(WHITE) != 1 || count<KING>(BLACK) != 1
+         || attackers_to_exist(square<KING>(~sideToMove), pieces(), sideToMove))
++#ifdef __EMSCRIPTEN__
++        return false;
++#else
+         assert(0 && "pos_is_ok: Kings");
++#endif
+ 
+     if ((pieces(PAWN) & (Rank1BB | Rank8BB)) || count<PAWN>(WHITE) > 8 || count<PAWN>(BLACK) > 8)
++#ifdef __EMSCRIPTEN__
++        return false;
++#else
+         assert(0 && "pos_is_ok: Pawns");
++#endif
+ 
+ 
+     if (ep_square() != SQ_NONE)
+@@ -1642,17 +1655,29 @@
+ 
+     if ((pieces(WHITE) & pieces(BLACK)) || (pieces(WHITE) | pieces(BLACK)) != pieces()
+         || popcount(pieces(WHITE)) > 16 || popcount(pieces(BLACK)) > 16)
++#ifdef __EMSCRIPTEN__
++        return false;
++#else
+         assert(0 && "pos_is_ok: Bitboards");
++#endif
+ 
+     for (PieceType p1 = PAWN; p1 <= KING; ++p1)
+         for (PieceType p2 = PAWN; p2 <= KING; ++p2)
+             if (p1 != p2 && (pieces(p1) & pieces(p2)))
++#ifdef __EMSCRIPTEN__
++                return false;
++#else
+                 assert(0 && "pos_is_ok: Bitboards");
++#endif
+ 
+     for (Piece pc : Pieces)
+         if (pieceCount[pc] != popcount(pieces(color_of(pc), type_of(pc)))
+             || pieceCount[pc] != std::count(board.begin(), board.end(), pc))
++#ifdef __EMSCRIPTEN__
++            return false;
++#else
+             assert(0 && "pos_is_ok: Pieces");
++#endif
+ 
+     for (Color c : {WHITE, BLACK})
+         for (CastlingRights cr : {c & KING_SIDE, c & QUEEN_SIDE})
+@@ -1663,7 +1688,11 @@
+             if (piece_on(castling_rook_square(cr)) != make_piece(c, ROOK)
+                 || castlingRightsMask[castlingRookSquare[cr]] != cr
+                 || (castlingRightsMask[square<KING>(c)] & cr) != cr)
++#ifdef __EMSCRIPTEN__
++                return false;
++#else
+                 assert(0 && "pos_is_ok: Castling");
++#endif
+         }
+ 
+     assert(material_key_is_ok() && "pos_is_ok: materialKey");
+diff -ruN --ex sfup/src/position.h sfjs/src/position.h
+--- sfup/src/position.h	2026-10-03 00:40:40
++++ sfjs/src/position.h	2026-10-03 00:40:22
+@@ -378,22 +378,26 @@
+ 
+ inline Piece Position::captured_piece() const { return st->capturedPiece; }
+ 
+-inline void Position::put_piece(Piece pc, Square s, DirtyThreats* const dts) {
++inline void Position::put_piece(Piece pc, Square s, [[maybe_unused]] DirtyThreats* const dts) {
+     board[s] = pc;
+     byTypeBB[ALL_PIECES] |= byTypeBB[type_of(pc)] |= s;
+     byColorBB[color_of(pc)] |= s;
+     pieceCount[pc]++;
+     pieceCount[make_piece(color_of(pc), ALL_PIECES)]++;
+ 
++#ifndef USE_LITE_NET
+     if (dts)
+         update_piece_threats(pc, true, s, dts);
++#endif
+ }
+ 
+-inline void Position::remove_piece(Square s, DirtyThreats* const dts) {
++inline void Position::remove_piece(Square s, [[maybe_unused]] DirtyThreats* const dts) {
+     Piece pc = board[s];
+ 
++#ifndef USE_LITE_NET
+     if (dts)
+         update_piece_threats(pc, false, s, dts);
++#endif
+ 
+     byTypeBB[ALL_PIECES] ^= s;
+     byTypeBB[type_of(pc)] ^= s;
+@@ -403,12 +407,14 @@
+     pieceCount[make_piece(color_of(pc), ALL_PIECES)]--;
+ }
+ 
+-inline void Position::move_piece(Square from, Square to, DirtyThreats* const dts) {
++inline void Position::move_piece(Square from, Square to, [[maybe_unused]] DirtyThreats* const dts) {
+     Piece    pc     = board[from];
+     Bitboard fromTo = from | to;
+ 
++#ifndef USE_LITE_NET
+     if (dts)
+         update_piece_threats(pc, false, from, dts, fromTo);
++#endif
+ 
+     byTypeBB[ALL_PIECES] ^= fromTo;
+     byTypeBB[type_of(pc)] ^= fromTo;
+@@ -416,22 +422,28 @@
+     board[from] = NO_PIECE;
+     board[to]   = pc;
+ 
++#ifndef USE_LITE_NET
+     if (dts)
+         update_piece_threats(pc, true, to, dts, fromTo);
++#endif
+ }
+ 
+-inline void Position::swap_piece(Square s, Piece pc, DirtyThreats* const dts) {
+-    Piece old = board[s];
++inline void Position::swap_piece(Square s, Piece pc, [[maybe_unused]] DirtyThreats* const dts) {
++    [[maybe_unused]] Piece old = board[s];
+ 
+     remove_piece(s);
+ 
++#ifndef USE_LITE_NET
+     if (dts)
+         update_piece_threats<false>(old, false, s, dts);
++#endif
+ 
+     put_piece(pc, s);
+ 
++#ifndef USE_LITE_NET
+     if (dts)
+         update_piece_threats<false>(pc, true, s, dts);
++#endif
+ }
+ 
+ inline void Position::do_move(Move m, StateInfo& newSt, const TranspositionTable* tt = nullptr) {
+diff -ruN --ex sfup/src/search.cpp sfjs/src/search.cpp
+--- sfup/src/search.cpp	2026-10-03 00:40:40
++++ sfjs/src/search.cpp	2026-10-03 00:40:22
+@@ -50,6 +50,10 @@
+ #include "uci.h"
+ #include "ucioption.h"
+ 
++#ifdef __EMSCRIPTEN_SINGLE_THREADED__
++    #include <emscripten.h>
++#endif
++
+ namespace Stockfish {
+ 
+ static constexpr std::array<int, 16> lmrDivisor = {3637, 2787, 2761, 2939, 3171, 3347, 3147, 2762,
+@@ -68,6 +72,10 @@
+ 
+ namespace {
+ 
++#ifdef __EMSCRIPTEN_SINGLE_THREADED__
++TimePoint lastElapsed;
++#endif
++
+ constexpr u64 NODES_LIMIT_OUTPUT = 10'000'000;
+ 
+ constexpr int SEARCHEDLIST_CAPACITY = 32;
+@@ -190,6 +198,10 @@
+ 
+ void Search::Worker::start_searching() {
+ 
++#ifdef __EMSCRIPTEN_SINGLE_THREADED__
++    lastElapsed = 0;
++#endif
++
+     accumulatorStack.reset();
+ 
+     // Non-main threads go directly to iterative_deepening()
+@@ -216,6 +228,7 @@
+     threads.start_searching();
+     bool uciPvSent = iterative_deepening();
+ 
++#ifndef __EMSCRIPTEN__
+     // When we reach the maximum depth, we can arrive here without a raise of
+     // threads.stop. However, if we are pondering or in an infinite search,
+     // the UCI protocol states that we shouldn't print the best move before the
+@@ -223,6 +236,7 @@
+     // until the GUI sends one of those commands.
+     while (!threads.stop && (main_manager()->ponder || limits.infinite))
+     {}
++#endif
+ 
+     // Stop the threads if not already stopped (also raise the stop if "ponderhit"
+     // just reset threads.ponder).
+@@ -919,6 +933,7 @@
+         ttWriter.penalize(1);
+     }
+ 
++#ifndef __NO_SYZYGY__
+     // Step 7. Tablebases probe
+     if (!rootNode && !excludedMove && tbConfig.cardinality)
+     {
+@@ -971,6 +986,7 @@
+             }
+         }
+     }
++#endif
+ 
+     if (ss->inCheck)
+         goto moves_loop;
+@@ -2113,6 +2129,13 @@
+     TimePoint elapsed = tm.elapsed([&worker]() { return worker.threads.nodes_searched(); });
+     TimePoint tick    = worker.limits.startTime + elapsed;
+ 
++#ifdef __EMSCRIPTEN_SINGLE_THREADED__
++    if (elapsed - lastElapsed >= 45) {
++        lastElapsed = elapsed;
++        emscripten_sleep(0);
++    }
++#endif
++
+     if (tick - lastInfoTime >= 1000)
+     {
+         lastInfoTime = tick;
+@@ -2279,7 +2302,9 @@
+     auto&      rootMoves = worker.rootMoves;
+     auto&      pos       = worker.rootPos;
+     usize      multiPV   = std::min(usize(worker.options["MultiPV"]), rootMoves.size());
++#ifndef __NO_SYZYGY__
+     u64        tbHits    = threads.tb_hits() + (worker.tbConfig.rootInTB ? rootMoves.size() : 0);
++#endif
+ 
+     for (usize i = 0; i < multiPV; ++i)
+     {
+@@ -2294,6 +2319,9 @@
+         if (v == -VALUE_INFINITE)
+             v = VALUE_ZERO;
+ 
++#ifdef __NO_SYZYGY__
++        bool isTBScore = false;
++#else
+         bool isTBScore = worker.tbConfig.rootInTB && !is_mate_or_mated(v);
+         v              = isTBScore ? rootMoves[i].tbScore : v;
+ 
+@@ -2302,6 +2330,7 @@
+         if (is_decisive(v) && !is_mate_or_mated(v) && !usePreviousScore
+             && (!rootMoves[i].is_inexact() || isTBScore))
+             syzygy_extend_pv(worker.options, worker.limits, pos, rootMoves[i], v, multiPV);
++#endif
+ 
+         std::string pv;
+         for (Move m : usePreviousScore ? rootMoves[i].previousPV : rootMoves[i].pv)
+@@ -2335,7 +2364,9 @@
+         info.timeMs    = time;
+         info.nodes     = nodes;
+         info.nps       = nodes * 1000 / time;
++#ifndef __NO_SYZYGY__
+         info.tbHits    = tbHits;
++#endif
+         info.pv        = pv;
+         info.hashfull  = tt.hashfull();
+ 
+diff -ruN --ex sfup/src/search.h sfjs/src/search.h
+--- sfup/src/search.h	2026-10-03 00:40:40
++++ sfjs/src/search.h	2026-10-03 00:40:22
+@@ -411,7 +411,9 @@
+     // The main thread has a SearchManager, the others have a NullSearchManager
+     std::unique_ptr<ISearchManager> manager;
+ 
++#ifndef __NO_SYZYGY__
+     Tablebases::Config tbConfig;
++#endif
+ 
+     const OptionsMap&                                        options;
+     ThreadPool&                                              threads;
+diff -ruN --ex sfup/src/thread.cpp sfjs/src/thread.cpp
+--- sfup/src/thread.cpp	2026-10-03 00:40:40
++++ sfjs/src/thread.cpp	2026-10-03 00:40:22
+@@ -59,6 +59,7 @@
+     stdThread(
+       create_native_thread(NativeThreadOptions{}.setLargeStack(true), &Thread::idle_loop, this)) {
+ 
++#ifndef __EMSCRIPTEN__ ///NOTE: This is to fix changing Threads count via the "setoption" UCI command.
+     if (!stdThread.joinable())
+     {
+         std::cerr << "Failed to create search thread\n";
+@@ -67,16 +68,21 @@
+ 
+     wait_for_search_finished();
+ 
++
+     run_custom_job([this, &binder, &sharedState, &sm, n]() {
++#endif
+         // Use the binder to [maybe] bind the threads to a NUMA node before doing
+         // the Worker allocation. Ideally we would also allocate the SearchManager
+         // here, but that's minor.
+         this->numaAccessToken = binder();
+         this->worker          = make_unique_large_page<Search::Worker>(
+           sharedState, std::move(sm), n, idxInNuma, totalNuma, this->numaAccessToken);
++          
++#ifndef __EMSCRIPTEN__
+     });
+ 
+     wait_for_search_finished();
++#endif
+ }
+ 
+ 
+@@ -88,7 +94,9 @@
+ 
+     exit = true;
+     start_searching();
++#ifndef __EMSCRIPTEN_SINGLE_THREADED__
+     stdThread.join();
++#endif
+ }
+ 
+ // Wakes up the thread that will start the search
+@@ -100,18 +108,24 @@
+ // Clears the histories for the thread worker (usually before a new game)
+ void Thread::clear_worker() {
+     assert(worker != nullptr);
++#ifndef __EMSCRIPTEN__
+     run_custom_job([this]() { worker->clear(); });
++#else
++    worker->clear();
++#endif
+ }
+ 
+ // Blocks on the condition variable until the thread has finished searching
+ void Thread::wait_for_search_finished() {
+-
++#ifndef __EMSCRIPTEN_SINGLE_THREADED__
+     std::unique_lock<std::mutex> lk(mutex);
+     cv.wait(lk, [&] { return !searching; });
++#endif
+ }
+ 
+ // Launching a function in the thread
+ void Thread::run_custom_job(std::function<void()> f) {
++#ifndef __EMSCRIPTEN_SINGLE_THREADED__
+     {
+         std::unique_lock<std::mutex> lk(mutex);
+         cv.wait(lk, [&] { return !searching; });
+@@ -119,6 +133,9 @@
+         searching = true;
+     }
+     cv.notify_one();
++#else
++    f();
++#endif
+ }
+ 
+ void Thread::ensure_network_replicated() { worker->ensure_network_replicated(); }
+@@ -174,6 +191,7 @@
+ 
+     if (requested > 0)  // create new thread(s)
+     {
++#ifndef __EMSCRIPTEN__
+         // Binding threads may be problematic when there's multiple NUMA nodes and
+         // multiple Stockfish instances running. In particular, if each instance
+         // runs a single thread then they would all be mapped to the first NUMA node.
+@@ -191,6 +209,9 @@
+             // numaPolicy == "system", or explicitly set by the user
+             return true;
+         }();
++#else
++        const bool doBindThreads = false;
++#endif
+ 
+         std::map<NumaIndex, usize> counts;
+         boundThreadToNumaNode = doBindThreads
+@@ -263,11 +284,14 @@
+     if (threads.empty())
+         return;
+ 
++
+     for (auto&& th : threads)
+         th->clear_worker();
+ 
++#ifndef __EMSCRIPTEN__
+     for (auto&& th : threads)
+         th->wait_for_search_finished();
++#endif
+ 
+     // These two affect the time taken on the first move of a game:
+     main_manager()->bestPreviousAverageScore = VALUE_INFINITE;
+@@ -320,7 +344,9 @@
+         for (const auto& m : MoveList<LEGAL>(pos))
+             rootMoves.emplace_back(m);
+ 
++#ifndef __NO_SYZYGY__
+     Tablebases::Config tbConfig = Tablebases::rank_root_moves(options, pos, rootMoves);
++#endif
+ 
+     // After ownership transfer 'states' becomes empty, so if we stop the search
+     // and call 'go' again without setting a new position states.get() == nullptr.
+@@ -336,7 +362,9 @@
+     // shared since they are read-only.
+     for (auto&& th : threads)
+     {
++#ifndef __EMSCRIPTEN__
+         th->run_custom_job([&]() {
++#endif
+             th->worker->limits = limits;
+             th->worker->nodes = th->worker->tbHits = th->worker->bestMoveChanges = 0;
+             th->worker->nmpMinPly                                                = 0;
+@@ -344,12 +372,18 @@
+             th->worker->rootMoves                                                = rootMoves;
+             th->worker->rootPos.set(pos.fen(), pos.is_chess960(), &th->worker->rootState);
+             th->worker->rootState = setupStates->back();
++#ifndef __NO_SYZYGY__
+             th->worker->tbConfig  = tbConfig;
++#endif
++#ifndef __EMSCRIPTEN__
+         });
++#endif
+     }
+ 
++#ifndef __EMSCRIPTEN__
+     for (auto&& th : threads)
+         th->wait_for_search_finished();
++#endif
+ 
+     main_thread()->start_searching();
+ }
+diff -ruN --ex sfup/src/timeman.h sfjs/src/timeman.h
+--- sfup/src/timeman.h	2026-10-03 00:40:40
++++ sfjs/src/timeman.h	2026-10-03 00:40:22
+@@ -49,7 +49,12 @@
+     TimePoint elapsed(FUNC nodes) const {
+         return useNodesTime ? TimePoint(nodes()) : elapsed_time();
+     }
++#ifndef __EMSCRIPTEN__
+     TimePoint elapsed_time() const { return now() - startTime; };
++#else
++    //NOTE: WASM has issues with time. See https://github.com/lichess-org/lila-stockfish-web/pull/3#discussion_r1748873352 for a discussion.
++    TimePoint elapsed_time() const { return std::max(now() - startTime, TimePoint(1)); };
++#endif
+ 
+     void clear();
+     void advance_nodes_time(i64 nodes);
+diff -ruN --ex sfup/src/tt.cpp sfjs/src/tt.cpp
+--- sfup/src/tt.cpp	2026-10-03 00:40:40
++++ sfjs/src/tt.cpp	2026-10-03 00:40:22
+@@ -202,7 +202,11 @@
+ 
+ // Initializes the entire transposition table to zero, in a multi-threaded way
+ void TranspositionTable::clear(ThreadPool& threads) {
+-    generation8             = 0;
++    generation8              = 0;
++#ifdef __EMSCRIPTEN__
++    // NOTE: Sometimes threaded TT initialization seems to fail (engine crash on startup), so here we simply initialize on main thread.
++    std::memset(table, 0, clusterCount * sizeof(Cluster));
++#else
+     const usize threadCount = threads.num_threads();
+ 
+     std::vector<usize> threadToNuma = threads.get_bound_thread_to_numa_node();
+@@ -233,6 +237,7 @@
+ 
+     for (usize i = 0; i < threadCount; ++i)
+         threads.wait_on_thread(i);
++#endif
+ }
+ 
+ 
+diff -ruN --ex sfup/src/uci.cpp sfjs/src/uci.cpp
+--- sfup/src/uci.cpp	2026-10-03 00:40:40
++++ sfjs/src/uci.cpp	2026-10-03 00:40:22
+@@ -27,7 +27,9 @@
+ #include <optional>
+ #include <sstream>
+ #include <string_view>
+-#include <filesystem>
++#ifndef __EMSCRIPTEN__
++    #include <filesystem>
++#endif
+ #include <utility>
+ #include <variant>
+ #include <vector>
+@@ -42,6 +44,10 @@
+ #include "types.h"
+ #include "ucioption.h"
+ 
++#ifdef __EMSCRIPTEN__
++    #include <emscripten.h>
++#endif
++
+ namespace Stockfish {
+ 
+ using Time = std::chrono::steady_clock;
+@@ -69,9 +75,15 @@
+     sync_cout_end();
+ }
+ 
++#ifdef __EMSCRIPTEN__
++UCIEngine::UCIEngine(int argc, char** argv) :
++    engine(argv[0]),
++    cli(argc, argv) {
++#else
+ UCIEngine::UCIEngine(CommandLine cli_) :
+     engine(cli_.argc > 0 ? std::optional{path_from_utf8(cli_.argv[0])} : std::nullopt),
+     cli(std::move(cli_)) {
++#endif
+ 
+     engine.get_options().add_info_listener([](const std::optional<std::string>& str) {
+         if (str.has_value())
+@@ -91,6 +103,13 @@
+     engine.set_on_verify_network([](const auto& s) { print_info_string(s); });
+ }
+ 
++#ifdef __EMSCRIPTEN__
++bool searching;
++void UCIEngine::process_command(std::string cmd)
++{
++    std::string token;
++    std::istringstream is(cmd);
++#else
+ void UCIEngine::loop() {
+     set_console_utf8();
+     std::string token, cmd;
+@@ -108,6 +127,7 @@
+         std::istringstream is(cmd);
+ 
+         token.clear();  // Avoid a stale if getline() returns nothing or a blank line
++#endif
+         is >> token;
+ 
+         if (token == "quit" || token == "stop")
+@@ -132,9 +152,17 @@
+             setoption(is);
+         else if (token == "go")
+         {
++#ifndef __EMSCRIPTEN__
+             // send info strings after the go command is sent for old GUIs and python-chess
+             print_info_string(engine.numa_config_information_as_string());
+             print_info_string(engine.thread_allocation_information_as_string());
++#else
++            if (!engine.validate_position()) {
++                sync_cout << "info depth 0 score cp 0" << sync_endl;
++                sync_cout << "bestmove (none)" << sync_endl;
++                return;
++            }
++#endif
+             go(is);
+         }
+         else if (token == "position")
+@@ -152,16 +180,27 @@
+                 terminate_on_critical_error(err->what());
+             }
+         }
++#ifndef __EMSCRIPTEN__
+         else if (token == "bench")
+             bench(is);
+         else if (token == BenchmarkCommand)
+             benchmark(is);
++#endif
+         else if (token == "d")
+             sync_cout << engine.visualize() << sync_endl;
+         else if (token == "eval")
++        {
++#ifdef __EMSCRIPTEN__
++            if (!engine.validate_position()) {
++                sync_cout << "Final evaluation       +0.00 (white side) [invalid position]" << sync_endl;
++                return;
++            }
++#endif
+             engine.trace_eval();
++        }
+         else if (token == "compiler")
+             sync_cout << compiler_info() << sync_endl;
++#ifndef __EMSCRIPTEN__
+         else if (token == "export_net")
+         {
+             std::optional<std::filesystem::path> file;
+@@ -186,6 +225,7 @@
+                       << sync_endl;
+ 
+     } while (token != "quit" && cli.argc <= 1);  // The command-line arguments are one-shot
++#endif
+ }
+ 
+ Search::LimitsType UCIEngine::parse_limits(std::istream& is) {
+@@ -241,8 +281,12 @@
+ 
+     if (limits.perft)
+         perft(limits);
+-    else
++    else {
++#ifdef __EMSCRIPTEN__
++        searching = true;
++#endif
+         engine.go(limits);
++    }
+ }
+ 
+ void UCIEngine::bench(std::istream& args) {
+@@ -669,7 +713,9 @@
+     ss << " nodes " << info.nodes        //
+        << " nps " << info.nps            //
+        << " hashfull " << info.hashfull  //
++#ifndef __NO_SYZYGY__
+        << " tbhits " << info.tbHits      //
++#endif
+        << " time " << info.timeMs        //
+        << " pv " << info.pv;             //
+ 
+@@ -692,7 +738,21 @@
+     if (!ponder.empty())
+         std::cout << " ponder " << ponder;
+     std::cout << sync_endl;
++#ifdef __EMSCRIPTEN__
++    searching = false;
++    MAIN_THREAD_ASYNC_EM_ASM({
++        try {
++            Module["onDoneSearching"]();
++        } catch (e) {};
++    });
++#endif
+ }
++
++#ifdef __EMSCRIPTEN__
++extern "C" bool isSearching() {
++    return searching;
++}
++#endif
+ 
+ void UCIEngine::terminate_on_critical_error(const std::string& message) {
+     sync_cout << "info string CRITICAL ERROR: Command `" << currentCmd
+diff -ruN --ex sfup/src/uci.h sfjs/src/uci.h
+--- sfup/src/uci.h	2026-10-03 00:40:40
++++ sfjs/src/uci.h	2026-10-03 00:40:22
+@@ -39,9 +39,14 @@
+ 
+ class UCIEngine {
+    public:
++   
++#ifdef __EMSCRIPTEN__
++    UCIEngine(int argc, char** argv);
++    void process_command(std::string cmd);
++#else
+     UCIEngine(CommandLine cli);
+-
+     void loop();
++#endif
+ 
+     static int         to_cp(Value v, const Position& pos);
+     static std::string format_score(const Score& s);
