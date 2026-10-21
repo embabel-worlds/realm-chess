@@ -1,12 +1,20 @@
 # Stockfish, as this realm carries it
 
-`modules/b6e43bfbb09335610d64c93e343a2e42b03ebdf80aafa54db42a4dcc1f168056.wasm` is Stockfish 19
-built as a pure-compute WebAssembly module: one thread, no SIMD, no clock, no filesystem, and no
-imports. The realm declares it as its `engine` dependency, and a host that loads the realm puts the
-file into its module store under that digest. This folder is its corresponding source under the
-GNU General Public License, version 3 (`COPYING`).
+The realm carries Stockfish 19 twice in `modules/`, as two builds of the same engine. Each is a
+pure-compute WebAssembly module: one thread, no clock, no filesystem, and no imports. Each file is
+named by its own sha256.
 
-## What the module is built from
+| File in `modules/` | Build | Used for |
+|---|---|---|
+| `b6e43bfbb09335610d64c93e343a2e42b03ebdf80aafa54db42a4dcc1f168056.wasm` | scalar, no SIMD | the realm's `engine` dependency; it runs on any host |
+| `de1517a78b37ea79925b78124a6afb4e8eb20afa3695523131548883fddaed0a.wasm` | 128-bit SIMD | a host that runs modules on a machine with Wasm SIMD; an interpreter without SIMD will not mount it |
+
+The realm declares the scalar build as its `engine` dependency, and a host that loads the realm
+puts that file into its module store under its digest. The SIMD build is the same engine and the
+same `analyse` method, carried so a host can take it from here. This folder is the corresponding
+source of both under the GNU General Public License, version 3 (`COPYING`).
+
+## What the modules are built from
 
 | Input | Pin |
 |---|---|
@@ -17,7 +25,7 @@ GNU General Public License, version 3 (`COPYING`).
 | network | `nn-61e7af4bb97d.nnue`, sha256 `61e7af4bb97d51eeeb25d322916f86513b5cd3a827ce189c98c6e31946f99e5b`, from `https://tests.stockfishchess.org/api/nn/` |
 | compiler | Emscripten `emcc` 6.0.10 |
 
-## Rebuilding it
+## Rebuilding them
 
 With Emscripten 6.0.10 on the path:
 
@@ -31,10 +39,34 @@ links two modules into `vendor/stockfish/dist/`:
 
 | Module | sha256 |
 |---|---|
-| `stockfish-lite.wasm` | `b6e43bfbb09335610d64c93e343a2e42b03ebdf80aafa54db42a4dcc1f168056`, the one this realm carries |
-| `stockfish-lite-simd.wasm` | `de1517a78b37ea79925b78124a6afb4e8eb20afa3695523131548883fddaed0a`, the same engine with 128-bit SIMD |
+| `stockfish-lite.wasm` | `b6e43bfbb09335610d64c93e343a2e42b03ebdf80aafa54db42a4dcc1f168056` |
+| `stockfish-lite-simd.wasm` | `de1517a78b37ea79925b78124a6afb4e8eb20afa3695523131548883fddaed0a` |
 
-The memory is 64 MiB to start and grows to at most 128 MiB.
+Both builds compile every source with the same flags (`COMMON` in `build.sh`) and link with the same
+memory settings (`LINK`). The memory is 64 MiB to start and grows to at most 128 MiB, with 4 MiB of
+stack.
+
+The only difference is the extra flags passed to the SIMD build:
+
+| Build | Extra compile and link flags |
+|---|---|
+| scalar, `stockfish-lite.wasm` | none: `-DIS_64BIT -DUSE_POPCNT` from `COMMON` and nothing else, so the engine uses its plain C++ paths |
+| SIMD, `stockfish-lite-simd.wasm` | `-msimd128 -msse -msse2 -mssse3 -msse4.1 -DUSE_SSE2 -DUSE_SSSE3 -DUSE_SSE41` |
+
+`-msimd128` lets Emscripten emit Wasm SIMD instructions. The `-msse*` flags make Emscripten
+translate the SSE intrinsics in Stockfish's network code into those instructions, and the `USE_SSE*`
+defines tell Stockfish to take those code paths.
+
+To move both builds into the realm, name each by its digest:
+
+```sh
+for f in vendor/stockfish/dist/*.wasm; do
+  cp "$f" "modules/$(shasum -a 256 "$f" | cut -d' ' -f1).wasm"
+done
+```
+
+The two files in `modules/` were built with emcc 6.0.10. A rebuild on another machine has not been
+checked for identical bytes, so compare the digests the script prints with the table above.
 
 ## The `analyse` method
 

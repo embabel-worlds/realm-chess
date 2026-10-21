@@ -66,7 +66,7 @@ out is kept in its own SQLite.
 | `wasm/lib/status.ts` | What the realm could not do, recorded for `ChessStatus`. |
 | `wasm/lib/board.ts` | The board the handlers play on: legal moves, SAN, check and mate, from chess.js's rules, with a test that holds it to chess.js move for move. Under an interpreter it is several times faster than chess.js itself. |
 | `wasm/lib/clock.ts` | Time inside one dispatch, and what each step charges where the host holds the clock still. |
-| `modules/<sha256>.wasm`, `vendor/stockfish/` | The engine the realm carries, and its source under the GPL: the pins, the patches and the script that builds it. |
+| `modules/<sha256>.wasm`, `vendor/stockfish/` | The engine the realm carries, as a scalar build and a SIMD build, and their source under the GPL: the pins, the patches and the script that builds both. |
 | `db/schema.sql`, `db/NNNN-*.sql` | The tables, then the migrations. `0001` and `0002` are the Lichess opening book (CC0) and its pawn skeletons, written by `scripts/book.mjs`. |
 | `.synth/` | Not committed. `npm run synth` writes `realm.yml`, `credentials.yml`, `apis/apis.yml`, `producers/`, `types/`, `views/`, `dependencies/`, `dist/` and `apps/chesscalator.html.app.json` here from `realm.ts`, and the tests read them. |
 | `apis/lichess.yml`, `apis/wikibooks.yml` | The OpenAPI documents for the two APIs. |
@@ -81,9 +81,11 @@ Stockfish 19, single thread, with no SIMD and no imports, is built as a Wasm lib
 in the realm as `modules/b6e43bfb….wasm`. The realm declares it as its `engine` dependency
 (`stockfish` 19.0.0) with one method, `analyse(fen, nodes, maxDepth, multiPv)`, which answers
 JSON. An appliance that loads the realm puts the file into its module store under that digest, so
-nothing has to be installed first. `vendor/stockfish/` is its corresponding source under the GNU
-GPL version 3: the pinned Stockfish commit, the patches, the network's digest, and `build.sh`,
-which builds the module again (see `vendor/stockfish/README.md`).
+nothing has to be installed first. Beside it, `modules/de1517a7….wasm` is the same engine built
+with 128-bit Wasm SIMD, for a host that runs modules on a machine with SIMD. `vendor/stockfish/` is
+the corresponding source of both under the GNU GPL version 3: the pinned Stockfish commit, the
+patches, the network's digest, and `build.sh`, which builds both modules again and says which
+flags make each (see `vendor/stockfish/README.md`).
 
 A search is timed by a node budget, the way a chess engine is timed without a clock: the same
 position with the same budget always gives the same lines. The numbers are in
