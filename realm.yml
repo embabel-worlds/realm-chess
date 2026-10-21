@@ -1,6 +1,5 @@
 name: chess
 host: wasm
-category: lifestyle
 version: 0.5.0
 description: |-
   A chessboard, a strong engine, and the plans a position calls for.
@@ -16,6 +15,7 @@ description: |-
   page. The engine is GPL-3.0, and so is this realm.
 author: Rod Johnson
 url: https://github.com/embabel-worlds/realm-chess
+category: lifestyle
 maturity: experimental
 capabilities:
   - model

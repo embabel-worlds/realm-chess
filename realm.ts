@@ -18,6 +18,7 @@ export default defineRealm({
   execution: "captured",
   version: "0.5.0",
   maturity: "experimental",
+  category: "lifestyle",
   description: `A chessboard, a strong engine, and the plans a position calls for.
 
 Stockfish 19, compiled to WebAssembly and running in the appliance's own sandbox, gives the best
