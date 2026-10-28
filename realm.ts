@@ -1,13 +1,34 @@
-import { defineRealm } from "@embabel/realm-types";
+import { defineRealm, type DependencySpec } from "@embabel/realm-types";
 import { handlers } from "./realm/handlers/index.ts";
 import { producers } from "./realm/producers.ts";
 import { types } from "./realm/types.ts";
 import { views } from "./realm/views.ts";
 import { ENGINE_MODULE } from "./wasm/lib/config.ts";
 
+const dependencies = {
+  /** The realm's own SQLite: the opening book and every result it keeps. Tables in db/schema.sql. */
+  db: {
+    module: "sqlite3-wasi",
+    version: "3.53",
+    sha256: "9a5542e25e42fbbb48501bae0ab4295cdf0fd0f41219ec3b6c891c4a282e7779",
+    kind: "sqlite",
+    from: { registry: "default" },
+    persistent: true,
+    init: "db/schema.sql",
+    migrations: ["db/0001-openings.sql", "db/0002-skeletons.sql", "db/0003-status.sql", "db/0004-lichess.sql", "db/0005-app.sql", "db/0006-deepen.sql", "db/0007-deepen-slots.sql", "db/0008-deep-failures.sql", "db/0009-requeue-deepen.sql"],
+  },
+  /** Stockfish 19 lite carried in the realm. How long it searches is in wasm/lib/config.ts. */
+  engine: {
+    ...ENGINE_MODULE,
+    kind: "string-method",
+    from: { local: "modules/stockfish-19.0.0.wasm" },
+    methods: { analyse: { args: ["string", "i32", "i32", "i32"], returns: "string" } },
+  },
+} satisfies Record<string, DependencySpec & { from: { local: string } | { registry: string } }>;
+
 /**
  * Chess, as a captured realm: the handlers run as Wasm inside the appliance, the engine is the
- * stockfish registry module, and what the realm computes is kept in its own SQLite.
+ * stockfish module carried in the realm, and what the realm computes is kept in its own SQLite.
  *
  * A host reads this file itself, and links zod from the lock to read the handler schemas. The
  * realm ships no realm.yml or dist/manifest.json. `npm run synth` writes them, and the rest of
@@ -117,20 +138,5 @@ page. The engine is GPL-3.0, and so is this realm.`,
     },
   },
 
-  dependencies: {
-    /** The realm's own SQLite: the opening book and every result it keeps. Tables in db/schema.sql. */
-    db: {
-      module: "sqlite3-wasi",
-      version: "3.53",
-      sha256: "9a5542e25e42fbbb48501bae0ab4295cdf0fd0f41219ec3b6c891c4a282e7779",
-      persistent: true,
-      init: "db/schema.sql",
-      migrations: ["db/0001-openings.sql", "db/0002-skeletons.sql", "db/0003-status.sql", "db/0004-lichess.sql", "db/0005-app.sql", "db/0006-deepen.sql", "db/0007-deepen-slots.sql", "db/0008-deep-failures.sql", "db/0009-requeue-deepen.sql"],
-    },
-    /** Stockfish 19 lite from the registry. How long it searches is in wasm/lib/config.ts. */
-    engine: {
-      ...ENGINE_MODULE,
-      methods: { analyse: { args: ["string", "i32", "i32", "i32"], returns: "string" } },
-    },
-  },
+  dependencies,
 });

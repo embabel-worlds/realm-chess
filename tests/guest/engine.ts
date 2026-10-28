@@ -7,13 +7,13 @@ import type { Analyse } from "./host";
 const ROOT = resolve(__dirname, "..", "..");
 
 /*
- * The stockfish module the realm declares, which it carries at modules/<sha256>.wasm, or
+ * The stockfish module the realm declares, which it carries at modules/stockfish-19.0.0.wasm, or
  * STOCKFISH_WASM. The SIMD build of the same engine (vendor/stockfish) also loads; it gives the
  * same lines at the same budget, only faster.
  */
 const SIMD_SHA256 = "de1517a78b37ea79925b78124a6afb4e8eb20afa3695523131548883fddaed0a";
 function stockfishPath(): string | undefined {
-  const candidates = [process.env.STOCKFISH_WASM, resolve(ROOT, "modules", `${ENGINE_MODULE.sha256}.wasm`)];
+  const candidates = [process.env.STOCKFISH_WASM, resolve(ROOT, "modules", "stockfish-19.0.0.wasm")];
   return candidates.find((p): p is string => !!p && existsSync(p));
 }
 
