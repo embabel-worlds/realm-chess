@@ -6,7 +6,7 @@
 
 /**
  * The engine: Stockfish 19 lite, single thread, no SIMD, no imports. The realm carries the module
- * itself, at modules/<sha256>.wasm, and its source in vendor/stockfish.
+ * itself, at modules/stockfish-19.0.0.wasm, and its source in vendor/stockfish.
  */
 export const ENGINE_MODULE = {
   module: "stockfish",

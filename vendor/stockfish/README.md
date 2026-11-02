@@ -1,12 +1,12 @@
 # Stockfish, as this realm carries it
 
 The realm carries Stockfish 19 twice in `modules/`, as two builds of the same engine. Each is a
-pure-compute WebAssembly module: one thread, no clock, no filesystem, and no imports. Each file is
-named by its own sha256.
+WebAssembly module: one thread, no clock, no filesystem, and no imports. The declared scalar file
+has a readable name. The SIMD file is named by its sha256.
 
 | File in `modules/` | Build | Used for |
 |---|---|---|
-| `b6e43bfbb09335610d64c93e343a2e42b03ebdf80aafa54db42a4dcc1f168056.wasm` | scalar, no SIMD | the realm's `engine` dependency; it runs on any host |
+| `stockfish-19.0.0.wasm` | scalar, no SIMD | the realm's `engine` dependency; it runs on any host |
 | `de1517a78b37ea79925b78124a6afb4e8eb20afa3695523131548883fddaed0a.wasm` | 128-bit SIMD | a host that runs modules on a machine with Wasm SIMD; an interpreter without SIMD will not mount it |
 
 The realm declares the scalar build as its `engine` dependency, and a host that loads the realm
@@ -57,12 +57,11 @@ The only difference is the extra flags passed to the SIMD build:
 translate the SSE intrinsics in Stockfish's network code into those instructions, and the `USE_SSE*`
 defines tell Stockfish to take those code paths.
 
-To move both builds into the realm, name each by its digest:
+To move both builds into the realm, verify their digests against the table above first:
 
 ```sh
-for f in vendor/stockfish/dist/*.wasm; do
-  cp "$f" "modules/$(shasum -a 256 "$f" | cut -d' ' -f1).wasm"
-done
+cp vendor/stockfish/dist/stockfish-lite.wasm modules/stockfish-19.0.0.wasm
+cp vendor/stockfish/dist/stockfish-lite-simd.wasm modules/de1517a78b37ea79925b78124a6afb4e8eb20afa3695523131548883fddaed0a.wasm
 ```
 
 The two files in `modules/` were built with emcc 6.0.10. A rebuild on another machine has not been

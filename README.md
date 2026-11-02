@@ -8,7 +8,9 @@ position calls for.
 The realm is called `chess` and is marked `experimental`. Its functions are written in TypeScript,
 declared in `realm.ts`, and compiled to WebAssembly when shinar loads them. Stockfish comes with the
 realm as a WebAssembly module in `modules/`, so nothing has to be installed for the engine and no
-docker is needed.
+docker is needed. `realm.ts` declares that local file and its SHA-256 digest. It also declares SQLite
+from the operator's default registry with its digest. The operator must allow both modules.
+Shinar must support dependency sources in `realm.ts` before it can load this revision.
 
 This page tells you how to run it. [docs/REALM.md](docs/REALM.md) explains how the realm works, and
 [vendor/stockfish/README.md](vendor/stockfish/README.md) explains how the engine is built.
