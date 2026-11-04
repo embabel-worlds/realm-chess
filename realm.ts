@@ -87,6 +87,8 @@ page. The engine is GPL-3.0, and so is this realm.`,
     "MovesByRating",
     "MovesByTimeControl",
     "ChessStatus",
+    /* An exports list loads only the skills it names, and the plans views ask the model with this one. */
+    "chess-plans",
   ],
 
   handlers,

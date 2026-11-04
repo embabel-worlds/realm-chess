@@ -342,11 +342,11 @@ APPLIANCE=http://127.0.0.1:11043 APPLIANCE_AUTH="Basic ..." node tests/battery/r
 ### The vendored SDK
 
 The SDK is not on npm yet, so `@embabel/realm-types` and `@embabel/realm-synth` are vendored as
-tarballs in `vendor/sdk/`, packed from embabel-ts branch `feat/sdk-auth-none-typed-model`. A fresh
-clone installs with no SDK checkout. To refresh them from an embabel-ts checkout on that branch:
+tarballs in `vendor/sdk/`, packed from the realm SDK's source. A fresh clone installs with no SDK
+checkout. To refresh them from an SDK checkout:
 
 ```bash
-npm run vendor:sdk -- <embabel-ts checkout>
+npm run vendor:sdk -- <SDK checkout>
 npm install --save-dev ./vendor/sdk/embabel-realm-types-0.1.0.tgz ./vendor/sdk/embabel-realm-synth-0.1.0.tgz
 ```
 

@@ -1,179 +1,76 @@
-# shinar-chess
+# realm-chess
 
-This repository is the chess realm built for shinar's demo. A realm is a package of functions,
-types and apps that a host loads and runs. Shinar is that host, and Brick is the desktop app you
-use to look at it. This realm gives you a chessboard app, the Stockfish 19 engine, and the plans a
-position calls for.
+A chessboard, a strong engine, and the plans a position calls for, as an Embabel realm.
 
-The realm is called `chess` and is marked `experimental`. Its functions are written in TypeScript,
-declared in `realm.ts`, and compiled to WebAssembly when shinar loads them. Stockfish comes with the
-realm as a WebAssembly module in `modules/`, so nothing has to be installed for the engine and no
-docker is needed. `realm.ts` declares that local file and its SHA-256 digest. It also declares SQLite
-from the operator's default registry with its digest. The operator must allow both modules.
-Shinar must support dependency sources in `realm.ts` before it can load this revision.
+- **Stockfish 19** gives the best lines. It travels with the realm as a WebAssembly module and
+  runs inside the appliance, so nothing has to be installed for it.
+- **Imbalances**, in Jeremy Silman's sense, are computed from the board: material, the minor
+  pieces, pawn structure, space, files, outposts, development and king safety.
+- **The opening** is named along the game's moves from the Lichess opening list, so a line keeps
+  its name after it leaves the book. The Chess Opening Theory wikibook says what theory holds
+  along the line.
+- **Plans** for both sides are decided by your model with the realm's `chess-plans` skill, from
+  those facts.
+- With a Lichess token, it also shows what masters and Lichess players chose in a position, and
+  how they scored.
 
-This page tells you how to run it. [docs/REALM.md](docs/REALM.md) explains how the realm works, and
-[vendor/stockfish/README.md](vendor/stockfish/README.md) explains how the engine is built.
+Everything is a Virtual Cypher hop from a position, so the analysis is a query and a REST call as
+well as a page:
 
-## This is a demo realm
-
-The repository is private, and its name does not start with `realm-` or `pack-`. Me and the worlds
-console list only repositories with those prefixes, so neither of them will ever offer this realm.
-You load it into shinar yourself, as described below.
-
-## What you need
-
-- **Access to the embabel-worlds GitHub organisation.** Three private repositories are needed:
-  shinar, embabel-ts and this one. Shinar reads `realm.ts` with the types in embabel-ts, so it
-  cannot load this realm without a checkout of it (shinar's limitation L302). Your git must be able
-  to clone `https://github.com/embabel-worlds/...` without asking for a password, for example
-  through `gh auth setup-git`.
-- **A shinar checkout.** These steps were checked on macOS.
-- **mise** (<https://mise.jdx.dev>). Shinar's `mise.toml` pins the tools it needs: JDK 25, Node
-  26.11.1, Javy 9.1.0 and esbuild 0.28.2. `mise install` in the shinar checkout installs them all.
-- **The Javy plugin.** `scripts/brick-dev.sh` downloads it the first time it runs, with
-  `scripts/fetch-javy-plugin.sh`. You can run that script yourself first.
-- **Network access to registry.npmjs.org.** The realm imports zod, and shinar downloads the exact
-  package version that `package-lock.json` pins, then checks it against its sha512. If you have no
-  network, copy the tarballs into the packages folder first (see "Without the network" below).
-- **The wasmtime library, optional but recommended.** `scripts/fetch-wasmtime.sh` downloads it.
-  With it, Stockfish runs on wasmtime and analysis is about twice as fast. Without it, Stockfish
-  falls back to endive, shinar's own WebAssembly runtime, and Brick's launcher prints a line saying
-  so. The realm still works, because the engine it uses is the build with no SIMD. The SIMD build
-  in `modules/` runs only on wasmtime: endive will not mount it.
-
-## Run it in Brick
-
-From the folder that holds your checkouts, clone shinar and embabel-ts, and put embabel-ts at the
-commit shinar's tests were written against:
-
-```sh
-git clone https://github.com/embabel-worlds/shinar
-git clone https://github.com/embabel-worlds/embabel-ts
-git -C embabel-ts checkout 213cae84f28d74a255132ad7c419ac3f859fded0
+```cypher
+MATCH (p:Position {fen: $fen})
+OPTIONAL MATCH (p)-[:HAS_IMBALANCES]->(i:PositionImbalances)
+OPTIONAL MATCH (p)-[:IN_OPENING]->(o:Opening)
+OPTIONAL MATCH (p)-[:HAS_CANDIDATE]->(c:CandidateMove) WHERE toInteger(c.lossCp) <= 50
+RETURN i.facts, o.name, collect(c.san)
 ```
 
-Then, inside the shinar checkout:
+The realm is `chess`, version 0.5.0, and is marked **experimental**.
 
-```sh
-cd shinar
-mise install
-scripts/fetch-javy-plugin.sh
-scripts/fetch-wasmtime.sh
-scripts/clone-fixture-realms.sh --tier demo --only shinar-chess
-scripts/fetch-packages.sh --realm .shinar-cache/realms/shinar-chess-<commit12>
-export SHINAR_EMBABEL_TS="$PWD/../embabel-ts"
-export SHINAR_PACKAGES="$PWD/.shinar-cache/packages"
-mise exec -- scripts/brick-dev.sh --realms demo
-```
+## Install
 
-What each step does:
+On an Embabel appliance, open **Realms**, find **chess** and install it. Or install it from
+`https://github.com/embabel-worlds/realm-chess`.
 
-| Step | What it does |
+The engine, the imbalances, the opening book and the theory work as soon as it is installed.
+The rest needs one approval each, in the console:
+
+| To get | Grant |
 |---|---|
-| `scripts/clone-fixture-realms.sh --tier demo --only shinar-chess` | Clones this repository at the exact commit shinar's `fixtures/realms.lock.yml` pins, into `.shinar-cache/realms/shinar-chess-<commit12>`, and makes the clone read-only. `<commit12>` in the next line is the first 12 characters of that commit, which the script prints as `cloned shinar-chess <commit12> ...`. |
-| `scripts/fetch-packages.sh --realm ...` | Downloads the npm packages the realm's lock pins (zod and what it needs) into `.shinar-cache/packages`. `brick-dev.sh` runs this for you too, so this step only makes a missing network show up early. |
-| `SHINAR_EMBABEL_TS` | The embabel-ts checkout shinar reads `realm.ts` with. Without it, the launcher prints `chess: not callable, it ships a realm.ts and SHINAR_EMBABEL_TS is not set`. |
-| `SHINAR_PACKAGES` | Where shinar finds the package tarballs. The launcher uses `.shinar-cache/packages` when it is not set. |
-| `scripts/brick-dev.sh --realms demo` | Starts shinar's sidecar with the demo realms, waits until it has loaded them, prints one line per realm, and opens Brick. Ctrl-C, or closing Brick, stops both. |
+| Plans for both sides | the **model** capability. Each plan spends your model budget. |
+| Masters, players and popularity by rating | a Lichess personal token (no scopes needed), bound as `lichess` |
+| The Chesscalator app | approve **Chesscalator** |
+| Background deepening of analysed lines | `schedule:chess.deepen` and `schedule:chess.markDeepened` |
 
-The demo also loads code, astrology, movie, doom, pulse and bearer. Any whose clone is missing is
-named with the command that clones it. Astrology and movie need docker; chess does not. To fetch
-every demo realm at once, run `scripts/clone-fixture-realms.sh --tier all` (it takes a while).
+The `ChessStatus` view says which of these is missing when a view comes back empty.
 
-## What you should see
+## Views
 
-The launcher prints `chess: loaded` among the other realms. In Brick, open **Realm studio**, pick
-`chess` and open its **Functions** tab. If a function's Call button is still off, the sidecar is
-building the realm's functions; it turns on when they are ready.
-
-**positionImbalances.** Call it with the Exchange Ruy Lopez after 9.Rxd1:
-
-```json
-{ "fens": ["r1b1kbnr/1pp3pp/p4p2/2p5/4P3/1N6/PPP2PPP/RNBR2K1 b kq - 0 9"] }
-```
-
-The run completes with one record. Its `facts` read, among other lines, "Material: the sides are
-level.", "Minor pieces: Black has the bishop pair.", that Black has doubled pawns on the c-file, and
-that White has a kingside pawn majority.
-
-**analysePosition.** Call it with the scholar's mate position, White to move:
-
-```json
-{ "fens": ["r1bqkb1r/pppp1ppp/2n2n2/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4"], "multiPv": 1, "depth": 8 }
-```
-
-The run completes with one line: `san` is `Qxf7#`, `mate` is 1, and there is no `scoreCp`, because a
-mate has no centipawn score.
-
-**Chesscalator.** On the **Apps** tab, open `chesscalator.html`. Brick asks you to approve the page
-first. Once approved, it shows the board, the starting position's imbalances and the engine's lines.
-
-The calls that need Lichess, the opening theory wikibook or a model end refused unless the sidecar
-is given those, and that is expected.
-
-### How long the calls take
-
-Measured on an Apple M5 Max from Brick's launcher, timing each call from dispatch until the run
-ended. The engine always searches the realm's own budget, 30,000 nodes, so a faster runtime finishes
-sooner but does not search deeper.
-
-| Call | Stockfish on wasmtime | Stockfish on endive (no wasmtime library) |
-|---|---|---|
-| positionImbalances, Exchange Ruy, first call | 3.6 s | 5.0 s |
-| positionImbalances, same position again | 2.3 s | 2.7 s |
-| analysePosition, scholar's mate, depth 8 | 5.9 s | 8.8 s |
-| analysePosition, starting position, default budget (depth 10, e4) | 10.0 s | 17.1 s |
-| analysePosition, a middlegame, default budget (depth 8) | 8.7 s | 15.9 s |
-
-In both columns the realm's own TypeScript runs on endive, which is the launcher's default and most
-of the time above. Shinar can run that part on wasmtime as well (its decision D258), where
-positionImbalances takes well under a second, but `brick-dev.sh` does not turn that on.
-
-## Add the realm by hand
-
-Brick can add a realm from a git address at a fixed commit. A sidecar holds only one realm called
-`chess`, so start Brick without the demo set first:
-
-```sh
-export SHINAR_EMBABEL_TS="$PWD/../embabel-ts"
-export SHINAR_PACKAGES="$PWD/.shinar-cache/packages"
-scripts/fetch-packages.sh --realm .shinar-cache/realms/shinar-chess-<commit12>
-mise exec -- scripts/brick-dev.sh
-```
-
-Then, in Brick's **Realm studio**, press **Add realm** and fill in:
-
-| Field | Value |
+| View | What it answers |
 |---|---|
-| Git URL | `https://github.com/embabel-worlds/shinar-chess.git` |
-| Branch | `main` |
-| Commit | the commit to load, for example the one shinar's `fixtures/realms.lock.yml` pins for `shinar-chess` |
+| `BestMoves` | the engine's best lines for a position |
+| `ImbalancesOf` | the position's imbalances, as facts |
+| `OpeningOf`, `OpeningOfLine` | the opening, from a position or along a line of moves |
+| `TheoryOfLine` | what the wikibook says along a line, as an attributed excerpt |
+| `PlansInPosition`, `PlansInLine` | plans for both sides, at the level asked for |
+| `MastersAtPosition`, `MasterGamesAtPosition` | what masters played, and the games |
+| `MovesByRating`, `MovesByTimeControl` | what Lichess players choose, by rating band or speed |
+| `PlayerAtPosition`, `PlayerGamesAtPosition` | what one Lichess player chooses there |
+| `ChessStatus` | how the last Lichess and model calls went |
 
-Press **Add**. The sidecar clones exactly that commit into a folder named after it, loads the realm
-and lists `chess`. A clone of that commit already in the cache, such as the one the demo uses, is
-checked and used instead of cloning again. The commit may be the full sha or its first 12 or more characters, as long as no
-other commit on the branch starts with them. Anything that is not hexadecimal is refused with "the
-commit must be 12 to 40 hexadecimal characters". Leave Commit empty to load the head of the branch.
+The **Chesscalator** app, at `/apps/chess/chesscalator.html`, puts all of it beside a board.
 
-## Without the network
+## Developing
 
-`scripts/fetch-packages.sh --check --realm .shinar-cache/realms/shinar-chess-<commit12>` lists the
-tarballs the realm needs, each named `<name>-<version>.tgz`. Copy those files into
-`.shinar-cache/packages` from a machine that has them, and the run above needs no registry.
-
-## When something goes wrong
-
-| What you see | What to do |
-|---|---|
-| `unavailable: private shinar-chess` from the clone script | Your git cannot reach the private repository over https. Check `git ls-remote https://github.com/embabel-worlds/shinar-chess.git`. |
-| `chess: not callable, it ships a realm.ts and SHINAR_EMBABEL_TS is not set` | Export `SHINAR_EMBABEL_TS` in the same shell, then start the launcher again. |
-| `realm shinar-chess is not in the cache` | Run the clone script line above. |
-| `more than 64M of swap is in use` | The launcher will not start Java while the machine swaps. Close something, or set `SHINAR_SWAP_LIMIT_MB` if the swap is left over and memory is free. |
-| `no wasmtime library at ..., so the modules marked native run on endive` | Run `scripts/fetch-wasmtime.sh`, or carry on: the realm works, just slower. |
-| A warning on the realm that `modules/de1517a7....wasm` is not stored | Expected. That is the SIMD build, which the realm carries but does not declare as its engine. |
+[docs/REALM.md](docs/REALM.md) explains how the realm is built: the handlers, the engine's
+budgets, the SQLite schema, the tests, and how to change a declaration.
+[vendor/stockfish/README.md](vendor/stockfish/README.md) explains how the engine module is built.
 
 ## Licence
 
-GPL-3.0, like Stockfish. `vendor/stockfish/` holds the engine's source, patches and build script
-beside the two modules.
+GPL-3.0, like Stockfish. `vendor/stockfish/` holds the engine's source, patches and build script.
+The opening book is the [Lichess opening list](https://github.com/lichess-org/chess-openings)
+(CC0). Opening theory is read at query time from the
+[Chess Opening Theory](https://en.wikibooks.org/wiki/Chess_Opening_Theory) wikibook, by Wikibooks
+contributors, under CC BY-SA 4.0, and shown only as an attributed excerpt. The other licences are
+listed in [docs/REALM.md](docs/REALM.md#licences).

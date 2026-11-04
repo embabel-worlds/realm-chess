@@ -1,8 +1,8 @@
 /*
- * Packs the realm SDK (@embabel/realm-types and @embabel/realm-synth) from an embabel-ts checkout
+ * Packs the realm SDK (@embabel/realm-types and @embabel/realm-synth) from a realm SDK checkout
  * into vendor/sdk/, so the realm installs from a fresh clone before the SDK is on npm.
  *
- *   node scripts/vendor-sdk.mjs <path to embabel-ts>
+ *   node scripts/vendor-sdk.mjs <path to the realm SDK checkout>
  *
  * Each package is copied to a temporary folder with just its package.json and src, and packed
  * there with npm pack. Two edits happen on the copy, never in the SDK checkout: "files" is set to
@@ -24,7 +24,7 @@ import { join, resolve } from "node:path";
 const PACKAGES = ["realm-types", "realm-synth"];
 const sdk = process.argv[2];
 if (!sdk) {
-  console.error("usage: node scripts/vendor-sdk.mjs <path to embabel-ts>");
+  console.error("usage: node scripts/vendor-sdk.mjs <path to the realm SDK checkout>");
   process.exit(1);
 }
 const dest = resolve("vendor/sdk");
