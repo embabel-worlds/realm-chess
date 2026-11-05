@@ -72,7 +72,7 @@ export const types = {
     }
   },
   CandidateMove: {
-    description: "One of the engine's best lines in a position (Stockfish 19, three lines, searched to a fixed node budget, at most depth 18). Reached from Position via HAS_CANDIDATE. THE SCORE IS FOR THE SIDE TO MOVE; `whiteCp` is the same from White's side. `lossCp` is how much worse than the best line this one is, in centipawns — the ONLY field to filter on for 'moves within half a pawn of best' (lossCp <= 50; a pawn is 100). `rank` is the engine's order, 1 to 3. `creates` and `removes` say which imbalances the line changes once its exchanges settle — the best evidence of what a move is for.",
+    description: "One of the engine's best lines in a position (Stockfish 19, three lines, searched to the depth the query asks for with `askedDepth`, 10 by default, within a node budget). Reached from Position via HAS_CANDIDATE. THE SCORE IS FOR THE SIDE TO MOVE; `whiteCp` is the same from White's side. `lossCp` is how much worse than the best line this one is, in centipawns — the ONLY field to filter on for 'moves within half a pawn of best' (lossCp <= 50; a pawn is 100). `rank` is the engine's order, 1 to 3. `creates` and `removes` say which imbalances the line changes once its exchanges settle — the best evidence of what a move is for.",
     properties: {
       candidateId: {
         description: "The FEN and the first move in UCI. Identity: stable across searches, where the rank is not.",
@@ -90,6 +90,7 @@ export const types = {
       whiteCp: "The same score from White's point of view. Null for mates.",
       lossCp: "Centipawns worse than the best line; 0 for the best. 'Within half a pawn' is lossCp <= 50. Null when the best line is a mate and this one is not.",
       depth: "Search depth reached, in plies.",
+      askedDepth: "The depth the search was asked for: the query's `askedDepth`, 6 to 22, or 10, the default search, when it pins none. Pin it to search deeper (`WHERE c.askedDepth = 14`). The node budget doubles for each ply past 10, up to what one request can spend, so `depth` says how far the search got.",
       pvSan: "The whole line in SAN, space-separated.",
       pvUci: "The whole line in UCI.",
       creates: "Imbalances the line creates once its exchanges settle, one sentence per line.",
@@ -212,7 +213,8 @@ export const types = {
       drawPct: "Percent drawn.",
       blackWinPct: "Percent won by Black.",
       scoreForMover: "Points per game for the side that played the move (1 a win, 0.5 a draw): how the move has scored for whoever chose it.",
-      averageRating: "Average rating of the players (masters), or of the opponents (a player's games)."
+averageRating: "Average rating of the players (masters), or of the opponents (a player's games).",
+      partial: "True while Lichess is still indexing the player's games, which takes it minutes for a player with many: the counts are those it had indexed when the realm stopped reading, and an ask ten minutes on finds more."
     }
   },
   PlayerGame: {
@@ -236,7 +238,8 @@ export const types = {
       year: "Year played.",
       month: "Month played, YYYY-MM.",
       speed: "Time control class, for a Lichess game.",
-      url: "The game on Lichess."
+url: "The game on Lichess.",
+      partial: "True while Lichess is still indexing the player's games, so their recent games may not all be here yet."
     }
   },
   RatedMove: {

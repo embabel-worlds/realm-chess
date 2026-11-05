@@ -21,7 +21,7 @@ export interface ViewSpec {
 export const GRAPH_VIEWS: ViewSpec[] = [
   {
     name: "BestMoves",
-    description: "The engine's best moves in a position, strongest first: every move within `withinCp` centipawns of the best, and always the best itself, each with its line, its score, how much worse than best it is, and which imbalances it creates and removes. Answers 'what are the best moves here', 'which moves are within half a pawn of best', 'what should White play'.",
+    description: "The engine's best moves in a position, strongest first: every move within `withinCp` centipawns of the best, and always the best itself, each with its line, its score, how much worse than best it is, and which imbalances it creates and removes. `depth` searches deeper than the default. Answers 'what are the best moves here', 'which moves are within half a pawn of best', 'what should White play', 'analyse this at depth 14'.",
     params: {
       fen: {
         type: "string",
@@ -37,9 +37,14 @@ export const GRAPH_VIEWS: ViewSpec[] = [
         type: "int",
         default: 5,
         description: "At most this many moves, best first. The engine computes five."
+      },
+      depth: {
+        type: "int",
+        default: 10,
+        description: "The depth to search to, 6 to 22: 10 is the default search, kept and deepened in the background. Each ply past 10 doubles the node budget, up to what one request can spend, so past about 11 the `depth` column says how far the search got. A new position at a deeper depth takes longer, up to about 20 seconds."
       }
     },
-    cypher: "MATCH (p:Position {fen: $fen})-[:HAS_CANDIDATE]->(c:CandidateMove)\nWHERE toInteger(c.rank) = 1 OR (c.lossCp IS NOT NULL AND toInteger(c.lossCp) <= $withinCp)\nRETURN toInteger(c.rank) AS rank, c.san AS move, c.uci AS uci, c.side AS side,\n       c.scoreCp AS scoreCp, c.mate AS mate, c.whiteCp AS whiteCp, c.lossCp AS lossCp,\n       c.pvSan AS line, c.pvUci AS lineUci, toInteger(c.depth) AS depth,\n       c.creates AS creates, c.removes AS removes\nORDER BY rank\nLIMIT $maxLines\n"
+    cypher: "MATCH (p:Position {fen: $fen})-[:HAS_CANDIDATE]->(c:CandidateMove)\nWHERE c.askedDepth = $depth\n  AND (toInteger(c.rank) = 1 OR (c.lossCp IS NOT NULL AND toInteger(c.lossCp) <= $withinCp))\nRETURN toInteger(c.rank) AS rank, c.san AS move, c.uci AS uci, c.side AS side,\n       c.scoreCp AS scoreCp, c.mate AS mate, c.whiteCp AS whiteCp, c.lossCp AS lossCp,\n       c.pvSan AS line, c.pvUci AS lineUci, toInteger(c.depth) AS depth,\n       c.creates AS creates, c.removes AS removes\nORDER BY rank\nLIMIT $maxLines\n"
   },
   {
     name: "ImbalancesOf",
@@ -149,7 +154,7 @@ export const GRAPH_VIEWS: ViewSpec[] = [
   },
   {
     name: "PlayerAtPosition",
-    description: "What one Lichess player chose from a position, as White or as Black, across their whole Lichess history — each move with games played and how it scored for them. Answers 'what does DrNykterstein play here', 'what does X play against the Sicilian as White'. Needs the Lichess key.",
+    description: "What one Lichess player chose from a position, as White or as Black, across their whole Lichess history — each move with games played and how it scored for them. `partial` is true while Lichess is still indexing the player's games: the counts are what it had indexed so far, and asking again in a few minutes finds more. Answers 'what does DrNykterstein play here', 'what does X play against the Sicilian as White'. Needs the Lichess key.",
     params: {
       fen: {
         type: "string",
@@ -167,7 +172,7 @@ export const GRAPH_VIEWS: ViewSpec[] = [
         description: "`white` or `black`: the colour the player had."
       }
     },
-    cypher: "MATCH (p:Position {fen: $fen})-[:PLAYER_PLAYED]->(m:PlayerMove)\nWHERE m.player = $player AND m.color = $color\nRETURN m.san AS move, toInteger(m.games) AS games, m.scoreForMover AS scoreForPlayer,\n       m.whiteWinPct AS whiteWinPct, m.drawPct AS drawPct, m.blackWinPct AS blackWinPct,\n       toInteger(m.averageRating) AS averageOpponentRating\nORDER BY games DESC\n"
+    cypher: "MATCH (p:Position {fen: $fen})-[:PLAYER_PLAYED]->(m:PlayerMove)\nWHERE m.player = $player AND m.color = $color\nRETURN m.san AS move, toInteger(m.games) AS games, m.scoreForMover AS scoreForPlayer,\n       m.whiteWinPct AS whiteWinPct, m.drawPct AS drawPct, m.blackWinPct AS blackWinPct,\n       toInteger(m.averageRating) AS averageOpponentRating, m.partial AS partial\nORDER BY games DESC\n"
   },
   {
     name: "PlayerGamesAtPosition",
@@ -189,7 +194,7 @@ export const GRAPH_VIEWS: ViewSpec[] = [
         description: "`white` or `black`."
       }
     },
-    cypher: "MATCH (p:Position {fen: $fen})-[:PLAYER_GAME]->(g:PlayerGame)\nWHERE g.player = $player AND g.color = $color\nRETURN g.white AS white, toInteger(g.whiteElo) AS whiteElo, g.black AS black, toInteger(g.blackElo) AS blackElo,\n       g.result AS result, g.speed AS speed, g.month AS month, g.uci AS movePlayed, g.url AS url\nORDER BY month DESC\n"
+    cypher: "MATCH (p:Position {fen: $fen})-[:PLAYER_GAME]->(g:PlayerGame)\nWHERE g.player = $player AND g.color = $color\nRETURN g.white AS white, toInteger(g.whiteElo) AS whiteElo, g.black AS black, toInteger(g.blackElo) AS blackElo,\n       g.result AS result, g.speed AS speed, g.month AS month, g.uci AS movePlayed, g.url AS url,\n       g.partial AS partial\nORDER BY month DESC\n"
   },
   {
     name: "MovesByRating",

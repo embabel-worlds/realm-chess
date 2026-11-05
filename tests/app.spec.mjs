@@ -283,6 +283,16 @@ test("the tolerance selector re-asks the view with the new withinCp", async ({ p
   await expect(moves(page)).toHaveCount(best(RUY, 100).length);
 });
 
+test("the depth selector re-asks the engine at that depth, and the default depth is asked as no depth", async ({ page }) => {
+  await open(page);
+  await load(page, RUY);
+  await expect(moves(page)).toHaveCount(best(RUY).length);
+  const lastAsk = () => page.evaluate(() => window.__calls.filter((k) => k.startsWith("call:chess.appPosition")).at(-1));
+  expect(JSON.parse((await lastAsk()).slice((await lastAsk()).indexOf("{")))).toEqual({ fen: RUY, withinCp: 50 });
+  await page.selectOption("#depth", "14");
+  await expect.poll(async () => JSON.parse((await lastAsk()).slice((await lastAsk()).indexOf("{")))).toEqual({ fen: RUY, withinCp: 50, depth: 14 });
+});
+
 test("clicking a candidate plays it and analyses the new position", async ({ page }) => {
   const errors = await open(page);
   await page.getByRole("button", { name: "e4", exact: true }).click();

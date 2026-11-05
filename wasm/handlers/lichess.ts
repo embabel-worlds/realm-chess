@@ -74,7 +74,8 @@ export const rowsMasterGames: Paged<RowsMasterGamesInput, Item<MastersAtPosition
 /**
  * What one Lichess player played from each position, as one colour, and their recent games
  * through it (PLAYER_PLAYED, PLAYER_GAME). The player and colour arrive as "player=X color=Y".
- * The player database streams its answer; the last complete record is the answer. Needs the Lichess token.
+ * The player database streams its answer; the last complete record is the answer, and a stream
+ * still going at the call deadline gives rows marked `partial`. Needs the Lichess token.
  */
 export const playerAtPosition: Handlers["playerAtPosition"] = async (input: { fens?: string[]; filters?: string }, ctx: Ctx) => {
   const out = { moves: [] as ExplorerMoveRecord[], games: [] as ExplorerGameRecord[] };
@@ -84,7 +85,7 @@ export const playerAtPosition: Handlers["playerAtPosition"] = async (input: { fe
   for (const fen of fensOf(input.fens ?? [])) {
     const a = (await explorerAnswerFor(s, "playerExplorer", playerParams(fen, who), PLAYER_TTL_MS))!;
     out.moves.push(...moveRecords(fen, a, who.player, who.color));
-    out.games.push(...gameRecords(fen, a.recentGames, gameUrl, who.player, who.color));
+    out.games.push(...gameRecords(fen, a.recentGames, gameUrl, who.player, who.color, a));
   }
   await recordLichess(s);
   return { moves: allWithValues(out.moves), games: allWithValues(out.games) };
@@ -104,7 +105,7 @@ export const rowsPlayerMoves: Paged<RowsPlayerMovesInput, Item<PlayerAtPositionO
 export const rowsPlayerGames: Paged<RowsPlayerGamesInput, Item<PlayerAtPositionOutput["games"]>> = async (input: { fens?: unknown; player?: unknown; color?: unknown; cursor?: unknown }, ctx: Ctx) =>
   lichessRows(ctx, playerUnits(input), input.cursor, (s, { fen, who }, first) =>
     explorerRows(s, "playerExplorer", playerParams(fen, who), PLAYER_TTL_MS, first,
-      (a) => gameRecords(fen, a.recentGames, gameUrl, who.player, who.color)));
+      (a) => gameRecords(fen, a.recentGames, gameUrl, who.player, who.color, a)));
 
 /** How often each move is played from a position by rating band and time control on Lichess, and how it scores. */
 export const ratedMoves: Handlers["ratedMoves"] = async (input: { fens?: string[]; filters?: string }, ctx: Ctx) => {

@@ -84,6 +84,15 @@
               <option value="100">1.00 of best</option>
             </select>
           </label>
+          <label class="inline" title="How deep the engine searches. Deeper takes longer on a new position; each line says the depth it reached.">Depth
+            <select id="depth">
+              <option value="8">8 (quick)</option>
+              <option value="10" selected>10</option>
+              <option value="12">12</option>
+              <option value="14">14</option>
+              <option value="18">18</option>
+            </select>
+          </label>
         </div>
         <div id="analysis"><div class="state">Make a move, or load a position.</div></div>
         <div class="note" id="mastersNote"></div>
@@ -181,8 +190,9 @@
   <ul>
     <li><b>Engine lines</b> — <code>HAS_CANDIDATE</code> → <code>CandidateMove</code>, from
       <code>chess.analysePosition</code>: Stockfish 19 (lite, WebAssembly) carried by the realm, three
-      lines, searched to a fixed node budget and at most depth 18; each line says the depth it
-      reached. Each line also carries the imbalances it creates and removes once its exchanges settle. Cached for
+      lines, searched to the depth the Depth selector asks for (10 by default) within a node budget
+      that doubles for each ply past 10, up to what one call can spend; each line says the depth it
+      reached, so past about 11 the budget, not the selector, is what stops it. Each line also carries the imbalances it creates and removes once its exchanges settle. Cached for
       seven days per position — a search is not repeatable, and the cache keeps the numbers steady.</li>
     <li><b>Imbalances</b> — <code>HAS_IMBALANCES</code> → <code>PositionImbalances</code>, from
       <code>chess.positionImbalances</code>: computed from the board, never judged. Material, bishop pair and
@@ -222,9 +232,10 @@
 
   <h3>2. The questions</h3>
   <p><b>BestMoves</b> — <code>fen</code>, <code>withinCp</code> (default 50; the selector sets it),
-    <code>maxLines</code> (default 5). The best move is always included.</p>
+    <code>maxLines</code> (default 5), <code>depth</code> (default 10; the Depth selector sets it). The best move is always included.</p>
 <pre>MATCH (p:Position {fen: $fen})-[:HAS_CANDIDATE]->(c:CandidateMove)
-WHERE toInteger(c.rank) = 1 OR (c.lossCp IS NOT NULL AND toInteger(c.lossCp) &lt;= $withinCp)
+WHERE c.askedDepth = $depth
+  AND (toInteger(c.rank) = 1 OR (c.lossCp IS NOT NULL AND toInteger(c.lossCp) &lt;= $withinCp))
 RETURN toInteger(c.rank) AS rank, c.san AS move, c.uci AS uci, c.side AS side,
        c.scoreCp AS scoreCp, c.mate AS mate, c.whiteCp AS whiteCp, c.lossCp AS lossCp,
        c.pvSan AS line, c.pvUci AS lineUci, toInteger(c.depth) AS depth,
@@ -355,6 +366,8 @@ let lastStatus = null; // ChessStatus, as the last reply carried it
  * through a game — a held arrow key, a run of Back — then costs one search, for the position
  * you stop on, instead of a queue of searches for positions already gone. */
 const SETTLE_MS = 300;
+/* The engine depth the realm searches to when a call names none (wasm/lib/config.ts, DEFAULT_DEPTH). */
+const DEFAULT_DEPTH = 10;
 
 /*
  * The reader's level, tab and player are kept by the appliance for this app and this reader,
@@ -605,14 +618,19 @@ function analyse(userMove) {
 }
 
 async function ask(seq, userMove) {
-  state("analysis", "The engine is thinking \u2014 one to four seconds for a new position.");
+  state("analysis", Number($("depth").value) > 10
+    ? "The engine is thinking \u2014 up to twenty seconds for a new position at this depth."
+    : "The engine is thinking \u2014 one to four seconds for a new position.");
   state("imbalances", "Reading the position\u2026");
   const fen = game.fen();
   const within = Number($("within").value);
+  const depth = Number($("depth").value);
   const moves = fromStart() && cursor > 0 ? playedLine() : null;
+  // The realm's default depth is sent as no depth, so a default step asks what it always has.
+  const args = { fen, ...(moves ? { moves } : {}), withinCp: within, ...(depth === DEFAULT_DEPTH ? {} : { depth }) };
   let reply;
   try {
-    reply = await call("chess.appPosition", moves ? { fen, moves, withinCp: within } : { fen, withinCp: within });
+    reply = await call("chess.appPosition", args);
   } catch (e) {
     if (seq !== analysisSeq) return;
     state("analysis", `The engine did not answer: ${failure(e)}`, "error");
@@ -1129,6 +1147,7 @@ $("flip").addEventListener("click", () => {
 });
 $("engineSide").addEventListener("change", () => maybeEngineMove(analysisSeq));
 $("within").addEventListener("change", () => analyse(false));
+$("depth").addEventListener("change", () => analyse(false));
 $("loadFen").addEventListener("click", () => {
   const fen = $("fenInput").value.trim();
   try {

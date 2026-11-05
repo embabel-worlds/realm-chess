@@ -7,7 +7,7 @@ import type { HandlerSpec } from "@embabel/realm-types";
 export const appPosition = {
   namespace: "chess",
   description:
-    "For Chesscalator, on every step: ImbalancesOf, the opening (OpeningOfLine along `moves`, else OpeningOf), TheoryOfLine along `moves`, and BestMoves within `withinCp` of the best. A new position costs one engine search.",
+    "For Chesscalator, on every step: ImbalancesOf, the opening (OpeningOfLine along `moves`, else OpeningOf), TheoryOfLine along `moves`, and BestMoves within `withinCp` of the best, searched to `depth`. A new position costs one engine search.",
   input: {
     type: "object",
     properties: {
@@ -22,6 +22,12 @@ export const appPosition = {
         minimum: 0,
         maximum: 1000,
         description: "Keep moves at most this many centipawns worse than the best. 50 when absent.",
+      },
+      depth: {
+        type: "integer",
+        minimum: 6,
+        maximum: 22,
+        description: "The depth to search to, as BestMoves's `depth`. 10, the default search, when absent.",
       },
     },
     required: ["fen"],

@@ -10,7 +10,14 @@ export interface ExplorerGame {
   id: string; uci?: string; winner?: "white" | "black" | null; speed?: string; year?: number; month?: string;
   white?: { name?: string; rating?: number }; black?: { name?: string; rating?: number };
 }
-export interface ExplorerAnswer { white?: number; draws?: number; black?: number; moves?: ExplorerMove[]; topGames?: ExplorerGame[]; recentGames?: ExplorerGame[] }
+export interface ExplorerAnswer {
+  white?: number; draws?: number; black?: number; moves?: ExplorerMove[]; topGames?: ExplorerGame[]; recentGames?: ExplorerGame[];
+  /**
+   * The realm's, never Lichess's: set when the player explorer was still streaming as the call
+   * ended, so the answer is the games Lichess had indexed by then and a later ask finds more.
+   */
+  partial?: boolean;
+}
 
 /*
  * The explorer answers JSON, except the player database, which streams newline-delimited JSON —
@@ -60,18 +67,22 @@ export function ratedGrid(filters: string | undefined): { band: string; speed: s
 
 /*
  * The player database streams newline-delimited JSON, and the host hands that over as
- * `{ records, truncated }`: every complete line parsed, and `truncated` when it dropped an
- * unfinished last one. Each record is a more complete version of the last, so the answer is the
- * last record, which is what explorerAnswer reads from raw text. No records is nothing readable.
+ * `{ records, truncated }`: every complete line parsed, and `truncated` when the read stopped
+ * before the stream ended. Each record is a more complete version of the last, so the answer is
+ * the last record, which is what explorerAnswer reads from raw text.
+ *
+ * Lichess keeps streaming while it indexes the player's games, which for a player with many
+ * games takes minutes, and a host stops reading at its call deadline. So a truncated stream is
+ * an answer, the games indexed so far, and `truncated` says so. No records is nothing readable.
  */
-export function ndjsonAnswer(reply: unknown): ExplorerAnswer {
+export function ndjsonAnswer(reply: unknown): { answer: ExplorerAnswer; truncated: boolean } {
   const r = reply as { records?: unknown; truncated?: unknown } | null;
   if (!r || typeof r !== "object" || !Array.isArray(r.records) || typeof r.truncated !== "boolean") {
     throw new Error("The Lichess player explorer answered in a shape the realm does not read");
   }
   const last = r.records[r.records.length - 1];
   if (!last || typeof last !== "object") throw new Error("The Lichess explorer answered with nothing readable");
-  return last as ExplorerAnswer;
+  return { answer: last as ExplorerAnswer, truncated: r.truncated };
 }
 
 /* ── Checking an answer before anything of it is kept or shown ── */
@@ -158,12 +169,19 @@ export interface ExplorerMoveRecord {
   scoreForMover: number | null;
   averageRating: number | null;
   player: string; color: string;
+  /** A player's row only: Lichess was still indexing the player's games (ExplorerAnswer.partial). */
+  partial?: boolean;
 }
 
 export interface ExplorerGameRecord {
   gameId: string; fen: string; uci: string; white: string; whiteElo: number | null; black: string; blackElo: number | null;
   result: string; year: number | null; month: string; speed: string; url: string; player: string; color: string;
+  /** A player's row only: Lichess was still indexing the player's games (ExplorerAnswer.partial). */
+  partial?: boolean;
 }
+
+/* A player's rows say whether they came from a partial answer; a masters row has no player. */
+const partialOf = (a: ExplorerAnswer | undefined, player: string) => (player ? { partial: a?.partial === true } : {});
 
 export function moveRecords(fen: string, a: ExplorerAnswer, player = "", color = ""): ExplorerMoveRecord[] {
   const mover = new Board(fen).turn();
@@ -176,7 +194,7 @@ export function moveRecords(fen: string, a: ExplorerAnswer, player = "", color =
       whiteWinPct: share(m.white, games), drawPct: share(m.draws, games), blackWinPct: share(m.black, games),
       scoreForMover: games ? Math.round(((wins + m.draws / 2) / games) * 1000) / 1000 : null,
       averageRating: m.averageRating ?? m.averageOpponentRating ?? null,
-      player, color,
+      player, color, ...partialOf(a, player),
     };
   });
 }
@@ -191,13 +209,13 @@ function sanOf(fen: string, uci: string | undefined): string {
   }
 }
 
-export function gameRecords(fen: string, games: ExplorerGame[] | undefined, url: (id: string) => string, player = "", color = ""): ExplorerGameRecord[] {
+export function gameRecords(fen: string, games: ExplorerGame[] | undefined, url: (id: string) => string, player = "", color = "", from?: ExplorerAnswer): ExplorerGameRecord[] {
   return (games ?? []).map((g) => ({
     gameId: `${fen}#${player}#${color}#${g.id}`, fen, uci: sanOf(fen, g.uci),
     white: g.white?.name ?? "", whiteElo: g.white?.rating ?? null,
     black: g.black?.name ?? "", blackElo: g.black?.rating ?? null,
     result: g.winner === "white" ? "1-0" : g.winner === "black" ? "0-1" : "½-½",
-    year: g.year ?? null, month: g.month ?? "", speed: g.speed ?? "", url: url(g.id), player, color,
+    year: g.year ?? null, month: g.month ?? "", speed: g.speed ?? "", url: url(g.id), player, color, ...partialOf(from, player),
   }));
 }
 

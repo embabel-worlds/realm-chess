@@ -5,11 +5,11 @@
 
 import type { AnalysePositionOutput, Handlers, RowsCandidatesInput } from "../generated/realm.ts";
 import { fits, spent } from "../lib/clock.ts";
-import { ANALYSIS_TTL_MS, DEPTH_CAP, FULL_POSITION_MS, MULTI_PV, SEARCH_UNTIL, YIELD_AT } from "../lib/config.ts";
+import { ANALYSIS_TTL_MS, DEFAULT_DEPTH, MAX_DEPTH, MIN_DEPTH, MULTI_PV, SEARCH_UNTIL, YIELD_AT } from "../lib/config.ts";
 import { allWithValues } from "../lib/records.ts";
 import { sha256Hex } from "../lib/sha256.ts";
 import { timed, timedSync } from "../lib/timing.ts";
-import { analysisIdOf, candidateRecords, configKey, DEEP, FULL, search } from "../lib/engine.ts";
+import { analysisIdOf, candidateRecords, configKey, DEEP, FULL, positionWorstMs, search, searchAt } from "../lib/engine.ts";
 import type { CandidateLineRecord, SearchConfig } from "../lib/engine.ts";
 import { keepAnalysis, keptAnalyses, sqlText } from "../lib/store.ts";
 import type { Db, KeptAnalysis } from "../lib/store.ts";
@@ -20,6 +20,26 @@ import type { Ctx, Item, Paged } from "./shared.ts";
 export interface CandidateRow extends CandidateLineRecord {
   analysisId: string;
   nodes: number;
+}
+
+/** A candidate row for the depth it was asked at, which the graph's CandidateMove carries. */
+export type DepthRow = CandidateRow & { askedDepth: number };
+
+/*
+ * The rows of a search asked at `depth`. Rows at the default depth keep their identity, the FEN and
+ * the move; at any other depth the identity also names the depth, so the same move at two depths
+ * is two rows, as it is two searches.
+ */
+export const atDepth = (rows: CandidateRow[], depth: number): DepthRow[] =>
+  rows.map((r) => ({ ...r, askedDepth: depth, ...(depth === DEFAULT_DEPTH ? {} : { candidateId: `${r.candidateId}#depth=${depth}` }) }));
+
+/** A depth a query pinned, refused as PUSHDOWN_VALUE when it is not a whole number the realm searches to. */
+export function pinnedDepths(values: unknown): number[] {
+  if (values === undefined || values === null) return [DEFAULT_DEPTH];
+  if (!Array.isArray(values) || values.some((v) => typeof v !== "string" || !/^\d{1,2}$/.test(v) || Number(v) < MIN_DEPTH || Number(v) > MAX_DEPTH)) {
+    throw new Error(`PUSHDOWN_VALUE: askedDepth must be a whole number from ${MIN_DEPTH} to ${MAX_DEPTH}`);
+  }
+  return [...new Set((values as string[]).map(Number))];
 }
 
 const isFresh = (a: KeptAnalysis | undefined): a is KeptAnalysis => a !== undefined && Date.now() - a.createdAt < ANALYSIS_TTL_MS;
@@ -73,11 +93,11 @@ export async function linesFor(ctx: Ctx, fen: string, c: SearchConfig, kept: Kep
 /**
  * The engine's best lines in each position, strongest first, each with what it changes about
  * the position's imbalances. A position with no legal moves returns nothing: there is nothing
- * to recommend in a checkmate or a stalemate, and the FEN says which. `depth` caps the search
- * and `multiPv` is the number of lines; the node budget is the realm's own.
+ * to recommend in a checkmate or a stalemate, and the FEN says which. `depth` is the depth to
+ * search to, with the node budget searchAt gives it, and `multiPv` is the number of lines.
  */
 export const analysePosition: Handlers["analysePosition"] = async (input: { fens?: string[]; multiPv?: number; depth?: number }, ctx: Ctx) => {
-  const c: SearchConfig = { ...FULL, multiPv: clamp(input.multiPv, MULTI_PV, 1, 8), depthCap: clamp(input.depth, DEPTH_CAP, 6, 22) };
+  const c: SearchConfig = searchAt(clamp(input.depth, DEFAULT_DEPTH, MIN_DEPTH, MAX_DEPTH), clamp(input.multiPv, MULTI_PV, 1, 8));
   const fens = (input.fens ?? []).map((f) => f.trim());
   fens.forEach(legal);
   const kept = await keptFor(ctx.deps.db, c, fens, false);
@@ -89,31 +109,37 @@ export const analysePosition: Handlers["analysePosition"] = async (input: { fens
 };
 
 /**
- * The producer behind HAS_CANDIDATE. Kept lines come back as they are; a position not yet
- * searched is searched while the page has spent less than 60 percent of the deadline and the
- * search and its lines still fit before the page hands back, and the rest are left to the next page, whose cursor is the index of the first key it owes. Every
- * page serves at least one key, so a single position always answers in one read.
+ * The producer behind HAS_CANDIDATE, for every position the host names at every depth the query
+ * pinned (`askedDepth`), or at the default depth when it pinned none. Kept lines come back as they
+ * are; a position not yet searched at a depth is searched while the page has spent less than 60
+ * percent of the deadline and the search and its lines still fit before the page hands back, and
+ * the rest are left to the next page, whose cursor is the index of the first position and depth it
+ * owes. Every page serves at least one, so a single position always answers in one read.
  */
-export const rowsCandidates: Paged<RowsCandidatesInput, Item<AnalysePositionOutput> & { analysisId: string; nodes: number }> = async (input: { fens?: unknown; cursor?: unknown }, ctx: Ctx) => {
+export const rowsCandidates: Paged<RowsCandidatesInput, Item<AnalysePositionOutput> & { analysisId: string; nodes: number; askedDepth: number }> = async (input: { fens?: unknown; depth?: unknown; cursor?: unknown }, ctx: Ctx) => {
   const keys = keysOf(input.fens).map((f) => f.trim());
+  const units = pinnedDepths(input.depth).flatMap((depth) => keys.map((fen) => ({ fen, depth, c: searchAt(depth) })));
   let start = 0;
   if (input.cursor !== undefined && input.cursor !== null) {
-    if (typeof input.cursor !== "string" || !/^\d{1,3}$/.test(input.cursor) || Number(input.cursor) >= keys.length) {
+    if (typeof input.cursor !== "string" || !/^\d{1,4}$/.test(input.cursor) || Number(input.cursor) >= units.length) {
       throw new Error("Invalid cursor");
     }
     start = Number(input.cursor);
   }
-  const page = keys.slice(start);
-  page.forEach(legal);
-  const kept = await keptFor(ctx.deps.db, FULL, page, true);
-  const rows: CandidateRow[] = [];
-  for (let i = start; i < keys.length; i++) {
-    const fen = keys[i];
-    const k = kept.get(fen);
+  const page = units.slice(start);
+  page.forEach((u) => legal(u.fen));
+  const kept = new Map<number, Map<string, KeptAnalysis>>();
+  for (const depth of new Set(page.map((u) => u.depth))) {
+    kept.set(depth, await keptFor(ctx.deps.db, searchAt(depth), page.filter((u) => u.depth === depth).map((u) => u.fen), true));
+  }
+  const rows: DepthRow[] = [];
+  for (let i = start; i < units.length; i++) {
+    const { fen, depth, c } = units[i];
+    const k = kept.get(depth)!.get(fen);
     const fresh = k !== undefined && Date.now() - k.createdAt < ANALYSIS_TTL_MS;
     const first = i === start;
-    if (!first && (spent() >= YIELD_AT || (!fresh && (spent() >= SEARCH_UNTIL || !fits(FULL_POSITION_MS))))) return { rows: allWithValues(rows), next: String(i) };
-    rows.push(...(await linesFor(ctx, fen, FULL, k)));
+    if (!first && (spent() >= YIELD_AT || (!fresh && (spent() >= SEARCH_UNTIL || !fits(positionWorstMs(c)))))) return { rows: allWithValues(rows), next: String(i) };
+    rows.push(...atDepth(await linesFor(ctx, fen, c, k), depth));
   }
   return { rows: allWithValues(rows), next: null };
 };
