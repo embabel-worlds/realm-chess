@@ -11,7 +11,7 @@
 
 import type { Handlers } from "../generated/realm.ts";
 import { fits } from "../lib/clock.ts";
-import { API_CALL_MS, LICHESS_SPACING_MS, MASTERS_TTL_MS, PLAYER_TTL_MS, RATED_TTL_MS, THEORY_TTL_MS } from "../lib/config.ts";
+import { API_CALL_MS, DEFAULT_DEPTH, LICHESS_SPACING_MS, MASTERS_TTL_MS, MAX_DEPTH, MIN_DEPTH, PLAYER_TTL_MS, RATED_TTL_MS, THEORY_TTL_MS } from "../lib/config.ts";
 import { BAND, COLOR, gameRecords, gameUrl, moveRecords, PLAYER, pinned, ratedCells, ratedRecords, ratedRequest, SPEED } from "../lib/explorer.ts";
 import type { RatedMoveRecord } from "../lib/explorer.ts";
 import { runView } from "../lib/cypher.ts";
@@ -21,13 +21,13 @@ import type { ExplorerOperation } from "../lib/lichess.ts";
 import { timed, timedSync } from "../lib/timing.ts";
 import { readStatus } from "../lib/status.ts";
 import { theoryFor, titlesOfSans } from "../lib/theory.ts";
-import { FULL } from "../lib/engine.ts";
+import { searchAt } from "../lib/engine.ts";
 import { gameLine, lineOpeningOf } from "../lib/gameline.ts";
 import type { GameLine } from "../lib/gameline.ts";
 import { positionAfter, splitLine } from "../lib/openings.ts";
 import { sqlText } from "../lib/store.ts";
 import type { Db } from "../lib/store.ts";
-import { keptFor, linesFor } from "./engine.ts";
+import { atDepth, keptFor, linesFor } from "./engine.ts";
 import { mastersParams, playerParams } from "./lichess.ts";
 import { lineOpening, lineTheory, levelsOf, plansFor, positionOpening, PRODUCER_PLAN_ARGS, recordModel } from "./plans.ts";
 import type { ModelSession, PlanRow } from "./plans.ts";
@@ -113,13 +113,15 @@ async function appImbalances(db: Db, fen: string): Promise<ImbalanceRecord[]> {
 /**
  * Everything the page shows on every step: the imbalances, the opening (along the line when the
  * game was played from the start, else by position), the theory for the line, and the engine's
- * lines within `withinCp` of the best. The engine's lines are searched at full, as the graph's are.
+ * lines within `withinCp` of the best, searched to `depth` as the graph's are for BestMoves.
  * What the page asked for before is kept, so asking again costs a few reads.
  */
-export const appPosition: Handlers["appPosition"] = async (input: { fen?: unknown; moves?: unknown; withinCp?: unknown }, ctx: Ctx): Promise<AppReply> => {
+export const appPosition: Handlers["appPosition"] = async (input: { fen?: unknown; moves?: unknown; withinCp?: unknown; depth?: unknown }, ctx: Ctx): Promise<AppReply> => {
   const db = ctx.deps.db;
   const { fen, moves, line } = await timed("line", () => appStep(db, input));
   const withinCp = clamp(typeof input.withinCp === "number" ? input.withinCp : undefined, 50, 0, 1000);
+  const depth = clamp(typeof input.depth === "number" ? input.depth : undefined, DEFAULT_DEPTH, MIN_DEPTH, MAX_DEPTH);
+  const c = searchAt(depth);
   const views: Record<string, ViewAnswer> = {};
   views.ImbalancesOf = await answer("ImbalancesOf", { fen }, () => timed("facts", () => appImbalances(db, fen)));
   if (moves && line) {
@@ -131,8 +133,8 @@ export const appPosition: Handlers["appPosition"] = async (input: { fen?: unknow
   } else {
     views.OpeningOf = await answer("OpeningOf", { fen }, () => openingRecords(db, [fen]));
   }
-  views.BestMoves = await answer("BestMoves", { fen, withinCp, maxLines: 5 }, async () =>
-    linesFor(ctx, fen, FULL, (await timed("keptRead", () => keptFor(db, FULL, [fen], true))).get(fen)));
+  views.BestMoves = await answer("BestMoves", { fen, withinCp, maxLines: 5, depth }, async () =>
+    atDepth(await linesFor(ctx, fen, c, (await timed("keptRead", () => keptFor(db, c, [fen], true))).get(fen)), depth));
   if (moves && line) {
     views.TheoryOfLine = await answer("TheoryOfLine", { moves: moves.join(" ") }, async () => {
       const t = await timed("theory", () => theoryFor(db, ctx.gateway, moves, THEORY_TTL_MS, () => fits(API_CALL_MS), titlesOfSans(line.sans)));
@@ -193,7 +195,7 @@ export const appPractice: Handlers["appPractice"] = async (input: { fen?: unknow
     });
     views[gameView] = views[moveView].error || views[moveView].skipped
       ? { ...views[moveView] }
-      : await answer(gameView, params, async () => gameRecords(fen, op === "playerExplorer" ? a!.recentGames : a!.topGames, gameUrl, who?.player, who?.color));
+      : await answer(gameView, params, async () => gameRecords(fen, op === "playerExplorer" ? a!.recentGames : a!.topGames, gameUrl, who?.player, who?.color, a!));
   };
   if (f.masters) await both("MastersAtPosition", "MasterGamesAtPosition", { fen }, "mastersExplorer", mastersParams(fen), MASTERS_TTL_MS);
   if (player) {

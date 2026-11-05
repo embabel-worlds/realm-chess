@@ -72,9 +72,10 @@ function setup(o: { parallel?: boolean } = {}) {
   const mark = () => run("markDeepened", {});
   const queued = () => db.exec("SELECT fen FROM deepen_queue ORDER BY fen").map((r) => r.fen);
   const deep = () => db.exec("SELECT fen, analysis_id, depth, nodes FROM deep_analyses ORDER BY fen");
-  const fetch = async (fens: string[]) =>
-    (await fetchProducer({ module: buildGuest(), handler: "chess.rowsCandidates", keyArgument: "fens", keys: fens, db, host, clock, tickMs: TICK })).rows;
-  return { clock, db, host, engine, cost, run, look, tick, mark, queued, deep, fetch };
+  const fetchAt = (fens: string[], extra: Record<string, unknown> = {}) =>
+    fetchProducer({ module: buildGuest(), handler: "chess.rowsCandidates", keyArgument: "fens", keys: fens, db, host, clock, tickMs: TICK, extra });
+  const fetch = async (fens: string[]) => (await fetchAt(fens)).rows;
+  return { clock, db, host, engine, cost, run, look, tick, mark, queued, deep, fetch, fetchAt };
 }
 
 const writes = (statements: string[]) => statements.filter((q) => !/^\s*SELECT\b/i.test(q));
@@ -269,16 +270,61 @@ describe.skipIf(!hasTooling)("deepening in the background, in the guest", () => 
     expect(later.views.BestMoves.rows).toEqual(runView(best, { fen: E4, withinCp: 50, maxLines: 5 }, rows));
   });
 
-  it("analysePosition answers at the depth cap it asked for, never from a deeper row", async () => {
+  it("analysePosition at the default depth answers from the page's own kept row, never from a deeper one", async () => {
     const s = setup();
     await s.fetch([E4]);
     s.tick();
     const searches = s.host.searches;
-    const own = s.run("analysePosition", { fens: [E4], depth: 18 }).result as unknown as Record<string, unknown>[];
+    const own = s.run("analysePosition", { fens: [E4] }).result as unknown as Record<string, unknown>[];
     expect(own.length).toBeGreaterThan(0);
+    // The fake engine reaches its cap, and the default search's cap is 18.
     expect(own.every((r) => r.depth === 18)).toBe(true);
     // It is the page's own kept row, so nothing is searched.
     expect(s.host.searches).toBe(searches);
+  });
+
+  it("a query that pins askedDepth is searched to that depth, in rows of their own; one that pins none gets the default", async () => {
+    const s = setup();
+    const plain = (await s.fetch([E4])) as Record<string, unknown>[];
+    expect(plain.length).toBeGreaterThan(0);
+    expect(plain.every((r) => r.askedDepth === 10 && !String(r.candidateId).includes("#depth="))).toBe(true);
+    const searches = s.host.searches;
+    const deep = (await s.fetchAt([E4], { depth: ["14"] })).rows as Record<string, unknown>[];
+    expect(deep.length).toBeGreaterThan(0);
+    expect(deep.every((r) => r.askedDepth === 14 && r.depth === 14 && String(r.candidateId).endsWith("#depth=14"))).toBe(true);
+    expect(s.host.searches).toBe(searches + 1);
+    // Kept, so asking again searches nothing.
+    expect((await s.fetchAt([E4], { depth: ["14"] })).rows).toEqual(deep);
+    expect(s.host.searches).toBe(searches + 1);
+  });
+
+  it.each([[["30"]], [["5"]], [["deep"]], [[14]]])("a pinned askedDepth of %j is refused with PUSHDOWN_VALUE", async (depth) => {
+    const s = setup();
+    const f = await s.fetchAt([E4], { depth });
+    expect(f.error).toMatch(/^PUSHDOWN_VALUE/);
+  });
+
+  it("Chesscalator's depth reaches BestMoves: the app answers the rows searched to it, as the view does", async () => {
+    const s = setup();
+    const views = (r: ReturnType<typeof s.run>) => (r.result as unknown as { views: Record<string, { rows: Record<string, unknown>[] }> }).views;
+    const plain = views(s.run("appPosition", { fen: E4 })).BestMoves.rows;
+    const deep = views(s.run("appPosition", { fen: E4, depth: 14 })).BestMoves.rows;
+    expect(plain.length).toBeGreaterThan(0);
+    expect(deep.length).toBeGreaterThan(0);
+    expect(plain.every((r) => r.depth === 18)).toBe(true);
+    expect(deep.every((r) => r.depth === 14)).toBe(true);
+  });
+
+  it("analysePosition at another depth searches once to that depth and keeps it", async () => {
+    const s = setup();
+    await s.fetch([E4]);
+    const searches = s.host.searches;
+    const deeper = s.run("analysePosition", { fens: [E4], depth: 14 }).result as unknown as Record<string, unknown>[];
+    expect(deeper.length).toBeGreaterThan(0);
+    expect(deeper.every((r) => r.depth === 14)).toBe(true);
+    expect(s.host.searches).toBe(searches + 1);
+    expect(s.run("analysePosition", { fens: [E4], depth: 14 }).result).toEqual(deeper);
+    expect(s.host.searches).toBe(searches + 1);
   });
 
   it("kept plans still hit after a tick deepens their position: plans are keyed on the page's own analysis", async () => {

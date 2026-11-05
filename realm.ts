@@ -15,7 +15,7 @@ const dependencies = {
     from: { registry: "default" },
     persistent: true,
     init: "db/schema.sql",
-    migrations: ["db/0001-openings.sql", "db/0002-skeletons.sql", "db/0003-status.sql", "db/0004-lichess.sql", "db/0005-app.sql", "db/0006-deepen.sql", "db/0007-deepen-slots.sql", "db/0008-deep-failures.sql", "db/0009-requeue-deepen.sql"],
+    migrations: ["db/0001-openings.sql", "db/0002-skeletons.sql", "db/0003-status.sql", "db/0004-lichess.sql", "db/0005-app.sql", "db/0006-deepen.sql", "db/0007-deepen-slots.sql", "db/0008-deep-failures.sql", "db/0009-requeue-deepen.sql", "db/0010-explorer-partial.sql"],
   },
   /** Stockfish 19 lite carried in the realm. How long it searches is in wasm/lib/config.ts. */
   engine: {

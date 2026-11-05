@@ -29,6 +29,23 @@ export const FULL_NODES = 30_000;
 /** The search stops at this depth even with budget left (depth 18). */
 export const DEPTH_CAP = 18;
 
+/*
+ * A search asked for a depth. The node budget decides how deep a search goes on every host, since
+ * the same budget gives the same lines, and `full`'s 30,000 nodes reach depth 8 to 10. So a request
+ * that names a depth gets that depth as its cap and a budget to match: `full`'s for depth 10 and
+ * below, where the cap ends the search sooner, and double for each ply past 10, up to the most one
+ * position can spend in a page. That is ASKED_MAX_NODES, 15 s at the slowest host's speed, which
+ * with the imbalances and three line reads is 26 s of the page's 27. Past about depth 11 it is the
+ * budget, not the cap, that stops the search, and every row says the depth it reached.
+ *
+ * A request that names no depth gets `full` itself, and its rows say DEFAULT_DEPTH, so the default
+ * keeps its kept analyses and the background deepening.
+ */
+export const DEFAULT_DEPTH = 10;
+export const MIN_DEPTH = 6;
+export const MAX_DEPTH = 22;
+export const ASKED_MAX_NODES = 75_000;
+
 /** Lines per position. */
 export const MULTI_PV = 3;
 
@@ -88,6 +105,11 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 export const MASTERS_TTL_MS = 30 * DAY_MS;
 export const RATED_TTL_MS = 30 * DAY_MS;
 export const PLAYER_TTL_MS = DAY_MS;
+/**
+ * A partial player answer, cut off while Lichess was still indexing the player's games. Indexing
+ * a player with many games takes Lichess minutes, so an ask ten minutes on finds more of them.
+ */
+export const PARTIAL_TTL_MS = 10 * 60 * 1000;
 export const THEORY_TTL_MS = 7 * DAY_MS;
 export const PLANS_TTL_MS = 7 * DAY_MS;
 

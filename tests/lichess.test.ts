@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { parse } from "yaml";
-import { LICHESS_SPACING_MS, MASTERS_TTL_MS, PLAYER_TTL_MS, RATED_TTL_MS, THEORY_TTL_MS } from "../wasm/lib/config";
+import { LICHESS_SPACING_MS, MASTERS_TTL_MS, PARTIAL_TTL_MS, PLAYER_TTL_MS, RATED_TTL_MS, THEORY_TTL_MS } from "../wasm/lib/config";
 import { explorerAnswer } from "../wasm/lib/explorer";
 import { LICENCE, pageUrl, theoryText, theoryTitles } from "../wasm/lib/theory";
 import { allWithValues } from "../wasm/lib/records";
@@ -26,6 +26,7 @@ const RUY_PAGES = theoryTitles(RUY_LINE.split(" ")).slice(0, 7);
 interface Fakes {
   latencyMs?: number;
   masters?: Answer;
+  player?: Answer;
   wikibooks?: Answer;
 }
 
@@ -37,7 +38,7 @@ function apis(clock: Clock, o: Fakes = {}): Record<string, Answer> {
   };
   return {
     lichess_mastersExplorer: slow(o.masters ?? ((a) => mastersAnswer(String(a.fen)))),
-    lichess_playerExplorer: slow((a) => ndjsonReply(playerRecords(String(a.fen), String(a.player), String(a.color)))),
+    lichess_playerExplorer: slow(o.player ?? ((a) => ndjsonReply(playerRecords(String(a.fen), String(a.player), String(a.color))))),
     lichess_lichessExplorer: slow((a) => ratedAnswer(String(a.fen), String(a.ratings), a.speeds as string | undefined)),
     wikibooks_wikibooksQuery: slow(o.wikibooks ?? wikibooksAnswers(RUY_PAGES, RUY_THEORY)),
   };
@@ -78,6 +79,14 @@ const withValues = (r: unknown) => {
   return { moves: allWithValues(x.moves), games: allWithValues(x.games) };
 };
 
+/*
+ * The recorded player answers are whole streams, recorded before a player's rows said so: each
+ * row of one carries `partial: false`.
+ */
+const whole = (r: unknown) => {
+  const w = r as { moves: object[]; games: object[] };
+  return { ...w, moves: w.moves.map((m) => ({ ...m, partial: false })), games: w.games.map((g) => ({ ...g, partial: false })) };
+};
 const lichessCalls = (host: ReturnType<typeof realmHost>) => host.calls.filter((c) => c.tool.startsWith("lichess_"));
 
 describe.skipIf(!hasTooling)("Lichess and theory, in the guest", () => {
@@ -141,7 +150,7 @@ describe.skipIf(!hasTooling)("Lichess and theory, in the guest", () => {
 
     it("PlayerAtPosition: the player's moves and games for three positions, from the last complete NDJSON record", async () => {
       const filters = "player=DrNykterstein color=black";
-      const recorded = withValues(recordedFor("playerAtPosition", { fens: FIXTURE_FENS, filters }));
+      const recorded = whole(withValues(recordedFor("playerAtPosition", { fens: FIXTURE_FENS, filters })));
       const { fetch, run } = setup();
       const pin = { player: ["DrNykterstein"], color: ["black"] };
       expect((await fetch("rowsPlayerMoves", "fens", FIXTURE_FENS, pin)).rows).toEqual(recorded.moves);
@@ -269,6 +278,31 @@ describe.skipIf(!hasTooling)("Lichess and theory, in the guest", () => {
       clock.now += 120_000;
       await fetch(handler, "fens", [START], pin);
       expect(host.count(tool)).toBe(2);
+    });
+
+    it("a player stream cut off while Lichess was still indexing gives partial rows, kept ten minutes rather than a day", async () => {
+      const cut: Answer = (a) => ndjsonReply(playerRecords(String(a.fen), String(a.player), String(a.color)), true);
+      const { fetch, host, clock } = setup({ player: cut });
+      const pin = { player: ["DrNykterstein"] };
+      const moves = (await fetch("rowsPlayerMoves", "fens", [START], pin)).rows as { partial?: boolean }[];
+      const games = (await fetch("rowsPlayerGames", "fens", [START], pin)).rows as { partial?: boolean }[];
+      expect(moves.length).toBeGreaterThan(0);
+      expect(games.length).toBeGreaterThan(0);
+      expect([...moves, ...games].every((r) => r.partial === true)).toBe(true);
+      expect(host.count("lichess_playerExplorer")).toBe(1);
+      clock.now += PARTIAL_TTL_MS - 60_000;
+      expect((await fetch("rowsPlayerMoves", "fens", [START], pin)).rows).toEqual(moves);
+      expect(host.count("lichess_playerExplorer")).toBe(1);
+      clock.now += 120_000;
+      await fetch("rowsPlayerMoves", "fens", [START], pin);
+      expect(host.count("lichess_playerExplorer")).toBe(2);
+    });
+
+    it("a whole player stream gives rows that say they are whole", async () => {
+      const { fetch } = setup();
+      const rows = (await fetch("rowsPlayerMoves", "fens", [START], { player: ["DrNykterstein"] })).rows as { partial?: boolean }[];
+      expect(rows.length).toBeGreaterThan(0);
+      expect(rows.every((r) => r.partial === false)).toBe(true);
     });
 
     it("an empty answer is not kept, as empty answers are never cached", async () => {

@@ -91,16 +91,22 @@ describe("the views the realm declares", () => {
 describe("the view reader, on rows written by hand", () => {
   const best = view("BestMoves");
   const rows = [
-    { rank: "2", san: "d4", lossCp: 9, whiteCp: 23 },
-    { rank: "1", san: "e4", lossCp: 0, whiteCp: 32 },
-    { rank: "3", san: "Nf3", lossCp: 60, whiteCp: -28 },
-    { rank: "4", san: "c4", lossCp: null, whiteCp: null },
+    { rank: "2", san: "d4", lossCp: 9, whiteCp: 23, askedDepth: 10 },
+    { rank: "1", san: "e4", lossCp: 0, whiteCp: 32, askedDepth: 10 },
+    { rank: "3", san: "Nf3", lossCp: 60, whiteCp: -28, askedDepth: 10 },
+    { rank: "4", san: "c4", lossCp: null, whiteCp: null, askedDepth: 10 },
+    { rank: "1", san: "Nc3", lossCp: 0, whiteCp: 30, askedDepth: 14 },
   ];
 
   it("filters, converts, orders and limits as the Cypher says", () => {
     expect(runView(best, { withinCp: 50 }, rows).map((r) => [r.rank, r.move])).toEqual([[1, "e4"], [2, "d4"]]);
     expect(runView(best, { withinCp: 100, maxLines: 2 }, rows).map((r) => r.move)).toEqual(["e4", "d4"]);
     expect(runView(best, { withinCp: 100 }, rows).map((r) => r.move)).toEqual(["e4", "d4", "Nf3"]);
+  });
+
+  it("answers the rows searched at the depth it asks for, the default when it names none", () => {
+    expect(runView(best, { withinCp: 50, depth: 14 }, rows).map((r) => r.move)).toEqual(["Nc3"]);
+    expect(runView(best, { withinCp: 50, depth: 12 }, rows)).toEqual([]);
   });
 
   it("returns every column, null for a property the row lacks", () => {
@@ -217,8 +223,9 @@ describe.skipIf(!hasTooling)("each view over the realm's producers", () => {
         const moves = runView(view("PlayerAtPosition"), args, await fetch("rowsPlayerMoves", "fens", [START], pushed));
         const games = runView(view("PlayerGamesAtPosition"), args, await fetch("rowsPlayerGames", "fens", [START], pushed));
         expect(moves.length, color).toBeGreaterThan(0);
-        expect(moves).toEqual(runView(view("PlayerAtPosition"), args, recordedRows.moves));
-        expect(games).toEqual(runView(view("PlayerGamesAtPosition"), args, recordedRows.games));
+        // The recorded answers are whole streams, recorded before a player's rows said so.
+        expect(moves).toEqual(runView(view("PlayerAtPosition"), args, recordedRows.moves.map((m) => ({ ...m, partial: false }))));
+        expect(games).toEqual(runView(view("PlayerGamesAtPosition"), args, recordedRows.games.map((g) => ({ ...g, partial: false }))));
       }
     });
 

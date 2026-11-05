@@ -1,5 +1,5 @@
 import { charge } from "./clock.ts";
-import { DEEP_DEPTH_CAP, DEEP_NODES, DEPTH_CAP, ENGINE_MODULE, ENGINE_NODES_PER_SECOND, FULL_NODES, MULTI_PV } from "./config.ts";
+import { ASKED_MAX_NODES, DEEP_DEPTH_CAP, DEEP_NODES, DEFAULT_DEPTH, DEPTH_CAP, ENGINE_MODULE, ENGINE_NODES_PER_SECOND, FULL_NODES, IMBALANCES_MS, LINE_READ_MS, MAX_DEPTH, MIN_DEPTH, MULTI_PV } from "./config.ts";
 import type { Imbalances } from "./imbalances.ts";
 import { readLine } from "./lines.ts";
 import { sha256Hex } from "./sha256.ts";
@@ -46,6 +46,20 @@ export const FULL: SearchConfig = { nodes: FULL_NODES, depthCap: DEPTH_CAP, mult
 /** The background tick's search: the same lines, with more nodes and a higher depth cap. */
 export const DEEP: SearchConfig = { nodes: DEEP_NODES, depthCap: DEEP_DEPTH_CAP, multiPv: MULTI_PV };
 
+/**
+ * The search for a requested depth (config.ts, DEFAULT_DEPTH): `full` itself at the default, else
+ * that depth as the cap with a node budget that doubles for each ply past the default, up to
+ * ASKED_MAX_NODES. A depth outside MIN_DEPTH to MAX_DEPTH is refused, never quietly moved.
+ */
+export function searchAt(depth: number, multiPv = MULTI_PV): SearchConfig {
+  if (!Number.isInteger(depth) || depth < MIN_DEPTH || depth > MAX_DEPTH) {
+    throw new Error(`A search depth is a whole number from ${MIN_DEPTH} to ${MAX_DEPTH}, not ${depth}`);
+  }
+  if (depth === DEFAULT_DEPTH) return { ...FULL, multiPv };
+  const nodes = Math.min(ASKED_MAX_NODES, FULL_NODES * 2 ** Math.max(0, depth - DEFAULT_DEPTH));
+  return { nodes, depthCap: depth, multiPv };
+}
+
 export const ENGINE_NAME = "Stockfish 19 lite (single-threaded WebAssembly)";
 
 /** What an analysis is looked up by: the engine module and how it was asked to search. */
@@ -61,6 +75,9 @@ export const analysisIdOf = (key: string, linesJson: string): string => sha256He
 
 /** What a search under this configuration can cost at worst, on the slowest host. */
 export const searchWorstMs = (c: SearchConfig): number => Math.ceil((c.nodes * 1000) / ENGINE_NODES_PER_SECOND);
+
+/** What a page spends at worst on a position it has no kept lines for: the search, its imbalances and its lines read. */
+export const positionWorstMs = (c: SearchConfig): number => searchWorstMs(c) + IMBALANCES_MS + c.multiPv * LINE_READ_MS;
 
 /** One search through the module. A refusal from the module is an error, never empty lines. */
 export async function search(engine: Engine, fen: string, c: SearchConfig): Promise<Search> {

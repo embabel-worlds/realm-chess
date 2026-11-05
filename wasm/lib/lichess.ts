@@ -1,5 +1,5 @@
 import { charge, waitUntil } from "./clock.ts";
-import { API_CALL_MS, LICHESS_SPACING_MS } from "./config.ts";
+import { API_CALL_MS, LICHESS_SPACING_MS, PARTIAL_TTL_MS } from "./config.ts";
 import { checkedAnswer, isEmptyAnswer, ndjsonAnswer } from "./explorer.ts";
 import type { ExplorerAnswer } from "./explorer.ts";
 import { recordOutcome } from "./status.ts";
@@ -10,9 +10,11 @@ import type { Db } from "./store.ts";
  * Asking the Lichess explorer, through the host's gateway, and keeping what it answers.
  *
  * Every answer is kept under its request: the operation, the position and every parameter sent.
- * A kept answer is reused while it is younger than its operation's time to live. An empty answer
- * is never kept, and neither is a refusal: a
- * refused call (an unbound token, a rate limit) would otherwise read as "nothing here" for a month.
+ * A kept answer is reused while it is younger than its operation's time to live, or PARTIAL_TTL_MS
+ * for a partial one, the player explorer cut off while Lichess was still indexing: the next ask
+ * after that finds more of the player's games. An empty answer is never kept, and neither is a
+ * refusal: a refused call (an unbound token, a rate limit) would otherwise read as "nothing here"
+ * for a month.
  *
  * Lichess wants one request at a time on a token. Requests are spaced 1.1 seconds apart within a
  * dispatch. Across dispatches the lichess_last_request_at row is a best effort, as each dispatch
@@ -51,10 +53,11 @@ export function requestKey(op: ExplorerOperation, params: Record<string, unknown
 
 /** The kept answer for a request, while it is fresh. */
 export async function keptAnswer(db: Db, op: ExplorerOperation, params: Record<string, unknown>, ttlMs: number): Promise<ExplorerAnswer | undefined> {
-  const rows = await db.exec(`SELECT response_json, fetched_at FROM explorer WHERE request_key = ${sqlText(requestKey(op, params))}`);
+  const rows = await db.exec(`SELECT response_json, fetched_at, partial FROM explorer WHERE request_key = ${sqlText(requestKey(op, params))}`);
   const r = rows[0];
-  if (!r || Date.now() - Date.parse(String(r.fetched_at)) >= ttlMs) return undefined;
-  return JSON.parse(String(r.response_json)) as ExplorerAnswer;
+  const partial = r !== undefined && num(r.partial) === 1;
+  if (!r || Date.now() - Date.parse(String(r.fetched_at)) >= (partial ? Math.min(ttlMs, PARTIAL_TTL_MS) : ttlMs)) return undefined;
+  return { ...(JSON.parse(String(r.response_json)) as ExplorerAnswer), ...(partial ? { partial } : {}) };
 }
 
 /** A request the gateway refused. The host says no more than that, so neither can the realm. */
@@ -114,16 +117,18 @@ export async function explorerAnswerFor(
       `INSERT INTO lichess_clock (name, at) VALUES ('${CLOCK_ROW}', ${Math.trunc(s.lastAt)}) ON CONFLICT(name) DO UPDATE SET at = excluded.at`,
     );
   }
-  const answer = checkedAnswer(op === "playerExplorer" ? ndjsonAnswer(reply) : reply);
+  const streamed = op === "playerExplorer" ? ndjsonAnswer(reply) : undefined;
+  const answer = checkedAnswer(streamed ? streamed.answer : reply);
+  const partial = streamed?.truncated === true;
   if (!isEmptyAnswer(answer)) {
     const fen = typeof params.fen === "string" ? params.fen : "";
     await s.db.exec(
-      `INSERT OR REPLACE INTO explorer (request_key, operation, fen, filters_json, response_json, fetched_at) VALUES (` +
+      `INSERT OR REPLACE INTO explorer (request_key, operation, fen, filters_json, response_json, fetched_at, partial) VALUES (` +
         `${sqlText(requestKey(op, params))}, ${sqlText(op)}, ${sqlText(fen)}, ${sqlText(JSON.stringify(params))}, ` +
-        `${sqlText(JSON.stringify(answer))}, ${sqlText(new Date().toISOString())})`,
+        `${sqlText(JSON.stringify(answer))}, ${sqlText(new Date().toISOString())}, ${partial ? 1 : 0})`,
     );
   }
-  return answer;
+  return partial ? { ...answer, partial } : answer;
 }
 
 /** Records how this dispatch's Lichess requests went, if it made any, for ChessStatus. */

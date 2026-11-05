@@ -9,8 +9,12 @@ export const analysePosition = {
     type: "object",
     properties: {
       fens: { type: "array", items: { type: "string" } },
-      multiPv: { type: "number" },
-      depth: { type: "number" },
+      multiPv: { type: "number", description: "Lines per position, 1 to 8. 3 when absent." },
+      depth: {
+        type: "number",
+        description:
+          "The depth to search to, 6 to 22. 10 when absent, the default search. Each ply past 10 doubles the node budget, up to what one request can spend, so past about 11 a row's `depth` says how far it got.",
+      },
     },
     required: ["fens"],
   },
@@ -59,7 +63,7 @@ export const analysePosition = {
 export const rowsCandidates = {
   namespace: "chess",
   description:
-    "The engine's best lines in each position the host names, as CandidateMove rows carrying the analysis they came from. Pages when there are more new positions than one dispatch can search.",
+    "The engine's best lines in each position the host names, at each depth the query pinned, as CandidateMove rows carrying the analysis they came from. Pages when there are more new positions than one dispatch can search.",
   input: {
     type: "object",
     properties: {
@@ -69,6 +73,12 @@ export const rowsCandidates = {
         type: "array",
         items: { type: "string", minLength: 1, maxLength: 2048 },
         description: "The Position FENs the host is fetching for.",
+      },
+      depth: {
+        maxItems: 17,
+        type: "array",
+        items: { type: "string", maxLength: 2 },
+        description: "The depths the query pinned on askedDepth, 6 to 22. The default depth, 10, when absent.",
       },
       cursor: { type: "string", maxLength: 8, description: "This realm's own next cursor, resent by the host." },
     },

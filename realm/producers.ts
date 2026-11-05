@@ -25,10 +25,12 @@ export const producers = {
     joins: [join("Opening", "GameLine", "IN_OPENING", "moves", "line")],
   },
   // About six new positions a page at three seconds a search; sixteen pages is the host's most.
+  // A query that pins askedDepth is searched at that depth; one that does not, at the default.
   "candidate-lines": {
     handler: "chess.rowsCandidates" as const,
     keyArgument: "fens",
     joins: [join("CandidateMove", "Position", "HAS_CANDIDATE", "fen", "fen")],
+    pushdown: [{ property: "askedDepth", argument: "depth" }],
     page: { argument: "cursor", maxPages: 16 },
   },
   // Theory along a game line: two wikibook requests a line, so a page serves what fits.

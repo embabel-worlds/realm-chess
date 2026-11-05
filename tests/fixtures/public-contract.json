@@ -5,6 +5,7 @@
       "inputSchema": {
         "properties": {
           "depth": {
+            "description": "The depth to search to, 6 to 22. 10 when absent, the default search. Each ply past 10 doubles the node budget, up to what one request can spend, so past about 11 a row's `depth` says how far it got.",
             "type": "number"
           },
           "fens": {
@@ -14,6 +15,7 @@
             "type": "array"
           },
           "multiPv": {
+            "description": "Lines per position, 1 to 8. 3 when absent.",
             "type": "number"
           }
         },
@@ -549,6 +551,9 @@
                 "month": {
                   "type": "string"
                 },
+                "partial": {
+                  "type": "boolean"
+                },
                 "player": {
                   "type": "string"
                 },
@@ -620,6 +625,9 @@
                 },
                 "moveId": {
                   "type": "string"
+                },
+                "partial": {
+                  "type": "boolean"
                 },
                 "player": {
                   "type": "string"
@@ -997,10 +1005,11 @@
   ],
   "types": [
     {
-      "description": "One of the engine's best lines in a position (Stockfish 19, three lines, searched to a fixed node budget, at most depth 18). Reached from Position via HAS_CANDIDATE. THE SCORE IS FOR THE SIDE TO MOVE; `whiteCp` is the same from White's side. `lossCp` is how much worse than the best line this one is, in centipawns — the ONLY field to filter on for 'moves within half a pawn of best' (lossCp <= 50; a pawn is 100). `rank` is the engine's order, 1 to 3. `creates` and `removes` say which imbalances the line changes once its exchanges settle — the best evidence of what a move is for.",
+      "description": "One of the engine's best lines in a position (Stockfish 19, three lines, searched to the depth the query asks for with `askedDepth`, 10 by default, within a node budget). Reached from Position via HAS_CANDIDATE. THE SCORE IS FOR THE SIDE TO MOVE; `whiteCp` is the same from White's side. `lossCp` is how much worse than the best line this one is, in centipawns — the ONLY field to filter on for 'moves within half a pawn of best' (lossCp <= 50; a pawn is 100). `rank` is the engine's order, 1 to 3. `creates` and `removes` say which imbalances the line changes once its exchanges settle — the best evidence of what a move is for.",
       "name": "CandidateMove",
       "properties": {
         "analysisId": "What the line belongs to: the hash of the engine, how it searched and the lines it found. Once the background tick has searched the position deeper, the rows are the deeper search's and carry its id.",
+        "askedDepth": "The depth the search was asked for: the query's `askedDepth`, 6 to 22, or 10, the default search, when it pins none. Pin it to search deeper (`WHERE c.askedDepth = 14`). The node budget doubles for each ply past 10, up to what one request can spend, so `depth` says how far the search got.",
         "candidateId": {
           "description": "The FEN and the first move in UCI. Identity: stable across searches, where the rank is not.",
           "metadata": {
@@ -1179,6 +1188,7 @@
           }
         },
         "month": "Month played, YYYY-MM.",
+        "partial": "True while Lichess is still indexing the player's games, so their recent games may not all be here yet.",
         "player": "The Lichess username asked about.",
         "result": "1-0, 0-1 or ½-½.",
         "speed": "Time control class, for a Lichess game.",
@@ -1207,6 +1217,7 @@
             "identity": "true"
           }
         },
+        "partial": "True while Lichess is still indexing the player's games, which takes it minutes for a player with many: the counts are those it had indexed when the realm stopped reading, and an ask ten minutes on finds more.",
         "player": "The Lichess username asked about. Filter on it.",
         "san": "The move in notation.",
         "scoreForMover": "Points per game for the side that played the move (1 a win, 0.5 a draw): how the move has scored for whoever chose it.",
@@ -1283,10 +1294,15 @@
   ],
   "views": [
     {
-      "cypher": "MATCH (p:Position {fen: $fen})-[:HAS_CANDIDATE]->(c:CandidateMove)\nWHERE toInteger(c.rank) = 1 OR (c.lossCp IS NOT NULL AND toInteger(c.lossCp) <= $withinCp)\nRETURN toInteger(c.rank) AS rank, c.san AS move, c.uci AS uci, c.side AS side,\n       c.scoreCp AS scoreCp, c.mate AS mate, c.whiteCp AS whiteCp, c.lossCp AS lossCp,\n       c.pvSan AS line, c.pvUci AS lineUci, toInteger(c.depth) AS depth,\n       c.creates AS creates, c.removes AS removes\nORDER BY rank\nLIMIT $maxLines\n",
-      "description": "The engine's best moves in a position, strongest first: every move within `withinCp` centipawns of the best, and always the best itself, each with its line, its score, how much worse than best it is, and which imbalances it creates and removes. Answers 'what are the best moves here', 'which moves are within half a pawn of best', 'what should White play'.",
+      "cypher": "MATCH (p:Position {fen: $fen})-[:HAS_CANDIDATE]->(c:CandidateMove)\nWHERE c.askedDepth = $depth\n  AND (toInteger(c.rank) = 1 OR (c.lossCp IS NOT NULL AND toInteger(c.lossCp) <= $withinCp))\nRETURN toInteger(c.rank) AS rank, c.san AS move, c.uci AS uci, c.side AS side,\n       c.scoreCp AS scoreCp, c.mate AS mate, c.whiteCp AS whiteCp, c.lossCp AS lossCp,\n       c.pvSan AS line, c.pvUci AS lineUci, toInteger(c.depth) AS depth,\n       c.creates AS creates, c.removes AS removes\nORDER BY rank\nLIMIT $maxLines\n",
+      "description": "The engine's best moves in a position, strongest first: every move within `withinCp` centipawns of the best, and always the best itself, each with its line, its score, how much worse than best it is, and which imbalances it creates and removes. `depth` searches deeper than the default. Answers 'what are the best moves here', 'which moves are within half a pawn of best', 'what should White play', 'analyse this at depth 14'.",
       "name": "BestMoves",
       "params": {
+        "depth": {
+          "default": 10,
+          "description": "The depth to search to, 6 to 22: 10 is the default search, kept and deepened in the background. Each ply past 10 doubles the node budget, up to what one request can spend, so past about 11 the `depth` column says how far the search got. A new position at a deeper depth takes longer, up to about 20 seconds.",
+          "type": "int"
+        },
         "fen": {
           "default": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
           "description": "The position, as a complete FEN (six fields).",
@@ -1411,8 +1427,8 @@
       }
     },
     {
-      "cypher": "MATCH (p:Position {fen: $fen})-[:PLAYER_PLAYED]->(m:PlayerMove)\nWHERE m.player = $player AND m.color = $color\nRETURN m.san AS move, toInteger(m.games) AS games, m.scoreForMover AS scoreForPlayer,\n       m.whiteWinPct AS whiteWinPct, m.drawPct AS drawPct, m.blackWinPct AS blackWinPct,\n       toInteger(m.averageRating) AS averageOpponentRating\nORDER BY games DESC\n",
-      "description": "What one Lichess player chose from a position, as White or as Black, across their whole Lichess history — each move with games played and how it scored for them. Answers 'what does DrNykterstein play here', 'what does X play against the Sicilian as White'. Needs the Lichess key.",
+      "cypher": "MATCH (p:Position {fen: $fen})-[:PLAYER_PLAYED]->(m:PlayerMove)\nWHERE m.player = $player AND m.color = $color\nRETURN m.san AS move, toInteger(m.games) AS games, m.scoreForMover AS scoreForPlayer,\n       m.whiteWinPct AS whiteWinPct, m.drawPct AS drawPct, m.blackWinPct AS blackWinPct,\n       toInteger(m.averageRating) AS averageOpponentRating, m.partial AS partial\nORDER BY games DESC\n",
+      "description": "What one Lichess player chose from a position, as White or as Black, across their whole Lichess history — each move with games played and how it scored for them. `partial` is true while Lichess is still indexing the player's games: the counts are what it had indexed so far, and asking again in a few minutes finds more. Answers 'what does DrNykterstein play here', 'what does X play against the Sicilian as White'. Needs the Lichess key.",
       "name": "PlayerAtPosition",
       "params": {
         "color": {
@@ -1433,7 +1449,7 @@
       }
     },
     {
-      "cypher": "MATCH (p:Position {fen: $fen})-[:PLAYER_GAME]->(g:PlayerGame)\nWHERE g.player = $player AND g.color = $color\nRETURN g.white AS white, toInteger(g.whiteElo) AS whiteElo, g.black AS black, toInteger(g.blackElo) AS blackElo,\n       g.result AS result, g.speed AS speed, g.month AS month, g.uci AS movePlayed, g.url AS url\nORDER BY month DESC\n",
+      "cypher": "MATCH (p:Position {fen: $fen})-[:PLAYER_GAME]->(g:PlayerGame)\nWHERE g.player = $player AND g.color = $color\nRETURN g.white AS white, toInteger(g.whiteElo) AS whiteElo, g.black AS black, toInteger(g.blackElo) AS blackElo,\n       g.result AS result, g.speed AS speed, g.month AS month, g.uci AS movePlayed, g.url AS url,\n       g.partial AS partial\nORDER BY month DESC\n",
       "description": "A Lichess player's recent games through a position, as White or as Black: opponent, ratings, result, speed and a link. Needs the Lichess key.",
       "name": "PlayerGamesAtPosition",
       "params": {

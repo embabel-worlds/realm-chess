@@ -1,10 +1,12 @@
 // Generated from realm.ts by @embabel/realm-synth. Do not edit.
 // Realm: chess (0.5.0)
 
-/** One of the engine's best lines in a position (Stockfish 19, three lines, searched to a fixed node budget, at most depth 18). Reached from Position via HAS_CANDIDATE. THE SCORE IS FOR THE SIDE TO MOVE; `whiteCp` is the same from White's side. `lossCp` is how much worse than the best line this one is, in centipawns — the ONLY field to filter on for 'moves within half a pawn of best' (lossCp <= 50; a pawn is 100). `rank` is the engine's order, 1 to 3. `creates` and `removes` say which imbalances the line changes once its exchanges settle — the best evidence of what a move is for. */
+/** One of the engine's best lines in a position (Stockfish 19, three lines, searched to the depth the query asks for with `askedDepth`, 10 by default, within a node budget). Reached from Position via HAS_CANDIDATE. THE SCORE IS FOR THE SIDE TO MOVE; `whiteCp` is the same from White's side. `lossCp` is how much worse than the best line this one is, in centipawns — the ONLY field to filter on for 'moves within half a pawn of best' (lossCp <= 50; a pawn is 100). `rank` is the engine's order, 1 to 3. `creates` and `removes` say which imbalances the line changes once its exchanges settle — the best evidence of what a move is for. */
 export interface CandidateMove {
   /** What the line belongs to: the hash of the engine, how it searched and the lines it found. Once the background tick has searched the position deeper, the rows are the deeper search's and carry its id. */
   analysisId?: string;
+  /** The depth the search was asked for: the query's `askedDepth`, 6 to 22, or 10, the default search, when it pins none. Pin it to search deeper (`WHERE c.askedDepth = 14`). The node budget doubles for each ply past 10, up to what one request can spend, so `depth` says how far the search got. */
+  askedDepth?: string;
   /** The FEN and the first move in UCI. Identity: stable across searches, where the rank is not. */
   candidateId?: string;
   /** Imbalances the line creates once its exchanges settle, one sentence per line. */
@@ -207,6 +209,8 @@ export interface PlayerGame {
   gameId?: string;
   /** Month played, YYYY-MM. */
   month?: string;
+  /** True while Lichess is still indexing the player's games, so their recent games may not all be here yet. */
+  partial?: string;
   /** The Lichess username asked about. */
   player?: string;
   /** 1-0, 0-1 or ½-½. */
@@ -245,6 +249,8 @@ export interface PlayerMove {
   games?: string;
   /** The position, player, colour and move. Identity. */
   moveId?: string;
+  /** True while Lichess is still indexing the player's games, which takes it minutes for a player with many: the counts are those it had indexed when the realm stopped reading, and an ask ten minutes on finds more. */
+  partial?: string;
   /** The Lichess username asked about. Filter on it. */
   player?: string;
   /** The move in notation. */
@@ -703,8 +709,10 @@ export type Handler<Input, Output> = (input: Input, ctx: HandlerContext) => Prom
 
 /** Input for the analysePosition handler. */
 export interface AnalysePositionInput {
+  /** The depth to search to, 6 to 22. 10 when absent, the default search. Each ply past 10 doubles the node budget, up to what one request can spend, so past about 11 a row's `depth` says how far it got. */
   depth?: number;
   fens: string[];
+  /** Lines per position, 1 to 8. 3 when absent. */
   multiPv?: number;
 }
 
@@ -755,6 +763,13 @@ export type AppPlansOutput = unknown;
 
 /** Input for the appPosition handler. */
 export interface AppPositionInput {
+  /**
+   * The depth to search to, as BestMoves's `depth`. 10, the default search, when absent.
+   *
+   * Minimum: 6.
+   * Maximum: 22.
+   */
+  depth?: number;
   /**
    * The position, as a complete FEN.
    *
@@ -943,6 +958,7 @@ export type PlayerAtPositionOutput = {
   fen: string;
   gameId: string;
   month: string;
+  partial?: boolean;
   player: string;
   result: string;
   speed: string;
@@ -962,6 +978,7 @@ export type PlayerAtPositionOutput = {
   fen: string;
   games: number;
   moveId: string;
+  partial?: boolean;
   player: string;
   san: string;
   scoreForMover?: number;
@@ -1027,6 +1044,8 @@ export interface RowsCandidatesInput {
    * Max length: 8.
    */
   cursor?: string;
+  /** The depths the query pinned on askedDepth, 6 to 22. The default depth, 10, when absent. */
+  depth?: string[];
   /** The Position FENs the host is fetching for. */
   fens: string[];
 }
