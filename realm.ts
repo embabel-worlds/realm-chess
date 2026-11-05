@@ -30,7 +30,9 @@ const dependencies = {
  * Chess, as a captured realm: the handlers run as Wasm inside the appliance, the engine is the
  * stockfish module carried in the realm, and what the realm computes is kept in its own SQLite.
  *
- * A host reads this file itself, and links zod from the lock to read the handler schemas. The
+ * A host reads this file itself, in a guest with no JIT. The handler schemas are plain JSON
+ * Schema for that reason: as zod schemas, building them took the definition thirteen seconds on a
+ * quiet machine and more than the host's thirty on a busy one, so the realm did not install. The
  * realm ships no realm.yml or dist/manifest.json. `npm run synth` writes them, and the rest of
  * what synth writes, into .synth/ for the tests, and writes the handler types to
  * wasm/generated/realm.ts.

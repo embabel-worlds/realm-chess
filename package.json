@@ -18,8 +18,7 @@
     "pretest": "node scripts/synth.mjs"
   },
   "dependencies": {
-    "chess.js": "1.4.0",
-    "zod": "4.6.5"
+    "chess.js": "1.4.0"
   },
   "devDependencies": {
     "@embabel/realm-synth": "file:vendor/sdk/embabel-realm-synth-0.1.0.tgz",
