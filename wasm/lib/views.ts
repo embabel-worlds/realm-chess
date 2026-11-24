@@ -21,7 +21,7 @@ export interface ViewSpec {
 export const GRAPH_VIEWS: ViewSpec[] = [
   {
     name: "BestMoves",
-    description: "The engine's best moves in a position, strongest first: every move within `withinCp` centipawns of the best, and always the best itself, each with its line, its score, how much worse than best it is, and which imbalances it creates and removes. `depth` searches deeper than the default. Answers 'what are the best moves here', 'which moves are within half a pawn of best', 'what should White play', 'analyse this at depth 14'.",
+    description: "The engine's best moves in a position, strongest first, with their lines. The engine's best moves in a position, strongest first: every move within `withinCp` centipawns of the best, and always the best itself, each with its line, its score, how much worse than best it is, and which imbalances it creates and removes. `depth` searches deeper than the default. Answers 'what are the best moves here', 'which moves are within half a pawn of best', 'what should White play', 'analyse this at depth 14'.",
     params: {
       fen: {
         type: "string",
@@ -48,7 +48,7 @@ export const GRAPH_VIEWS: ViewSpec[] = [
   },
   {
     name: "ImbalancesOf",
-    description: "Jeremy Silman's imbalances of a position, computed from the board: material, bishop pair and good/bad bishops, pawn structure (doubled, isolated, backward, passed, hanging, isolated queen's pawn, majorities, locked chains and the wing they point to), space, open and half-open files, outposts, development and king safety. Answers 'what are the imbalances', 'who has the better pawn structure', 'is there an outpost'.",
+    description: "A position's Silman imbalances, computed from the board. Jeremy Silman's imbalances of a position, computed from the board: material, bishop pair and good/bad bishops, pawn structure (doubled, isolated, backward, passed, hanging, isolated queen's pawn, majorities, locked chains and the wing they point to), space, open and half-open files, outposts, development and king safety. Answers 'what are the imbalances', 'who has the better pawn structure', 'is there an outpost'. Board facts only: no engine score and no plan, which BestMoves and PlansInPosition give.",
     params: {
       fen: {
         type: "string",
@@ -60,7 +60,7 @@ export const GRAPH_VIEWS: ViewSpec[] = [
   },
   {
     name: "OpeningOf",
-    description: "The named opening a position is, from the Lichess opening book — ECO code, name and moves. A position deeper than the book has none, and the view returns no row. Answers 'what opening is this', 'what is this position called'.",
+    description: "The named book opening a position is: ECO code, name and moves. The named opening a position is, from the Lichess opening book — ECO code, name and moves. A position deeper than the book has none, and the view returns no row. Answers 'what opening is this', 'what is this position called'. It does not follow a game past the book: OpeningOfLine does.",
     params: {
       fen: {
         type: "string",
@@ -72,7 +72,7 @@ export const GRAPH_VIEWS: ViewSpec[] = [
   },
   {
     name: "PlansInPosition",
-    description: "The plans for BOTH sides in a position — what each should be trying to do and why, with key moves, the imbalances each plan uses and which of the engine's candidate moves carry it — plus a summary of who stands better and how the plans meet. Judged by a model with the chess-plans skill from the position's imbalances, opening and engine lines. Costs an engine search and a model call per new position (tens of seconds); cached for a week. Answers 'what's the plan here', 'what should Black be aiming for', 'explain the engine's moves'.",
+    description: "Both sides' plans in a position, judged by a model, with a summary. The plans for BOTH sides in a position — what each should be trying to do and why, with key moves, the imbalances each plan uses and which of the engine's candidate moves carry it — plus a summary of who stands better and how the plans meet. Judged by a model with the chess-plans skill from the position's imbalances, opening and engine lines. Costs an engine search and a model call per new position (tens of seconds); cached for a week. Answers 'what's the plan here', 'what should Black be aiming for', 'explain the engine's moves'. Only the plans for the asked `level`; up to three per side.",
     params: {
       fen: {
         type: "string",
@@ -89,7 +89,7 @@ export const GRAPH_VIEWS: ViewSpec[] = [
   },
   {
     name: "OpeningOfLine",
-    description: "The opening a game became: the deepest named book position along its moves, and how far past it the game has gone. A game keeps its name after it leaves the book — twenty moves into the Exchange Ruy Lopez it is still the Exchange Ruy Lopez. Answers 'what opening is this game', 'what variation did we play'.",
+    description: "The opening a game became, named along its moves. The opening a game became: the deepest named book position along its moves, and how far past it the game has gone. A game keeps its name after it leaves the book — twenty moves into the Exchange Ruy Lopez it is still the Exchange Ruy Lopez. Answers 'what opening is this game', 'what variation did we play'. Names only: no theory text, which TheoryOfLine gives.",
     params: {
       moves: {
         type: "string",
@@ -101,7 +101,7 @@ export const GRAPH_VIEWS: ViewSpec[] = [
   },
   {
     name: "PlansInLine",
-    description: "The plans for both sides in the position a game has reached, judged by a model with the chess-plans skill knowing the game's opening name — which the position alone loses once it leaves the book. Same shape as PlansInPosition. Costs an engine search and a model call per new line; cached for a week.",
+    description: "Both sides' plans where a game has reached, judged knowing its opening. The plans for both sides in the position a game has reached, judged by a model with the chess-plans skill knowing the game's opening name — which the position alone loses once it leaves the book. Same shape as PlansInPosition. Costs an engine search and a model call per new line; cached for a week. Only the plans for the asked `level`; up to three per side.",
     params: {
       moves: {
         type: "string",
@@ -118,7 +118,7 @@ export const GRAPH_VIEWS: ViewSpec[] = [
   },
   {
     name: "TheoryOfLine",
-    description: "What opening theory says about a game line: the deepest page of the Chess Opening Theory wikibook the line reaches, its text (CC BY-SA 4.0), and how far past it the game has gone. Answers 'what does theory say here', 'what is the idea behind this variation', 'why is this move played'.",
+    description: "What opening theory says about a game line, from the wikibook. What opening theory says about a game line: the deepest page of the Chess Opening Theory wikibook the line reaches, its text (CC BY-SA 4.0), and how far past it the game has gone. Answers 'what does theory say here', 'what is the idea behind this variation', 'why is this move played'. Only lines the wikibook has a page for; a line with none returns no row.",
     params: {
       moves: {
         type: "string",
@@ -130,7 +130,7 @@ export const GRAPH_VIEWS: ViewSpec[] = [
   },
   {
     name: "MastersAtPosition",
-    description: "What masters played from a position — each move with its number of games, how often White won, drew and lost, and how it scored for the side that chose it — from the Lichess masters database (over-the-board, 2200+). Answers 'what do masters play here', 'what's the most popular move', 'how does this move score'. Needs the Lichess key.",
+    description: "What masters played from a position, with games and scores per move. What masters played from a position — each move with its number of games, how often White won, drew and lost, and how it scored for the side that chose it — from the Lichess masters database (over-the-board, 2200+). Answers 'what do masters play here', 'what's the most popular move', 'how does this move score'. Needs the Lichess key. Over-the-board master games only, not online play: MovesByRating covers Lichess players.",
     params: {
       fen: {
         type: "string",
@@ -142,7 +142,7 @@ export const GRAPH_VIEWS: ViewSpec[] = [
   },
   {
     name: "MasterGamesAtPosition",
-    description: "Top master games that reached a position: players, ratings, year, result, the move played from the position, and a link. Answers 'show me master games from here', 'who has played this'. Needs the Lichess key.",
+    description: "Top master games that reached a position, newest first. Top master games that reached a position: players, ratings, year, result, the move played from the position, and a link. Answers 'show me master games from here', 'who has played this'. Needs the Lichess key.",
     params: {
       fen: {
         type: "string",
@@ -154,7 +154,7 @@ export const GRAPH_VIEWS: ViewSpec[] = [
   },
   {
     name: "PlayerAtPosition",
-    description: "What one Lichess player chose from a position, as White or as Black, across their whole Lichess history — each move with games played and how it scored for them. `partial` is true while Lichess is still indexing the player's games: the counts are what it had indexed so far, and asking again in a few minutes finds more. Answers 'what does DrNykterstein play here', 'what does X play against the Sicilian as White'. Needs the Lichess key.",
+    description: "What one Lichess player chose from a position, as White or Black. What one Lichess player chose from a position, as White or as Black, across their whole Lichess history — each move with games played and how it scored for them. `partial` is true while Lichess is still indexing the player's games: the counts are what it had indexed so far, and asking again in a few minutes finds more. Answers 'what does DrNykterstein play here', 'what does X play against the Sicilian as White'. Needs the Lichess key. Only the named player and colour, matched exactly; without a player it returns nothing.",
     params: {
       fen: {
         type: "string",
@@ -176,7 +176,7 @@ export const GRAPH_VIEWS: ViewSpec[] = [
   },
   {
     name: "PlayerGamesAtPosition",
-    description: "A Lichess player's recent games through a position, as White or as Black: opponent, ratings, result, speed and a link. Needs the Lichess key.",
+    description: "One Lichess player's recent games through a position, as White or Black. A Lichess player's recent games through a position, as White or as Black: opponent, ratings, result, speed and a link. Needs the Lichess key. Only the named player and colour, matched exactly; recent games only, not the whole history.",
     params: {
       fen: {
         type: "string",
@@ -198,7 +198,7 @@ export const GRAPH_VIEWS: ViewSpec[] = [
   },
   {
     name: "MovesByRating",
-    description: "How the moves played from a position change with rating: for one time control, each move's share of games in every Lichess rating band, from under 1000 to 2500+, with how it scored. Answers 'what do 1600s play here compared with 2200s', 'is Bxc6 a club-player move'. `speed` is a time control, or `all`. Needs the Lichess key; a new position takes several seconds (one request per band), then it is cached.",
+    description: "How the moves from a position change with rating, in one time control. How the moves played from a position change with rating: for one time control, each move's share of games in every Lichess rating band, from under 1000 to 2500+, with how it scored. Answers 'what do 1600s play here compared with 2200s', 'is Bxc6 a club-player move'. `speed` is a time control, or `all`. Needs the Lichess key; a new position takes several seconds (one request per band), then it is cached. Only moves at or above `minShare` percent of games in a band.",
     params: {
       fen: {
         type: "string",
@@ -220,7 +220,7 @@ export const GRAPH_VIEWS: ViewSpec[] = [
   },
   {
     name: "MovesByTimeControl",
-    description: "How the moves played from a position change with time control: for one Lichess rating band, each move's share of games in every time control from ultrabullet to correspondence, with how it scored. Answers 'do people play this differently in blitz and classical'. Needs the Lichess key.",
+    description: "How the moves from a position change with time control, in one band. How the moves played from a position change with time control: for one Lichess rating band, each move's share of games in every time control from ultrabullet to correspondence, with how it scored. Answers 'do people play this differently in blitz and classical'. Needs the Lichess key. Only moves at or above `minShare` percent of games in a time control.",
     params: {
       fen: {
         type: "string",
@@ -245,7 +245,7 @@ export const GRAPH_VIEWS: ViewSpec[] = [
 export const STATUS_VIEW: ViewSpec = {
   name: "ChessStatus",
   description:
-    "What the chess realm could not do: whether Lichess and the model answered the last time they were asked, the last refusal and when. Answers 'why are there no master games', 'why are there no plans'.",
+    "Why a chess view came back empty: Lichess and model status. What the chess realm could not do: whether Lichess and the model answered the last time they were asked, the last refusal and when. Answers 'why are there no master games', 'why are there no plans'.",
   cypher: `MATCH (u:AssistantUser)-[:HAS_CHESS_STATUS]->(s:ChessStatus)
 RETURN s.lichess AS lichess, s.model AS model, s.lastRefusal AS lastRefusal, s.at AS at
 `,

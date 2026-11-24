@@ -14,7 +14,25 @@ export const types = {
           identity: "true"
         }
       }
-    }
+    },
+    examples: [
+      {
+        q: "what are the best moves from the starting position, within half a pawn of best",
+        cypher: "MATCH (p:Position {fen: 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'})-[:HAS_CANDIDATE]->(c:CandidateMove)\nWHERE c.askedDepth = 10 AND toInteger(c.lossCp) <= 50\nRETURN c.san AS move, c.scoreCp AS scoreCp, c.pvSan AS line\nORDER BY toInteger(c.rank)",
+      },
+      {
+        q: "what opening is the position after 1.e4",
+        cypher: "MATCH (p:Position {fen: 'rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1'})-[:IN_OPENING]->(o:Opening)\nRETURN o.eco AS eco, o.name AS name",
+      },
+      {
+        q: "what are the imbalances in this position",
+        cypher: "MATCH (p:Position {fen: 'rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2'})-[:HAS_IMBALANCES]->(i:PositionImbalances)\nRETURN i.facts AS facts, i.structure AS structure",
+      },
+      {
+        q: "what opening did the game e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O become",
+        cypher: "MATCH (g:GameLine {moves: 'e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6 O-O'})-[:IN_OPENING]->(o:Opening)\nRETURN o.eco AS eco, o.name AS name",
+      },
+    ],
   },
   GameLine: {
     description: "A game as its moves from the starting position, in SAN, space-separated — e.g. `e4 e5 Nf3 Nc6 Bb5 a6 Bxc6 dxc6`. Pin one with `MATCH (g:GameLine {moves: $moves})`. A line keeps the name of the deepest book position it passed through, which a position looked up alone loses once it leaves the book: this is how a game twenty moves into the Exchange Ruy Lopez is still called that.",
@@ -28,7 +46,7 @@ export const types = {
     }
   },
   PositionImbalances: {
-    description: "Jeremy Silman's imbalances of a position — material, the minor pieces (bishop pair, good and bad bishops), pawn structure (doubled, isolated, backward, passed, hanging, isolated queen's pawn, majorities, locked chains and the wing they point to), space, open and half-open files, outposts, development and king safety. Computed from the board, not judged. Reached from Position via HAS_IMBALANCES. `facts` is one plain sentence per imbalance and is what to read.",
+    description: "One position's Jeremy Silman imbalances, keyed by the position's `fen` — material, the minor pieces (bishop pair, good and bad bishops), pawn structure (doubled, isolated, backward, passed, hanging, isolated queen's pawn, majorities, locked chains and the wing they point to), space, open and half-open files, outposts, development and king safety. Computed from the board, not judged. Reached from Position via HAS_IMBALANCES. `facts` is one plain sentence per imbalance and is what to read.",
     properties: {
       fen: {
         description: "The position. Identity.",
@@ -55,7 +73,7 @@ export const types = {
     }
   },
   Opening: {
-    description: "The named opening a position is, from the Lichess opening book (3,815 named lines, CC0). Only a position that IS a book position has one — a position deeper than the book returns none. Reached from Position via IN_OPENING.",
+    description: "The named opening one position is, keyed by that position's `fen`, from the Lichess opening book (3,815 named lines, CC0). Only a position that IS a book position has one — a position deeper than the book returns none. Reached from Position via IN_OPENING.",
     properties: {
       fen: {
         description: "The position. Identity.",
@@ -72,7 +90,7 @@ export const types = {
     }
   },
   CandidateMove: {
-    description: "One of the engine's best lines in a position (Stockfish 19, three lines, searched to the depth the query asks for with `askedDepth`, 10 by default, within a node budget). Reached from Position via HAS_CANDIDATE. THE SCORE IS FOR THE SIDE TO MOVE; `whiteCp` is the same from White's side. `lossCp` is how much worse than the best line this one is, in centipawns — the ONLY field to filter on for 'moves within half a pawn of best' (lossCp <= 50; a pawn is 100). `rank` is the engine's order, 1 to 3. `creates` and `removes` say which imbalances the line changes once its exchanges settle — the best evidence of what a move is for.",
+    description: "One of the engine's best lines in a position, keyed by `candidateId` (the FEN and the first move in UCI) (Stockfish 19, three lines, searched to the depth the query asks for with `askedDepth`, 10 by default, within a node budget). Reached from Position via HAS_CANDIDATE. THE SCORE IS FOR THE SIDE TO MOVE; `whiteCp` is the same from White's side. `lossCp` is how much worse than the best line this one is, in centipawns — the ONLY field to filter on for 'moves within half a pawn of best' (lossCp <= 50; a pawn is 100). `rank` is the engine's order, 1 to 3. `creates` and `removes` say which imbalances the line changes once its exchanges settle — the best evidence of what a move is for.",
     properties: {
       candidateId: {
         description: "The FEN and the first move in UCI. Identity: stable across searches, where the rank is not.",
@@ -113,7 +131,7 @@ export const types = {
       },
       fen: "The position.",
       side: "`white` or `black`.",
-      priority: "1 is the side's most important plan.",
+      priority: "Rank of the plan for its side: `1`, `2` or `3`, where 1 is the most important plan for that side.",
       name: "The plan in a few words.",
       idea: "What the plan achieves and why the position calls for it.",
       moves: "Key moves and manoeuvres, in notation.",
@@ -147,7 +165,7 @@ export const types = {
     }
   },
   MasterMove: {
-    description: "A move masters played from a position, with how often and how it scored — from the Lichess masters database (over-the-board games, players rated 2200+). Reached from Position via MASTERS_PLAYED. `scoreForMover` is the side-that-played-it's points per game. This is practice, not analysis: compare it with the engine's CandidateMove lines, and where they disagree, both are worth saying.",
+    description: "One move masters played from a position, keyed by `moveId` (the position and the move), with how often and how it scored — from the Lichess masters database (over-the-board games, players rated 2200+). Reached from Position via MASTERS_PLAYED. `scoreForMover` is the side-that-played-it's points per game. This is practice, not analysis: compare it with the engine's CandidateMove lines, and where they disagree, both are worth saying.",
     properties: {
       moveId: {
         description: "The position and the move. Identity.",
@@ -160,7 +178,7 @@ export const types = {
       san: "The move in notation.",
       games: "Games in which it was played here.",
       white: "Of those, won by White.",
-      draws: "Drawn.",
+      draws: "Of those games, how many were drawn (a count of games, not a percentage).",
       black: "Won by Black.",
       whiteWinPct: "Percent won by White.",
       drawPct: "Percent drawn.",
@@ -170,7 +188,7 @@ export const types = {
     }
   },
   MasterGame: {
-    description: "A top master game through a position, from the Lichess masters database: who played it, when, the result, and the move played from the position. Reached from Position via MASTER_GAME.",
+    description: "One top master game through a position, keyed by `gameId` (the position and the Lichess game id), from the Lichess masters database: who played it, when, the result, and the move played from the position. Reached from Position via MASTER_GAME.",
     properties: {
       gameId: {
         description: "The position and the Lichess game id. Identity.",
@@ -192,7 +210,7 @@ export const types = {
     }
   },
   PlayerMove: {
-    description: "A move one Lichess player chose from a position, as one colour, with how it scored for them — from the Lichess player explorer, across their whole Lichess history. Reached from Position via PLAYER_PLAYED, and ALWAYS asked with the player and colour: `WHERE m.player = 'DrNykterstein' AND m.color = 'white'`. Without a player the hop returns nothing.",
+    description: "One move one Lichess player chose from a position, as one colour, keyed by `moveId` (`<fen>#<player>#<color>#<uci>`), with how it scored for them — from the Lichess player explorer, across their whole Lichess history. Reached from Position via PLAYER_PLAYED, and ALWAYS asked with the player and colour: `WHERE m.player = 'DrNykterstein' AND m.color = 'white'`. Without a player the hop returns nothing.",
     properties: {
       moveId: {
         description: "The position, player, colour and move. Identity.",
@@ -207,7 +225,7 @@ export const types = {
       san: "The move in notation.",
       games: "Games in which it was played here.",
       white: "Of those, won by White.",
-      draws: "Drawn.",
+      draws: "Of those games, how many were drawn (a count of games, not a percentage).",
       black: "Won by Black.",
       whiteWinPct: "Percent won by White.",
       drawPct: "Percent drawn.",
@@ -218,7 +236,7 @@ averageRating: "Average rating of the players (masters), or of the opponents (a 
     }
   },
   PlayerGame: {
-    description: "A recent game of one Lichess player through a position, as one colour. Reached from Position via PLAYER_GAME; asked with the player and colour, like PlayerMove.",
+    description: "One recent game of one Lichess player through a position, as one colour, keyed by `gameId` (`<fen>#<player>#<color>#<game id>`). Reached from Position via PLAYER_GAME; asked with the player and colour, like PlayerMove.",
     properties: {
       gameId: {
         description: "The position, player, colour and game id. Identity.",
@@ -243,7 +261,7 @@ url: "The game on Lichess.",
     }
   },
   RatedMove: {
-    description: "How often a move is played from a position on Lichess, in one rating band and one time control, and how it scores — for comparing what players at different levels or speeds choose. Reached from Position via PLAYED_AT_RATING. Pin ONE dimension and the other is compared across: `WHERE m.speed = 'blitz'` returns every rating band in blitz; `WHERE m.band = '1600'` returns every time control at 1600; pin neither and every band over all time controls comes back (speed `all`). `share` is the move's percent of the games from the position in that band and time control — compare shares, not raw game counts, across bands.",
+    description: "One move's popularity from a position on Lichess in one rating band and one time control, keyed by `rowId` (`<fen>#<band>#<speed>#<uci>`), and how it scores — for comparing what players at different levels or speeds choose. Reached from Position via PLAYED_AT_RATING. Pin ONE dimension and the other is compared across: `WHERE m.speed = 'blitz'` returns every rating band in blitz; `WHERE m.band = '1600'` returns every time control at 1600; pin neither and every band over all time controls comes back (speed `all`). `share` is the move's percent of the games from the position in that band and time control — compare shares, not raw game counts, across bands.",
     properties: {
       rowId: {
         description: "Position, band, time control and move. Identity.",
@@ -268,7 +286,7 @@ url: "The game on Lichess.",
   },
   ChessStatus: {
     description:
-      "What the realm could not do, as it last recorded it. Reached from the owner via HAS_CHESS_STATUS. It knows only what a finished call recorded: a call that died records nothing, and a refused Lichess call does not say why.",
+      "One row per owner, keyed by `username`: what the realm could not do, as it last recorded it. Reached from the owner via HAS_CHESS_STATUS. It knows only what a finished call recorded: a call that died records nothing, and a refused Lichess call does not say why.",
     properties: {
       username: { description: "The owner. Identity.", metadata: { identity: "true" } },
       lichess: "`ok`, `refused` or `unknown`: how the last Lichess call went.",
