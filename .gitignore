@@ -7,3 +7,6 @@ tests/battery/results/
 vendor/stockfish/build/
 vendor/stockfish/net/
 vendor/stockfish/dist/
+
+# Bytecode from the Python battery.
+__pycache__/

@@ -19,6 +19,7 @@ import sys
 import urllib.request
 from pathlib import Path
 
+sys.dont_write_bytecode = True  # no __pycache__ left in the checkout under test
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import battery_common
 from battery_common import ROOT, check, invoke, problem, sweep  # noqa: E402
