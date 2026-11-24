@@ -41,7 +41,7 @@ export default defineRealm({
   name: "chess",
   host: "wasm",
   execution: "captured",
-  version: "0.5.0",
+  version: "0.5.1",
   maturity: "experimental",
   category: "lifestyle",
   description: `A chessboard, a strong engine, and the plans a position calls for.

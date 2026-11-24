@@ -1,7 +1,7 @@
 // Generated from realm.ts by @embabel/realm-synth. Do not edit.
-// Realm: chess (0.5.0)
+// Realm: chess (0.5.1)
 
-/** One of the engine's best lines in a position (Stockfish 19, three lines, searched to the depth the query asks for with `askedDepth`, 10 by default, within a node budget). Reached from Position via HAS_CANDIDATE. THE SCORE IS FOR THE SIDE TO MOVE; `whiteCp` is the same from White's side. `lossCp` is how much worse than the best line this one is, in centipawns — the ONLY field to filter on for 'moves within half a pawn of best' (lossCp <= 50; a pawn is 100). `rank` is the engine's order, 1 to 3. `creates` and `removes` say which imbalances the line changes once its exchanges settle — the best evidence of what a move is for. */
+/** One of the engine's best lines in a position, keyed by `candidateId` (the FEN and the first move in UCI) (Stockfish 19, three lines, searched to the depth the query asks for with `askedDepth`, 10 by default, within a node budget). Reached from Position via HAS_CANDIDATE. THE SCORE IS FOR THE SIDE TO MOVE; `whiteCp` is the same from White's side. `lossCp` is how much worse than the best line this one is, in centipawns — the ONLY field to filter on for 'moves within half a pawn of best' (lossCp <= 50; a pawn is 100). `rank` is the engine's order, 1 to 3. `creates` and `removes` say which imbalances the line changes once its exchanges settle — the best evidence of what a move is for. */
 export interface CandidateMove {
   /** What the line belongs to: the hash of the engine, how it searched and the lines it found. Once the background tick has searched the position deeper, the rows are the deeper search's and carry its id. */
   analysisId?: string;
@@ -45,7 +45,7 @@ export interface CandidateMove {
   whiteCp?: string;
 }
 
-/** What the realm could not do, as it last recorded it. Reached from the owner via HAS_CHESS_STATUS. It knows only what a finished call recorded: a call that died records nothing, and a refused Lichess call does not say why. */
+/** One row per owner, keyed by `username`: what the realm could not do, as it last recorded it. Reached from the owner via HAS_CHESS_STATUS. It knows only what a finished call recorded: a call that died records nothing, and a refused Lichess call does not say why. */
 export interface ChessStatus {
   /** When the last outcome was recorded. */
   at?: string;
@@ -65,7 +65,7 @@ export interface GameLine {
   moves?: string;
 }
 
-/** A top master game through a position, from the Lichess masters database: who played it, when, the result, and the move played from the position. Reached from Position via MASTER_GAME. */
+/** One top master game through a position, keyed by `gameId` (the position and the Lichess game id), from the Lichess masters database: who played it, when, the result, and the move played from the position. Reached from Position via MASTER_GAME. */
 export interface MasterGame {
   /** Black's name. */
   black?: string;
@@ -93,7 +93,7 @@ export interface MasterGame {
   year?: string;
 }
 
-/** A move masters played from a position, with how often and how it scored — from the Lichess masters database (over-the-board games, players rated 2200+). Reached from Position via MASTERS_PLAYED. `scoreForMover` is the side-that-played-it's points per game. This is practice, not analysis: compare it with the engine's CandidateMove lines, and where they disagree, both are worth saying. */
+/** One move masters played from a position, keyed by `moveId` (the position and the move), with how often and how it scored — from the Lichess masters database (over-the-board games, players rated 2200+). Reached from Position via MASTERS_PLAYED. `scoreForMover` is the side-that-played-it's points per game. This is practice, not analysis: compare it with the engine's CandidateMove lines, and where they disagree, both are worth saying. */
 export interface MasterMove {
   /** Average rating of the players (masters), or of the opponents (a player's games). */
   averageRating?: string;
@@ -103,7 +103,7 @@ export interface MasterMove {
   blackWinPct?: string;
   /** Percent drawn. */
   drawPct?: string;
-  /** Drawn. */
+  /** Of those games, how many were drawn (a count of games, not a percentage). */
   draws?: string;
   /** The position. */
   fen?: string;
@@ -123,7 +123,7 @@ export interface MasterMove {
   whiteWinPct?: string;
 }
 
-/** The named opening a position is, from the Lichess opening book (3,815 named lines, CC0). Only a position that IS a book position has one — a position deeper than the book returns none. Reached from Position via IN_OPENING. */
+/** The named opening one position is, keyed by that position's `fen`, from the Lichess opening book (3,815 named lines, CC0). Only a position that IS a book position has one — a position deeper than the book returns none. Reached from Position via IN_OPENING. */
 export interface Opening {
   /** ECO code, e.g. `C68`. */
   eco?: string;
@@ -185,7 +185,7 @@ export interface Plan {
   opening?: string;
   /** The position, side, priority and plan name. Identity. */
   planId?: string;
-  /** 1 is the side's most important plan. */
+  /** Rank of the plan for its side: `1`, `2` or `3`, where 1 is the most important plan for that side. */
   priority?: string;
   /** `white` or `black`. */
   side?: string;
@@ -195,7 +195,7 @@ export interface Plan {
   summary?: string;
 }
 
-/** A recent game of one Lichess player through a position, as one colour. Reached from Position via PLAYER_GAME; asked with the player and colour, like PlayerMove. */
+/** One recent game of one Lichess player through a position, as one colour, keyed by `gameId` (`<fen>#<player>#<color>#<game id>`). Reached from Position via PLAYER_GAME; asked with the player and colour, like PlayerMove. */
 export interface PlayerGame {
   /** Black's name. */
   black?: string;
@@ -229,7 +229,7 @@ export interface PlayerGame {
   year?: string;
 }
 
-/** A move one Lichess player chose from a position, as one colour, with how it scored for them — from the Lichess player explorer, across their whole Lichess history. Reached from Position via PLAYER_PLAYED, and ALWAYS asked with the player and colour: `WHERE m.player = 'DrNykterstein' AND m.color = 'white'`. Without a player the hop returns nothing. */
+/** One move one Lichess player chose from a position, as one colour, keyed by `moveId` (`<fen>#<player>#<color>#<uci>`), with how it scored for them — from the Lichess player explorer, across their whole Lichess history. Reached from Position via PLAYER_PLAYED, and ALWAYS asked with the player and colour: `WHERE m.player = 'DrNykterstein' AND m.color = 'white'`. Without a player the hop returns nothing. */
 export interface PlayerMove {
   /** Average rating of the players (masters), or of the opponents (a player's games). */
   averageRating?: string;
@@ -241,7 +241,7 @@ export interface PlayerMove {
   color?: string;
   /** Percent drawn. */
   drawPct?: string;
-  /** Drawn. */
+  /** Of those games, how many were drawn (a count of games, not a percentage). */
   draws?: string;
   /** The position. */
   fen?: string;
@@ -271,7 +271,7 @@ export interface Position {
   fen?: string;
 }
 
-/** Jeremy Silman's imbalances of a position — material, the minor pieces (bishop pair, good and bad bishops), pawn structure (doubled, isolated, backward, passed, hanging, isolated queen's pawn, majorities, locked chains and the wing they point to), space, open and half-open files, outposts, development and king safety. Computed from the board, not judged. Reached from Position via HAS_IMBALANCES. `facts` is one plain sentence per imbalance and is what to read. */
+/** One position's Jeremy Silman imbalances, keyed by the position's `fen` — material, the minor pieces (bishop pair, good and bad bishops), pawn structure (doubled, isolated, backward, passed, hanging, isolated queen's pawn, majorities, locked chains and the wing they point to), space, open and half-open files, outposts, development and king safety. Computed from the board, not judged. Reached from Position via HAS_IMBALANCES. `facts` is one plain sentence per imbalance and is what to read. */
 export interface PositionImbalances {
   /** Whether Black has the bishop pair. */
   bishopPairBlack?: string;
@@ -309,7 +309,7 @@ export interface PositionImbalances {
   structure?: string;
 }
 
-/** How often a move is played from a position on Lichess, in one rating band and one time control, and how it scores — for comparing what players at different levels or speeds choose. Reached from Position via PLAYED_AT_RATING. Pin ONE dimension and the other is compared across: `WHERE m.speed = 'blitz'` returns every rating band in blitz; `WHERE m.band = '1600'` returns every time control at 1600; pin neither and every band over all time controls comes back (speed `all`). `share` is the move's percent of the games from the position in that band and time control — compare shares, not raw game counts, across bands. */
+/** One move's popularity from a position on Lichess in one rating band and one time control, keyed by `rowId` (`<fen>#<band>#<speed>#<uci>`), and how it scores — for comparing what players at different levels or speeds choose. Reached from Position via PLAYED_AT_RATING. Pin ONE dimension and the other is compared across: `WHERE m.speed = 'blitz'` returns every rating band in blitz; `WHERE m.band = '1600'` returns every time control at 1600; pin neither and every band over all time controls comes back (speed `all`). `share` is the move's percent of the games from the position in that band and time control — compare shares, not raw game counts, across bands. */
 export interface RatedMove {
   /** Rating band floor as Lichess names it: 0, 1000, 1200, 1400, 1600, 1800, 2000, 2200, 2500. Filter on it. */
   band?: string;
