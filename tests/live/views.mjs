@@ -23,6 +23,7 @@
 import { readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { short } from "../lib/short.mjs";
 
 const base = process.env.APPLIANCE ?? "http://127.0.0.1:11043";
 const auth = process.env.APPLIANCE_AUTH;
@@ -46,22 +47,12 @@ async function invoke(name, args) {
 }
 
 /*
- * A view's own word on whether its rows are the whole answer. A PARTIAL outcome is still
- * SUCCEEDED, so a status check alone took a short answer's rows (or its empty) as the realm's
- * answer, and judged an empty by ChessStatus when the engine had already said why. Null when
- * whole; else the line printed in place of the verdict, which fails the view.
+ * A view's own word on whether its rows are the whole answer: the battery library's short()
+ * (tests/lib, pinned from embabel-worlds/realm-spec). A PARTIAL outcome is still SUCCEEDED, so a
+ * status check alone took a short answer's rows (or its empty) as the realm's answer, and judged an
+ * empty by ChessStatus when the engine had already said why. Null when whole; else the line
+ * printed in place of the verdict, which fails the view.
  */
-const SHORT_PUBLIC = new Set(["PARTIAL", "REDUCTION_FAILED", "COMPUTE_FAILED", "PROPERTY_NOT_STORED",
-  "AGENTIC_DEGRADED", "RATE_LIMITED", "SOURCE_UNAVAILABLE", "SOURCE_REJECTED", "INVALID_FILTER",
-  "UNPUSHED_FILTER", "TOO_BROAD", "FETCH_CAPPED", "INDEX_UNAVAILABLE", "ARGUMENT_REFUSED"]);
-function short(env, figure) {
-  if (env.status !== "SUCCEEDED") return `REFUSED: ${env.status} ${JSON.stringify(env.error ?? env).slice(0, 200)}`;
-  const ws = (env.warnings ?? []).filter((w) => w && SHORT_PUBLIC.has(w.code));
-  if (!["OK", "EMPTY"].includes(env.outcome) || ws.length) {
-    return `PARTIAL ${figure}: ${(ws.length ? `${ws[0].code}: ${ws[0].message ?? ""}` : `outcome ${env.outcome}`).slice(0, 200)}`;
-  }
-  return null;
-}
 
 const calls = Object.keys(recorded).map((k) => {
   const m = k.match(/^view:(\w+):(.*)$/);
