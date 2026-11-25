@@ -1,6 +1,6 @@
 {
   "name": "realm-chess",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "private": true,
   "description": "A chessboard, a strong engine, and the plans behind its best moves, as a captured Embabel realm",
   "license": "GPL-3.0-only",

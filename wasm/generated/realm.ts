@@ -1,5 +1,5 @@
 // Generated from realm.ts by @embabel/realm-synth. Do not edit.
-// Realm: chess (0.5.1)
+// Realm: chess (0.5.2)
 
 /** One of the engine's best lines in a position, keyed by `candidateId` (the FEN and the first move in UCI) (Stockfish 19, three lines, searched to the depth the query asks for with `askedDepth`, 10 by default, within a node budget). Reached from Position via HAS_CANDIDATE. THE SCORE IS FOR THE SIDE TO MOVE; `whiteCp` is the same from White's side. `lossCp` is how much worse than the best line this one is, in centipawns — the ONLY field to filter on for 'moves within half a pawn of best' (lossCp <= 50; a pawn is 100). `rank` is the engine's order, 1 to 3. `creates` and `removes` say which imbalances the line changes once its exchanges settle — the best evidence of what a move is for. */
 export interface CandidateMove {
