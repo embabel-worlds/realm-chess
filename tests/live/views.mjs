@@ -45,6 +45,24 @@ async function invoke(name, args) {
   return { env, ms: Date.now() - t, rows: Array.isArray(env.data) ? env.data : [] };
 }
 
+/*
+ * A view's own word on whether its rows are the whole answer. A PARTIAL outcome is still
+ * SUCCEEDED, so a status check alone took a short answer's rows (or its empty) as the realm's
+ * answer, and judged an empty by ChessStatus when the engine had already said why. Null when
+ * whole; else the line printed in place of the verdict, which fails the view.
+ */
+const SHORT_PUBLIC = new Set(["PARTIAL", "REDUCTION_FAILED", "COMPUTE_FAILED", "PROPERTY_NOT_STORED",
+  "AGENTIC_DEGRADED", "RATE_LIMITED", "SOURCE_UNAVAILABLE", "SOURCE_REJECTED", "INVALID_FILTER",
+  "UNPUSHED_FILTER", "TOO_BROAD", "FETCH_CAPPED", "INDEX_UNAVAILABLE", "ARGUMENT_REFUSED"]);
+function short(env, figure) {
+  if (env.status !== "SUCCEEDED") return `REFUSED: ${env.status} ${JSON.stringify(env.error ?? env).slice(0, 200)}`;
+  const ws = (env.warnings ?? []).filter((w) => w && SHORT_PUBLIC.has(w.code));
+  if (!["OK", "EMPTY"].includes(env.outcome) || ws.length) {
+    return `PARTIAL ${figure}: ${(ws.length ? `${ws[0].code}: ${ws[0].message ?? ""}` : `outcome ${env.outcome}`).slice(0, 200)}`;
+  }
+  return null;
+}
+
 const calls = Object.keys(recorded).map((k) => {
   const m = k.match(/^view:(\w+):(.*)$/);
   return { name: m[1], args: JSON.parse(m[2]), recorded: recorded[k] };
@@ -69,8 +87,8 @@ const columnsOf = (name) => {
 let failed = 0;
 for (const c of calls) {
   const { env, ms, rows } = await invoke(c.name, c.args);
-  let verdict;
-  if (env.status !== "SUCCEEDED") verdict = `FAILED ${JSON.stringify(env.error ?? env).slice(0, 200)}`;
+  let verdict = short(env, rows.length);
+  if (verdict) { /* short or refused: printed as is, and counted failed below */ }
   else if (DETERMINISTIC.has(c.name)) {
     verdict = JSON.stringify(rows) === JSON.stringify(c.recorded.data) ? `ok, as recorded (${rows.length})` : "DIFFERS from the recorded rows";
   } else if (rows.length === 0) {

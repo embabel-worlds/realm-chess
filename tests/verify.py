@@ -33,7 +33,7 @@ print("== L2: ground truth")
 MATE = "6k1/5ppp/8/8/8/8/5PPP/R5K1 w - - 0 1"
 env = invoke("BestMoves", {"fen": MATE})
 best = (env.get("data") or [{}])[0]
-check("BestMoves finds the back-rank mate in one (Ra8#)", best.get("uci") == "a1a8" and best.get("mate") in (1, "1"),
+check("BestMoves finds the back-rank mate in one (Ra8#)", best.get("uci") == "a1a8" and best.get("mate") in (1, "1") and not problem(env),
       problem(env) or f"rank 1 = {best.get('move')} {best.get('uci')}, mate={best.get('mate')}")
 
 book = {}
@@ -46,7 +46,7 @@ for fen, pgn in (("rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1", 
                  ("rnbqkbnr/pp1ppppp/8/2p5/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2", "1. e4 c5")):
     env = invoke("OpeningOf", {"fen": fen})
     row = (env.get("data") or [{}])[0]
-    check(f"OpeningOf({pgn}) = the Lichess list's {book.get(pgn)}", (row.get("eco"), row.get("name")) == book.get(pgn),
+    check(f"OpeningOf({pgn}) = the Lichess list's {book.get(pgn)}", (row.get("eco"), row.get("name")) == book.get(pgn) and not problem(env),
           problem(env) or f"got {row.get('eco')} {row.get('name')}")
 
 # verify.sh runs tests/live/views.mjs next and prints the verdict for the whole battery.
